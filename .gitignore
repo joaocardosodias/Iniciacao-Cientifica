@@ -1,0 +1,15 @@
+# Ambiente
+.env
+*.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs de experimentos
+logs/
+results/
+
+# IDE
+.vscode/
+.idea/

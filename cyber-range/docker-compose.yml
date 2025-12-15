@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  metasploitable:
+    image: tleemcjr/metasploitable2
+    container_name: metasploitable
+    hostname: metasploitable
+    tty: true
+    networks:
+      cyber-range-net:
+        ipv4_address: 172.20.0.2
+
+networks:
+  cyber-range-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
