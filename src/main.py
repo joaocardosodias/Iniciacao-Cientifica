@@ -24,17 +24,63 @@ CURRENT_TARGET = None
 
 # Command timeouts (seconds)
 COMMAND_TIMEOUTS = {
+    # Reconnaissance
     "nmap": 300,
-    "hydra": 600,
-    "nikto": 300,
-    "gobuster": 300,
-    "sqlmap": 600,
+    "masscan": 180,
     "ping": 30,
-    "ssh": 60,
-    "curl": 60,
-    "wget": 120,
+    "fping": 60,
+    "traceroute": 60,
+    "whois": 30,
+    "dig": 30,
+    "nslookup": 30,
+    "dnsenum": 300,
+    "dnsrecon": 300,
+    "fierce": 300,
+    "theharvester": 300,
+    # Web scanning
+    "nikto": 600,
+    "gobuster": 300,
+    "dirb": 600,
+    "wfuzz": 300,
+    "whatweb": 60,
+    "wafw00f": 60,
+    "wpscan": 600,
+    "joomscan": 600,
+    "sqlmap": 900,
+    "xsser": 300,
+    # Password attacks
+    "hydra": 900,
+    "medusa": 900,
+    "john": 1800,
+    "hashcat": 1800,
+    "crunch": 120,
+    "cewl": 300,
+    # Network tools
     "nc": 60,
-    "default": 120
+    "netcat": 60,
+    "socat": 60,
+    "tcpdump": 120,
+    "tshark": 120,
+    # File transfer
+    "curl": 120,
+    "wget": 300,
+    "scp": 120,
+    "ftp": 120,
+    "ssh": 60,
+    "telnet": 60,
+    # Enumeration
+    "enum4linux": 300,
+    "smbclient": 120,
+    "smbmap": 180,
+    "rpcclient": 120,
+    "ldapsearch": 120,
+    "snmpwalk": 180,
+    "onesixtyone": 120,
+    # Exploitation
+    "msfconsole": 300,
+    "searchsploit": 30,
+    # Default
+    "default": 180
 }
 
 

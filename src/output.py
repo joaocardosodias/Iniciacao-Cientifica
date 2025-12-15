@@ -44,13 +44,20 @@ class Logger:
     
     @staticmethod
     def banner():
-        """Exibe banner do sistema."""
-        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}")
-        print("=" * 70)
-        print("    RED TEAM AUTONOMOUS AGENT - Guardrail Evasion Research")
-        print("    IC Project - Context Fragmentation Analysis")
-        print("=" * 70)
-        print(f"{Colors.RESET}")
+        """Exibe banner do sistema com ASCII art."""
+        ascii_art = r"""
+███████╗██████╗  █████╗  ██████╗ ███╗   ███╗███████╗███╗   ██╗████████╗██╗   ██╗███╗   ███╗
+██╔════╝██╔══██╗██╔══██╗██╔════╝ ████╗ ████║██╔════╝████╗  ██║╚══██╔══╝██║   ██║████╗ ████║
+█████╗  ██████╔╝███████║██║  ███╗██╔████╔██║█████╗  ██╔██╗ ██║   ██║   ██║   ██║██╔████╔██║
+██╔══╝  ██╔══██╗██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██║╚██╔╝██║
+██║     ██║  ██║██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗██║ ╚████║   ██║   ╚██████╔╝██║ ╚═╝ ██║
+╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝
+"""
+        print(f"\n{Colors.BRIGHT_CYAN}{Colors.BOLD}{ascii_art}{Colors.RESET}")
+        print(f"{Colors.DIM}{'─' * 80}{Colors.RESET}")
+        print(f"{Colors.BRIGHT_WHITE}  Red Team Autonomous Agent - Guardrail Evasion Research{Colors.RESET}")
+        print(f"{Colors.DIM}  IC Project - Context Fragmentation Analysis{Colors.RESET}")
+        print(f"{Colors.DIM}{'─' * 80}{Colors.RESET}\n")
     
     @staticmethod
     def config(provider: str, model: str, target: str):
