@@ -60,9 +60,22 @@ class Logger:
         print(f"{Colors.DIM}{'─' * 80}{Colors.RESET}\n")
     
     @staticmethod
-    def config(provider: str, model: str, target: str):
+    def config(provider: str, model: str, target: str, stealth: str = "low"):
         """Exibe configuração atual."""
+        stealth_colors = {
+            "low": Colors.RED,
+            "medium": Colors.YELLOW,
+            "high": Colors.GREEN
+        }
+        stealth_labels = {
+            "low": "AGGRESSIVE",
+            "medium": "BALANCED",
+            "high": "STEALTH/LOLBins"
+        }
+        sc = stealth_colors.get(stealth, Colors.WHITE)
+        sl = stealth_labels.get(stealth, stealth.upper())
         print(f"{Colors.DIM}[CONFIG]{Colors.RESET} Provider: {Colors.CYAN}{provider}{Colors.RESET} | Model: {Colors.CYAN}{model}{Colors.RESET} | Target: {Colors.YELLOW}{target}{Colors.RESET}")
+        print(f"{Colors.DIM}[OPSEC]{Colors.RESET}  Stealth: {sc}{sl}{Colors.RESET}")
     
     @staticmethod
     def mode(mode: str):
@@ -183,7 +196,148 @@ class Logger:
         print(f"\n{Colors.CYAN}{'=' * 70}")
         print("  END OF OPERATION")
         print(f"{'=' * 70}{Colors.RESET}\n")
+    
+    @staticmethod
+    def final_report(findings: 'FindingsCollector', target: str, scenario_id: str = None):
+        """Exibe relatório final com findings."""
+        print(f"\n{Colors.BOLD}{Colors.BRIGHT_CYAN}{'=' * 70}")
+        print("  FINAL REPORT - OPERATION SUMMARY")
+        print(f"{'=' * 70}{Colors.RESET}\n")
+        
+        print(f"{Colors.BOLD}Target:{Colors.RESET} {Colors.YELLOW}{target}{Colors.RESET}")
+        if scenario_id and scenario_id != "manual":
+            print(f"{Colors.BOLD}Scenario:{Colors.RESET} {scenario_id}")
+        print(f"{Colors.BOLD}Total Steps:{Colors.RESET} {findings.total_steps}")
+        print(f"{Colors.BOLD}Commands Executed:{Colors.RESET} {len(findings.commands)}")
+        
+        # Open Ports
+        if findings.open_ports:
+            print(f"\n{Colors.BRIGHT_GREEN}[OPEN PORTS]{Colors.RESET}")
+            for port, service in sorted(findings.open_ports.items()):
+                print(f"  {Colors.GREEN}*{Colors.RESET} {port}/tcp - {service}")
+        
+        # Services
+        if findings.services:
+            print(f"\n{Colors.BRIGHT_BLUE}[SERVICES DETECTED]{Colors.RESET}")
+            for service, version in findings.services.items():
+                print(f"  {Colors.BLUE}*{Colors.RESET} {service}: {version}")
+        
+        # Vulnerabilities
+        if findings.vulnerabilities:
+            print(f"\n{Colors.BRIGHT_RED}[VULNERABILITIES]{Colors.RESET}")
+            for vuln in findings.vulnerabilities:
+                print(f"  {Colors.RED}!{Colors.RESET} {vuln}")
+        
+        # Credentials
+        if findings.credentials:
+            print(f"\n{Colors.BRIGHT_MAGENTA}[CREDENTIALS FOUND]{Colors.RESET}")
+            for cred in findings.credentials:
+                print(f"  {Colors.MAGENTA}*{Colors.RESET} {cred}")
+        
+        # Key Findings
+        if findings.key_findings:
+            print(f"\n{Colors.BRIGHT_YELLOW}[KEY FINDINGS]{Colors.RESET}")
+            for finding in findings.key_findings:
+                print(f"  {Colors.YELLOW}>{Colors.RESET} {finding}")
+        
+        # Brain Intelligence Summary (if available)
+        try:
+            from intelligence import get_brain
+            brain = get_brain(target)
+            if brain.knowledge.users_found:
+                print(f"\n{Colors.BRIGHT_CYAN}[USERS DISCOVERED]{Colors.RESET}")
+                for user in list(brain.knowledge.users_found)[:10]:
+                    print(f"  {Colors.CYAN}@{Colors.RESET} {user}")
+            if brain.knowledge.credentials_valid:
+                print(f"\n{Colors.BRIGHT_MAGENTA}[VALID CREDENTIALS]{Colors.RESET}")
+                for svc, user, passwd in brain.knowledge.credentials_valid[:5]:
+                    print(f"  {Colors.MAGENTA}*{Colors.RESET} {user}:{passwd} ({svc})")
+            if brain.insights:
+                print(f"\n{Colors.BRIGHT_WHITE}[INTELLIGENCE INSIGHTS]{Colors.RESET}")
+                for insight in brain.insights[-5:]:  # Last 5 insights
+                    print(f"  {Colors.WHITE}>{Colors.RESET} {insight}")
+        except:
+            pass  # Brain not available
+        
+        print(f"\n{Colors.DIM}{'─' * 70}{Colors.RESET}")
+
+
+class FindingsCollector:
+    """Coleta findings durante a execução para relatório final."""
+    
+    def __init__(self):
+        self.open_ports = {}  # port: service
+        self.services = {}    # service: version
+        self.vulnerabilities = []
+        self.credentials = []
+        self.key_findings = []
+        self.commands = []
+        self.total_steps = 0
+    
+    def parse_output(self, cmd: str, output: str):
+        """Extrai findings do output de comandos."""
+        import re
+        output_lower = output.lower()
+        
+        self.commands.append(cmd)
+        
+        # Parse nmap output for ports
+        port_matches = re.findall(r'(\d+)/tcp\s+open\s+(\S+)', output)
+        for port, service in port_matches:
+            self.open_ports[port] = service
+        
+        # Parse service versions
+        version_matches = re.findall(r'(\d+)/tcp\s+open\s+(\S+)\s+(.+?)(?:\n|$)', output)
+        for port, service, version in version_matches:
+            version = version.strip()[:50]
+            if version and service not in self.services:
+                self.services[service] = version
+        
+        # Detect vulnerabilities
+        vuln_patterns = [
+            (r'vsftpd 2\.3\.4', 'vsftpd 2.3.4 Backdoor (CVE-2011-2523)'),
+            (r'OpenSSH 4\.7p1', 'OpenSSH 4.7p1 - Multiple vulnerabilities'),
+            (r'Apache/2\.2\.8', 'Apache 2.2.8 - Multiple vulnerabilities'),
+            (r'PHP/5\.2\.4', 'PHP 5.2.4 - Multiple vulnerabilities'),
+            (r'Samba 3\.0\.20', 'Samba 3.0.20 - Username map script RCE'),
+            (r'MySQL 5\.0\.51', 'MySQL 5.0.51 - Multiple vulnerabilities'),
+            (r'PostgreSQL 8\.3', 'PostgreSQL 8.3 - Multiple vulnerabilities'),
+            (r'distccd', 'DistCC - Remote Code Execution'),
+            (r'UnrealIRCd', 'UnrealIRCd - Backdoor'),
+            (r'EXPLOIT', 'Exploit available (see nmap output)'),
+        ]
+        for pattern, vuln_name in vuln_patterns:
+            if re.search(pattern, output, re.IGNORECASE) and vuln_name not in self.vulnerabilities:
+                self.vulnerabilities.append(vuln_name)
+        
+        # Detect credentials
+        cred_patterns = [
+            r'login:\s*(\S+)\s+password:\s*(\S+)',
+            r'\[(\d+)\]\[(\w+)\]\s+host:.+login:\s*(\S+)\s+password:\s*(\S+)',
+            r'valid password found:\s*(\S+)',
+        ]
+        for pattern in cred_patterns:
+            matches = re.findall(pattern, output, re.IGNORECASE)
+            for match in matches:
+                if isinstance(match, tuple):
+                    cred = ':'.join(match)
+                else:
+                    cred = match
+                if cred not in self.credentials:
+                    self.credentials.append(cred)
+        
+        # Key findings based on output
+        if 'host is up' in output_lower:
+            if 'Host is up' not in [f[:10] for f in self.key_findings]:
+                self.key_findings.append(f"Host is up and responding")
+        
+        if 'backdoor' in output_lower:
+            self.key_findings.append("Backdoor detected!")
+        
+        if 'root' in output_lower and ('access' in output_lower or 'shell' in output_lower):
+            self.key_findings.append("Potential root access identified")
 
 
 # Instância global
 log = Logger()
+findings = FindingsCollector()

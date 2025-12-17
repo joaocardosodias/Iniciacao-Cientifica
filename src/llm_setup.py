@@ -24,6 +24,7 @@ class LLMProvider(Enum):
     GROQ = "groq"
     TOGETHER = "together"
     FIREWORKS = "fireworks"
+    CEREBRAS = "cerebras"
     OLLAMA = "ollama"
 
 
@@ -43,6 +44,7 @@ DEFAULT_MODELS = {
     "groq": "llama-3.3-70b-versatile",
     "together": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "fireworks": "accounts/fireworks/models/llama-v3p1-70b-instruct",
+    "cerebras": "llama3.1-70b",
     "ollama": "llama3:70b"
 }
 
@@ -74,6 +76,7 @@ def get_llm(provider: str = None, model: str = None, temperature: float = 0):
         "groq": _get_groq,
         "together": _get_together,
         "fireworks": _get_fireworks,
+        "cerebras": _get_cerebras,
         "ollama": _get_ollama,
     }
     
@@ -263,6 +266,22 @@ def _get_fireworks(model: str, temperature: float):
     )
 
 
+def _get_cerebras(model: str, temperature: float):
+    """Cerebras via OpenAI-compatible API."""
+    from langchain_openai import ChatOpenAI
+    
+    api_key = os.getenv("CEREBRAS_API_KEY")
+    if not api_key:
+        raise ValueError("CEREBRAS_API_KEY not found in .env")
+    
+    return ChatOpenAI(
+        model=model,
+        temperature=temperature,
+        api_key=api_key,
+        base_url="https://api.cerebras.ai/v1"
+    )
+
+
 def _get_ollama(model: str, temperature: float):
     """Ollama local (Llama, Mistral, etc)."""
     from langchain_ollama import ChatOllama
@@ -294,6 +313,7 @@ def list_providers():
         ("groq", "GROQ_API_KEY", "Groq (fast)"),
         ("together", "TOGETHER_API_KEY", "Together AI"),
         ("fireworks", "FIREWORKS_API_KEY", "Fireworks AI"),
+        ("cerebras", "CEREBRAS_API_KEY", "Cerebras"),
         ("ollama", "OLLAMA_BASE_URL", "Ollama (local)"),
     ]
     
