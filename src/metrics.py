@@ -60,7 +60,7 @@ class ExperimentRun:
             "timestamp": time.time(),
             "description": step_description,
             "command": command,
-            "output": output[:1000],  # Limita tamanho
+            "output": output,  # Output completo
             "refused": refused
         })
         self.total_steps = step_num

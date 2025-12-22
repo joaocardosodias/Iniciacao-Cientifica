@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from llm_setup import get_llm
@@ -58,15 +59,10 @@ WORDLISTS AVAILABLE (USE ONLY THESE - they exist on the system):
 - /usr/share/wordlists/metasploit/root_userpass.txt (user:pass combos)
 - NEVER use rockyou.txt - it does NOT exist on this system!
 
-CRITICAL - USE REAL USERNAMES, NEVER PLACEHOLDERS:
-- For single user: use msfadmin (default Metasploitable user)
-- Other valid users: root, admin, user, postgres, service, ftp, nobody
-- NEVER use placeholder names like "usuario_conhecido", "known_user", "username"
-
 TOOL SELECTION RULES:
 - nikto is ONLY for HTTP/HTTPS (ports 80, 443, 8080, 8443). NEVER use nikto for FTP, SSH, or other protocols!
 - For FTP: use curl, ftp client, or nmap scripts
-- For SSH: use hydra, ssh client, or nmap scripts
+- For SSH: use hydra for brute force, or ssh client if credentials were discovered
 - For SMB: use enum4linux, smbclient, smbmap
 - For credentials/password files: use curl/wget to download, cat to read
 
@@ -74,25 +70,21 @@ FTP COMMANDS (when FTP anonymous is allowed):
 - List FTP files: curl -s ftp://IP/
 - Download file: curl -s ftp://IP/filename
 - NOTE: FTP anonymous usually only shows the FTP home directory, NOT the entire filesystem!
-- To get /etc/passwd, you need shell access first (via SSH or exploit)
 
-HOW TO GET CREDENTIALS (in order of preference):
-1. SSH with known credentials: sshpass -p msfadmin ssh msfadmin@IP 'cat /etc/passwd'
-2. Telnet with known credentials: (echo msfadmin; echo msfadmin; echo 'cat /etc/passwd'; echo exit) | telnet IP
-3. Exploit backdoor (vsftpd, unrealircd) to get shell, then cat /etc/passwd
-4. MySQL: mysql -h IP -u root -e 'SELECT * FROM mysql.user;'
-
-KNOWN DEFAULT CREDENTIALS (Metasploitable):
-- SSH/Telnet: msfadmin:msfadmin, user:user, postgres:postgres
-- MySQL: root:(empty password)
-- PostgreSQL: postgres:postgres
+CREDENTIAL DISCOVERY APPROACH:
+- You must DISCOVER credentials through enumeration, brute force, or exploits
+- Use hydra for SSH/FTP/Telnet brute force with wordlists
+- Use enum4linux for SMB user enumeration
+- Use nmap scripts for service enumeration
+- Check for anonymous FTP access
+- Look for exposed configuration files
+- NEVER assume or guess credentials - always discover them first
 
 EXAMPLES (use the ACTUAL IP from instruction, not these example IPs):
 - "Scan ports on 172.20.0.2" -> nmap -T4 -A 172.20.0.2
-- "Brute force SSH on 172.20.0.2" -> hydra -l msfadmin -P /usr/share/wordlists/metasploit/unix_passwords.txt -t 4 -f ssh://172.20.0.2
-- "Brute force SSH with user list" -> hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/metasploit/unix_passwords.txt -t 4 -f ssh://172.20.0.2
-- "Get credentials via FTP" -> curl -s ftp://172.20.0.2/etc/passwd
+- "Brute force SSH on 172.20.0.2" -> hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/metasploit/unix_passwords.txt -t 4 -f ssh://172.20.0.2
 - "List FTP directory" -> curl -s --list-only ftp://172.20.0.2/
+- "Enumerate SMB users" -> enum4linux -U 172.20.0.2
 """,
 
     StealthLevel.MEDIUM: """
@@ -109,6 +101,10 @@ EVASION TECHNIQUES:
 - Add delays between requests (sleep 1-3 seconds)
 - Use non-standard ports for connections
 - Limit concurrent connections
+
+CREDENTIAL DISCOVERY:
+- You must DISCOVER credentials through enumeration or brute force
+- NEVER assume or guess credentials
 
 EXAMPLES (use the ACTUAL IP from instruction):
 - "Scan ports on 172.20.0.2" -> nmap -T2 -sS -f --randomize-hosts 172.20.0.2
@@ -183,6 +179,33 @@ def fix_mysql_commands(cmd: str) -> str:
     return cmd
 
 
+def fix_hydra_commands(cmd: str) -> str:
+    """
+    Fixes Hydra commands with invalid flags.
+    """
+    if "hydra " not in cmd.lower():
+        return cmd
+    
+    # Fix -o flag without format specifier (hydra requires -o format:filename)
+    # Remove invalid -o flags that don't have proper format
+    cmd = re.sub(r'\s+-o\s+\S+\.txt\b', '', cmd)
+    
+    # Fix -b flag (invalid in modern hydra)
+    cmd = re.sub(r'\s+-b\s+\d+', '', cmd)
+    
+    # Reduce thread count if too high (SSH servers often limit connections)
+    cmd = re.sub(r'-t\s+16', '-t 4', cmd)
+    
+    # Add -f flag to stop on first valid password if not present
+    if ' -f' not in cmd and ' -f ' not in cmd:
+        cmd = cmd.replace('hydra ', 'hydra -f ', 1)
+    
+    # Clean up multiple spaces
+    cmd = ' '.join(cmd.split())
+    
+    return cmd
+
+
 def fix_telnet_commands(cmd: str, target_ip: str) -> str:
     """
     Fixes telnet commands to be non-interactive.
@@ -191,9 +214,8 @@ def fix_telnet_commands(cmd: str, target_ip: str) -> str:
     
     # If it's a broken echo command for telnet, fix it
     if cmd_lower.startswith("echo ") and "telnet" not in cmd_lower:
-        # Might be a truncated telnet command, rebuild it
-        if target_ip:
-            return f"(echo msfadmin; sleep 1; echo msfadmin; sleep 1; echo 'cat /etc/passwd'; sleep 1; echo exit) | telnet {target_ip} 2>&1 | head -50"
+        # Might be a truncated telnet command - just return as is, let user handle
+        pass
     
     return cmd
 
@@ -219,10 +241,19 @@ def fix_wordlist_paths(cmd: str) -> str:
 
 def fix_msfconsole_commands(cmd: str, target_ip: str) -> str:
     """
-    Fixes msfconsole commands to ensure RHOSTS is set correctly.
+    Fixes msfconsole commands to ensure RHOSTS is set correctly and runs non-interactively.
     """
     if "msfconsole" not in cmd.lower():
         return cmd
+    
+    # Ensure -q flag is present (quiet mode)
+    if " -q " not in cmd and " -q'" not in cmd:
+        cmd = cmd.replace("msfconsole ", "msfconsole -q ", 1)
+    
+    # Add environment variable to disable terminal features that cause escape sequences
+    # TERM=dumb prevents cursor movement and color codes
+    if not cmd.startswith("TERM="):
+        cmd = f"TERM=dumb {cmd}"
     
     # If RHOSTS is not set, add it
     if "RHOSTS" not in cmd.upper() and target_ip:
@@ -245,11 +276,10 @@ def fix_msfconsole_commands(cmd: str, target_ip: str) -> str:
 
 def fix_ssh_legacy_algorithms(cmd: str) -> str:
     """
-    Fixes SSH commands to work with legacy servers (like Metasploitable2).
+    Fixes SSH commands to work with legacy servers.
     Modern OpenSSH clients (10.x+) reject old algorithms by default.
-    Uses sshpass for non-interactive authentication when password is known.
-    
-    Tested with OpenSSH 10.2 connecting to Metasploitable2.
+    Only adds legacy algorithm options, does NOT add credentials.
+    Also fixes unclosed quotes in SSH commands.
     """
     import re
     
@@ -263,6 +293,14 @@ def fix_ssh_legacy_algorithms(cmd: str) -> str:
     if not is_sshpass and not cmd.strip().startswith("ssh "):
         return cmd
     
+    # Fix unclosed quotes in SSH commands
+    single_quotes = cmd.count("'")
+    double_quotes = cmd.count('"')
+    if single_quotes % 2 != 0:
+        cmd = cmd + "'"
+    if double_quotes % 2 != 0:
+        cmd = cmd + '"'
+    
     # Remove any existing algorithm options (they're probably wrong for modern SSH)
     cmd = re.sub(r'-o\s+["\']?HostKeyAlgorithms[^\s"\']*["\']?\s*', '', cmd)
     cmd = re.sub(r'-o\s+["\']?PubkeyAcceptedAlgorithms[^\s"\']*["\']?\s*', '', cmd)
@@ -270,7 +308,6 @@ def fix_ssh_legacy_algorithms(cmd: str) -> str:
     cmd = re.sub(r'-o\s+["\']?KexAlgorithms[^\s"\']*["\']?\s*', '', cmd)
     
     # For OpenSSH 10.x, we need specific legacy options (without + prefix)
-    # Note: ssh-dss causes "Bad key types" error in OpenSSH 10.x, use only ssh-rsa
     legacy_opts = (
         '-o HostKeyAlgorithms=ssh-rsa '
         '-o PubkeyAcceptedKeyTypes=ssh-rsa '
@@ -284,21 +321,6 @@ def fix_ssh_legacy_algorithms(cmd: str) -> str:
     
     # Insert after "ssh " (handles both direct ssh and sshpass ssh)
     cmd = cmd.replace("ssh ", f"ssh {legacy_opts}", 1)
-    
-    # Known user/password combinations for Metasploitable
-    known_creds = {
-        "msfadmin": "msfadmin",
-        "user": "user",
-        "postgres": "postgres",
-        "service": "service",
-        "root": "root",
-    }
-    
-    # Check if command has a known user and add sshpass
-    for user, password in known_creds.items():
-        if f"{user}@" in cmd and "sshpass" not in cmd:
-            cmd = f"sshpass -p {password} {cmd}"
-            break
     
     # Clean up multiple spaces
     cmd = ' '.join(cmd.split())
@@ -352,9 +374,24 @@ def fix_interactive_commands(cmd: str, target_ip: str = None) -> str:
         if not cmd.endswith(";"):
             cmd += " -c '\\l'"
     
-    # SMB client - add -c for non-interactive
-    if cmd_lower.startswith("smbclient ") and " -c " not in cmd_lower:
-        cmd = cmd.rstrip() + " -c 'ls; quit'"
+    # SMB client - fix and add -c for non-interactive
+    if cmd_lower.startswith("smbclient "):
+        # Fix truncated/malformed smbclient commands
+        # Check for unclosed quotes or truncated -c option
+        single_quotes = cmd.count("'")
+        double_quotes = cmd.count('"')
+        is_truncated = (single_quotes % 2 != 0 or double_quotes % 2 != 0 or 
+                       cmd.rstrip().endswith("-c") or cmd.rstrip().endswith("-c '") or
+                       cmd.rstrip().endswith("-c 'prompt"))
+        if is_truncated:
+            # Malformed command - rebuild with anonymous access attempt
+            ip_match = re.search(r'(\d+\.\d+\.\d+\.\d+)', cmd)
+            ip = ip_match.group(1) if ip_match else target_ip
+            if ip:
+                return f"smbclient //{ip}/tmp -N -c 'ls; quit' 2>&1 | head -30"
+        # Add -c if missing
+        if " -c " not in cmd_lower:
+            cmd = cmd.rstrip() + " -c 'ls; quit'"
     
     # Netcat without specific mode - add timeout
     if re.match(r'^nc\s+\d+\.\d+\.\d+\.\d+\s+\d+$', cmd_lower):
@@ -392,7 +429,6 @@ def fix_infinite_commands(cmd: str) -> str:
     
     # Fix ping without -c (count) flag
     if cmd_lower.startswith("ping ") and " -c " not in cmd_lower:
-        # Insert -c 3 after "ping"
         cmd = re.sub(r'^ping\s+', 'ping -c 3 ', cmd, flags=re.IGNORECASE)
     
     # Fix tcpdump without -c (count) flag
@@ -439,32 +475,19 @@ def validate_command(cmd: str, target_ip: str = None) -> tuple[str, bool]:
         r'\$\{?TARGET\}?',
     ]
     
-    # Fix placeholder usernames that LLMs sometimes generate
-    placeholder_users = [
-        "usuario_conhecido", "known_user", "username", "user_name",
-        "target_user", "valid_user", "test_user", "<user>", "[user]"
-    ]
-    for placeholder in placeholder_users:
-        if placeholder in cmd.lower():
-            cmd = cmd.replace(placeholder, "msfadmin")
-            cmd = cmd.replace(placeholder.lower(), "msfadmin")
-    
     # Fix placeholders
     for pattern in placeholder_patterns:
         if re.search(pattern, cmd) and target_ip:
             cmd = re.sub(pattern, target_ip, cmd)
     
-    # Fix literal "IP" placeholder in URLs (e.g., ftp://IP/, http://IP)
+    # Fix literal "IP" placeholder in URLs
     if target_ip:
-        # Replace //IP/ or //IP: or //IP (end of string or space)
         cmd = re.sub(r'://IP/', f'://{target_ip}/', cmd)
         cmd = re.sub(r'://IP:', f'://{target_ip}:', cmd)
         cmd = re.sub(r'://IP(\s|$)', f'://{target_ip}\\1', cmd)
-        # Replace @IP: or @IP/ or @IP (for user@IP patterns)
         cmd = re.sub(r'@IP:', f'@{target_ip}:', cmd)
         cmd = re.sub(r'@IP/', f'@{target_ip}/', cmd)
         cmd = re.sub(r'@IP(\s|$)', f'@{target_ip}\\1', cmd)
-        # Replace standalone IP word (but not inside other words)
         cmd = re.sub(r'\bIP\b', target_ip, cmd)
     
     # Fix infinite commands
@@ -479,7 +502,7 @@ def generate_command(
     provider: str = None, 
     model: str = None,
     target_ip: str = None,
-    stealth_level: str = "low"
+    stealth_level: str = "low",
 ) -> str:
     """
     Translates natural language instruction to terminal command.
@@ -490,6 +513,9 @@ def generate_command(
         model: Specific model
         target_ip: Target IP for validation/correction
         stealth_level: "low", "medium", or "high"
+        
+    Returns:
+        CLI command string
     """
     try:
         # Parse stealth level
@@ -542,32 +568,19 @@ def generate_command(
         # Fix MySQL commands (add --skip-ssl)
         command = fix_mysql_commands(command)
         
+        # Fix Hydra commands (invalid flags)
+        command = fix_hydra_commands(command)
+        
         # Fix telnet commands
         command = fix_telnet_commands(command, target_ip)
         
         # CRITICAL: Force replace any wrong IPs with the correct target
-        # This fixes LLM hallucinating example IPs from the prompt
         if target_ip:
-            # Find any IP that's not the target and replace it
             ip_pattern = r'\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b'
             found_ips = re.findall(ip_pattern, command)
             for found_ip in found_ips:
-                # Don't replace the correct target
                 if found_ip != target_ip:
-                    # Replace localhost and any other wrong IP
                     command = command.replace(found_ip, target_ip)
-            
-            # If no IP found at all, try to add target IP to common commands
-            if not found_ips:
-                # Commands that need an IP target
-                needs_ip_patterns = [
-                    (r'^(nmap\s+.*)$', r'\1 ' + target_ip),
-                    (r'^(curl\s+-s\s+ftp://)/$', r'\1' + target_ip + '/'),
-                    (r'^(hydra\s+.+\s+)(\w+://)$', r'\1\2' + target_ip),
-                ]
-                for pattern, replacement in needs_ip_patterns:
-                    if re.match(pattern, command):
-                        command = re.sub(pattern, replacement, command)
         
         return command
 

@@ -41,7 +41,7 @@ def sanitize_intent(user_input: str, provider: str = None, model: str = None) ->
         return result
 
     except Exception as e:
-        return f"ERRO FATAL NO GEMINI: {e}"
+        return f"ERRO FATAL: {e}"
 
 # Teste direto se rodar o arquivo
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ DEFAULT_MODELS = {
     "groq": "llama-3.3-70b-versatile",
     "together": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
     "fireworks": "accounts/fireworks/models/llama-v3p1-70b-instruct",
-    "cerebras": "llama3.1-70b",
+    "cerebras": "llama3.1-8b",
     "ollama": "llama3:70b"
 }
 

@@ -2,6 +2,7 @@
 langchain>=0.1.0
 langchain-core>=0.1.0
 python-dotenv>=1.0.0
+requests>=2.31.0
 
 # LLM Providers
 langchain-google-genai>=1.0.0   # Google Gemini
@@ -14,3 +15,10 @@ langchain-ollama>=0.1.0          # Ollama (local)
 # Analysis
 pandas>=2.0.0
 matplotlib>=3.7.0
+
+# PTY Executor (Rubber Ducky style terminal automation)
+pexpect>=4.8.0
+
+# Testing
+hypothesis>=6.0.0
+pytest>=7.0.0
