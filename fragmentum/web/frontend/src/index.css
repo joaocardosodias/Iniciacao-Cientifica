@@ -1,0 +1,281 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 240 5% 90%;
+
+    --card: 240 10% 7%;
+    --card-foreground: 240 5% 90%;
+
+    --popover: 240 10% 7%;
+    --popover-foreground: 240 5% 90%;
+
+    --primary: 160 100% 50%;
+    --primary-foreground: 240 10% 4%;
+
+    --secondary: 240 10% 12%;
+    --secondary-foreground: 240 5% 90%;
+
+    --muted: 240 10% 15%;
+    --muted-foreground: 240 5% 55%;
+
+    --accent: 195 100% 50%;
+    --accent-foreground: 240 10% 4%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 18%;
+    --input: 240 10% 15%;
+    --ring: 160 100% 50%;
+
+    --radius: 0.5rem;
+
+    /* Custom cyberpunk colors */
+    --cyber-green: 155 100% 50%;
+    --cyber-cyan: 195 100% 50%;
+    --cyber-red: 0 100% 63%;
+    --cyber-orange: 32 100% 50%;
+    --cyber-yellow: 45 100% 50%;
+    --cyber-purple: 270 100% 63%;
+
+    /* Severity colors */
+    --severity-critical: 0 100% 63%;
+    --severity-high: 32 100% 50%;
+    --severity-medium: 45 100% 50%;
+    --severity-low: 155 100% 50%;
+    --severity-info: 210 100% 60%;
+
+    /* Glow effects */
+    --glow-green: 0 0 20px hsl(155 100% 50% / 0.4);
+    --glow-cyan: 0 0 20px hsl(195 100% 50% / 0.4);
+    --glow-red: 0 0 20px hsl(0 100% 63% / 0.4);
+
+    --sidebar-background: 240 10% 5%;
+    --sidebar-foreground: 240 5% 90%;
+    --sidebar-primary: 160 100% 50%;
+    --sidebar-primary-foreground: 240 10% 4%;
+    --sidebar-accent: 240 10% 12%;
+    --sidebar-accent-foreground: 240 5% 90%;
+    --sidebar-border: 240 10% 15%;
+    --sidebar-ring: 160 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Terminal-style text */
+  .terminal-text {
+    @apply font-mono text-primary;
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  /* Glow effects */
+  .glow-green {
+    box-shadow: var(--glow-green);
+  }
+
+  .glow-cyan {
+    box-shadow: var(--glow-cyan);
+  }
+
+  .glow-red {
+    box-shadow: var(--glow-red);
+  }
+
+  /* Scanline effect */
+  .scanline::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(var(--primary) / 0.03) 2px,
+      hsl(var(--primary) / 0.03) 4px
+    );
+  }
+
+  /* Cyber border */
+  .cyber-border {
+    @apply border border-border;
+    position: relative;
+  }
+
+  .cyber-border::before {
+    content: '';
+    @apply absolute -inset-px rounded-[inherit] pointer-events-none;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.2) 0%,
+      transparent 50%,
+      hsl(var(--accent) / 0.2) 100%
+    );
+  }
+
+  /* Severity badges */
+  .badge-critical {
+    @apply bg-[hsl(var(--severity-critical)/0.2)] text-[hsl(var(--severity-critical))] border border-[hsl(var(--severity-critical)/0.5)];
+  }
+
+  .badge-high {
+    @apply bg-[hsl(var(--severity-high)/0.2)] text-[hsl(var(--severity-high))] border border-[hsl(var(--severity-high)/0.5)];
+  }
+
+  .badge-medium {
+    @apply bg-[hsl(var(--severity-medium)/0.2)] text-[hsl(var(--severity-medium))] border border-[hsl(var(--severity-medium)/0.5)];
+  }
+
+  .badge-low {
+    @apply bg-[hsl(var(--severity-low)/0.2)] text-[hsl(var(--severity-low))] border border-[hsl(var(--severity-low)/0.5)];
+  }
+
+  .badge-info {
+    @apply bg-[hsl(var(--severity-info)/0.2)] text-[hsl(var(--severity-info))] border border-[hsl(var(--severity-info)/0.5)];
+  }
+
+  /* Category badges */
+  .badge-category {
+    @apply bg-secondary text-muted-foreground border border-border text-xs px-2 py-0.5 rounded;
+  }
+}
+
+@layer utilities {
+  /* Animations */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes blink {
+    0%, 50% {
+      opacity: 1;
+    }
+    51%, 100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  .animate-typing {
+    animation: typing 2s steps(40, end);
+  }
+}
+
+/* Shell Terminal Styles */
+.shell-terminal-container {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+.shell-terminal-container .xterm {
+  padding: 8px;
+}
+
+.shell-terminal-container .xterm-viewport {
+  background: transparent !important;
+}
+
+.shell-terminal-container .xterm-screen {
+  background: transparent;
+}
+
+/* Terminal glow effect */
+.shell-terminal-container::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary) / 0.1) 0%,
+    transparent 50%,
+    hsl(var(--accent) / 0.1) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Terminal cursor glow */
+.shell-terminal-container .xterm-cursor-layer {
+  filter: drop-shadow(0 0 4px hsl(var(--primary) / 0.6));
+}
+
+/* Selection styling */
+.shell-terminal-container .xterm-selection div {
+  background: hsl(var(--primary) / 0.3) !important;
+}
+
+/* Scrollbar styling for terminal */
+.shell-terminal-container .xterm-viewport::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shell-terminal-container .xterm-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shell-terminal-container .xterm-viewport::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.shell-terminal-container .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}

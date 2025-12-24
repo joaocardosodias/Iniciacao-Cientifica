@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "fragmentum": {
+      "command": "/home/kali/GitHub/Iniciacao-Cientifica/venv/bin/python",
+      "args": ["-m", "fragmentum.mcp.server"],
+      "cwd": "/home/kali/GitHub/Iniciacao-Cientifica",
+      "env": {
+        "PYTHONPATH": "/home/kali/GitHub/Iniciacao-Cientifica"
+      },
+      "disabled": false,
+      "autoApprove": ["get_session_info", "searchsploit"]
+    }
+  }
+}

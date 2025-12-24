@@ -1,0 +1,1 @@
+"""FRAGMENTUM Web UI package."""

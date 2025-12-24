@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "fragmentum": {
+      "command": "python3",
+      "args": ["-m", "fragmentum.mcp.server"],
+      "description": "FRAGMENTUM - AI-Powered Penetration Testing Framework. 50+ security tools for autonomous pentesting.",
+      "timeout": 300,
+      "alwaysAllow": ["get_session_info", "searchsploit"]
+    }
+  }
+}
