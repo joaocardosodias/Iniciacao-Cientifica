@@ -1,2 +1,8 @@
-python-dotenv>=1.0.0
-openai>=1.0.0
+python-dotenv
+openai   # OpenRouter usa a interface OpenAI
+
+# Gerador de ambiente de teste (generate_test_files.py)
+openpyxl
+python-docx
+reportlab
+faker

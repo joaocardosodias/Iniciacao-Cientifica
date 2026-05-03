@@ -1,18 +1,34 @@
-.env
-
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-
-venv/
-.venv/
-
 *.egg-info/
 dist/
 build/
+.venv/
+venv/
+ENV/
+.env
+.env.*
+*.env
 
-.idea/
+# Test/cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS/editor
+.DS_Store
+Thumbs.db
 .vscode/
-*.swp
-*.swo
-*~
+
+# Data (keep .gitkeep)
+data/**
+!data/**/.gitkeep
+
+# Local outputs
+output/
+logs/
