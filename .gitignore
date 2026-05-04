@@ -30,5 +30,5 @@ data/**
 !data/**/.gitkeep
 
 # Local outputs
-output/
+
 logs/
