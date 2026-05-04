@@ -40,6 +40,17 @@ PROJECT_CLEANUP_TARGETS = [
 # Extensões de arquivos temporários a varrer no projeto
 TEMP_EXTENSIONS = {".pyc", ".pyo", ".log", ".tmp"}
 
+# Pastas padrão do sistema que o ransomware pode ter atacado
+STANDARD_DIRS = [
+    Path.home() / "Documents",
+    Path.home() / "Documentos",
+    Path.home() / "Desktop",
+    Path.home() / "Área de Trabalho",
+    Path.home() / "Downloads",
+    Path.home() / "Pictures",
+    Path.home() / "Imagens",
+]
+
 
 # ── Helpers visuais ────────────────────────────────────────────────────────────
 
@@ -99,23 +110,73 @@ def clean_temp_files(root: Path):
 def clean_output_encrypted(test_dir: Path):
     """
     Remove arquivos com extensões comuns de ransomware/criptografia
-    que possam ter sido gerados dentro do diretório de teste.
-    Exemplos: .enc, .locked, .crypted, .ransomware
+    tanto no diretório de teste quanto nas pastas padrão do sistema.
     """
-    encrypted_exts = {".enc", ".locked", ".crypted", ".ransomware", ".crypt", ".encrypted"}
+    encrypted_exts = {".enc", ".locked", ".crypted", ".ransomware", ".crypt", ".encrypted", ".wncry", ".locky"}
+    
+    # Lista de diretórios para varrer
+    dirs_to_scan = STANDARD_DIRS + [test_dir]
+    
     removed = 0
-    if test_dir.exists():
-        for ext in encrypted_exts:
-            for f in test_dir.rglob(f"*{ext}"):
-                try:
-                    f.unlink()
-                    removed += 1
-                except Exception:
-                    pass
+    for directory in dirs_to_scan:
+        if directory.exists() and directory.is_dir():
+            for ext in encrypted_exts:
+                for f in directory.rglob(f"*{ext}"):
+                    try:
+                        f.unlink()
+                        removed += 1
+                    except Exception:
+                        pass
+            
+            # Também remove as notas de resgate
+            for note in ["LEIA_ME.txt", "_INSTRUCOES_RESGATE.html", "READ_ME.txt"]:
+                for f in directory.rglob(note):
+                    try:
+                        f.unlink()
+                        removed += 1
+                    except Exception:
+                        pass
+
     if removed:
-        _ok(f"Removidos {removed} arquivo(s) criptografado(s)/residuais em {test_dir}")
+        _ok(f"Removidos {removed} arquivo(s) residuais de ataque do sistema.")
     else:
-        _skip("Nenhum arquivo criptografado residual encontrado.")
+        _skip("Nenhum arquivo residual de ataque encontrado.")
+
+
+def clean_crontab():
+    """Remove entradas de persistência do crontab criadas pelo pipeline."""
+    try:
+        # Pega o crontab atual
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+        if result.returncode != 0:
+            _skip("Crontab vazio ou não disponível.")
+            return
+
+        lines = result.stdout.splitlines()
+        new_lines = []
+        removed = 0
+
+        # Filtra linhas que apontam para a pasta do projeto ou para arquivos gerados
+        for line in lines:
+            # Verifica se a linha contém referências ao nosso projeto ou pasta output
+            if str(PROJECT_ROOT) in line or "output/result_" in line:
+                removed += 1
+                continue
+            new_lines.append(line)
+
+        if removed > 0:
+            if not new_lines:
+                # Se não sobrou nada, limpa o crontab
+                subprocess.run(["crontab", "-r"])
+            else:
+                # Atualiza com as linhas filtradas
+                subprocess.run(["crontab", "-"], input="\n".join(new_lines) + "\n", text=True)
+            _ok(f"Removidas {removed} entrada(s) do crontab.")
+        else:
+            _skip("Nenhuma entrada de persistência encontrada no crontab.")
+
+    except Exception as e:
+        _warn(f"Erro ao limpar crontab: {e}")
 
 
 # ── Regeneração ────────────────────────────────────────────────────────────────
@@ -175,9 +236,10 @@ def reset(test_dir: Path, regen: bool, count: int, force: bool):
         clean_directory(target, "cache Python")
     clean_temp_files(PROJECT_ROOT)
 
-    # ── 4. Remove resquícios de criptografia no dir de teste ───────
-    _title("PASSO 4 — Verificando resquícios de criptografia")
+    # ── 4. Remove resquícios de criptografia e persistência ───────
+    _title("PASSO 4 — Limpando resquícios do ataque")
     clean_output_encrypted(test_dir)
+    clean_crontab()
 
     # ── 5. Regenera o ambiente ─────────────────────────────────────
     if regen:
