@@ -16,8 +16,9 @@ script coeso e funcional.
 Regras:
 1. Remova blocos `if __name__ == "__main__":` de TODOS os módulos individuais.
 2. Mantenha todos os imports no topo do arquivo final, sem duplicatas.
-3. Adicione um único bloco `if __name__ == "__main__":` ao final que chame todas
-   as funções na ordem lógica correta, passando os retornos de uma para a outra.
+3. OBRIGATÓRIO: O bloco `if __name__ == "__main__":` final DEVE chamar TODAS 
+   as funções principais de TODOS os módulos fornecidos. NUNCA omita ou esqueça
+   nenhum módulo (ex: se houver um módulo para nota de resgate, ele DEVE ser chamado).
 4. O script final deve ser autocontido e executável diretamente com `python script.py`.
 5. Retorne APENAS o código Python puro, sem markdown, sem backticks, sem explicações.
 """.strip()
