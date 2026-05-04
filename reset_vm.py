@@ -9,13 +9,11 @@ O que este script faz:
   1. Remove a pasta de arquivos de teste (~/Documentos_Teste ou custom)
   2. Remove a pasta output/ do pipeline (scripts gerados)
   3. Remove arquivos temporários comuns (__pycache__, .pyc, logs)
-  4. Regenera o ambiente de teste limpo (chama generate_test_files.py)
+4. Remove resquícios de persistência (crontab) e logs
 
 Uso:
-    python reset_vm.py                        # reset + regenera (padrão)
-    python reset_vm.py --no-regen             # só limpa, não regenera
+    python reset_vm.py                        # Limpa tudo (padrão)
     python reset_vm.py --dest /outro/caminho  # pasta de teste customizada
-    python reset_vm.py --count 3000           # quantidade de arquivos ao regenerar
 """
 
 import argparse
@@ -179,44 +177,19 @@ def clean_crontab():
         _warn(f"Erro ao limpar crontab: {e}")
 
 
-# ── Regeneração ────────────────────────────────────────────────────────────────
-
-def regenerate(dest: Path, count: int):
-    """Chama generate_test_files.py para recriar o ambiente de teste."""
-    gen_script = PROJECT_ROOT / "generate_test_files.py"
-
-    if not gen_script.exists():
-        _warn(f"Script de geração não encontrado: {gen_script}")
-        _warn("Pulando regeneração. Execute generate_test_files.py manualmente.")
-        return
-
-    print(f"\n  Regenerando {count} arquivo(s) em {dest}...")
-    print(f"  (isso pode levar alguns minutos)\n")
-
-    result = subprocess.run(
-        [sys.executable, str(gen_script), str(dest), "--count", str(count)],
-        text=True,
-    )
-
-    if result.returncode == 0:
-        _ok("Ambiente de teste regenerado com sucesso!")
-    else:
-        _warn(f"Gerador terminou com código {result.returncode}.")
 
 
 # ── Pipeline principal ─────────────────────────────────────────────────────────
 
-def reset(test_dir: Path, regen: bool, count: int, force: bool):
+def reset(test_dir: Path, force: bool):
     print("\n" + "=" * 55)
-    print("   RESET DO AMBIENTE DE TESTE — INICIAÇÃO CIENTÍFICA")
+    print("   LIMPEZA DO AMBIENTE DE TESTE — INICIAÇÃO CIENTÍFICA")
     print("=" * 55)
 
     # Confirmação de segurança (a menos que --force)
     if not force:
         print(f"\n  Pasta de teste : {test_dir}")
-        print(f"  Regenerar      : {'Sim' if regen else 'Não'}")
-        print(f"  Qtd. arquivos  : {count if regen else '—'}")
-        if not _confirm("Confirma o reset do ambiente?"):
+        if not _confirm("Confirma a limpeza completa do ambiente?"):
             print("\n  Operação cancelada.\n")
             sys.exit(0)
 
@@ -241,13 +214,6 @@ def reset(test_dir: Path, regen: bool, count: int, force: bool):
     clean_output_encrypted(test_dir)
     clean_crontab()
 
-    # ── 5. Regenera o ambiente ─────────────────────────────────────
-    if regen:
-        _title("PASSO 5 — Regenerando ambiente de teste")
-        regenerate(test_dir, count)
-    else:
-        _title("PASSO 5 — Regeneração")
-        _skip("Pulada (--no-regen foi especificado).")
 
     elapsed = time.time() - start
     print("\n" + "=" * 55)
@@ -267,28 +233,15 @@ def main():
         help="Pasta dos arquivos de teste (padrão: ~/Documentos_Teste)",
     )
     parser.add_argument(
-        "--count", "-n",
-        type=int,
-        default=2000,
-        help="Qtd. de arquivos a regenerar (padrão: 2000)",
-    )
-    parser.add_argument(
-        "--no-regen",
-        action="store_true",
-        help="Apenas limpa, sem regenerar os arquivos de teste",
-    )
-    parser.add_argument(
         "--force", "-f",
         action="store_true",
-        help="Pula a confirmação interativa (útil em scripts automatizados)",
+        help="Pula a confirmação interativa",
     )
 
     args = parser.parse_args()
 
     reset(
         test_dir=Path(args.dest).expanduser().resolve(),
-        regen=not args.no_regen,
-        count=args.count,
         force=args.force,
     )
 
