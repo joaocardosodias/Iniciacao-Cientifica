@@ -1,5 +1,6 @@
 python-dotenv
-openai   # OpenRouter usa a interface OpenAI
+flask            # servidor C2 (c2_server.py)
+openai           # OpenRouter usa a interface OpenAI
 
 # Gerador de ambiente de teste (generate_test_files.py)
 openpyxl

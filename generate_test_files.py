@@ -287,7 +287,7 @@ def main():
     parser.add_argument(
         "--count", "-n",
         type=int,
-        default=2000,
+        default=5000,
         help="Número total de arquivos a gerar (padrão: 2000)",
     )
     args = parser.parse_args()
