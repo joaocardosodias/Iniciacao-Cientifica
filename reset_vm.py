@@ -42,18 +42,26 @@ SYSTEM_DIRS = [
 
 # Extensões de arquivos criptografados
 ENCRYPTED_EXTS = {
-    ".wncry", ".locky", ".enc", ".locked",
+    ".wncry", ".WNCRY", ".locky", ".enc", ".locked",
     ".crypted", ".crypt", ".encrypted", ".ransomware",
 }
 
 # Notas de resgate que o ransomware deixa
 RANSOM_NOTES = {
+    "#_LEIA_ME_WNCRY_#.txt",
     "LEIA_ME.txt",
     "READ_ME.txt",
     "_INSTRUCOES_RESGATE.html",
     "HOW_TO_DECRYPT.txt",
     "YOUR_FILES_ARE_ENCRYPTED.txt",
 }
+
+# Raízes para varredura completa do sistema
+SCAN_ROOTS = [
+    Path.home(),          # home inteiro do usuário
+    Path("/tmp"),         # temporários deixados pelo ransomware
+    Path("/mnt"),         # unidades montadas
+]
 
 # ── Helpers visuais ────────────────────────────────────────────────────────────
 
@@ -97,38 +105,56 @@ def clean_test_dir(test_dir: Path):
 def clean_attack_residues():
     """
     Remove da máquina toda a sujeira deixada pelo ransomware:
-    - Arquivos criptografados (.wncry, .locky, etc.)
-    - Notas de resgate (LEIA_ME.txt, etc.)
-    Varre as pastas padrão do sistema.
+    - Arquivos criptografados (.wncry, .WNCRY, .locky, etc.)
+    - Notas de resgate (#_LEIA_ME_WNCRY_#.txt, LEIA_ME.txt, etc.)
+    - Arquivo de chave temporária /tmp/.master.key
+    Varre o home inteiro + /tmp + /mnt para não deixar nada para trás.
     """
     total = 0
 
-    for directory in SYSTEM_DIRS:
-        if not directory.exists():
+    for root in SCAN_ROOTS:
+        if not root.exists():
             continue
 
-        # Arquivos criptografados
-        for ext in ENCRYPTED_EXTS:
-            for f in directory.rglob(f"*{ext}"):
-                try:
-                    f.unlink()
-                    total += 1
-                except Exception:
-                    pass
+        try:
+            for f in root.rglob("*"):
+                if not f.is_file() or f.is_symlink():
+                    continue
 
-        # Notas de resgate
-        for note_name in RANSOM_NOTES:
-            for f in directory.rglob(note_name):
-                try:
-                    f.unlink()
-                    total += 1
-                except Exception:
-                    pass
+                # Arquivo criptografado pelo ransomware
+                if f.suffix.lower() in {e.lower() for e in ENCRYPTED_EXTS}:
+                    try:
+                        f.unlink()
+                        total += 1
+                    except Exception:
+                        pass
+                    continue
+
+                # Nota de resgate (compara nome exato)
+                if f.name in RANSOM_NOTES:
+                    try:
+                        f.unlink()
+                        total += 1
+                    except Exception:
+                        pass
+
+        except PermissionError:
+            pass
+
+    # Remove chave mestra temporária do ransomware
+    master_key = Path("/tmp/.master.key")
+    if master_key.exists():
+        try:
+            master_key.unlink()
+            total += 1
+            _ok("Chave mestra do ransomware (/tmp/.master.key) removida.")
+        except Exception as e:
+            _warn(f"Falha ao remover /tmp/.master.key: {e}")
 
     if total:
-        _ok(f"{total} arquivo(s) de ataque removidos das pastas do sistema.")
+        _ok(f"{total} arquivo(s) de ataque removidos do sistema.")
     else:
-        _skip("Nenhum arquivo de ataque encontrado nas pastas do sistema.")
+        _skip("Nenhum arquivo de ataque encontrado.")
 
 
 def clean_c2_log():
