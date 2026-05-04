@@ -1,64 +1,122 @@
 """
-LLM Client — wrapper para OpenRouter.
+LLM Client — wrapper para OpenRouter e Groq.
 
-OpenRouter expõe a interface compatível com OpenAI, permitindo
-trocar de modelo apenas mudando a string `model` sem alterar código.
+Ambos expõem interface compatível com OpenAI, permitindo trocar de
+provedor e modelo apenas com a string passada via --model, sem alterar
+o código das camadas do pipeline.
 
-Documentação: https://openrouter.ai/docs
+Prefixos de roteamento:
+  groq:<modelo>        → Groq API   (ex: groq:llama-3.3-70b-versatile)
+  <qualquer outro>     → OpenRouter (ex: openai/gpt-4o-mini)
+
+Documentação:
+  OpenRouter → https://openrouter.ai/docs
+  Groq       → https://console.groq.com/docs
 """
 
 import os
+import time
 from openai import OpenAI
 
 
-# Modelos disponíveis no OpenRouter (adicione conforme necessário)
-MODELS = {
-    # Modelos gratuitos (rate limit menor, bom para testes)
-    "free-qwen":      "qwen/qwen3-30b-a3b:free",
-    "free-deepseek":  "deepseek/deepseek-r1:free",
-    "free-gemma":     "google/gemma-3-27b-it:free",
-    "free-llama":     "meta-llama/llama-4-scout:free",
-
-    # Modelos pagos (maior capacidade)
-    "gpt-4o-mini":    "openai/gpt-4o-mini",
-    "gpt-4o":         "openai/gpt-4o",
-    "claude-haiku":   "anthropic/claude-3-5-haiku",
-    "claude-sonnet":  "anthropic/claude-sonnet-4-5",
-    "gemini-flash":   "google/gemini-2.0-flash-001",
-    "deepseek-v3":    "deepseek/deepseek-chat-v3-0324",
+# ── Modelos OpenRouter ─────────────────────────────────────────────────────────
+OPENROUTER_MODELS = {
+    # Gratuitos
+    "free-qwen":     "qwen/qwen3-30b-a3b:free",
+    "free-deepseek": "deepseek/deepseek-r1:free",
+    "free-gemma":    "google/gemma-3-27b-it:free",
+    "free-llama":    "meta-llama/llama-4-scout:free",
+    # Pagos
+    "gpt-4o-mini":   "openai/gpt-4o-mini",
+    "gpt-4o":        "openai/gpt-4o",
+    "claude-haiku":  "anthropic/claude-3-5-haiku",
+    "claude-sonnet": "anthropic/claude-sonnet-4-5",
+    "gemini-flash":  "google/gemini-2.0-flash-001",
+    "deepseek-v3":   "deepseek/deepseek-chat-v3-0324",
 }
 
-# Modelo padrão usado quando nenhum é especificado
+# ── Modelos Groq ───────────────────────────────────────────────────────────────
+GROQ_MODELS = {
+    # Gratuitos / rápidos (prefixo groq:)
+    "groq:llama3-70b":    "llama3-70b-8192",
+    "groq:llama3-8b":     "llama3-8b-8192",
+    "groq:llama3.3-70b":  "llama-3.3-70b-versatile",
+    "groq:deepseek-r1":   "deepseek-r1-distill-llama-70b",
+    "groq:gemma2-9b":     "gemma2-9b-it",
+    "groq:mixtral":       "mixtral-8x7b-32768",
+    "groq:qwen-32b":      "qwen-qwq-32b",
+}
+
+# Tabela unificada para --models
+MODELS = {**OPENROUTER_MODELS, **GROQ_MODELS}
+
+# Modelo padrão
 DEFAULT_MODEL = "free-qwen"
+
+_GROQ_BASE_URL      = "https://api.groq.com/openai/v1"
+_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+
+def _resolve(model_str: str) -> tuple[str, str, str]:
+    """
+    Retorna (provider, base_url, model_name) a partir de um alias ou nome direto.
+
+    Regra:
+      - Alias no dicionário GROQ_MODELS   → provider=groq
+      - Alias começando com 'groq:'       → provider=groq  (nome direto)
+      - Qualquer outro                    → provider=openrouter
+    """
+    # Alias exato no dicionário Groq
+    if model_str in GROQ_MODELS:
+        return "groq", _GROQ_BASE_URL, GROQ_MODELS[model_str]
+
+    # Prefixo explícito groq:<modelo>
+    if model_str.startswith("groq:"):
+        raw = model_str[len("groq:"):]
+        # Verifica se é um sub-alias
+        full_key = f"groq:{raw}"
+        resolved = GROQ_MODELS.get(full_key, raw)
+        return "groq", _GROQ_BASE_URL, resolved
+
+    # OpenRouter — alias ou nome direto
+    resolved = OPENROUTER_MODELS.get(model_str, model_str)
+    return "openrouter", _OPENROUTER_BASE_URL, resolved
 
 
 class LLMClient:
     """
-    Wrapper para o OpenRouter via interface compatível com OpenAI.
+    Wrapper unificado para OpenRouter e Groq.
 
-    Exemplo de uso:
-        client = LLMClient()                          # modelo padrão
-        client = LLMClient("gpt-4o-mini")             # alias do dicionário
-        client = LLMClient("openai/gpt-4o")           # nome direto do OpenRouter
+    Exemplos de uso:
+        LLMClient()                        # padrão (OpenRouter qwen free)
+        LLMClient("gpt-4o-mini")           # alias OpenRouter
+        LLMClient("openai/gpt-4o")         # nome direto OpenRouter
+        LLMClient("groq:llama3-70b")       # alias Groq
+        LLMClient("groq:llama-3.3-70b-versatile")  # nome direto Groq
     """
 
     def __init__(self, model: str | None = None, delay: int = 0):
-        api_key = os.environ.get("OPENROUTER_API_KEY")
-        if not api_key:
-            raise EnvironmentError(
-                "Variável OPENROUTER_API_KEY não encontrada. "
-                "Copie .env.example para .env e preencha sua chave."
-            )
-
-        # Resolve o alias ou usa o nome direto
-        resolved = model or DEFAULT_MODEL
-        self.model = MODELS.get(resolved, resolved)
+        raw = model or DEFAULT_MODEL
+        provider, base_url, self.model = _resolve(raw)
+        self.provider = provider
         self.delay = delay
 
-        self._client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=api_key,
-        )
+        if provider == "groq":
+            api_key = os.environ.get("GROQ_API_KEY")
+            if not api_key:
+                raise EnvironmentError(
+                    "Variável GROQ_API_KEY não encontrada. "
+                    "Adicione GROQ_API_KEY=<sua_chave> no arquivo .env."
+                )
+        else:
+            api_key = os.environ.get("OPENROUTER_API_KEY")
+            if not api_key:
+                raise EnvironmentError(
+                    "Variável OPENROUTER_API_KEY não encontrada. "
+                    "Copie .env.example para .env e preencha sua chave."
+                )
+
+        self._client = OpenAI(base_url=base_url, api_key=api_key)
 
     def chat(self, system: str, user: str) -> str:
         """
@@ -71,7 +129,6 @@ class LLMClient:
         Returns:
             Texto da resposta do modelo.
         """
-        import time
         if self.delay > 0:
             time.sleep(self.delay)
 
@@ -85,4 +142,4 @@ class LLMClient:
         return response.choices[0].message.content.strip()
 
     def __repr__(self) -> str:
-        return f"LLMClient(model={self.model!r})"
+        return f"LLMClient(provider={self.provider!r}, model={self.model!r})"
