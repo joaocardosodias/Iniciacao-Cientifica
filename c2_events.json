@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2026-05-03T22:00:48",
+    "type": "KEY_RECEIVED",
+    "source_ip": "10.254.19.238",
+    "hostname": "lab",
+    "aes_key": "UHhXuG0uXMhy0CUFpJan+BlYytC/ueMzFuwAsy8nFBk=",
+    "key_len": 44
+  }
+]

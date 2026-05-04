@@ -26,6 +26,15 @@ Regras estritas:
      {"nome": "criptografar_arquivo", "descricao": "Criptografar o conteúdo de um arquivo usando Fernet e retornar a chave."}
    ]
 5. Gere entre 3 e 6 módulos. Não gere mais do que isso.
+
+Contexto do ambiente de execução (IMPORTANTE para os módulos):
+- Sistema Operacional: Linux com locale pt_BR
+- As pastas do usuário podem ter nomes em inglês OU português:
+  EN: Documents, Desktop, Downloads, Pictures
+  PT: Documentos, Área de Trabalho, Imagens, Downloads, Documentos_Teste
+- O módulo de varredura de arquivos DEVE verificar ambos os nomes (EN e PT) e
+  também a pasta ~/Documentos_Teste (ambiente de teste).
+- Use Path.home() para obter o diretório home do usuário.
 """.strip()
 
 
