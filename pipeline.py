@@ -53,15 +53,16 @@ def _save_output(code: str) -> Path:
 
 # ── Pipeline ───────────────────────────────────────────────────────────────────
 
-def run(prompt: str, model: str | None = None) -> Path:
+def run(prompt: str, model: str | None = None, delay: int = 0) -> Path:
     """
     Executa o pipeline completo e retorna o caminho do arquivo gerado.
 
     Args:
         prompt: Prompt malicioso original.
         model:  Alias ou nome do modelo OpenRouter (None = padrão).
+        delay:  Segundos de espera entre chamadas ao LLM.
     """
-    llm = LLMClient(model)
+    llm = LLMClient(model, delay=delay)
     log.info(f"Modelo: {llm.model}")
 
     # Camada 1 — Sanitizer
@@ -125,6 +126,12 @@ def main():
         action="store_true",
         help="Lista os modelos disponíveis.",
     )
+    parser.add_argument(
+        "--limit", "-L",
+        type=int,
+        default=0,
+        help="Segundos de espera entre as camadas/chamadas do LLM (evita rate limit).",
+    )
     args = parser.parse_args()
 
     if args.list:
@@ -168,7 +175,7 @@ def main():
             print(f"  Usando prompt padrão.")
 
     try:
-        output_path = run(prompt, args.model)
+        output_path = run(prompt, args.model, delay=args.limit)
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")
         raise

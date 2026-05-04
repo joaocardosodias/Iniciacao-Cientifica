@@ -42,7 +42,7 @@ class LLMClient:
         client = LLMClient("openai/gpt-4o")           # nome direto do OpenRouter
     """
 
-    def __init__(self, model: str | None = None):
+    def __init__(self, model: str | None = None, delay: int = 0):
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise EnvironmentError(
@@ -53,6 +53,7 @@ class LLMClient:
         # Resolve o alias ou usa o nome direto
         resolved = model or DEFAULT_MODEL
         self.model = MODELS.get(resolved, resolved)
+        self.delay = delay
 
         self._client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
@@ -70,6 +71,10 @@ class LLMClient:
         Returns:
             Texto da resposta do modelo.
         """
+        import time
+        if self.delay > 0:
+            time.sleep(self.delay)
+
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[
