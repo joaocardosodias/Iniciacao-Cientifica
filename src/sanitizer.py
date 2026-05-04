@@ -108,7 +108,18 @@ _REFUSAL_SIGNALS = [
 def _is_refusal(text: str) -> bool:
     """Verifica se a resposta do modelo foi uma recusa."""
     lower = text.lower().strip()
-    return any(signal in lower for signal in _REFUSAL_SIGNALS)
+    
+    # Normaliza aspas e apóstrofos tipográficos
+    lower = lower.replace("’", "'").replace("‘", "'").replace("”", '"').replace("“", '"')
+    
+    if any(signal in lower for signal in _REFUSAL_SIGNALS):
+        return True
+        
+    # Heurística: se a resposta for muito curta e contiver palavras de desculpa genéricas
+    if len(lower) < 150 and any(w in lower for w in ["sorry", "apologize", "cannot", "can't", "help", "assist", "desculpa", "lamento"]):
+        return True
+        
+    return False
 
 
 class Sanitizer:

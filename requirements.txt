@@ -1,8 +1,8 @@
 python-dotenv
 flask            # servidor C2 (c2_server.py)
 openai           # OpenRouter usa a interface OpenAI
-
-# Gerador de ambiente de teste (generate_test_files.py)
+cryptography     # Usado pelos scripts gerados para criptografia AES-GCM
+requests         # Usado pelos scripts gerados para exfiltração via HTTP
 openpyxl
 python-docx
 reportlab
