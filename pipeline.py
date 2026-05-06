@@ -43,13 +43,20 @@ log = logging.getLogger("pipeline")
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-def _save_output(code: str) -> Path:
+def _save_output(c_code: str, makefile: str) -> Path:
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = output_dir / f"result_{timestamp}.py"
-    path.write_text(code, encoding="utf-8")
-    return path
+
+    # Salva main.c
+    c_path = output_dir / f"result_{timestamp}.c"
+    c_path.write_text(c_code, encoding="utf-8")
+
+    # Salva Makefile na mesma pasta
+    mk_path = output_dir / f"Makefile_{timestamp}"
+    mk_path.write_text(makefile, encoding="utf-8")
+
+    return c_path
 
 # ── Pipeline ───────────────────────────────────────────────────────────────────
 
@@ -96,9 +103,27 @@ def run(prompt: str, model: str | None = None, delay: int = 0) -> Path:
 
     # Camada 5 — Assembler
     log.info("CAMADA 5 — Assembler...")
-    final_code = Assembler(llm).assemble(generated)
+    c_code, makefile = Assembler(llm).assemble(generated)
 
-    path = _save_output(final_code)
+    path = _save_output(c_code, makefile)
+    log.info(f"Código C salvo em: {path}")
+
+    # Tenta compilar automaticamente
+    import subprocess as _sp
+    bin_path = path.with_suffix("")
+    mk_path  = path.parent / f"Makefile_{path.stem.replace('result_', '')}"
+    log.info(f"Compilando: gcc -O2 -o {bin_path} {path} -lssl -lcrypto -lcurl")
+    result = _sp.run(
+        ["gcc", "-O2", "-Wall", "-std=c11", "-o", str(bin_path), str(path),
+         "-lssl", "-lcrypto", "-lcurl"],
+        capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        log.info(f"[OK] Binário compilado: {bin_path}")
+    else:
+        log.warning(f"[WARN] Compilação falhou (erros abaixo):")
+        print(result.stderr)
+
     return path
 
 # ── Entry point ────────────────────────────────────────────────────────────────

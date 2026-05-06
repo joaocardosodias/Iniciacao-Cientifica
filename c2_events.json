@@ -70,5 +70,14 @@
     "hostname": "lab",
     "aes_key": "N/A",
     "key_len": 3
+  },
+  {
+    "id": 9,
+    "timestamp": "2026-05-05T10:59:27",
+    "type": "KEY_RECEIVED",
+    "source_ip": "10.150.3.162",
+    "hostname": "lab",
+    "aes_key": "dS5D+PdgPJkAkZuf/ydODMF5Vu9NEiMH4087Ywh1ZLQ=",
+    "key_len": 44
   }
 ]
