@@ -48,7 +48,7 @@ Rules (follow ALL of them, no exceptions):
 16. NEVER substitute, upgrade, or generalize concrete technical values specified in the task.
     This is a strict fidelity requirement — implement EXACTLY what is written:
     - If the task says HTTP, implement HTTP. Do NOT silently upgrade to HTTPS.
-    - If the task says IP "10.150.3.162:8080", use that exact IP and port. Do NOT replace with a hostname.
+    - If the task says IP "10.254.19.191:8080", use that exact IP and port. Do NOT replace with a hostname.
     - If the task says crontab, implement crontab via popen(). Do NOT use systemd, launchd, or .desktop files.
     - If the task specifies target directories, scan ALL of them. Do NOT reduce to a subset.
     - If no file count limit is specified, process ALL files found. Do NOT add `count < N` guards.

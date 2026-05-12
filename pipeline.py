@@ -63,6 +63,43 @@ def _save_output(c_code: str, makefile: str, suffix: str = "") -> Path:
 
     return c_path
 
+
+def _compile_binary(c_path: Path) -> tuple[bool, Path]:
+    """
+    Compila um arquivo .c e gera o binário ao lado dele.
+
+    O binário recebe o mesmo nome do .c sem a extensão.
+    Ex: output/result_20260510_raw.c → output/result_20260510_raw
+
+    Returns:
+        (success, binary_path) — success indica se gcc retornou 0.
+    """
+    import subprocess
+
+    bin_path = c_path.with_suffix("")
+    result = subprocess.run(
+        [
+            "gcc", "-O2", "-Wall", "-Wno-discarded-qualifiers",
+            "-std=c11", "-o", str(bin_path), str(c_path),
+            "-lssl", "-lcrypto", "-lcurl",
+        ],
+        capture_output=True, text=True,
+    )
+
+    if result.returncode == 0:
+        log.info(f"  [Build] ✓ Binário compilado: {bin_path}")
+        if result.stderr.strip():
+            # Warnings (não fatais)
+            warn_count = result.stderr.count("warning:")
+            log.info(f"  [Build]   {warn_count} warning(s)")
+    else:
+        log.warning(f"  [Build] ✗ Compilação falhou para {c_path.name}")
+        # Primeiras 10 linhas de erro
+        for line in result.stderr.splitlines()[:10]:
+            log.warning(f"  [Build]   {line}")
+
+    return result.returncode == 0, bin_path
+
 # ── Pipeline ───────────────────────────────────────────────────────────────────
 
 def run(
@@ -136,20 +173,14 @@ def run(
             log.info(f"Código C (corrigido) salvo em: {path}")
         elif compiled_ok:
             log.info("  [Fixer] Código original já compilava — nenhuma alteração necessária.")
+
+    # Compilação final — gera o binário ao lado do .c
+    log.info("BUILD — Compilando binário final...")
+    build_ok, bin_path = _compile_binary(path)
+    if build_ok:
+        print(f"\n  [Build] ✓ Binário pronto: {bin_path}")
     else:
-        # Sem Fixer: compilação simples para relatório
-        import subprocess as _sp
-        result = _sp.run(
-            ["gcc", "-O2", "-Wall", "-std=c11", "-o",
-             str(path.with_suffix("")), str(path),
-             "-lssl", "-lcrypto", "-lcurl"],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            log.info(f"[OK] Binário compilado: {path.with_suffix('')}")
-        else:
-            log.warning("[WARN] Compilação falhou (use --no-fixer removido para ativar Fixer):")
-            print(result.stderr)
+        print(f"\n  [Build] ✗ Binário não gerado (erros de compilação)")
 
     return path
 
@@ -250,7 +281,12 @@ def main():
         raise
 
     print("\n" + "=" * 60)
-    print(f"  ✓ Script salvo em: {output_path}")
+    print(f"  ✓ Código salvo em: {output_path}")
+    bin_path = output_path.with_suffix("")
+    if bin_path.exists():
+        print(f"  ✓ Binário pronto:  {bin_path}")
+    else:
+        print(f"  ✗ Binário não gerado (veja erros acima)")
     print("=" * 60 + "\n")
 
 

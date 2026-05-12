@@ -16,7 +16,8 @@ Documentação:
 
 import os
 import time
-from openai import OpenAI
+import logging
+from openai import OpenAI, RateLimitError, APIStatusError
 
 
 # ── Modelos OpenRouter ─────────────────────────────────────────────────────────
@@ -26,6 +27,7 @@ OPENROUTER_MODELS = {
     "free-deepseek": "deepseek/deepseek-r1:free",
     "free-gemma":    "google/gemma-3-27b-it:free",
     "free-llama":    "meta-llama/llama-4-scout:free",
+    "free-ring":     "inclusionai/ring-2.6-1t:free",
     # Pagos
     "gpt-4o-mini":   "openai/gpt-4o-mini",
     "gpt-4o":        "openai/gpt-4o",
@@ -116,11 +118,20 @@ class LLMClient:
                     "Copie .env.example para .env e preencha sua chave."
                 )
 
-        self._client = OpenAI(base_url=base_url, api_key=api_key)
+        self._client = OpenAI(base_url=base_url, api_key=api_key, max_retries=0)
+
+    # Configuração de retry para rate-limit (429) e erros transitórios (502/503)
+    _MAX_RETRIES    = 6
+    _INITIAL_WAIT_S = 5
+    _MAX_WAIT_S     = 60
+    _RETRYABLE_CODES = {429, 502, 503}
 
     def chat(self, system: str, user: str) -> str:
         """
         Envia uma mensagem ao modelo e retorna a resposta como string.
+
+        Implementa retry com backoff exponencial para erros 429 (rate limit)
+        e 502/503 (erros transitórios de upstream).
 
         Args:
             system: Instrução de sistema (papel/persona do modelo).
@@ -129,17 +140,47 @@ class LLMClient:
         Returns:
             Texto da resposta do modelo.
         """
+        log = logging.getLogger("llm_client")
+
         if self.delay > 0:
             time.sleep(self.delay)
 
-        response = self._client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user",   "content": user},
-            ],
-        )
-        return response.choices[0].message.content.strip()
+        last_exc: Exception | None = None
+        wait = self._INITIAL_WAIT_S
+
+        for attempt in range(1, self._MAX_RETRIES + 1):
+            try:
+                response = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user",   "content": user},
+                    ],
+                )
+                return response.choices[0].message.content.strip()
+
+            except RateLimitError as e:
+                last_exc = e
+                log.warning(
+                    f"[Retry {attempt}/{self._MAX_RETRIES}] Rate limit (429). "
+                    f"Aguardando {wait}s..."
+                )
+            except APIStatusError as e:
+                if e.status_code in self._RETRYABLE_CODES:
+                    last_exc = e
+                    log.warning(
+                        f"[Retry {attempt}/{self._MAX_RETRIES}] HTTP {e.status_code}. "
+                        f"Aguardando {wait}s..."
+                    )
+                else:
+                    raise  # Erro não-retryable, propaga imediatamente
+
+            if attempt < self._MAX_RETRIES:
+                time.sleep(wait)
+                wait = min(wait * 2, self._MAX_WAIT_S)
+
+        # Esgotou todas as tentativas
+        raise last_exc  # type: ignore[misc]
 
     def __repr__(self) -> str:
         return f"LLMClient(provider={self.provider!r}, model={self.model!r})"

