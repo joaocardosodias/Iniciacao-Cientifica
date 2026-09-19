@@ -28,9 +28,6 @@ Thumbs.db
 
 # ── Artefatos do pipeline ─────────────────────────────────────────────────────
 
-# Saídas geradas (código C, Makefiles, binários compilados)
-output/
-
 # Servidor C2 — log de eventos capturados nos experimentos
 c2_events.json
 
