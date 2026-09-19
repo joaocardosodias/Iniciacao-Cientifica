@@ -47,18 +47,21 @@ log = logging.getLogger("pipeline")
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-def _save_output(c_code: str, makefile: str, suffix: str = "") -> Path:
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
+def _save_output(c_code: str, makefile: str, suffix: str = "", run_dir: Path | None = None) -> Path:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Cada run tem sua própria subpasta: output/run_<timestamp>/
+    if run_dir is None:
+        run_dir = Path("output") / f"run_{timestamp}"
+    run_dir.mkdir(parents=True, exist_ok=True)
 
     # Salva main.c (sufixo opcional para distinguir versão corrigida)
     label = f"result_{timestamp}{suffix}"
-    c_path = output_dir / f"{label}.c"
+    c_path = run_dir / f"{label}.c"
     c_path.write_text(c_code, encoding="utf-8")
 
-    # Salva Makefile na mesma pasta
-    mk_path = output_dir / f"Makefile_{timestamp}"
+    # Salva Makefile na mesma subpasta
+    mk_path = run_dir / f"Makefile_{timestamp}"
     mk_path.write_text(makefile, encoding="utf-8")
 
     return c_path
@@ -173,8 +176,12 @@ def run(
     log.info("CAMADA 5 — Assembler...")
     c_code, makefile = Assembler(llm).assemble(generated)
 
+    # Cria a subpasta da run uma única vez — raw e fixed ficam juntos
+    from datetime import datetime as _dt
+    run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
+
     # Salva versão bruta do Assembler (antes do Fixer)
-    path = _save_output(c_code, makefile, suffix="_raw" if use_fixer else "")
+    path = _save_output(c_code, makefile, suffix="_raw" if use_fixer else "", run_dir=run_dir)
     log.info(f"Código C (bruto) salvo em: {path}")
 
     # Camada 6 — Fixer
@@ -186,8 +193,8 @@ def run(
         print(f"\n  [Fixer] {status} após correções.")
 
         if fixed_code != c_code:
-            # Só salva um arquivo separado se houve alterações
-            path = _save_output(fixed_code, makefile, suffix="_fixed" if compiled_ok else "_fixed_partial")
+            # Só salva um arquivo separado se houve alterações — mesma subpasta
+            path = _save_output(fixed_code, makefile, suffix="_fixed" if compiled_ok else "_fixed_partial", run_dir=run_dir)
             log.info(f"Código C (corrigido) salvo em: {path}")
         elif compiled_ok:
             log.info("  [Fixer] Código original já compilava — nenhuma alteração necessária.")

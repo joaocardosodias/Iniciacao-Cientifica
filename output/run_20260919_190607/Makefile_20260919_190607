@@ -1,0 +1,14 @@
+mkeile
+CC = gcc
+CFLAGS = -O2 -Wall
+LIDS = -lssl -lcrypto -lcurl
+TARGET = ransomare
+SRC = main.c
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIDS)
+
+clean:
+	rm -f $(TARGET) *.o
