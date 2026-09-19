@@ -134,22 +134,40 @@ def run(
     for m in modules:
         print(f"    • {m['nome']}: {m['descricao']}")
 
-    # Camadas 3 + 4 — PromptMaker + Coder (por módulo)
-    log.info("CAMADAS 3+4 — PromptMaker + Coder...")
+    # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
+    log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
     coder        = Coder(llm)
-    generated: list[tuple[str, str]] = []
 
-    for i, module in enumerate(modules, 1):
+    def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
+        """Processa um módulo: PromptMaker → Coder. Retorna (índice, nome, código)."""
+        i, module = args
         nome = module["nome"]
-        log.info(f"  [{i}/{len(modules)}] {nome}")
+        log.info(f"  [{i}/{len(modules)}] {nome} — iniciando...")
 
         ctx_prompt = prompt_maker.make(module)
         print(f"\n  [PromptMaker → {nome}]\n  {ctx_prompt[:120]}...")
 
         code = coder.generate(ctx_prompt)
         print(f"  [Coder → {nome}] {len(code.splitlines())} linhas geradas.")
-        generated.append((nome, code))
+        log.info(f"  [{i}/{len(modules)}] {nome} — concluído.")
+        return i, nome, code
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # Roda todos os módulos em paralelo; workers = nº de módulos (tipicamente 3-6)
+    results: list[tuple[int, str, str]] = []
+    with ThreadPoolExecutor(max_workers=len(modules)) as executor:
+        futures = {
+            executor.submit(_process_module, (i, module)): i
+            for i, module in enumerate(modules, 1)
+        }
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    # Reordena pelo índice original para garantir a ordem correta ao Assembler
+    results.sort(key=lambda x: x[0])
+    generated: list[tuple[str, str]] = [(nome, code) for _, nome, code in results]
 
     # Camada 5 — Assembler
     log.info("CAMADA 5 — Assembler...")

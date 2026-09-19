@@ -31,6 +31,7 @@ OPENROUTER_MODELS: dict[str, str] = {
     "free-llama":     "meta-llama/llama-4-scout:free",
     "free-ring":      "inclusionai/ring-2.6-1t:free",
     "free-nemotron":  "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "free-nex":       "nex-agi/nex-n2.5-pro:free",
     # Pagos
     "gpt-4o-mini":   "openai/gpt-4o-mini",
     "gpt-4o":        "openai/gpt-4o",
