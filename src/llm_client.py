@@ -25,11 +25,12 @@ from openai import OpenAI, RateLimitError, APIStatusError
 # ── Modelos OpenRouter ─────────────────────────────────────────────────────────
 OPENROUTER_MODELS: dict[str, str] = {
     # Gratuitos
-    "free-qwen":     "qwen/qwen3-30b-a3b:free",
-    "free-deepseek": "deepseek/deepseek-r1:free",
-    "free-gemma":    "google/gemma-3-27b-it:free",
-    "free-llama":    "meta-llama/llama-4-scout:free",
-    "free-ring":     "inclusionai/ring-2.6-1t:free",
+    "free-qwen":      "qwen/qwen3-30b-a3b:free",
+    "free-deepseek":  "deepseek/deepseek-r1:free",
+    "free-gemma":     "google/gemma-3-27b-it:free",
+    "free-llama":     "meta-llama/llama-4-scout:free",
+    "free-ring":      "inclusionai/ring-2.6-1t:free",
+    "free-nemotron":  "nvidia/nemotron-3-ultra-550b-a55b:free",
     # Pagos
     "gpt-4o-mini":   "openai/gpt-4o-mini",
     "gpt-4o":        "openai/gpt-4o",
@@ -186,7 +187,11 @@ class LLMClient:
                         {"role": "user",   "content": user},
                     ],
                 )
-                return response.choices[0].message.content.strip()
+                # Alguns provedores retornam choices=None em vez de recusar com texto
+                if not response.choices:
+                    return ""
+                content = response.choices[0].message.content
+                return content.strip() if content else ""
 
             except RateLimitError as e:
                 last_exc = e
