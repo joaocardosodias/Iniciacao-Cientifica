@@ -229,7 +229,7 @@ def main():
     args = parser.parse_args()
 
     if args.list:
-        from test_prompts import PROMPTS
+        from scenarios.test_prompts import PROMPTS
         print("\n🦠 Cenários disponíveis:\n")
         for key, data in PROMPTS.items():
             print(f"  --scenario {key:10s} → {data['nome']}")
@@ -248,7 +248,7 @@ def main():
     print("=" * 60)
 
     if args.scenario:
-        from test_prompts import PROMPTS
+        from scenarios.test_prompts import PROMPTS
         key = args.scenario.lower()
         if key not in PROMPTS:
             print(f"[ERRO] Cenário '{key}' não encontrado. Use --list.")

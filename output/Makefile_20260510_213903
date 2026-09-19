@@ -1,5 +1,0 @@
-all: main.c
-	gcc -O2 -Wall -o ransomware main.c -lssl -lcrypto -lcurl
-
-clean:
-	rm -f ransomware *.o

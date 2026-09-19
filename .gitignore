@@ -11,7 +11,7 @@ ENV/
 .env.*
 *.env
 
-# Test/cache
+# Testes / cache
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -20,15 +20,32 @@ ENV/
 # Jupyter
 .ipynb_checkpoints/
 
-# OS/editor
+# OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
+.idea/
 
-# Data (keep .gitkeep)
-data/**
-!data/**/.gitkeep
+# ── Artefatos do pipeline ─────────────────────────────────────────────────────
 
-# Local outputs
+# Saídas geradas (código C, Makefiles, binários compilados)
+output/
 
+# Servidor C2 — log de eventos capturados nos experimentos
+c2_events.json
+
+# Chave temporária do ransomware em /tmp (não deve ser comitada acidentalmente)
+*.master.key
+
+# Binários ELF compilados na raiz ou em qualquer subpasta
+*.out
+# (binários sem extensão são excluídos pelo output/ acima)
+
+# ── Ambiente de teste ─────────────────────────────────────────────────────────
+
+# Pasta criada pelo generate_test_files.py (fora do repo, mas por segurança)
+Documentos_Teste/
+
+# Logs gerais
 logs/
+*.log
