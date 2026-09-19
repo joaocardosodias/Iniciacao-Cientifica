@@ -1,17 +1,19 @@
 """
-LLM Client — wrapper para OpenRouter e Groq.
+LLM Client — wrapper para OpenRouter, Groq e NVIDIA NIM.
 
-Ambos expõem interface compatível com OpenAI, permitindo trocar de
+Todos os três expõem interface compatível com OpenAI, permitindo trocar de
 provedor e modelo apenas com a string passada via --model, sem alterar
 o código das camadas do pipeline.
 
 Prefixos de roteamento:
-  groq:<modelo>        → Groq API   (ex: groq:llama-3.3-70b-versatile)
-  <qualquer outro>     → OpenRouter (ex: openai/gpt-4o-mini)
+  groq:<modelo>     → Groq API    (ex: groq:llama-3.3-70b-versatile)
+  nim:<modelo>      → NVIDIA NIM  (ex: nim:meta/llama-3.1-405b-instruct)
+  <qualquer outro>  → OpenRouter  (ex: openai/gpt-4o-mini)
 
 Documentação:
-  OpenRouter → https://openrouter.ai/docs
-  Groq       → https://console.groq.com/docs
+  OpenRouter  → https://openrouter.ai/docs
+  Groq        → https://console.groq.com/docs
+  NVIDIA NIM  → https://docs.api.nvidia.com/nim/reference/llm-apis
 """
 
 import os
@@ -21,7 +23,7 @@ from openai import OpenAI, RateLimitError, APIStatusError
 
 
 # ── Modelos OpenRouter ─────────────────────────────────────────────────────────
-OPENROUTER_MODELS = {
+OPENROUTER_MODELS: dict[str, str] = {
     # Gratuitos
     "free-qwen":     "qwen/qwen3-30b-a3b:free",
     "free-deepseek": "deepseek/deepseek-r1:free",
@@ -38,63 +40,92 @@ OPENROUTER_MODELS = {
 }
 
 # ── Modelos Groq ───────────────────────────────────────────────────────────────
-GROQ_MODELS = {
-    # Gratuitos / rápidos (prefixo groq:)
-    "groq:llama3-70b":    "llama3-70b-8192",
-    "groq:llama3-8b":     "llama3-8b-8192",
-    "groq:llama3.3-70b":  "llama-3.3-70b-versatile",
-    "groq:deepseek-r1":   "deepseek-r1-distill-llama-70b",
-    "groq:gemma2-9b":     "gemma2-9b-it",
-    "groq:mixtral":       "mixtral-8x7b-32768",
-    "groq:qwen-32b":      "qwen-qwq-32b",
+GROQ_MODELS: dict[str, str] = {
+    "groq:llama3-70b":   "llama3-70b-8192",
+    "groq:llama3-8b":    "llama3-8b-8192",
+    "groq:llama3.3-70b": "llama-3.3-70b-versatile",
+    "groq:deepseek-r1":  "deepseek-r1-distill-llama-70b",
+    "groq:gemma2-9b":    "gemma2-9b-it",
+    "groq:mixtral":      "mixtral-8x7b-32768",
+    "groq:qwen-32b":     "qwen-qwq-32b",
+}
+
+# ── Modelos NVIDIA NIM ─────────────────────────────────────────────────────────
+NIM_MODELS: dict[str, str] = {
+    "nim:llama3.1-405b":  "meta/llama-3.1-405b-instruct",
+    "nim:llama3.1-70b":   "meta/llama-3.1-70b-instruct",
+    "nim:llama3.1-8b":    "meta/llama-3.1-8b-instruct",
+    "nim:llama3.3-70b":   "meta/llama-3.3-70b-instruct",
+    "nim:deepseek-r1":    "deepseek-ai/deepseek-r1",
+    "nim:qwen2.5-72b":    "qwen/qwen2.5-72b-instruct",
+    "nim:mistral-nemo":   "mistralai/mistral-nemo-12b-instruct",
+    "nim:phi4":           "microsoft/phi-4-mini-instruct",
+    # Z.ai GLM
+    "nim:glm4.7":         "z-ai/glm4.7",
+    "nim:glm5.1":         "z-ai/glm5.1",
+    "nim:glm-5.2":        "z-ai/glm-5.2",
+    "nim:glm-5.3":        "z-ai/glm-5.3",
+    "nim:glm-5.3-flash":  "z-ai/glm-5.3-flash",
 }
 
 # Tabela unificada para --models
-MODELS = {**OPENROUTER_MODELS, **GROQ_MODELS}
+MODELS: dict[str, str] = {**OPENROUTER_MODELS, **GROQ_MODELS, **NIM_MODELS}
 
 # Modelo padrão
 DEFAULT_MODEL = "free-qwen"
 
-_GROQ_BASE_URL      = "https://api.groq.com/openai/v1"
+_GROQ_BASE_URL       = "https://api.groq.com/openai/v1"
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+_NIM_BASE_URL        = "https://integrate.api.nvidia.com/v1"
 
 
 def _resolve(model_str: str) -> tuple[str, str, str]:
     """
     Retorna (provider, base_url, model_name) a partir de um alias ou nome direto.
 
-    Regra:
-      - Alias no dicionário GROQ_MODELS   → provider=groq
-      - Alias começando com 'groq:'       → provider=groq  (nome direto)
-      - Qualquer outro                    → provider=openrouter
+    Regras de roteamento (em ordem de prioridade):
+      1. Alias exato em GROQ_MODELS ou NIM_MODELS → provedor correspondente
+      2. Prefixo 'groq:'                           → Groq
+      3. Prefixo 'nim:'                            → NVIDIA NIM
+      4. Qualquer outro                            → OpenRouter
     """
-    # Alias exato no dicionário Groq
+    # Alias exato em Groq
     if model_str in GROQ_MODELS:
         return "groq", _GROQ_BASE_URL, GROQ_MODELS[model_str]
+
+    # Alias exato em NIM
+    if model_str in NIM_MODELS:
+        return "nim", _NIM_BASE_URL, NIM_MODELS[model_str]
 
     # Prefixo explícito groq:<modelo>
     if model_str.startswith("groq:"):
         raw = model_str[len("groq:"):]
-        # Verifica se é um sub-alias
-        full_key = f"groq:{raw}"
-        resolved = GROQ_MODELS.get(full_key, raw)
+        resolved = GROQ_MODELS.get(f"groq:{raw}", raw)
         return "groq", _GROQ_BASE_URL, resolved
 
-    # OpenRouter — alias ou nome direto
+    # Prefixo explícito nim:<modelo>
+    if model_str.startswith("nim:"):
+        raw = model_str[len("nim:"):]
+        resolved = NIM_MODELS.get(f"nim:{raw}", raw)
+        return "nim", _NIM_BASE_URL, resolved
+
+    # OpenRouter — alias ou nome direto (ex: "openai/gpt-4o")
     resolved = OPENROUTER_MODELS.get(model_str, model_str)
     return "openrouter", _OPENROUTER_BASE_URL, resolved
 
 
 class LLMClient:
     """
-    Wrapper unificado para OpenRouter e Groq.
+    Wrapper unificado para OpenRouter, Groq e NVIDIA NIM.
 
     Exemplos de uso:
-        LLMClient()                        # padrão (OpenRouter qwen free)
-        LLMClient("gpt-4o-mini")           # alias OpenRouter
-        LLMClient("openai/gpt-4o")         # nome direto OpenRouter
-        LLMClient("groq:llama3-70b")       # alias Groq
-        LLMClient("groq:llama-3.3-70b-versatile")  # nome direto Groq
+        LLMClient()                              # padrão (OpenRouter qwen free)
+        LLMClient("gpt-4o-mini")                 # alias OpenRouter
+        LLMClient("openai/gpt-4o")               # nome direto OpenRouter
+        LLMClient("groq:llama3-70b")             # alias Groq
+        LLMClient("groq:llama-3.3-70b-versatile") # nome direto Groq
+        LLMClient("nim:llama3.1-70b")            # alias NVIDIA NIM
+        LLMClient("nim:meta/llama-3.1-70b-instruct") # nome direto NIM
     """
 
     def __init__(self, model: str | None = None, delay: int = 0):
@@ -103,28 +134,26 @@ class LLMClient:
         self.provider = provider
         self.delay = delay
 
-        if provider == "groq":
-            api_key = os.environ.get("GROQ_API_KEY")
-            if not api_key:
-                raise EnvironmentError(
-                    "Variável GROQ_API_KEY não encontrada. "
-                    "Adicione GROQ_API_KEY=<sua_chave> no arquivo .env."
-                )
-        else:
-            api_key = os.environ.get("OPENROUTER_API_KEY")
-            if not api_key:
-                raise EnvironmentError(
-                    "Variável OPENROUTER_API_KEY não encontrada. "
-                    "Copie .env.example para .env e preencha sua chave."
-                )
+        _ENV_KEYS = {
+            "groq":        "GROQ_API_KEY",
+            "nim":         "NVIDIA_API_KEY",
+            "openrouter":  "OPENROUTER_API_KEY",
+        }
+        env_var = _ENV_KEYS[provider]
+        api_key = os.environ.get(env_var)
+        if not api_key:
+            raise EnvironmentError(
+                f"Variável {env_var} não encontrada. "
+                f"Adicione {env_var}=<sua_chave> no arquivo .env."
+            )
 
         self._client = OpenAI(base_url=base_url, api_key=api_key, max_retries=0)
 
     # Configuração de retry para rate-limit (429) e erros transitórios (502/503)
-    _MAX_RETRIES    = 6
-    _INITIAL_WAIT_S = 5
-    _MAX_WAIT_S     = 60
-    _RETRYABLE_CODES = {429, 502, 503}
+    _MAX_RETRIES     = 6
+    _INITIAL_WAIT_S  = 5
+    _MAX_WAIT_S      = 60
+    _RETRYABLE_CODES = {429, 502, 503, 504}
 
     def chat(self, system: str, user: str) -> str:
         """
@@ -179,7 +208,6 @@ class LLMClient:
                 time.sleep(wait)
                 wait = min(wait * 2, self._MAX_WAIT_S)
 
-        # Esgotou todas as tentativas
         raise last_exc  # type: ignore[misc]
 
     def __repr__(self) -> str:
