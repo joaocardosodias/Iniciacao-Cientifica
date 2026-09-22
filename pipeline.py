@@ -32,7 +32,6 @@ from src.sanitizer import Sanitizer
 from src.planner import Planner
 from src.prompt_maker import PromptMaker
 from src.coder import Coder
-from src.coder_rust import CoderRust
 from src.assembler_harness import AssemblerHarness
 from src.assembler import Assembler
 from src.fixer import Fixer
@@ -106,7 +105,13 @@ def run(
     # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
     log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
-    coder = CoderRust(llm) if lang == "rust" else Coder(llm)
+    coder = Coder(llm)
+    if lang == "rust":
+        try:
+            from src.coder_rust import CoderRust
+            coder = CoderRust(llm)
+        except ImportError:
+            log.warning("coder_rust não disponível — usando Coder C")
 
     def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
         i, module = args
