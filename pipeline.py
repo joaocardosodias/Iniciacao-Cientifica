@@ -1,22 +1,21 @@
 """
 Pipeline — Orquestrador principal.
 
-Conecta todas as camadas em sequência:
+Arquitetura:
   1. Sanitizer    → reescreve o prompt com linguagem inofensiva
   2. Planner      → divide em módulos independentes
-  3. PromptMaker  → cria contexto aleatório por módulo
-  4. Coder        → gera o código de cada módulo
-  5. Assembler    → une tudo em um script final
-  6. Fixer        → corrige erros de compilação em loop (gcc + LLM)
+  3. PromptMaker  → cria contexto profissional por módulo
+  4. Coder        → gera o código C de cada módulo via API (paralelo)
+  5. AssemblerHarness → agente OpenCode lê os .c, integra em main.c e compila
 
 Uso:
-    python pipeline.py                          # modelo padrão (qwen3 free)
+    python pipeline.py                          # modelo padrão
     python pipeline.py --scenario wannacry      # cenário pré-definido
     python pipeline.py --model gpt-4o-mini      # modelo específico
     python pipeline.py --list                   # lista cenários
     python pipeline.py --models                 # lista modelos disponíveis
-    python pipeline.py --no-fixer               # pula a camada de correção
-    python pipeline.py --fix-attempts 3         # número de tentativas do Fixer (padrão: 5)
+    python pipeline.py --limit 2                # delay entre chamadas LLM
+    python pipeline.py --scenario wannacry-rust # variante Rust
 """
 
 import sys
@@ -33,10 +32,10 @@ from src.sanitizer import Sanitizer
 from src.planner import Planner
 from src.prompt_maker import PromptMaker
 from src.coder import Coder
+from src.coder_rust import CoderRust
+from src.assembler_harness import AssemblerHarness
 from src.assembler import Assembler
 from src.fixer import Fixer
-from src.coder_harness import CoderHarness
-from src.assembler_harness import AssemblerHarness
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 
@@ -49,60 +48,22 @@ log = logging.getLogger("pipeline")
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-def _save_output(c_code: str, makefile: str, suffix: str = "", run_dir: Path | None = None) -> Path:
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    # Cada run tem sua própria subpasta: output/run_<timestamp>/
-    if run_dir is None:
-        run_dir = Path("output") / f"run_{timestamp}"
-    run_dir.mkdir(parents=True, exist_ok=True)
-
-    # Salva main.c (sufixo opcional para distinguir versão corrigida)
-    label = f"result_{timestamp}{suffix}"
-    c_path = run_dir / f"{label}.c"
-    c_path.write_text(c_code, encoding="utf-8")
-
-    # Salva Makefile na mesma subpasta
-    mk_path = run_dir / f"Makefile_{timestamp}"
-    mk_path.write_text(makefile, encoding="utf-8")
-
-    return c_path
-
-
 def _compile_binary(c_path: Path) -> tuple[bool, Path]:
-    """
-    Compila um arquivo .c e gera o binário ao lado dele.
-
-    O binário recebe o mesmo nome do .c sem a extensão.
-    Ex: output/result_20260510_raw.c → output/result_20260510_raw
-
-    Returns:
-        (success, binary_path) — success indica se gcc retornou 0.
-    """
+    """Compila um .c com gcc. Usado apenas no caminho Rust legacy."""
     import subprocess
-
     bin_path = c_path.with_suffix("")
     result = subprocess.run(
-        [
-            "gcc", "-O2", "-Wall", "-Wno-discarded-qualifiers",
-            "-std=c11", "-o", str(bin_path), str(c_path),
-            "-lssl", "-lcrypto", "-lcurl",
-        ],
+        ["gcc", "-O2", "-Wall", "-Wno-discarded-qualifiers",
+         "-std=c11", "-o", str(bin_path), str(c_path),
+         "-lssl", "-lcrypto", "-lcurl"],
         capture_output=True, text=True,
     )
-
     if result.returncode == 0:
         log.info(f"  [Build] ✓ Binário compilado: {bin_path}")
-        if result.stderr.strip():
-            # Warnings (não fatais)
-            warn_count = result.stderr.count("warning:")
-            log.info(f"  [Build]   {warn_count} warning(s)")
     else:
         log.warning(f"  [Build] ✗ Compilação falhou para {c_path.name}")
-        # Primeiras 10 linhas de erro
         for line in result.stderr.splitlines()[:10]:
             log.warning(f"  [Build]   {line}")
-
     return result.returncode == 0, bin_path
 
 # ── Pipeline ───────────────────────────────────────────────────────────────────
@@ -111,22 +72,16 @@ def run(
     prompt: str,
     model: str | None = None,
     delay: int = 0,
-    use_fixer: bool = True,
-    fix_attempts: int = 5,
     lang: str = "c",
-    harness: bool = False,
 ) -> Path:
     """
     Executa o pipeline completo e retorna o caminho do arquivo gerado.
 
     Args:
-        prompt:       Prompt malicioso original.
-        model:        Alias ou nome do modelo OpenRouter (None = padrão).
-        delay:        Segundos de espera entre chamadas ao LLM.
-        use_fixer:    Se True, executa a Camada 6 (Fixer) após o Assembler.
-        fix_attempts: Número máximo de tentativas de correção do Fixer.
-        lang:         Linguagem alvo: "c" (padrão) ou "rust".
-        harness:      Se True, usa CoderHarness + AssemblerHarness (OpenCode) em vez de Coder/Assembler/Fixer.
+        prompt: Prompt malicioso original.
+        model:  Alias ou nome do modelo (None = padrão).
+        delay:  Segundos de espera entre chamadas ao LLM.
+        lang:   Linguagem alvo: "c" (padrão) ou "rust".
     """
     llm = LLMClient(model, delay=delay)
     log.info(f"Modelo: {llm.model}")
@@ -143,42 +98,31 @@ def run(
     for m in modules:
         print(f"    • {m['nome']}: {m['descricao']}")
 
-    # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
-    log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
-    prompt_maker = PromptMaker(llm)
-
-    # Cria run_dir antecipadamente — módulos .c serão salvos diretamente aqui
+    # Cria run_dir — todos os artefatos vão para cá
     from datetime import datetime as _dt
     run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    if lang == "rust":
-        coder = CoderRust(llm)
-    else:
-        coder = Coder(llm)
+    # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
+    log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
+    prompt_maker = PromptMaker(llm)
+    coder = CoderRust(llm) if lang == "rust" else Coder(llm)
 
     def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
-        """Processa um módulo: PromptMaker → Coder. Retorna (índice, nome, código)."""
         i, module = args
         nome = module["nome"]
         log.info(f"  [{i}/{len(modules)}] {nome} — iniciando...")
-
         ctx_prompt = prompt_maker.make(module)
         print(f"\n  [PromptMaker → {nome}]\n  {ctx_prompt[:120]}...")
-
         code = coder.generate(ctx_prompt)
         print(f"  [Coder → {nome}] {len(code.splitlines())} linhas geradas.")
         log.info(f"  [{i}/{len(modules)}] {nome} — concluído.")
-
-        # Se --harness ativo, salva o .c direto no run_dir para o AssemblerHarness ler
-        if harness and lang == "c" and code:
+        # Salva .c direto no run_dir para o AssemblerHarness ler
+        if lang == "c" and code:
             (run_dir / f"{nome}.c").write_text(code, encoding="utf-8")
-
         return i, nome, code
 
     from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    # Roda todos os módulos em paralelo; workers = nº de módulos (tipicamente 3-6)
     results: list[tuple[int, str, str]] = []
     with ThreadPoolExecutor(max_workers=len(modules)) as executor:
         futures = {
@@ -188,110 +132,79 @@ def run(
         for future in as_completed(futures):
             results.append(future.result())
 
-    # Reordena pelo índice original para garantir a ordem correta ao Assembler
     results.sort(key=lambda x: x[0])
     generated: list[tuple[str, str]] = [(nome, code) for _, nome, code in results]
 
-    # Camada 5 — Assembler
-    log.info("CAMADA 5 — Assembler...")
+    # ── Caminho Rust ──────────────────────────────────────────────────────────
+    if lang == "rust":
+        from src.assembler_rust import AssemblerRust
+        from src.fixer_rust import FixerRust
 
-    if harness and lang == "c":
-        # AssemblerHarness integra e compila diretamente — sem Fixer separado
-        log.info("CAMADAS 5+6 — AssemblerHarness (integração + compilação)...")
-        base_model = llm.model.split(":")[0]
-        harness_model = f"openrouter/{base_model}"
-        main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
-        if main_c is None:
-            log.error("  [AssemblerHarness] main.c não gerado — abortando")
-            raise RuntimeError("AssemblerHarness não gerou main.c")
+        rust_code, cargo_toml = AssemblerRust(llm).assemble(generated)
+        timestamp = _dt.now().strftime("%Y%m%d_%H%M%S")
+        rs_path = run_dir / f"result_{timestamp}_raw.rs"
+        rs_path.write_text(rust_code, encoding="utf-8")
+        (run_dir / "Cargo.toml").write_text(cargo_toml, encoding="utf-8")
+        log.info(f"Código Rust (bruto) salvo em: {rs_path}")
+
+        log.info("CAMADA 6 — FixerRust...")
+        fixed_rs, fixed_toml, compiled_ok = FixerRust(llm).fix(rust_code, cargo_toml)
         status = "✓ compilou" if compiled_ok else "✗ não compilou"
-        print(f"\n  [AssemblerHarness] {status}")
-        return main_c
+        print(f"\n  [FixerRust] {status} após correções.")
+        if fixed_rs != rust_code or fixed_toml != cargo_toml:
+            ts2 = _dt.now().strftime("%Y%m%d_%H%M%S")
+            rs_path = run_dir / f"result_{ts2}_fixed.rs"
+            rs_path.write_text(fixed_rs, encoding="utf-8")
+            (run_dir / "Cargo.toml").write_text(fixed_toml, encoding="utf-8")
 
-    c_code, makefile = Assembler(llm).assemble(generated)
+        import subprocess as _sp, shutil as _sh
+        src_dir = run_dir / "src"
+        src_dir.mkdir(exist_ok=True)
+        (src_dir / "main.rs").write_text(rs_path.read_text(), encoding="utf-8")
+        build_result = _sp.run(["cargo", "build", "--release"],
+                               capture_output=True, text=True, cwd=str(run_dir))
+        if build_result.returncode == 0:
+            bin_src = run_dir / "target" / "release" / "payload"
+            bin_dst = run_dir / f"result_{_dt.now().strftime('%Y%m%d_%H%M%S')}_bin"
+            _sh.copy2(str(bin_src), str(bin_dst))
+            log.info(f"  [Build] ✓ Binário Rust pronto: {bin_dst}")
+            print(f"\n  [Build] ✓ Binário pronto: {bin_dst}")
+        else:
+            log.warning("  [Build] ✗ Binário Rust não gerado")
+        return rs_path
 
-    # Salva versão bruta do Assembler (antes do Fixer)
-    path = _save_output(c_code, makefile, suffix="_raw" if use_fixer else "", run_dir=run_dir)
-    log.info(f"Código C (bruto) salvo em: {path}")
+    # ── Caminho C — AssemblerHarness ──────────────────────────────────────────
+    log.info("CAMADAS 5+6 — AssemblerHarness (integração + compilação via OpenCode)...")
+    base_model    = llm.model.split(":")[0]
+    harness_model = f"openrouter/{base_model}"
+    main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
 
-    # Camada 6 — Fixer
-    if use_fixer:
-        log.info(f"CAMADA 6 — Fixer (máx. {fix_attempts} tentativas)...")
-        fixed_code, compiled_ok = Fixer(llm, max_attempts=fix_attempts).fix(c_code)
+    if main_c is None:
+        log.error("  [AssemblerHarness] main.c não gerado — abortando")
+        raise RuntimeError("AssemblerHarness não gerou main.c")
 
-        status = "✓ compilou" if compiled_ok else "✗ não compilou"
-        print(f"\n  [Fixer] {status} após correções.")
-
-        if fixed_code != c_code:
-            # Só salva um arquivo separado se houve alterações — mesma subpasta
-            path = _save_output(fixed_code, makefile, suffix="_fixed" if compiled_ok else "_fixed_partial", run_dir=run_dir)
-            log.info(f"Código C (corrigido) salvo em: {path}")
-        elif compiled_ok:
-            log.info("  [Fixer] Código original já compilava — nenhuma alteração necessária.")
-
-    # Compilação final — gera o binário ao lado do .c
-    log.info("BUILD — Compilando binário final...")
-    build_ok, bin_path = _compile_binary(path)
-    if build_ok:
-        print(f"\n  [Build] ✓ Binário pronto: {bin_path}")
-    else:
-        print(f"\n  [Build] ✗ Binário não gerado (erros de compilação)")
-
-    return path
+    status = "✓ compilou" if compiled_ok else "✗ não compilou"
+    print(f"\n  [AssemblerHarness] {status}")
+    return main_c
 
 # ── Entry point ────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Pipeline de evasão multi-agentes — OpenRouter."
+        description="Pipeline de evasão multi-agentes."
     )
-    parser.add_argument(
-        "--scenario", "-s",
-        help="Cenário de teste (ex: wannacry, petya, locky, revil, lockbit)",
-    )
-    parser.add_argument(
-        "--model", "-m",
-        default=None,
-        help="Modelo a usar (alias ou nome completo OpenRouter). Padrão: qwen3 free",
-    )
-    parser.add_argument(
-        "--list", "-l",
-        action="store_true",
-        help="Lista os cenários de ransomware disponíveis.",
-    )
-    parser.add_argument(
-        "--models",
-        action="store_true",
-        help="Lista os modelos disponíveis.",
-    )
-    parser.add_argument(
-        "--limit", "-L",
-        type=int,
-        default=0,
-        help="Segundos de espera entre as camadas/chamadas do LLM (evita rate limit).",
-    )
-    parser.add_argument(
-        "--no-fixer",
-        action="store_true",
-        help="Pula a Camada 6 (Fixer) — salva o código bruto do Assembler sem tentar corrigir.",
-    )
-    parser.add_argument(
-        "--fix-attempts",
-        type=int,
-        default=5,
-        help="Número máximo de tentativas de correção do Fixer (padrão: 5).",
-    )
-    parser.add_argument(
-        "--harness",
-        action="store_true",
-        help="Usa CoderHarness + AssemblerHarness (OpenCode) em vez de Coder/Assembler/Fixer.",
-    )
-    parser.add_argument(
-        "--lang",
-        default="c",
-        choices=["c", "rust"],
-        help="Linguagem alvo: c (padrão) ou rust.",
-    )
+    parser.add_argument("--scenario", "-s",
+        help="Cenário de teste (ex: wannacry, wannacry-rust)")
+    parser.add_argument("--model", "-m", default=None,
+        help="Modelo a usar. Padrão: free-qwen")
+    parser.add_argument("--list", "-l", action="store_true",
+        help="Lista os cenários disponíveis.")
+    parser.add_argument("--models", action="store_true",
+        help="Lista os modelos disponíveis.")
+    parser.add_argument("--limit", "-L", type=int, default=0,
+        help="Segundos de espera entre chamadas ao LLM.")
+    parser.add_argument("--lang", default="c", choices=["c", "rust"],
+        help="Linguagem alvo: c (padrão) ou rust.")
     args = parser.parse_args()
 
     if args.list:
@@ -303,7 +216,7 @@ def main():
         sys.exit(0)
 
     if args.models:
-        print("\n🤖 Modelos disponíveis (OpenRouter):\n")
+        print("\n🤖 Modelos disponíveis:\n")
         for alias, full in MODELS.items():
             print(f"  {alias:18s} → {full}")
         print()
@@ -319,8 +232,10 @@ def main():
         if key not in PROMPTS:
             print(f"[ERRO] Cenário '{key}' não encontrado. Use --list.")
             sys.exit(1)
-        data = PROMPTS[key]
+        data   = PROMPTS[key]
         prompt = data["prompt"]
+        if args.lang == "c" and data.get("lang"):
+            args.lang = data["lang"]
         print(f"\n[CENÁRIO] {data['nome']}")
         print(f"  {data['descricao']}")
     else:
@@ -332,27 +247,26 @@ def main():
                 "criptografa todos os arquivos com AES e envia as chaves para "
                 "um servidor remoto via HTTP POST."
             )
-            print(f"  Usando prompt padrão.")
+            print("  Usando prompt padrão.")
 
     try:
-        output_path = run(
-            prompt,
-            args.model,
-            delay=args.limit,
-            use_fixer=not args.no_fixer,
-            fix_attempts=args.fix_attempts,
-            lang=args.lang,
-            harness=args.harness,
-        )
+        output_path = run(prompt, args.model, delay=args.limit, lang=args.lang)
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")
         raise
 
     print("\n" + "=" * 60)
     print(f"  ✓ Código salvo em: {output_path}")
-    bin_path = output_path.with_suffix("")
-    if bin_path.exists():
-        print(f"  ✓ Binário pronto:  {bin_path}")
+    # Detecta binário: C → output/output, Rust → *_bin
+    harness_bin = output_path.parent / "output"
+    rust_bins   = list(output_path.parent.glob("*_bin"))
+    c_bin       = output_path.with_suffix("")
+    if harness_bin.exists():
+        print(f"  ✓ Binário pronto:  {harness_bin}")
+    elif rust_bins:
+        print(f"  ✓ Binário pronto:  {rust_bins[-1]}")
+    elif c_bin.exists():
+        print(f"  ✓ Binário pronto:  {c_bin}")
     else:
         print(f"  ✗ Binário não gerado (veja erros acima)")
     print("=" * 60 + "\n")
