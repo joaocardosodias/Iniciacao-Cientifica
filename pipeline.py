@@ -147,19 +147,12 @@ def run(
     log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
 
-    # Cria run_dir antecipadamente para o harness poder organizar módulos dentro dele
+    # Cria run_dir antecipadamente — módulos .c serão salvos diretamente aqui
     from datetime import datetime as _dt
     run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
-    run_dir.mkdir(parents=True, exist_ok=True)  # garante existência antes das threads paralelas
-    if harness and lang == "c":
-        (run_dir / "modules").mkdir(exist_ok=True)  # garante que modules/ existe antes das threads
+    run_dir.mkdir(parents=True, exist_ok=True)
 
-    if harness and lang == "c":
-        # Formata model ID para o opencode: remove sufixos de versão ":"
-        base_model = llm.model.split(":")[0]
-        harness_model = f"openrouter/{base_model}"
-        coder = CoderHarness(model=harness_model, run_dir=run_dir)
-    elif lang == "rust":
+    if lang == "rust":
         coder = CoderRust(llm)
     else:
         coder = Coder(llm)
@@ -173,9 +166,14 @@ def run(
         ctx_prompt = prompt_maker.make(module)
         print(f"\n  [PromptMaker → {nome}]\n  {ctx_prompt[:120]}...")
 
-        code = coder.generate(ctx_prompt, module_name=nome) if harness else coder.generate(ctx_prompt)
+        code = coder.generate(ctx_prompt)
         print(f"  [Coder → {nome}] {len(code.splitlines())} linhas geradas.")
         log.info(f"  [{i}/{len(modules)}] {nome} — concluído.")
+
+        # Se --harness ativo, salva o .c direto no run_dir para o AssemblerHarness ler
+        if harness and lang == "c" and code:
+            (run_dir / f"{nome}.c").write_text(code, encoding="utf-8")
+
         return i, nome, code
 
     from concurrent.futures import ThreadPoolExecutor, as_completed

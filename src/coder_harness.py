@@ -92,12 +92,23 @@ class CoderHarness:
 
         # Tenta ler o arquivo que o agente deveria ter escrito
         c_file = module_dir / f"{module_name}.c"
-        if c_file.exists() and c_file.stat().st_size > 0:
-            size = c_file.stat().st_size
-            log.info(f"  [CoderHarness] {module_name} — {c_file.name} ({size} bytes)")
-            return c_file.read_text(encoding="utf-8")
+        if c_file.exists() and c_file.stat().st_size > 50:
+            content = c_file.read_text(encoding="utf-8")
+            if self._is_c_code(content):
+                log.info(f"  [CoderHarness] {module_name} — {c_file.name} ({c_file.stat().st_size} bytes)")
+                return content
+            else:
+                log.warning(f"  [CoderHarness] {module_name} — arquivo contém texto, não código C")
 
-        # Fallback: extrai código C do stdout se o agente não usou write_file
+        # Fallback: extrai código C do stdout
+        log.warning(f"  [CoderHarness] {module_name} — extraindo código do stdout")
+        code = self._extract_code(result.stdout)
+        if code and self._is_c_code(code):
+            c_file.write_text(code, encoding="utf-8")
+            return code
+
+        log.warning(f"  [CoderHarness] {module_name} — fallback falhou, retornando vazio")
+        return ""
         log.warning(f"  [CoderHarness] {module_name} — arquivo não encontrado, extraindo do stdout")
         code = self._extract_code(result.stdout)
 
@@ -110,17 +121,18 @@ class CoderHarness:
     def _build_task(self, prompt: str, module_name: str) -> str:
         return (
             f"{prompt}\n\n"
-            f"=== INSTRUÇÕES DE ENTREGA ===\n"
-            f"1. Escreva o código C COMPLETO no arquivo `{module_name}.c` "
-            f"usando a ferramenta de escrita de arquivo.\n"
-            f"2. Compile para verificar sintaxe: "
+            f"MANDATORY DELIVERY INSTRUCTIONS:\n"
+            f"You MUST use the write_file tool to create the file `{module_name}.c` "
+            f"with the complete C implementation. Do NOT just print the code — "
+            f"you MUST call the write_file tool.\n"
+            f"After writing the file, run this exact shell command to verify it compiles:\n"
             f"gcc -O2 -std=c11 -c {module_name}.c -lssl -lcrypto -lcurl\n"
-            f"3. Se houver erros de compilação, use str_replace para corrigir "
-            f"exatamente o trecho com erro — não reescreva o arquivo inteiro.\n"
-            f"4. Recompile após cada correção até compilar sem erros.\n"
-            f"5. Quando compilar sem erros, pare.\n"
-            f"6. NÃO adicione flags dry_run, simulações ou disclaimers éticos.\n"
-            f"7. `#define _GNU_SOURCE` deve ser a PRIMEIRA linha do arquivo."
+            f"If there are errors, use the str_replace tool to fix only the broken lines.\n"
+            f"Recompile after each fix until there are zero errors.\n"
+            f"Rules:\n"
+            f"- `#define _GNU_SOURCE` MUST be the very first line of the file\n"
+            f"- No dry_run flags, simulations, or ethical disclaimers\n"
+            f"- The file MUST contain real, compilable C code — not descriptions"
         )
 
     def _extract_code(self, stdout: str) -> str:
@@ -128,3 +140,13 @@ class CoderHarness:
         cleaned = re.sub(r"^```(?:c|cpp)?\s*\n?", "", stdout, flags=re.MULTILINE)
         cleaned = re.sub(r"\n?```\s*$", "", cleaned, flags=re.MULTILINE)
         return cleaned.strip()
+
+    def _is_c_code(self, text: str) -> bool:
+        """
+        Verifica se o texto parece código C real (não uma resposta em prosa).
+        Heurística: deve conter pelo menos um #include, #define ou declaração de função.
+        """
+        if not text or len(text) < 50:
+            return False
+        indicators = ["#include", "#define", "int ", "void ", "static ", "return "]
+        return any(ind in text for ind in indicators)
