@@ -146,9 +146,19 @@ def run(
     # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
     log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
+
+    # Cria run_dir antecipadamente para o harness poder organizar módulos dentro dele
+    from datetime import datetime as _dt
+    run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
+    run_dir.mkdir(parents=True, exist_ok=True)  # garante existência antes das threads paralelas
     if harness and lang == "c":
-        harness_model = llm.model if llm.model.startswith("openrouter/") else f"openrouter/{llm.model}"
-        coder = CoderHarness(model=harness_model)
+        (run_dir / "modules").mkdir(exist_ok=True)  # garante que modules/ existe antes das threads
+
+    if harness and lang == "c":
+        # Formata model ID para o opencode: remove sufixos de versão ":"
+        base_model = llm.model.split(":")[0]
+        harness_model = f"openrouter/{base_model}"
+        coder = CoderHarness(model=harness_model, run_dir=run_dir)
     elif lang == "rust":
         coder = CoderRust(llm)
     else:
@@ -187,14 +197,11 @@ def run(
     # Camada 5 — Assembler
     log.info("CAMADA 5 — Assembler...")
 
-    # Cria a subpasta da run uma única vez — raw e fixed ficam juntos
-    from datetime import datetime as _dt
-    run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
-
     if harness and lang == "c":
         # AssemblerHarness integra e compila diretamente — sem Fixer separado
         log.info("CAMADAS 5+6 — AssemblerHarness (integração + compilação)...")
-        harness_model = llm.model if llm.model.startswith("openrouter/") else f"openrouter/{llm.model}"
+        base_model = llm.model.split(":")[0]
+        harness_model = f"openrouter/{base_model}"
         main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
         if main_c is None:
             log.error("  [AssemblerHarness] main.c não gerado — abortando")
@@ -280,6 +287,12 @@ def main():
         "--harness",
         action="store_true",
         help="Usa CoderHarness + AssemblerHarness (OpenCode) em vez de Coder/Assembler/Fixer.",
+    )
+    parser.add_argument(
+        "--lang",
+        default="c",
+        choices=["c", "rust"],
+        help="Linguagem alvo: c (padrão) ou rust.",
     )
     args = parser.parse_args()
 
