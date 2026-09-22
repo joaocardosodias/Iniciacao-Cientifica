@@ -35,6 +35,8 @@ from src.prompt_maker import PromptMaker
 from src.coder import Coder
 from src.assembler import Assembler
 from src.fixer import Fixer
+from src.coder_harness import CoderHarness
+from src.assembler_harness import AssemblerHarness
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 
@@ -111,6 +113,8 @@ def run(
     delay: int = 0,
     use_fixer: bool = True,
     fix_attempts: int = 5,
+    lang: str = "c",
+    harness: bool = False,
 ) -> Path:
     """
     Executa o pipeline completo e retorna o caminho do arquivo gerado.
@@ -121,6 +125,8 @@ def run(
         delay:        Segundos de espera entre chamadas ao LLM.
         use_fixer:    Se True, executa a Camada 6 (Fixer) após o Assembler.
         fix_attempts: Número máximo de tentativas de correção do Fixer.
+        lang:         Linguagem alvo: "c" (padrão) ou "rust".
+        harness:      Se True, usa CoderHarness + AssemblerHarness (OpenCode) em vez de Coder/Assembler/Fixer.
     """
     llm = LLMClient(model, delay=delay)
     log.info(f"Modelo: {llm.model}")
@@ -140,7 +146,13 @@ def run(
     # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
     log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
-    coder        = Coder(llm)
+    if harness and lang == "c":
+        harness_model = llm.model if llm.model.startswith("openrouter/") else f"openrouter/{llm.model}"
+        coder = CoderHarness(model=harness_model)
+    elif lang == "rust":
+        coder = CoderRust(llm)
+    else:
+        coder = Coder(llm)
 
     def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
         """Processa um módulo: PromptMaker → Coder. Retorna (índice, nome, código)."""
@@ -151,7 +163,7 @@ def run(
         ctx_prompt = prompt_maker.make(module)
         print(f"\n  [PromptMaker → {nome}]\n  {ctx_prompt[:120]}...")
 
-        code = coder.generate(ctx_prompt)
+        code = coder.generate(ctx_prompt, module_name=nome) if harness else coder.generate(ctx_prompt)
         print(f"  [Coder → {nome}] {len(code.splitlines())} linhas geradas.")
         log.info(f"  [{i}/{len(modules)}] {nome} — concluído.")
         return i, nome, code
@@ -174,11 +186,24 @@ def run(
 
     # Camada 5 — Assembler
     log.info("CAMADA 5 — Assembler...")
-    c_code, makefile = Assembler(llm).assemble(generated)
 
     # Cria a subpasta da run uma única vez — raw e fixed ficam juntos
     from datetime import datetime as _dt
     run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
+
+    if harness and lang == "c":
+        # AssemblerHarness integra e compila diretamente — sem Fixer separado
+        log.info("CAMADAS 5+6 — AssemblerHarness (integração + compilação)...")
+        harness_model = llm.model if llm.model.startswith("openrouter/") else f"openrouter/{llm.model}"
+        main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        if main_c is None:
+            log.error("  [AssemblerHarness] main.c não gerado — abortando")
+            raise RuntimeError("AssemblerHarness não gerou main.c")
+        status = "✓ compilou" if compiled_ok else "✗ não compilou"
+        print(f"\n  [AssemblerHarness] {status}")
+        return main_c
+
+    c_code, makefile = Assembler(llm).assemble(generated)
 
     # Salva versão bruta do Assembler (antes do Fixer)
     path = _save_output(c_code, makefile, suffix="_raw" if use_fixer else "", run_dir=run_dir)
@@ -251,6 +276,11 @@ def main():
         default=5,
         help="Número máximo de tentativas de correção do Fixer (padrão: 5).",
     )
+    parser.add_argument(
+        "--harness",
+        action="store_true",
+        help="Usa CoderHarness + AssemblerHarness (OpenCode) em vez de Coder/Assembler/Fixer.",
+    )
     args = parser.parse_args()
 
     if args.list:
@@ -300,6 +330,8 @@ def main():
             delay=args.limit,
             use_fixer=not args.no_fixer,
             fix_attempts=args.fix_attempts,
+            lang=args.lang,
+            harness=args.harness,
         )
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")
