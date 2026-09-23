@@ -14,6 +14,7 @@ from src.prompt_maker import PromptMaker
 from src.coder import Coder
 from src.assembler_harness import AssemblerHarness
 from src.trace import RunTrace, safe_name, sha256_text, utc_now
+from src.interrupts import RunGuard, RunInterrupted
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +49,9 @@ def run(
     )
     if scenario:
         trace.record_stage("input", {"scenario": scenario})
+
+    guard = RunGuard(trace)
+    guard.install()
 
     try:
         llm = LLMClient(
@@ -168,13 +172,18 @@ def run(
         trace.emit("layer.started", layer="modules", count=len(modules))
         modules_started = time.perf_counter()
         results: list[tuple[int, str, str]] = []
-        with ThreadPoolExecutor(max_workers=len(modules)) as executor:
+        executor = ThreadPoolExecutor(max_workers=len(modules))
+        executor_clean = False
+        try:
             futures = {
                 executor.submit(_process_module, (index, module)): index
                 for index, module in enumerate(modules, 1)
             }
             for future in as_completed(futures):
                 results.append(future.result())
+            executor_clean = True
+        finally:
+            executor.shutdown(wait=executor_clean, cancel_futures=not executor_clean)
 
         results.sort(key=lambda item: item[0])
         generated = [(name, code) for _, name, code in results]
@@ -222,10 +231,16 @@ def run(
         )
         print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
         return main_c
+    except (RunInterrupted, KeyboardInterrupt) as interrupted:
+        trace.finalize(status="interrupted", error=interrupted)
+        log.error(f"Execucao interrompida. Artefatos preservados em: {trace.run_dir}")
+        raise
     except Exception as error:
         trace.finalize(status="failed", error=error)
         log.error(f"Execucao registrada em: {trace.run_dir}")
         raise
+    finally:
+        guard.restore()
 
 def main():
     parser = argparse.ArgumentParser(

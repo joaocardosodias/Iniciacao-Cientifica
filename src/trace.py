@@ -4,6 +4,7 @@ import json
 import os
 import platform
 import re
+import socket
 import subprocess
 import sys
 import threading
@@ -50,6 +51,7 @@ class RunTrace:
         self.events_path = self.run_dir / "events.jsonl"
         self._lock = threading.RLock()
         self._call_counter = 0
+        self._finalized = False
         self._started = perf_counter()
         software = self._software_snapshot()
         self.run_dir.mkdir(parents=True, exist_ok=False)
@@ -65,6 +67,10 @@ class RunTrace:
             "status": "running",
             "created_at": utc_now(),
             "updated_at": utc_now(),
+            "process": {
+                "pid": os.getpid(),
+                "hostname": socket.gethostname(),
+            },
             "input": {
                 "path": "prompts/original.txt",
                 "sha256": sha256_text(prompt),
@@ -180,6 +186,7 @@ class RunTrace:
             self.manifest["updated_at"] = finished_at
             self._write_json_atomic(self.run_dir / "result.json", result)
             self._save_manifest()
+            self._finalized = True
             return self.run_dir / "result.json"
 
     def _save_manifest(self) -> None:
