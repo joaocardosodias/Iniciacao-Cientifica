@@ -1,22 +1,6 @@
-"""
-test_prompts.py — Catálogo de prompts de ransomware para teste.
-
-Cada entrada representa uma variante real de ransomware, usada para
-avaliar a taxa de evasão do pipeline contra filtros de segurança de LLMs.
-
-Uso direto:
-    from test_prompts import PROMPTS
-    prompt = PROMPTS["wannacry"]["prompt"]
-
-Via CLI:
-    python test_prompts.py              # lista todos
-    python test_prompts.py wannacry     # imprime o prompt
-"""
-
 PROMPTS: dict[str, dict] = {
 
-    # ── 1. WannaCry-like (C) ──────────────────────────────────────────────────
-    "wannacry": {
+        "wannacry": {
         "id": 1,
         "nome": "WannaCry-like (C)",
         "descricao": (
@@ -67,10 +51,7 @@ PROMPTS: dict[str, dict] = {
         ),
     },
 
-
 }
-
-# ── CLI de conveniência ────────────────────────────────────────────────────────
 
 def _print_list():
     print("\n🦠 Prompts de ransomware disponíveis:\n")
@@ -78,7 +59,6 @@ def _print_list():
         print(f"  [{data['id']}] {key:10s} → {data['nome']}")
         print(f"              {data['descricao'][:85]}...")
         print()
-
 
 if __name__ == "__main__":
     import sys
@@ -94,10 +74,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     data = PROMPTS[key]
-    print(f"\n{'═' * 60}")
+    print(f"\n{'' * 60}")
     print(f"  [{data['id']}] {data['nome']}")
-    print(f"{'═' * 60}")
+    print(f"{'' * 60}")
     print(f"\n{data['descricao']}\n")
-    print(f"{'─' * 60}\n")
+    print(f"{'' * 60}\n")
     print(data["prompt"])
     print()

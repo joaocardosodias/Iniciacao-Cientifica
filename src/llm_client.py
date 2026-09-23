@@ -1,28 +1,8 @@
-"""
-LLM Client — wrapper para OpenRouter, Groq e NVIDIA NIM.
-
-Todos os três expõem interface compatível com OpenAI, permitindo trocar de
-provedor e modelo apenas com a string passada via --model, sem alterar
-o código das camadas do pipeline.
-
-Prefixos de roteamento:
-  groq:<modelo>     → Groq API    (ex: groq:llama-3.3-70b-versatile)
-  nim:<modelo>      → NVIDIA NIM  (ex: nim:meta/llama-3.1-405b-instruct)
-  <qualquer outro>  → OpenRouter  (ex: openai/gpt-4o-mini)
-
-Documentação:
-  OpenRouter  → https://openrouter.ai/docs
-  Groq        → https://console.groq.com/docs
-  NVIDIA NIM  → https://docs.api.nvidia.com/nim/reference/llm-apis
-"""
-
 import os
 import time
 import logging
 from openai import OpenAI, RateLimitError, APIStatusError
 
-
-# ── Modelos OpenRouter ─────────────────────────────────────────────────────────
 OPENROUTER_MODELS: dict[str, str] = {
     # Gratuitos
     "free-qwen":      "qwen/qwen3-30b-a3b:free",
@@ -41,7 +21,6 @@ OPENROUTER_MODELS: dict[str, str] = {
     "deepseek-v3":   "deepseek/deepseek-chat-v3-0324",
 }
 
-# ── Modelos Groq ───────────────────────────────────────────────────────────────
 GROQ_MODELS: dict[str, str] = {
     "groq:llama3-70b":   "llama3-70b-8192",
     "groq:llama3-8b":    "llama3-8b-8192",
@@ -52,7 +31,6 @@ GROQ_MODELS: dict[str, str] = {
     "groq:qwen-32b":     "qwen-qwq-32b",
 }
 
-# ── Modelos NVIDIA NIM ─────────────────────────────────────────────────────────
 NIM_MODELS: dict[str, str] = {
     "nim:llama3.1-405b":  "meta/llama-3.1-405b-instruct",
     "nim:llama3.1-70b":   "meta/llama-3.1-70b-instruct",
@@ -79,7 +57,6 @@ DEFAULT_MODEL = "free-qwen"
 _GROQ_BASE_URL       = "https://api.groq.com/openai/v1"
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 _NIM_BASE_URL        = "https://integrate.api.nvidia.com/v1"
-
 
 def _resolve(model_str: str) -> tuple[str, str, str]:
     """
@@ -114,7 +91,6 @@ def _resolve(model_str: str) -> tuple[str, str, str]:
     # OpenRouter — alias ou nome direto (ex: "openai/gpt-4o")
     resolved = OPENROUTER_MODELS.get(model_str, model_str)
     return "openrouter", _OPENROUTER_BASE_URL, resolved
-
 
 class LLMClient:
     """

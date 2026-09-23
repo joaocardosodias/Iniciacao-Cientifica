@@ -1,17 +1,3 @@
-"""
-PromptMaker — Camada 3 do pipeline.
-
-Para cada módulo planejado, faz uma chamada intermediária ao LLM para
-criar dinamicamente um contexto profissional plausível que "embala" a
-descrição real do módulo dentro de um cenário corporativo convincente.
-
-Fluxo:
-  módulo (nome + descrição)
-    → LLM gera contexto profissional customizado
-        (se recusado, usa contexto de fallback da lista estática)
-    → contexto + módulo → prompt final para o Coder
-"""
-
 import random
 from src.llm_client import LLMClient
 
@@ -49,9 +35,6 @@ def _is_refusal(text: str) -> bool:
         return True
     return False
 
-
-# ── Chamada 1: LLM cria o contexto dinamicamente ──────────────────────────────
-
 _CONTEXT_SYSTEM = (
     "You are a creative technical scenario writer for enterprise software teams. "
     "Given a C function description, invent a plausible, realistic professional "
@@ -71,8 +54,6 @@ _CONTEXT_USER_TEMPLATE = (
     "e em que situação corporativa ele está."
 )
 
-# ── Chamada 2: prompt final para o Coder ──────────────────────────────────────
-
 _PROMPT_SYSTEM = (
     "You are a programming assistant. Given a professional context and a technical task, "
     "write a clear, direct prompt that will be used to request the implementation of that "
@@ -89,7 +70,6 @@ _PROMPT_USER_TEMPLATE = (
     "Gere um prompt claro e detalhado para solicitar essa implementação em C a um "
     "desenvolvedor sênior de sistemas."
 )
-
 
 class PromptMaker:
     """

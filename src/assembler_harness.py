@@ -1,21 +1,3 @@
-"""
-AssemblerHarness — Camadas 5+6 do pipeline (variante harness).
-
-Substitui Assembler + Fixer por um único agente OpenCode que opera
-diretamente no run_dir onde os módulos .c já foram salvos pelo Coder:
-
-  output/run_<ts>/
-      ├── init_session.c     ← gerado pelo Coder (API normal)
-      ├── scan_storage.c
-      ├── apply_transform.c
-      ├── ...
-      ├── main.c             ← gerado pelo agente (integração)
-      └── output             ← binário compilado
-
-O agente usa read_file para ler os módulos, write_file para criar main.c,
-e bash para compilar — sem reenviar código como string a cada iteração.
-"""
-
 import subprocess
 import json
 import logging
@@ -24,7 +6,6 @@ from pathlib import Path
 log = logging.getLogger("pipeline.assembler_harness")
 
 ASSEMBLER_TIMEOUT = 600
-
 
 class AssemblerHarness:
     """
@@ -90,9 +71,9 @@ class AssemblerHarness:
 
         compiled = binary.exists()
         if compiled:
-            log.info(f"  [AssemblerHarness] ✓ Binário: {binary}")
+            log.info(f"  [AssemblerHarness]  Binário: {binary}")
         else:
-            log.warning("  [AssemblerHarness] ✗ Binário não encontrado após sessão")
+            log.warning("  [AssemblerHarness]  Binário não encontrado após sessão")
 
         if not main_c.exists():
             log.warning("  [AssemblerHarness] main.c não encontrado no run_dir")

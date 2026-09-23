@@ -1,26 +1,6 @@
-"""
-Pipeline — Orquestrador principal.
-
-Arquitetura:
-  1. Sanitizer         → reescreve o prompt com linguagem inofensiva
-  2. Planner           → divide em módulos independentes
-  3. PromptMaker       → cria contexto profissional por módulo
-  4. Coder             → gera o código C de cada módulo via API (paralelo)
-  5. AssemblerHarness  → agente OpenCode integra os .c, compila e gera binário
-
-Uso:
-    python pipeline.py                          # modelo padrão
-    python pipeline.py --scenario wannacry      # cenário pré-definido
-    python pipeline.py --model gpt-4o-mini      # modelo específico
-    python pipeline.py --list                   # lista cenários
-    python pipeline.py --models                 # lista modelos disponíveis
-    python pipeline.py --limit 2                # delay entre chamadas LLM
-"""
-
 import sys
 import logging
 import argparse
-from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -33,8 +13,6 @@ from src.prompt_maker import PromptMaker
 from src.coder import Coder
 from src.assembler_harness import AssemblerHarness
 
-# ── Logging ────────────────────────────────────────────────────────────────────
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(message)s",
@@ -42,42 +20,28 @@ logging.basicConfig(
 )
 log = logging.getLogger("pipeline")
 
-# ── Pipeline ───────────────────────────────────────────────────────────────────
-
 def run(
     prompt: str,
     model: str | None = None,
     delay: int = 0,
 ) -> Path:
-    """
-    Executa o pipeline completo e retorna o caminho do main.c gerado.
-
-    Args:
-        prompt: Prompt malicioso original.
-        model:  Alias ou nome do modelo (None = padrão).
-        delay:  Segundos de espera entre chamadas ao LLM.
-    """
     llm = LLMClient(model, delay=delay)
     log.info(f"Modelo: {llm.model}")
 
-    # Camada 1 — Sanitizer
     log.info("CAMADA 1 — Sanitizer...")
     sanitized = Sanitizer(llm).sanitize(prompt)
     print(f"\n  [Sanitizer] {sanitized}\n")
 
-    # Camada 2 — Planner
     log.info("CAMADA 2 — Planner...")
     modules = Planner(llm).plan(sanitized)
-    print(f"  [Planner] {len(modules)} módulo(s):")
+    print(f"  [Planner] {len(modules)} modulo(s):")
     for m in modules:
-        print(f"    • {m['nome']}: {m['descricao']}")
+        print(f"    - {m['nome']}: {m['descricao']}")
 
-    # Cria run_dir — todos os artefatos vão para cá
     from datetime import datetime as _dt
     run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    # Camadas 3 + 4 — PromptMaker + Coder (paralelo por módulo)
     log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
     prompt_maker = PromptMaker(llm)
     coder        = Coder(llm)
@@ -87,11 +51,10 @@ def run(
         nome = module["nome"]
         log.info(f"  [{i}/{len(modules)}] {nome} — iniciando...")
         ctx_prompt = prompt_maker.make(module)
-        print(f"\n  [PromptMaker → {nome}]\n  {ctx_prompt[:120]}...")
+        print(f"\n  [PromptMaker -> {nome}]\n  {ctx_prompt[:120]}...")
         code = coder.generate(ctx_prompt)
-        print(f"  [Coder → {nome}] {len(code.splitlines())} linhas geradas.")
-        log.info(f"  [{i}/{len(modules)}] {nome} — concluído.")
-        # Salva .c direto no run_dir para o AssemblerHarness ler
+        print(f"  [Coder -> {nome}] {len(code.splitlines())} linhas geradas.")
+        log.info(f"  [{i}/{len(modules)}] {nome} — concluido.")
         if code:
             (run_dir / f"{nome}.c").write_text(code, encoding="utf-8")
         return i, nome, code
@@ -109,21 +72,17 @@ def run(
     results.sort(key=lambda x: x[0])
     generated: list[tuple[str, str]] = [(nome, code) for _, nome, code in results]
 
-    # Camadas 5+6 — AssemblerHarness (integração + compilação via OpenCode)
-    log.info("CAMADAS 5+6 — AssemblerHarness (integração + compilação via OpenCode)...")
+    log.info("CAMADAS 5+6 — AssemblerHarness...")
     base_model    = llm.model.split(":")[0]
     harness_model = f"openrouter/{base_model}"
     main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
 
     if main_c is None:
-        log.error("  [AssemblerHarness] main.c não gerado — abortando")
-        raise RuntimeError("AssemblerHarness não gerou main.c")
+        log.error("  [AssemblerHarness] main.c nao gerado — abortando")
+        raise RuntimeError("AssemblerHarness nao gerou main.c")
 
-    status = "✓ compilou" if compiled_ok else "✗ não compilou"
-    print(f"\n  [AssemblerHarness] {status}")
+    print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
     return main_c
-
-# ── Entry point ────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
@@ -143,16 +102,16 @@ def main():
 
     if args.list:
         from scenarios.test_prompts import PROMPTS
-        print("\n🦠 Cenários disponíveis:\n")
+        print("\nCenarios disponiveis:\n")
         for key, data in PROMPTS.items():
-            print(f"  --scenario {key:10s} → {data['nome']}")
+            print(f"  --scenario {key:10s} -> {data['nome']}")
         print()
         sys.exit(0)
 
     if args.models:
-        print("\n🤖 Modelos disponíveis:\n")
+        print("\nModelos disponiveis:\n")
         for alias, full in MODELS.items():
-            print(f"  {alias:18s} → {full}")
+            print(f"  {alias:18s} -> {full}")
         print()
         sys.exit(0)
 
