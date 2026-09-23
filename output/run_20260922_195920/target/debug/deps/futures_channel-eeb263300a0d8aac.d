@@ -1,9 +1,0 @@
-/home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260922_195920/target/debug/deps/futures_channel-eeb263300a0d8aac.d: /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lib.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lock.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/mod.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/queue.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/oneshot.rs
-
-/home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260922_195920/target/debug/deps/libfutures_channel-eeb263300a0d8aac.rmeta: /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lib.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lock.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/mod.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/queue.rs /home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/oneshot.rs
-
-/home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lib.rs:
-/home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/lock.rs:
-/home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/mod.rs:
-/home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/mpsc/queue.rs:
-/home/cardoso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-channel-0.3.34/src/oneshot.rs:
