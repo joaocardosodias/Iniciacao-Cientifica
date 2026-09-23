@@ -1,0 +1,62 @@
+Como parte do módulo de inventário de dados para migração para nuvem corporativa, preciso implementar uma função em C que realize uma varredura recursiva de diretórios específicos e retorne uma lista de caminhos absolutos de arquivos com extensões predefinidas. A função deve se chamar `scan_storage` e ter a seguinte assinatura:
+
+```c
+char** scan_storage(const char* base_paths[], int num_paths, size_t* out_count);
+```
+
+### Requisitos funcionais:
+
+1. **Diretórios a varrer**: a função deve receber um array de caminhos base (strings) e seu tamanho. Os caminhos fixos esperados no contexto atual são:
+   - `~/Documentos_Teste`
+   - `~/Documentos`
+   - `~/Downloads`
+   - `~/Imagens`
+   - `/mnt`
+   
+   Porém, a função deve ser genérica o suficiente para aceitar qualquer conjunto de caminhos.
+
+2. **Varredura recursiva**: para cada caminho base, percorrer recursivamente toda a árvore de diretórios usando `opendir()` e `readdir()`. Ignorar as entradas `.` e `..`. Para subdiretórios, fazer chamada recursiva.
+
+3. **Filtro por extensão**: selecionar apenas arquivos (não diretórios) cujo nome termine com uma das seguintes extensões (case-insensitive):
+   - `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`
+   - `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, `.rar`
+
+4. **Lista de saída**: retornar um array alocado dinamicamente de strings (ponteiros para `char`), cada uma contendo o caminho absoluto e canônico do arquivo encontrado (ex.: `/home/usuario/Documentos/relatorio.docx`). O número de elementos deve ser armazenado em `out_count`.
+
+5. **Tratamento de erros**:
+   - Se `opendir()` falhar (permissão negada, diretório inexistente, etc.), ignorar silenciosamente aquele caminho e continuar com os demais.
+   - Se `malloc`/`realloc` falharem, a função deve liberar toda a memória já alocada e retornar `NULL` com `*out_count = 0`.
+   - Para determinar se é diretório ou arquivo, utilize `struct stat` e a chamada `stat()` (ou `lstat()`, evitando seguir links simbólicos para fora das árvores).
+
+6. **Forma dos caminhos**:
+   - Expandir `~` para o diretório home do usuário atual usando `getenv("HOME")`.
+   - Construir caminhos absolutos concatenando o diretório base com o nome da entrada. Evitar barras duplicadas.
+   - Para cada arquivo encontrado, armazenar o caminho tal qual obtido (já absoluto).
+
+7. **Performance e segurança**:
+   - A função deve ser reentrante e não usar variáveis globais ou `static`.
+   - Evitar recursão profunda excessiva; usar profundidade máxima arbitrariamente alta (ex.: 4096) ou realocar pilha conforme necessário, mas o importante é não estourar a pilha. Pode-se usar alocação dinâmica para a lista de resultados durante a varredura (e.g., vetor dinâmico).
+   - Não seguir links simbólicos para fora dos diretórios especificados.
+
+### Exemplo de uso esperado:
+
+```c
+const char* dirs[] = {
+    "~/Documentos_Teste", "~/Documentos", "~/Downloads", "~/Imagens", "/mnt"
+};
+size_t count;
+char** files = scan_storage(dirs, 5, &count);
+for (size_t i = 0; i < count; ++i) {
+    printf("%s\n", files[i]);
+    free(files[i]);
+}
+free(files);
+```
+
+### Observações finais:
+
+- O código deve ser compilável com C99 ou C11, sem dependências externas.
+- Inclua comentários sucintos explicando decisões de implementação, especialmente nas partes de recursão e alocação dinâmica.
+- Se possível, forneça um pequeno programa de teste (`main`) demonstrando o uso da função com os caminhos acima.
+
+Implemente a função `scan_storage` de acordo com as especificações acima.
