@@ -15,6 +15,8 @@ from time import perf_counter
 from typing import Any
 
 from src.events import EventLog, utc_now
+from src.provenance import collect as collect_provenance
+from src.provenance import find_repo_root
 
 
 def sha256_bytes(content: bytes) -> str:
@@ -65,6 +67,17 @@ def serialize_error(error: BaseException | None) -> dict[str, str] | None:
     return {"type": type(error).__name__, "message": str(error)}
 
 
+def _output_exclude(output_root: Path, repo: Path | None) -> list[Path]:
+    if repo is None:
+        return []
+    candidate = (Path.cwd() / output_root).resolve()
+    try:
+        candidate.relative_to(repo.resolve())
+    except ValueError:
+        return []
+    return [candidate]
+
+
 class RunTrace:
     schema_version = "1.0"
 
@@ -84,16 +97,21 @@ class RunTrace:
         self.modules_dir = self.run_dir / "modules"
         self.assembly_dir = self.run_dir / "assembly"
         self.events_path = self.run_dir / "events.jsonl"
+        self.provenance_dir = self.run_dir / "provenance"
         self._lock = threading.RLock()
         self._call_counter = 0
         self._finalized = False
         self._started = perf_counter()
-        software = self._software_snapshot()
         self.run_dir.mkdir(parents=True, exist_ok=False)
         self.calls_dir.mkdir()
         self.prompts_dir.mkdir()
         self.modules_dir.mkdir()
         self.assembly_dir.mkdir()
+        self.provenance_dir.mkdir()
+        repo = find_repo_root(Path.cwd())
+        git = collect_provenance(repo, self.provenance_dir,
+                                 exclude_dirs=_output_exclude(output_root, repo))
+        software = self._software_snapshot(git)
         self.events = EventLog(self.events_path, self.run_id)
         self.write_text("prompts/original.txt", prompt)
         self.manifest = {
@@ -231,7 +249,7 @@ class RunTrace:
     def _artifact_index(self) -> list[dict[str, Any]]:
         return artifact_index(self.run_dir)
 
-    def _software_snapshot(self) -> dict[str, Any]:
+    def _software_snapshot(self, git: dict[str, Any]) -> dict[str, Any]:
         packages = {}
         for name in ["openai", "python-dotenv", "flask", "cryptography", "requests", "openpyxl", "python-docx", "reportlab", "faker"]:
             try:
@@ -243,7 +261,7 @@ class RunTrace:
             "platform": platform.platform(),
             "executable": sys.executable,
             "working_directory": str(Path.cwd()),
-            "git": self._git_snapshot(),
+            "git": git,
             "commands": {
                 "gcc": self._command_version(["gcc", "--version"]),
                 "opencode": self._command_version(["opencode", "--version"]),
@@ -263,26 +281,6 @@ class RunTrace:
             return result.stdout.strip().splitlines()[0]
         except (OSError, subprocess.SubprocessError, IndexError):
             return None
-
-    def _git_snapshot(self) -> dict[str, Any]:
-        try:
-            commit = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-                check=True,
-            ).stdout.strip()
-            status = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-                check=True,
-            ).stdout
-            return {"commit": commit, "dirty": bool(status.strip())}
-        except (OSError, subprocess.SubprocessError):
-            return {"commit": None, "dirty": None}
 
     def _write_json_atomic(self, path: Path, content: Any) -> None:
         write_json_atomic(path, content)
