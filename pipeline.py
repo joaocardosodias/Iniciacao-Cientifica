@@ -115,10 +115,7 @@ def run(
                 )
                 trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
                 print(f"\n  [PromptMaker -> {name}]\n  {contextualized_prompt[:120]}...")
-                code = coder.generate(
-                    contextualized_prompt,
-                    stage=f"module.{index:02d}.{safe_name(name)}.coder",
-                )
+                code = coder.generate(contextualized_prompt)
                 trace.write_text(module_relative / "response.c", code)
                 if code:
                     trace.write_text(f"modules/{safe_name(name)}.c", code)
