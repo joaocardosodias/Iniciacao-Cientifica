@@ -37,28 +37,33 @@ class AssemblerHarness:
         """
         run_dir.mkdir(parents=True, exist_ok=True)
 
-        # Garante que todos os módulos têm arquivo .c no run_dir
+        modules_dir = run_dir / "modules"
+        modules_dir.mkdir(exist_ok=True)
+
+        assembly_dir = run_dir / "assembly"
+        assembly_dir.mkdir(exist_ok=True)
+
+        # Garante que todos os módulos têm arquivo .c em modules/
         module_files: list[Path] = []
         for name, code in modules:
-            f = run_dir / f"{name}.c"
+            f = modules_dir / f"{name}.c"
             if not f.exists() or f.stat().st_size == 0:
-                # Fallback: escreve o código recebido como string
                 f.write_text(code, encoding="utf-8")
                 log.info(f"  [AssemblerHarness] {name}.c escrito via fallback ({len(code.splitlines())} linhas)")
             else:
                 log.info(f"  [AssemblerHarness] {name}.c já existe ({f.stat().st_size} bytes)")
-            module_files.append(f)
+            # Copia para assembly/ para o agente ter tudo no mesmo diretório de trabalho
+            (assembly_dir / f"{name}.c").write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
+            module_files.append(assembly_dir / f"{name}.c")
 
-        # Config temporário sem MCPs para não criar lixo fora do run_dir
-        tmp_cfg = run_dir / "opencode.json"
+        # Config temporário sem MCPs dentro do assembly/
+        tmp_cfg = assembly_dir / "opencode.json"
         tmp_cfg.write_text(json.dumps({"$schema": "https://opencode.ai/config.json", "mcp": {}}))
 
         task = self._build_task(module_files)
-        assembly_dir = run_dir / "assembly"
-        assembly_dir.mkdir(parents=True, exist_ok=True)
         (assembly_dir / "task.txt").write_text(task, encoding="utf-8")
 
-        log.info(f"  [AssemblerHarness] Sessão opencode em {run_dir}")
+        log.info(f"  [AssemblerHarness] Sessão opencode em {assembly_dir}")
         started_at = utc_now()
         started = time.perf_counter()
         try:
@@ -67,7 +72,7 @@ class AssemblerHarness:
                 capture_output=True,
                 text=True,
                 timeout=ASSEMBLER_TIMEOUT,
-                cwd=str(run_dir),
+                cwd=str(assembly_dir),
                 env={**__import__("os").environ, "OPENCODE_CONFIG": str(tmp_cfg)},
             )
         except subprocess.TimeoutExpired as error:
@@ -110,8 +115,8 @@ class AssemblerHarness:
             log.warning(f"  [AssemblerHarness] opencode retornou {result.returncode}")
             log.debug(f"  stderr: {result.stderr[:500]}")
 
-        main_c = run_dir / "main.c"
-        binary  = run_dir / "output"
+        main_c = assembly_dir / "main.c"
+        binary  = assembly_dir / "output"
 
         compiled = binary.exists()
         (assembly_dir / "result.json").write_text(

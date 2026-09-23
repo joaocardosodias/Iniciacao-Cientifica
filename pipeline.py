@@ -121,7 +121,7 @@ def run(
                 )
                 trace.write_text(module_relative / "response.c", code)
                 if code:
-                    trace.write_text(f"{safe_name(name)}.c", code)
+                    trace.write_text(f"modules/{safe_name(name)}.c", code)
                 trace.write_json(module_relative / "module.json", {
                     "index": index,
                     "name": name,
@@ -131,7 +131,7 @@ def run(
                     "finished_at": utc_now(),
                     "duration_seconds": round(time.perf_counter() - module_started, 6),
                     "prompt_path": (module_relative / "prompt.txt").as_posix(),
-                    "code_path": f"{safe_name(name)}.c",
+                    "code_path": f"modules/{safe_name(name)}.c",
                     "code_sha256": sha256_text(code),
                     "code_lines": len(code.splitlines()),
                 })
@@ -287,7 +287,7 @@ def main():
 
     print("\n" + "=" * 60)
     print(f"  Codigo salvo em: {output_path}")
-    binary = output_path.parent / "output"
+    binary = output_path.parent / "output"        # assembly/output
     if binary.exists():
         print(f"  Binario pronto:  {binary}")
     else:
