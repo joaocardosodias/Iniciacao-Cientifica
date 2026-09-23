@@ -13,9 +13,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+from src.events import EventLog, utc_now
 
 
 def sha256_bytes(content: bytes) -> str:
@@ -49,6 +47,7 @@ class RunTrace:
         self.prompts_dir = self.run_dir / "prompts"
         self.modules_dir = self.run_dir / "modules"
         self.assembly_dir = self.run_dir / "assembly"
+        self.events_path = self.run_dir / "events.jsonl"
         self._lock = threading.RLock()
         self._call_counter = 0
         self._started = perf_counter()
@@ -58,6 +57,7 @@ class RunTrace:
         self.prompts_dir.mkdir()
         self.modules_dir.mkdir()
         self.assembly_dir.mkdir()
+        self.events = EventLog(self.events_path, self.run_id)
         self.write_text("prompts/original.txt", prompt)
         self.manifest = {
             "schema_version": self.schema_version,
@@ -81,6 +81,15 @@ class RunTrace:
             "stages": {},
         }
         self._write_json_atomic(self.run_dir / "manifest.json", self.manifest)
+        self.emit(
+            "run.started",
+            model=requested_model,
+            delay_seconds=delay,
+            output_root=str(output_root),
+        )
+
+    def emit(self, event: str, **data: Any) -> None:
+        self.events.emit(event, **data)
 
     def configure_model(self, resolved: str, provider: str) -> None:
         with self._lock:
@@ -149,6 +158,12 @@ class RunTrace:
     ) -> Path:
         with self._lock:
             finished_at = utc_now()
+            self.emit(
+                "run.finished",
+                status=status,
+                compiled=compiled,
+                error=self._serialize_error(error),
+            )
             result = {
                 "schema_version": self.schema_version,
                 "run_id": self.run_id,

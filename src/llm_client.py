@@ -171,6 +171,10 @@ class LLMClient:
         started = time.perf_counter()
         attempts: list[dict[str, Any]] = []
 
+        if self.trace is not None:
+            self.trace.emit("llm.call.started", stage=stage, model=self.model,
+                            provider=self.provider, delay_seconds=self.delay)
+
         if self.delay > 0:
             time.sleep(self.delay)
 
@@ -231,6 +235,10 @@ class LLMClient:
                     "error_type": type(e).__name__,
                     "message": str(e),
                 })
+                if self.trace is not None:
+                    self.trace.emit("llm.call.retry", stage=stage, attempt=attempt,
+                                    max_retries=self._MAX_RETRIES, wait_seconds=wait,
+                                    reason="rate_limit", message=str(e))
                 log.warning(
                     f"[Retry {attempt}/{self._MAX_RETRIES}] Rate limit (429). "
                     f"Aguardando {wait}s..."
@@ -245,6 +253,10 @@ class LLMClient:
                         "status_code": e.status_code,
                         "message": str(e),
                     })
+                    if self.trace is not None:
+                        self.trace.emit("llm.call.retry", stage=stage, attempt=attempt,
+                                        max_retries=self._MAX_RETRIES, wait_seconds=wait,
+                                        reason=f"http_{e.status_code}", message=str(e))
                     log.warning(
                         f"[Retry {attempt}/{self._MAX_RETRIES}] HTTP {e.status_code}. "
                         f"Aguardando {wait}s..."
@@ -347,6 +359,19 @@ class LLMClient:
             },
         }
         self.trace.record_llm_call(stage, system, user, output, metadata)
+        self.trace.emit(
+            "llm.call.finished",
+            stage=stage,
+            status=status,
+            provider=self.provider,
+            model=self.model,
+            response_model=metadata["response_model"],
+            response_id=metadata["response_id"],
+            duration_seconds=metadata["duration_seconds"],
+            attempts=len(attempts),
+            usage=usage_data,
+            error=metadata["error"],
+        )
 
     def __repr__(self) -> str:
         return f"LLMClient(provider={self.provider!r}, model={self.model!r})"

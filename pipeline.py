@@ -63,27 +63,35 @@ def run(
         log.info(f"Modelo: {llm.model}")
 
         log.info("CAMADA 1 — Sanitizer...")
+        trace.emit("layer.started", layer="sanitizer")
         stage_started = time.perf_counter()
         sanitized = Sanitizer(llm).sanitize(prompt)
         trace.write_text("prompts/sanitized.txt", sanitized)
+        sanitizer_duration = round(time.perf_counter() - stage_started, 6)
         trace.record_stage("sanitizer", {
             "status": "completed",
             "output": "prompts/sanitized.txt",
             "sha256": sha256_text(sanitized),
-            "duration_seconds": round(time.perf_counter() - stage_started, 6),
+            "duration_seconds": sanitizer_duration,
         })
+        trace.emit("layer.finished", layer="sanitizer", status="completed",
+                   duration_seconds=sanitizer_duration)
         print(f"\n  [Sanitizer] {sanitized}\n")
 
         log.info("CAMADA 2 — Planner...")
+        trace.emit("layer.started", layer="planner")
         stage_started = time.perf_counter()
         modules = Planner(llm).plan(sanitized)
         trace.write_json("prompts/planner_response.json", modules)
+        planner_duration = round(time.perf_counter() - stage_started, 6)
         trace.record_stage("planner", {
             "status": "completed",
             "output": "prompts/planner_response.json",
             "module_count": len(modules),
-            "duration_seconds": round(time.perf_counter() - stage_started, 6),
+            "duration_seconds": planner_duration,
         })
+        trace.emit("layer.finished", layer="planner", status="completed",
+                   module_count=len(modules), duration_seconds=planner_duration)
         print(f"  [Planner] {len(modules)} modulo(s):")
         for module in modules:
             print(f"    - {module['nome']}: {module['descricao']}")
@@ -107,6 +115,8 @@ def run(
                 "status": "running",
                 "started_at": module_started_at,
             })
+            trace.emit("module.started", index=index, name=name,
+                       total=len(modules), module_dir=module_relative.as_posix())
             log.info(f"  [{index}/{len(modules)}] {name} — iniciando...")
             try:
                 contextualized_prompt = prompt_maker.make(
@@ -132,6 +142,9 @@ def run(
                     "code_sha256": sha256_text(code),
                     "code_lines": len(code.splitlines()),
                 })
+                trace.emit("module.finished", index=index, name=name,
+                           status="completed", code_lines=len(code.splitlines()),
+                           duration_seconds=round(time.perf_counter() - module_started, 6))
                 print(f"  [Coder -> {name}] {len(code.splitlines())} linhas geradas.")
                 log.info(f"  [{index}/{len(modules)}] {name} — concluido.")
                 return index, safe_name(name), code
@@ -146,9 +159,13 @@ def run(
                     "duration_seconds": round(time.perf_counter() - module_started, 6),
                     "error": {"type": type(error).__name__, "message": str(error)},
                 })
+                trace.emit("module.failed", index=index, name=name, status="failed",
+                           duration_seconds=round(time.perf_counter() - module_started, 6),
+                           error={"type": type(error).__name__, "message": str(error)})
                 raise
 
         from concurrent.futures import ThreadPoolExecutor, as_completed
+        trace.emit("layer.started", layer="modules", count=len(modules))
         modules_started = time.perf_counter()
         results: list[tuple[int, str, str]] = []
         with ThreadPoolExecutor(max_workers=len(modules)) as executor:
@@ -161,24 +178,33 @@ def run(
 
         results.sort(key=lambda item: item[0])
         generated = [(name, code) for _, name, code in results]
+        modules_duration = round(time.perf_counter() - modules_started, 6)
         trace.record_stage("modules", {
             "status": "completed",
             "count": len(generated),
-            "duration_seconds": round(time.perf_counter() - modules_started, 6),
+            "duration_seconds": modules_duration,
         })
+        trace.emit("layer.finished", layer="modules", status="completed",
+                   count=len(generated), duration_seconds=modules_duration)
 
         log.info("CAMADAS 5+6 — AssemblerHarness...")
+        trace.emit("assembly.started", model=llm.model)
         assembly_started = time.perf_counter()
         base_model = llm.model.split(":")[0]
         harness_model = f"openrouter/{base_model}"
         main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        assembly_duration = round(time.perf_counter() - assembly_started, 6)
         trace.record_stage("assembler_harness", {
             "status": "completed" if compiled_ok else "compile_failed",
             "model": harness_model,
             "main_c": "main.c" if main_c else None,
             "binary": "output" if compiled_ok else None,
-            "duration_seconds": round(time.perf_counter() - assembly_started, 6),
+            "duration_seconds": assembly_duration,
         })
+        trace.emit("assembly.finished",
+                   status="completed" if compiled_ok else "compile_failed",
+                   main_c=bool(main_c), compiled=compiled_ok,
+                   duration_seconds=assembly_duration)
 
         if main_c is None:
             log.error("  [AssemblerHarness] main.c nao gerado — abortando")
