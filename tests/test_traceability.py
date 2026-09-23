@@ -122,7 +122,7 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(manifest["status"], "completed")
             self.assertEqual(manifest["stages"]["planner"]["module_count"], 2)
             self.assertEqual(result["module_count"], 2)
-            self.assertTrue((run_dir / "module_one.c").exists())
+            self.assertTrue((run_dir / "modules/module_one.c").exists())
             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
             self.assertTrue((run_dir / "assembly/task.txt").exists())
             self.assertTrue((run_dir / "output").exists())

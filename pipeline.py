@@ -13,8 +13,9 @@ from src.planner import Planner
 from src.prompt_maker import PromptMaker
 from src.coder import Coder
 from src.assembler_harness import AssemblerHarness
-from src.trace import RunTrace, safe_name, sha256_text, utc_now
+from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
+from src.recovery import recover_stale_runs
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +41,7 @@ def run(
         "seed": seed,
         "max_tokens": max_tokens,
     }
+    recover_stale_runs(output_root)
     trace = RunTrace(
         prompt=prompt,
         requested_model=model,
@@ -69,7 +71,11 @@ def run(
         log.info("CAMADA 1 — Sanitizer...")
         trace.emit("layer.started", layer="sanitizer")
         stage_started = time.perf_counter()
-        sanitized = Sanitizer(llm).sanitize(prompt)
+        try:
+            sanitized = Sanitizer(llm).sanitize(prompt)
+        except Exception as error:
+            trace.emit("layer.failed", layer="sanitizer", error=serialize_error(error))
+            raise
         trace.write_text("prompts/sanitized.txt", sanitized)
         sanitizer_duration = round(time.perf_counter() - stage_started, 6)
         trace.record_stage("sanitizer", {
@@ -85,7 +91,11 @@ def run(
         log.info("CAMADA 2 — Planner...")
         trace.emit("layer.started", layer="planner")
         stage_started = time.perf_counter()
-        modules = Planner(llm).plan(sanitized)
+        try:
+            modules = Planner(llm).plan(sanitized)
+        except Exception as error:
+            trace.emit("layer.failed", layer="planner", error=serialize_error(error))
+            raise
         trace.write_json("prompts/planner_response.json", modules)
         planner_duration = round(time.perf_counter() - stage_started, 6)
         trace.record_stage("planner", {
@@ -201,7 +211,12 @@ def run(
         assembly_started = time.perf_counter()
         base_model = llm.model.split(":")[0]
         harness_model = f"openrouter/{base_model}"
-        main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        try:
+            main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        except Exception as error:
+            trace.emit("assembly.failed", model=harness_model, error=serialize_error(error),
+                       duration_seconds=round(time.perf_counter() - assembly_started, 6))
+            raise
         assembly_duration = round(time.perf_counter() - assembly_started, 6)
         trace.record_stage("assembler_harness", {
             "status": "completed" if compiled_ok else "compile_failed",
@@ -216,6 +231,9 @@ def run(
                    duration_seconds=assembly_duration)
 
         if main_c is None:
+            trace.emit("assembly.failed", model=harness_model,
+                       error={"type": "RuntimeError", "message": "AssemblerHarness nao gerou main.c"},
+                       duration_seconds=assembly_duration)
             log.error("  [AssemblerHarness] main.c nao gerado — abortando")
             raise RuntimeError("AssemblerHarness nao gerou main.c")
 

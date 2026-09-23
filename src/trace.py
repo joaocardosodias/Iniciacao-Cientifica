@@ -30,6 +30,41 @@ def safe_name(value: str) -> str:
     return normalized or "unnamed"
 
 
+def write_json_atomic(path: Path, content: Any) -> None:
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    temporary.write_text(
+        json.dumps(content, indent=2, ensure_ascii=False, sort_keys=True),
+        encoding="utf-8",
+    )
+    os.replace(temporary, path)
+
+
+def artifact_index(run_dir: Path, excluded: set[str] | None = None) -> list[dict[str, Any]]:
+    skip = {"manifest.json", "result.json"}
+    if excluded:
+        skip |= excluded
+    artifacts = []
+    for path in sorted(run_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(run_dir).as_posix()
+        if relative in skip:
+            continue
+        content = path.read_bytes()
+        artifacts.append({
+            "path": relative,
+            "bytes": len(content),
+            "sha256": sha256_bytes(content),
+        })
+    return artifacts
+
+
+def serialize_error(error: BaseException | None) -> dict[str, str] | None:
+    if error is None:
+        return None
+    return {"type": type(error).__name__, "message": str(error)}
+
+
 class RunTrace:
     schema_version = "1.0"
 
@@ -194,21 +229,7 @@ class RunTrace:
         self._write_json_atomic(self.run_dir / "manifest.json", self.manifest)
 
     def _artifact_index(self) -> list[dict[str, Any]]:
-        artifacts = []
-        excluded = {"manifest.json", "result.json"}
-        for path in sorted(self.run_dir.rglob("*")):
-            if not path.is_file():
-                continue
-            relative = path.relative_to(self.run_dir).as_posix()
-            if relative in excluded:
-                continue
-            content = path.read_bytes()
-            artifacts.append({
-                "path": relative,
-                "bytes": len(content),
-                "sha256": sha256_bytes(content),
-            })
-        return artifacts
+        return artifact_index(self.run_dir)
 
     def _software_snapshot(self) -> dict[str, Any]:
         packages = {}
@@ -264,14 +285,7 @@ class RunTrace:
             return {"commit": None, "dirty": None}
 
     def _write_json_atomic(self, path: Path, content: Any) -> None:
-        temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
-        temporary.write_text(
-            json.dumps(content, indent=2, ensure_ascii=False, sort_keys=True),
-            encoding="utf-8",
-        )
-        os.replace(temporary, path)
+        write_json_atomic(path, content)
 
     def _serialize_error(self, error: BaseException | None) -> dict[str, str] | None:
-        if error is None:
-            return None
-        return {"type": type(error).__name__, "message": str(error)}
+        return serialize_error(error)

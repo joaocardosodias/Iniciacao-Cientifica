@@ -1,5 +1,6 @@
 import os
 import time
+import uuid
 import logging
 from typing import Any
 from openai import OpenAI, RateLimitError, APIStatusError
@@ -170,10 +171,12 @@ class LLMClient:
         started_at = utc_now()
         started = time.perf_counter()
         attempts: list[dict[str, Any]] = []
+        call_id = uuid.uuid4().hex[:12]
 
         if self.trace is not None:
-            self.trace.emit("llm.call.started", stage=stage, model=self.model,
-                            provider=self.provider, delay_seconds=self.delay)
+            self.trace.emit("llm.call.started", call_id=call_id, stage=stage,
+                            model=self.model, provider=self.provider,
+                            delay_seconds=self.delay)
 
         if self.delay > 0:
             time.sleep(self.delay)
@@ -209,6 +212,7 @@ class LLMClient:
                         started_at,
                         started,
                         attempts,
+                        call_id,
                         response,
                     )
                     return ""
@@ -223,6 +227,7 @@ class LLMClient:
                     started_at,
                     started,
                     attempts,
+                    call_id,
                     response,
                 )
                 return output
@@ -236,9 +241,9 @@ class LLMClient:
                     "message": str(e),
                 })
                 if self.trace is not None:
-                    self.trace.emit("llm.call.retry", stage=stage, attempt=attempt,
-                                    max_retries=self._MAX_RETRIES, wait_seconds=wait,
-                                    reason="rate_limit", message=str(e))
+                    self.trace.emit("llm.call.retry", call_id=call_id, stage=stage,
+                                    attempt=attempt, max_retries=self._MAX_RETRIES,
+                                    wait_seconds=wait, reason="rate_limit", message=str(e))
                 log.warning(
                     f"[Retry {attempt}/{self._MAX_RETRIES}] Rate limit (429). "
                     f"Aguardando {wait}s..."
@@ -254,9 +259,9 @@ class LLMClient:
                         "message": str(e),
                     })
                     if self.trace is not None:
-                        self.trace.emit("llm.call.retry", stage=stage, attempt=attempt,
-                                        max_retries=self._MAX_RETRIES, wait_seconds=wait,
-                                        reason=f"http_{e.status_code}", message=str(e))
+                        self.trace.emit("llm.call.retry", call_id=call_id, stage=stage,
+                                        attempt=attempt, max_retries=self._MAX_RETRIES,
+                                        wait_seconds=wait, reason=f"http_{e.status_code}", message=str(e))
                     log.warning(
                         f"[Retry {attempt}/{self._MAX_RETRIES}] HTTP {e.status_code}. "
                         f"Aguardando {wait}s..."
@@ -278,6 +283,7 @@ class LLMClient:
                         started_at,
                         started,
                         attempts,
+                        call_id,
                         error=e,
                     )
                     raise
@@ -297,6 +303,7 @@ class LLMClient:
                     started_at,
                     started,
                     attempts,
+                    call_id,
                     error=e,
                 )
                 raise
@@ -314,6 +321,7 @@ class LLMClient:
             started_at,
             started,
             attempts,
+            call_id,
             error=last_exc,
         )
         raise last_exc  # type: ignore[misc]
@@ -328,6 +336,7 @@ class LLMClient:
         started_at: str,
         started: float,
         attempts: list[dict[str, Any]],
+        call_id: str = "",
         response: Any = None,
         error: BaseException | None = None,
     ) -> None:
@@ -342,6 +351,7 @@ class LLMClient:
                 "total_tokens": getattr(usage, "total_tokens", None),
             }
         metadata = {
+            "call_id": call_id,
             "status": status,
             "started_at": started_at,
             "finished_at": utc_now(),
@@ -361,6 +371,7 @@ class LLMClient:
         self.trace.record_llm_call(stage, system, user, output, metadata)
         self.trace.emit(
             "llm.call.finished",
+            call_id=call_id,
             stage=stage,
             status=status,
             provider=self.provider,
