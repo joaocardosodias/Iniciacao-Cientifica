@@ -1,0 +1,10 @@
+Preciso que você implemente uma função C com a seguinte assinatura: `int init_session_key(void);`. A função deve:
+
+1. Gerar 32 bytes aleatórios usando `RAND_bytes()` da OpenSSL para servir como chave mestra da sessão AES-256.
+2. Codificar esses 32 bytes em Base64 utilizando `EVP_EncodeBlock()`.
+3. Criar (ou sobrescrever) o arquivo `/tmp/.master.key` com permissão 0600 (leitura/escrita apenas para o proprietário), usando `fopen()`, `fwrite()` e `chmod()`.
+4. Escrever no arquivo um objeto JSON no formato: `{"aes_key":"<string_base64>"}`, onde `<string_base64>` é a chave codificada.
+5. Fechar o arquivo.
+6. Retornar 0 em caso de sucesso, ou -1 em caso de falha, imprimindo mensagens de erro descritivas em stderr.
+
+Inclua os cabeçalhos necessários (OpenSSL, stdio, stdlib, sys/stat.h, etc.), verifique os retornos de todas as chamadas de sistema e da OpenSSL, e garanta que não haja vazamento de memória. O ambiente é Linux, e o serviço roda com privilégios de root no momento da inicialização. Assuma que não há concorrência na chamada desta função.

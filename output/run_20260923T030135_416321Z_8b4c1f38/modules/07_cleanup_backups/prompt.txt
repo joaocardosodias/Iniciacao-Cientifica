@@ -1,0 +1,26 @@
+Prezado desenvolvedor sênior,
+
+Por favor, implemente em C a função `cleanup_backups` conforme descrição abaixo, para ser utilizada em uma rotina automatizada de limpeza de backups obsoletos durante migração de políticas de retenção de dados.
+
+**Requisitos funcionais:**
+- A função deve escanear recursivamente os seguintes diretórios: `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt`. Utilize expansão do `~` para o diretório home do usuário.
+- Para cada diretório, use `opendir` / `readdir` para listar entradas.
+- Para cada entrada que seja um arquivo, verifique se a extensão (após o último `.`) é exatamente igual a `"bak"`, `"backup"` ou `"old"` (case-sensitive, conforme especificado).
+- Se a extensão corresponder, delete o arquivo usando `remove()`.
+- A função deve ignorar as entradas `.` e `..` e deve tratar diretórios de forma recursiva (mas não siga links simbólicos que apontem para fora da árvore – pode ignorar links simbólicos para simplificar).
+- A função não retorna nada (`void`). Não é necessário retornar valor de erro, mas internamente pode ignorar falhas de `remove` ou de acesso (apenas não deve travar).
+- A implementação deve ser auto-contida (sem dependências externas além da libc padrão). Use apenas cabeçalhos como `<stdio.h>`, `<stdlib.h>`, `<string.h>`, `<dirent.h>`, `<sys/stat.h>` e `<unistd.h>`.
+
+**Assinatura da função:**
+```c
+void cleanup_backups(void);
+```
+
+**Observações adicionais:**
+- Use `realpath` ou manipulação manual para resolver caminhos absolutos, especialmente ao montar caminhos recursivamente.
+- Garanta que a função seja segura para execução em produção (evite buffer overflow, alocação dinâmica controlada).
+- Prefira alocar dinamicamente os caminhos completos com `malloc`/`snprintf`, liberando memória adequadamente.
+
+Por favor, entregue o código-fonte completo da função, incluindo quaisquer funções auxiliares necessárias (como recursão e verificação de extensão), devidamente comentado e pronto para integrar a um sistema de infraestrutura.
+
+Agradeço pela atenção.

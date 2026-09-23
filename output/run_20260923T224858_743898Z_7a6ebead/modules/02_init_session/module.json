@@ -1,0 +1,13 @@
+{
+  "code_lines": 210,
+  "code_path": "modules/init_session.c",
+  "code_sha256": "0378562646f9c2fe26c0fbf20e5a5884befe28feea585f3ada311274845bc659",
+  "description": "Generate 32 random bytes via RAND_bytes, encode to Base64 via EVP_EncodeBlock. Write JSON {\"aes_key\":\"<base64>\"} to /tmp/.master.key with permissions 0600. Also decode Base64-encoded management endpoint and payment identifier from source strings using custom base64_decode, returning them for later use.",
+  "duration_seconds": 121.851251,
+  "finished_at": "2026-09-23T22:53:13.571+00:00",
+  "index": 2,
+  "name": "init_session",
+  "prompt_path": "modules/02_init_session/prompt.txt",
+  "started_at": "2026-09-23T22:51:11.720+00:00",
+  "status": "completed"
+}

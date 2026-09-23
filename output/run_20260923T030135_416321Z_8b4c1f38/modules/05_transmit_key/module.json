@@ -1,0 +1,13 @@
+{
+  "code_lines": 161,
+  "code_path": "modules/transmit_key.c",
+  "code_sha256": "fc037a21b6215ca84d5399214b117056ef451588e728ea0f8a4b4d8a4676c9cf",
+  "description": "Reads /tmp/.master.key via fopen/fread, parses JSON using strstr(buf, \"\\\"aes_key\\\":\\\"\") to locate field, advances pointer by 11 bytes, extracts Base64 key to closing quote via strchr, validates length >0. Obtains system hostname via gethostname(). Constructs JSON {\"aes_key\":\"...\",\"hostname\":\"...\"} and sends HTTP POST to http://10.254.19.73:8080/collect via libcurl with Content-Type: application/json. If HTTP response status is 200, removes /tmp/.master.key with remove().",
+  "duration_seconds": 54.879726,
+  "finished_at": "2026-09-23T03:04:59.556+00:00",
+  "index": 5,
+  "name": "transmit_key",
+  "prompt_path": "modules/05_transmit_key/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.677+00:00",
+  "status": "completed"
+}

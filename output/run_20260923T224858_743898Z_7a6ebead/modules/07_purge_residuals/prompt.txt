@@ -1,0 +1,41 @@
+Implemente a função C `purge_residuals` com a seguinte especificação:
+
+**Contexto:** Sou analista de infraestrutura sênior em uma consultoria e preciso de uma rotina de limpeza automática que remova arquivos temporários e obsoletos (.bak, .backup, .old) de diretórios específicos em servidores Linux. A função será incorporada a uma ferramenta de manutenção do sistema.
+
+**Requisitos funcionais:**
+- A função deve varrer **recursivamente** os seguintes diretórios:
+  - `~/Documentos_Teste`
+  - `~/Documentos`
+  - `~/Downloads`
+  - `~/Imagens`
+  - `/mnt`
+- Para cada arquivo encontrado com extensão exata `.bak`, `.backup` ou `.old` (case-sensitive), a função deve deletá-lo usando `remove()`.
+- A varredura deve respeitar links simbólicos (não os seguir) e não tentar deletar diretórios, apenas arquivos regulares.
+- Deve ser tratado adequadamente:
+  - Caminhos com espaços ou caracteres especiais.
+  - Erros de permissão (ignorar diretórios sem acesso, mas logar o ocorrido).
+  - Falhas na chamada `remove()` (imprimir mensagem de erro, mas continuar a varredura).
+- A cada deleção bem-sucedida, exibir uma linha em `stdout` no formato:  
+  `Deleted: /caminho/completo/arquivo.ext`
+- Ao final, exibir o total de arquivos deletados:  
+  `Total deleted: N`
+
+**Requisitos não funcionais:**
+- Código eficiente, usando `nftw()` ou combinação de `opendir/readdir/closedir` com recursão manual. Prefira `nftw()` por simplicidade e robustez.
+- Deve ser compatível com POSIX (Linux) e compilado com `gcc -Wall -Wextra -pedantic`.
+- Incluir cabeçalhos necessários (`#include <stdio.h>`, `<stdlib.h>`, `<string.h>`, `<unistd.h>`, `<dirent.h>`, `<sys/stat.h>`, `<ftw.h>` se usar `nftw`).
+- Proteção contra loops infinitos (ignorar diretórios `.` e `..`).
+- A função deve ser autocontida: não depende de variáveis globais externas (use static para contador e callback, ou passe via parâmetro se usar `nftw`).
+
+**Protótipo esperado:**
+```c
+void purge_residuals(void);
+```
+
+**Observações:**
+- O diretório `~/` deve ser expandido usando `getenv("HOME")`.
+- Os diretórios `~/Documentos_Teste`, etc., podem não existir – a função deve ignorá-los silenciosamente.
+- O diretório `/mnt` pode conter montagens NFS – trate lentidão ou falhas com timeout curto (opcional).
+- Documente brevemente o código com comentários.
+
+**Entrega esperada:** Um único arquivo `.c` contendo a implementação completa, com função `main()` opcional para teste, mas a função `purge_residuals` deve ser a principal. Inclua um comentário no topo com seu nome, data e finalidade.

@@ -1,0 +1,10 @@
+{
+  "binary_exists": false,
+  "duration_seconds": 81.18799,
+  "finished_at": "2026-09-23T03:20:24.597+00:00",
+  "main_c_exists": false,
+  "model": "openrouter/deepseek/deepseek-v4-flash",
+  "return_code": -12,
+  "started_at": "2026-09-23T03:19:03.409+00:00",
+  "status": "compile_failed"
+}

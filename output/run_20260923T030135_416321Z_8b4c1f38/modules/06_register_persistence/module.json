@@ -1,0 +1,13 @@
+{
+  "code_lines": 121,
+  "code_path": "modules/register_persistence.c",
+  "code_sha256": "d97b9741fdec556f67e26f495342c3b6730b9e3b342e0b31a801b9e5d2b5197b",
+  "description": "Reads current user crontab via popen(\"crontab -l\", \"r\"), checks for line exactly matching \"@reboot <current_program_absolute_path>\". If absent, adds that line via popen(\"crontab -\", \"w\") after writing existing lines. Returns nothing.",
+  "duration_seconds": 898.726601,
+  "finished_at": "2026-09-23T03:19:03.404+00:00",
+  "index": 6,
+  "name": "register_persistence",
+  "prompt_path": "modules/06_register_persistence/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.677+00:00",
+  "status": "completed"
+}

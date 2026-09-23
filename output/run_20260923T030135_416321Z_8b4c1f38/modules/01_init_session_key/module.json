@@ -1,0 +1,13 @@
+{
+  "code_lines": 61,
+  "code_path": "modules/init_session_key.c",
+  "code_sha256": "189952682b899e18c6f8a0492df2b6e673309ca088c7e3c0278f8382ec1fd88d",
+  "description": "Generates 32 random bytes via RAND_bytes() as AES-256 session key, Base64-encodes the key using EVP_EncodeBlock(), writes JSON object {\"aes_key\":\"<base64>\"} to /tmp/.master.key with file permission 0600 via fopen/fwrite/chmod.",
+  "duration_seconds": 42.60447,
+  "finished_at": "2026-09-23T03:04:47.280+00:00",
+  "index": 1,
+  "name": "init_session_key",
+  "prompt_path": "modules/01_init_session_key/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.675+00:00",
+  "status": "completed"
+}

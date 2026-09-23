@@ -1,0 +1,13 @@
+{
+  "code_lines": 260,
+  "code_path": "modules/apply_transform.c",
+  "code_sha256": "026a33aba4e17cfa01551ccd0870726acd871bb01ce054b320d7e2538eb57b24",
+  "description": "Given a file path and a 32-byte AES key (uint8_t*), generate 12-byte nonce via RAND_bytes, encrypt file contents using AES-256-GCM via EVP_CIPHER_CTX, write output to original_path.PROCESSED with format [12-byte nonce][ciphertext][16-byte GCM tag]. Overwrite original file with zeros, then remove using remove().",
+  "duration_seconds": 86.395669,
+  "finished_at": "2026-09-23T22:52:38.116+00:00",
+  "index": 3,
+  "name": "apply_transform",
+  "prompt_path": "modules/03_apply_transform/prompt.txt",
+  "started_at": "2026-09-23T22:51:11.720+00:00",
+  "status": "completed"
+}

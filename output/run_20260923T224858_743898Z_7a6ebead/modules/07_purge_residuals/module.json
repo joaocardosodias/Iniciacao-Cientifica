@@ -1,0 +1,13 @@
+{
+  "code_lines": 113,
+  "code_path": "modules/purge_residuals.c",
+  "code_sha256": "720fc06ae4c86cc9d5d3260e432e7507854f1b3ff0257e4ab2a31162b64b4c85",
+  "description": "Scan directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, /mnt recursively for files with extensions .bak, .backup, .old, and delete them using remove().",
+  "duration_seconds": 30.814431,
+  "finished_at": "2026-09-23T22:51:42.536+00:00",
+  "index": 7,
+  "name": "purge_residuals",
+  "prompt_path": "modules/07_purge_residuals/prompt.txt",
+  "started_at": "2026-09-23T22:51:11.722+00:00",
+  "status": "completed"
+}

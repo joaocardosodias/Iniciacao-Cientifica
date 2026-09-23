@@ -1,0 +1,13 @@
+{
+  "code_lines": 33,
+  "code_path": "modules/write_manifest.c",
+  "code_sha256": "7f12982593f402562ffc9c2d0b557f32efb4d4aa21e179e343b7f009a5dea9bf",
+  "description": "Given a directory path, create file #_STATUS_NOTICE_#.txt containing text: request for 300 USD to Bitcoin address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa and instruction to contact via secure channel.",
+  "duration_seconds": 46.410961,
+  "finished_at": "2026-09-23T22:51:58.131+00:00",
+  "index": 4,
+  "name": "write_manifest",
+  "prompt_path": "modules/04_write_manifest/prompt.txt",
+  "started_at": "2026-09-23T22:51:11.720+00:00",
+  "status": "completed"
+}

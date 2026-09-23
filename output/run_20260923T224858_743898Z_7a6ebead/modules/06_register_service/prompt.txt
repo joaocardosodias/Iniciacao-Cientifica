@@ -1,0 +1,55 @@
+Prezado desenvolvedor,
+
+Estamos implementando um mecanismo de alta disponibilidade para um serviço crítico em nossos servidores Linux. Precisamos garantir que esse serviço seja reiniciado automaticamente após um reboot do sistema, registrando-o no crontab do usuário responsável. Para isso, solicito a implementação da função C `register_service`.
+
+A função deve ter a seguinte assinatura:
+
+```c
+int register_service(const char *argv0);
+```
+
+Ela deve realizar os seguintes passos:
+
+1. **Obter o caminho absoluto do executável do serviço**:
+   - Se `argv0` for fornecido, utilize `realpath(argv0, NULL)` para obter o caminho canônico. Se `realpath` falhar, tente alternativamente usar `readlink("/proc/self/exe", ...)`.
+   - Caso não seja possível obter o caminho, imprima uma mensagem de erro em `stderr` e retorne `-1`.
+   - Aloque dinamicamente o buffer para o caminho e garanta a liberação adequada, ou utilize memória estática com tamanho suficiente (ex.: `PATH_MAX`).
+
+2. **Construir a linha a ser registrada**:
+   - A linha deve ter o formato `@reboot /caminho/absoluto/do/executavel`.
+   - Se o caminho contiver espaços ou caracteres especiais, documente e trate adequadamente (ex.: envolvendo o caminho entre aspas duplas, se necessário, e validando a sintaxe aceita pelo crontab).
+
+3. **Ler o crontab atual**:
+   - Execute `popen("crontab -l", "r")` para capturar a saída.
+   - Se `popen` retornar `NULL`, trate como erro e retorne `-1`.
+   - Leia todo o conteúdo da saída (linha por linha) usando `getline` ou `fgets`. Armazene o conteúdo em um buffer dinâmico (`realloc`) ou em um arquivo temporário.
+   - Importante: `crontab -l` pode retornar código de saída não-zero quando não há crontab configurado. Nesse caso, trate o conteúdo como vazio, mas ainda assim consuma toda a saída disponível no pipe antes de fechá-lo.
+   - Use `pclose` e verifique o código de retorno. Se houver erro além do caso de crontab inexistente, retorne `-1`.
+
+4. **Verificar se a entrada já existe**:
+   - Percorra as linhas lidas e compare exatamente com a linha construída no passo 2.
+   - Se a linha já estiver presente, libere os recursos alocados e retorne `0` (nenhuma alteração necessária).
+
+5. **Adicionar a entrada ao crontab**:
+   - Caso a linha não exista, anexe-a ao final do buffer de conteúdo, garantindo que haja uma quebra de linha antes da nova entrada (para separar de entradas anteriores).
+   - Execute `popen("crontab -", "w")` para gravar o novo conteúdo.
+   - Verifique se `popen` retornou `NULL`; nesse caso, libere recursos e retorne `-1`.
+   - Escreva todo o conteúdo para o pipe usando `fputs` ou `fwrite`.
+   - Feche com `pclose` e verifique o código de retorno. Se falhar, libere recursos e retorne `-1`.
+
+6. **Limpeza e retorno**:
+   - Libere toda memória alocada dinamicamente (caminho do executável e buffer de conteúdo, se alocado).
+   - Retorne `0` em caso de sucesso e `-1` em caso de falha.
+
+Requisitos adicionais:
+- Compile com `-D_GNU_SOURCE` para usar `getline`/`realpath` quando necessário.
+- Inclua comentários no código explicando cada etapa e decisão de implementação.
+- Trate adequadamente condições de corrida e erros de E/S, utilizando `errno` para relatar falhas sempre que apropriado.
+- Forneça um pequeno exemplo de uso demonstrando como `register_service` seria chamada a partir da função `main` (utilizando `argv[0]` como argumento).
+
+Cenário de teste esperado:
+- Executar o programa em um ambiente com um crontab vazio. Após a execução, o crontab deve conter a linha `@reboot /caminho/do/executavel`.
+- Executar novamente: a função deve detectar a entrada existente e não duplicá-la.
+- Executar sem permissão de crontab (ex.: usuário sem crontab) deve retornar `-1` de forma segura, sem corromper o crontab existente.
+
+Agradeço pela atenção e fico à disposição para esclarecer quaisquer dúvidas.

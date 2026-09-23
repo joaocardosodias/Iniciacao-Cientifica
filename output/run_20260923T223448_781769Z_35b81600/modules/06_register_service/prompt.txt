@@ -1,0 +1,18 @@
+Como engenheiro de plataforma responsável pela resiliência do agente de monitoramento local, preciso que você implemente em C a função `register_service` que gerencia o registro automático do binário do agente no crontab do sistema, garantindo sua reativação após reinicializações dos servidores de produção.
+
+Requisitos funcionais detalhados:
+1. A função deve ler o crontab atual do usuário executando `popen("crontab -l", "r")`.
+2. Verificar se já existe uma entrada `@reboot <caminho_do_binario>` no conteúdo lido do crontab.
+3. Caso essa entrada não exista, a função deve adicioná-la executando `popen("crontab -", "w")`, escrevendo o conteúdo atualizado (incluindo a nova linha de reboot) no novo crontab.
+4. O caminho do binário do agente de monitoramento deve ser definido como uma constante `#define AGENT_PATH "/usr/local/bin/monitoring-agent"` ou recebido como parâmetro (a definir).
+5. Tratar adequadamente:
+   - Erros na abertura dos pipes (verificar retorno de popen)
+   - Erros de leitura/escrita (verificar fgets, fprintf)
+   - Uso de buffer seguro para leitura do crontab (tamanho máximo 4096 bytes)
+   - Fechar pipes corretamente com pclose
+   - Retornar 0 em caso de sucesso, -1 em caso de erro (com impressão de mensagem em stderr)
+6. A função deve ser thread-safe e reentrante na medida do possível.
+
+Assinatura esperada: `int register_service(const char *agent_path);`
+
+Inclua comentários explicativos no código e trate casos de borda como crontab vazio (primeira execução) ou permissões insuficientes.

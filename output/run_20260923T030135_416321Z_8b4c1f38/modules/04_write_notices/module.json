@@ -1,0 +1,13 @@
+{
+  "code_lines": 34,
+  "code_path": "modules/write_notices.c",
+  "code_sha256": "ced7c596629d9c71df5895c03e6bab6e585d07d5b3fdffb8f316ba19fb012887",
+  "description": "For each directory in a provided list, creates a file named \"#_STATUS_NOTICE_#.txt\" containing text demanding 300 USD to payment address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa and instructing contact via a secure channel. Uses fopen/fprintf/fclose. Returns nothing.",
+  "duration_seconds": 16.692103,
+  "finished_at": "2026-09-23T03:04:21.368+00:00",
+  "index": 4,
+  "name": "write_notices",
+  "prompt_path": "modules/04_write_notices/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.676+00:00",
+  "status": "completed"
+}

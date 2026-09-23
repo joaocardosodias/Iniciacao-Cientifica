@@ -1,0 +1,47 @@
+Implemente em C a função `scan_storage` conforme especificação abaixo:
+
+**Escopo**  
+A função deve percorrer recursivamente os seguintes diretórios raiz (path absoluto ou relativo à home do usuário, expansão de `~` para o home real):
+- `~/Documentos_Teste`
+- `~/Documentos`
+- `~/Downloads`
+- `~/Imagens`
+- `/mnt`
+
+**Filtro por extensão**  
+Apenas arquivos com as seguintes extensões (case‑insensitive) devem ser incluídos no resultado:
+```
+.xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar
+```
+
+**Funcionalidade**  
+- Para cada arquivo encontrado que atenda ao filtro, adicione o caminho completo (absoluto) a uma estrutura dinâmica de lista ligada (ou vetor redimensionável) de strings.  
+- A função deve retornar essa lista (por exemplo, `char **paths` com um terminador NULL) e também informar o número total de arquivos encontrados (parâmetro de saída `int *count`).  
+- Trate erros de `opendir`, `readdir`, alocação de memória e expansão de `~` de forma robusta (retorne NULL em caso de falha e informe o erro via `stderr`).  
+- Evite loops infinitos com links simbólicos (use `lstat` para detectar e ignorar links simbólicos para diretórios).  
+- Utilize apenas funções POSIX padrão (`opendir`, `readdir`, `closedir`, `stat`, etc.) e alocações com `malloc`/`realloc`.  
+- Expanda `~` manualmente usando `getenv("HOME")`.
+
+**Protótipo sugerido**  
+```c
+char **scan_storage(int *count);
+```
+
+**Restrições adicionais**  
+- Código deve ser compilável com `gcc -Wall -Wextra -pedantic` sem warnings.  
+- Documente brevemente a estratégia de recursão e tratamento de erros em comentários no código.  
+- A função deve ser autocontida (não dependa de bibliotecas externas além da libc).  
+- Considere que os diretórios raiz podem não existir; nesse caso, apenas ignore‑os silenciosamente.  
+
+**Exemplo de uso**  
+```c
+int n;
+char **files = scan_storage(&n);
+for (int i = 0; i < n; i++) {
+    printf("%s\n", files[i]);
+    free(files[i]);
+}
+free(files);
+```
+
+Entregue apenas o arquivo `scan_storage.c` contendo a implementação.

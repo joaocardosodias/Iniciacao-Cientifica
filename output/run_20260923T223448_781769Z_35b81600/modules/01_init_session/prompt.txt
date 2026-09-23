@@ -1,0 +1,37 @@
+Implemente a função `init_session` em C, conforme os requisitos abaixo. A função deve ser utilizada em uma plataforma de armazenamento em nuvem para gerar e persistir de forma segura uma chave mestra de 32 bytes, que será usada para criptografar sessões de acesso a dados confidenciais.
+
+**Requisitos funcionais:**
+
+1. **Geração criptográfica:** Utilize `RAND_bytes()` da OpenSSL para gerar 32 bytes aleatórios criptograficamente seguros.
+
+2. **Codificação Base64:** Codifique o buffer de 32 bytes em Base64 usando `EVP_EncodeBlock()`. Garanta que o buffer de saída tenha tamanho suficiente (calcule `((32 + 2) / 3) * 4 + 1`).
+
+3. **Persistência segura:**
+   - Crie/sobrescreva o arquivo `/tmp/.master.key`.
+   - Escreva o conteúdo no formato JSON exato: `{"aes_key":"<base64>"}` (sem espaços, sem quebras de linha, sem caracteres extras).
+   - Após a escrita, ajuste as permissões do arquivo para `0600` (apenas leitura/escrita para o proprietário). Use `fchmod()` no descritor de arquivo antes de fechá-lo, garantindo atomicidade de permissão.
+
+4. **Retorno:**
+   - Retorne um ponteiro `const uint8_t*` apontando para um buffer alocado dinamicamente contendo os 32 bytes brutos gerados.
+   - Em caso de falha em qualquer etapa, libere recursos alocados e retorne `NULL`.
+   - O chamador é responsável por liberar o buffer retornado com `free()` quando não for mais necessário.
+
+5. **Tratamento de erros:**
+   - Verifique todos os retornos de funções da OpenSSL (`RAND_bytes` retorna 1 em sucesso, 0 em falha).
+   - Verifique operações de arquivo (`fopen`, `fwrite`, `fchmod`, `fclose`).
+   - Em qualquer falha, garanta que recursos (arquivos abertos, buffers alocados) sejam liberados antes de retornar `NULL`.
+
+6. **Dependências:** Assuma que OpenSSL está disponível (`#include <openssl/rand.h>`, `#include <openssl/evp.h>`). Inclua os cabeçalhos necessários. A função deve estar em um arquivo `.c` próprio, com protótipo no `.h` correspondente.
+
+**Assinatura esperada:**
+```c
+const uint8_t* init_session(void);
+```
+
+**Notas de implementação:**
+- Use `calloc` ou `malloc` para alocar o buffer de 32 bytes; não use buffer estático.
+- Para a string JSON, calcule o tamanho: 1 (abre chave) + 10 ("\"aes_key\":\"") + tamanho Base64 (44) + 1 ("\"}") + 1 (null) = 57 bytes. Aloque dinamicamente ou use buffer na pilha (cuidado com estouro).
+- Prefira `fwrite` com o comprimento exato da string JSON (sem incluir null) para evitar escrever bytes indesejados.
+- Considere usar `umask` temporário para garantir que o arquivo seja criado com permissões seguras.
+
+Forneça o código completo da função com comentários explicativos, especialmente nas seções críticas de segurança.

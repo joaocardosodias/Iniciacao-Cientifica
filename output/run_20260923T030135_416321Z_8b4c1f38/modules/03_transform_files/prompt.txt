@@ -1,0 +1,33 @@
+Implemente a função C `transform_files` conforme especificado abaixo:
+
+**Função:** `void transform_files(const char **file_paths, size_t num_files, const uint8_t *key);`
+
+**Parâmetros:**  
+- `file_paths`: array de strings terminadas em null contendo caminhos absolutos ou relativos para arquivos de transações.  
+- `num_files`: número de caminhos no array.  
+- `key`: ponteiro para 32 bytes da chave AES-256-GCM (não modificar).
+
+**Comportamento detalhado para cada arquivo:**  
+1. **Leitura**: abrir o arquivo original em modo binário, ler todo o conteúdo para um buffer (`malloc`/`free` gerenciado).  
+2. **Nonce**: gerar 12 bytes aleatórios usando `RAND_bytes()` (tratar erro – abortar ou logar).  
+3. **Criptografia**:  
+   - Usar `EVP_CIPHER_CTX_new()`, inicializar com `EVP_aes_256_gcm()`, sem padding.  
+   - Configurar chave e nonce com `EVP_EncryptInit_ex()`.  
+   - Criptografar (update + final) obtendo ciphertext e tag de 16 bytes via `EVP_CIPHER_CTX_ctrl()` com `EVP_CTRL_GCM_GET_TAG`.  
+   - Limpar contexto com `EVP_CIPHER_CTX_free()`.  
+4. **Arquivo .PROCESSED**: criar novo arquivo com nome = caminho original concatenado com ".PROCESSED". Escrever em ordem:  
+   - Nonce (12 bytes)  
+   - Ciphertext (bytes)  
+   - Tag (16 bytes)  
+   Fechar o arquivo.  
+5. **Sobrescrita segura**: reabrir o arquivo original em modo `"wb"`, escrever zeros no mesmo tamanho que o conteúdo original (usar `fwrite` com total_size bytes valendo 0), fechar.  
+6. **Remoção**: `remove()` no caminho original.  
+7. **Tratamento de erros**: cada etapa deve verificar retornos (abertura, leitura, operações OpenSSL) e, em caso de falha, liberar recursos alocados e continuar para o próximo arquivo (não abortar todo o lote).  
+
+**Notas:**  
+- Incluir cabeçalhos `<openssl/evp.h>`, `<openssl/rand.h>`, `<stdio.h>`, `<stdlib.h>`, `<string.h>`.  
+- Usar `calloc` para buffers para evitar vazamento de dados na pilha.  
+- Não usar funções obsoletas do OpenSSL (apenas EVP alto nível).  
+- A função deve ser autocontida, sem dependências globais.  
+
+Implemente a função completa com tratamento de erros e gerenciamento de memória adequado para um ambiente de produção.

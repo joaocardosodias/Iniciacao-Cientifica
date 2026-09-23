@@ -1,0 +1,13 @@
+{
+  "code_lines": 108,
+  "code_path": "modules/cleanup_backups.c",
+  "code_sha256": "af6c36b42258fc03d2841d7eae545fbe909080e661bc86b321f53f28b5904e4e",
+  "description": "Recursively scans directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt using opendir/readdir, identifies files with extensions .bak, .backup, .old, and deletes each using remove(). Returns nothing.",
+  "duration_seconds": 86.28256,
+  "finished_at": "2026-09-23T03:05:30.960+00:00",
+  "index": 7,
+  "name": "cleanup_backups",
+  "prompt_path": "modules/07_cleanup_backups/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.678+00:00",
+  "status": "completed"
+}

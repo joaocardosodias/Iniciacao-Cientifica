@@ -1,0 +1,22 @@
+Implemente a função `purge_residuals` em C conforme especificado abaixo.
+
+A função deve percorrer os seguintes diretórios alvo, enumerando recursivamente todos os arquivos e subdiretórios:
+- `~/Documentos_Teste`
+- `~/Documentos`
+- `~/Downloads`
+- `~/Imagens`
+- `/mnt`
+
+Para cada arquivo encontrado, verifique se sua extensão (após o último ponto) é igual a `"bak"`, `"backup"` ou `"old"` (case-insensitive). Se sim, chame `remove()` para deletar o arquivo.
+
+A implementação deve:
+- Expandir corretamente `~` para o diretório home do usuário atual (use `getenv("HOME")`).
+- Lidar com caminhos com até 4096 caracteres.
+- Tratar erros de `remove()` silenciosamente (não imprimir nada), a menos que o erro seja relevante para depuração futura — nesse caso, use um mecanismo de log opcional que possa ser ativado via variável de ambiente `PURGE_DEBUG=1`.
+- Não utilizar bibliotecas externas; apenas POSIX (dirent.h, unistd.h, string.h, stdlib.h, stdio.h).
+- Ser thread-safe (não usar variáveis globais ou estáticas mutáveis).
+- Retornar o número total de arquivos deletados com sucesso (int).
+
+Assinatura: `int purge_residuals(void);`
+
+Forneça o código completo, com includes, comentários de documentação e tratamento de expansão de caminho com `~`.

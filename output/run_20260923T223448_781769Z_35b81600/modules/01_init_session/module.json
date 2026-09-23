@@ -1,0 +1,13 @@
+{
+  "code_lines": 77,
+  "code_path": "modules/init_session.c",
+  "code_sha256": "d3f735434ec2ef7047357311de1fcf7676fab0522c75abbf000e4df1d406b2e3",
+  "description": "Generates 32 cryptographically random bytes using RAND_bytes() from OpenSSL, Base64-encodes using EVP_EncodeBlock(), persists the encoded key to /tmp/.master.key as JSON object with exact format {\"aes_key\":\"<base64>\"} (no whitespace) and file permissions set to 0600. Returns the 32-byte key as const uint8_t*.",
+  "duration_seconds": 39.793877,
+  "finished_at": "2026-09-23T22:39:26.883+00:00",
+  "index": 1,
+  "name": "init_session",
+  "prompt_path": "modules/01_init_session/prompt.txt",
+  "started_at": "2026-09-23T22:38:47.089+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,13 @@
+{
+  "code_lines": 196,
+  "code_path": "modules/register_service.c",
+  "code_sha256": "6cc7d3955762e024adccf2abd5a461197d4d739ffb8bebf012b2417198c03727",
+  "description": "Reads current crontab using popen(\"crontab -l\",\"r\"). If an entry \"@reboot <path_to_binary>\" does not exist, appends it using popen(\"crontab -\",\"w\").",
+  "duration_seconds": 123.324808,
+  "finished_at": "2026-09-23T22:40:50.416+00:00",
+  "index": 6,
+  "name": "register_service",
+  "prompt_path": "modules/06_register_service/prompt.txt",
+  "started_at": "2026-09-23T22:38:47.091+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,58 @@
+Implemente a função `scan_storage` em linguagem C, conforme especificado abaixo.
+
+**Contexto:** Precisamos de uma rotina de auditoria interna que percorra os diretórios padrão dos usuários para catalogar arquivos de documentos, imagens e backups. A função deve retornar uma lista encadeada contendo os caminhos completos dos arquivos encontrados.
+
+**Assinatura sugerida:**
+```c
+typedef struct FileNode {
+    char *path;
+    struct FileNode *next;
+} FileNode;
+
+FileNode *scan_storage(void);
+```
+
+**Requisitos funcionais:**
+
+1. A função deve varrer recursivamente os seguintes diretórios base:
+   - `~/Documentos_Teste`
+   - `~/Documentos`
+   - `~/Downloads`
+   - `~/Imagens`
+   - `/mnt`
+
+   O prefixo `~` deve ser expandido usando a variável de ambiente `HOME`.
+
+2. Durante a varredura, a função deve incluir na lista apenas arquivos cuja extensão (case-insensitive) seja uma das seguintes:
+   - `.xlsx`
+   - `.docx`
+   - `.pdf`
+   - `.txt`
+   - `.csv`
+   - `.jpg`
+   - `.png`
+   - `.db`
+   - `.backup`
+   - `.psd`
+   - `.zip`
+   - `.rar`
+
+3. Para cada arquivo qualificado, deve ser armazenado o caminho completo (absoluto) no campo `path` do nó da lista. Cada `path` deve ser alocado dinamicamente (ex.: com `strdup`).
+
+4. A lista retornada deve conter os arquivos de todos os diretórios base e subdiretórios, sem ordem exigida.
+
+5. Em caso de nenhum arquivo encontrado ou erro fatal de alocação, a função deve retornar `NULL`.
+
+**Requisitos de implementação:**
+
+- Utilize exclusivamente as chamadas de sistema POSIX `opendir`, `readdir`, `closedir` e `stat` (ou `lstat`) para navegação no sistema de arquivos.
+- Para cada diretório encontrado, faça a recursão; não siga symlinks de diretórios (use `lstat` para identificar), a fim de evitar ciclos.
+- Diretórios que não puderem ser abertos (permissão negada, etc.) devem ser ignorados silenciosamente, sem interromper a varredura.
+- Use buffers de caminho com tamanho seguro (ex.: `PATH_MAX`) e evite estouros; se um caminho exceder o tamanho máximo, ignore o arquivo/diretório.
+- Trate adequadamente os erros de alocação de memória: caso `malloc`/`strdup` falhe, libere toda a memória já alocada e retorne `NULL`.
+- Considere a portabilidade para Linux; o código deve compilar com GCC (padrão C99 ou posterior).
+- Não utilize funções não seguras como `sprintf` sem limites; prefira `snprintf`.
+
+**Documentação:** Inclua comentários explicativos no código, especialmente sobre a estratégia recursiva e a gestão de memória.
+
+**Entrega:** Forneça o código completo da função `scan_storage`, incluindo a definição da estrutura `FileNode` e uma breve explicação de como liberar a lista retornada.

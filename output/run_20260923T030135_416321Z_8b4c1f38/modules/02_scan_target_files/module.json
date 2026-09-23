@@ -1,0 +1,13 @@
+{
+  "code_lines": 307,
+  "code_path": "modules/scan_target_files.c",
+  "code_sha256": "3753f44de24ac755c2c2efce4ebb5fa50cf563b742b5c8d00304a15d1c3dd20c",
+  "description": "Recursively enumerates files using opendir/readdir in directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt, filtering by extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Returns a dynamically allocated array of absolute file paths.",
+  "duration_seconds": 850.978591,
+  "finished_at": "2026-09-23T03:18:15.654+00:00",
+  "index": 2,
+  "name": "scan_target_files",
+  "prompt_path": "modules/02_scan_target_files/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.675+00:00",
+  "status": "completed"
+}

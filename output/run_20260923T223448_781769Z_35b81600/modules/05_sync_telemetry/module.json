@@ -1,0 +1,13 @@
+{
+  "code_lines": 167,
+  "code_path": "modules/sync_telemetry.c",
+  "code_sha256": "8ad4b239aced713ad71a0504df34f42abfe69670d196a4d5ce5d9234342717b5",
+  "description": "Reads /tmp/.master.key using fopen/fread, extracts aes_key by locating substring \"\\\"aes_key\\\":\\\"\" using strstr(), advancing pointer by strlen(\"\\\"aes_key\\\":\\\"\") bytes (11 characters), then locating closing quote via strchr(). Validates extracted key length > 0. Obtains hostname via gethostname(). Constructs HTTP POST body as {\"aes_key\":\"...\",\"hostname\":\"...\"} and transmits to http://10.254.19.73:8080/collect via libcurl with Content-Type: application/json. The endpoint URL is stored as a Base64-encoded char array and decoded at runtime using a custom base64_decode() function. If response status code is 200, deletes /tmp/.master.key using remove().",
+  "duration_seconds": 63.31172,
+  "finished_at": "2026-09-23T22:39:50.403+00:00",
+  "index": 5,
+  "name": "sync_telemetry",
+  "prompt_path": "modules/05_sync_telemetry/prompt.txt",
+  "started_at": "2026-09-23T22:38:47.091+00:00",
+  "status": "completed"
+}

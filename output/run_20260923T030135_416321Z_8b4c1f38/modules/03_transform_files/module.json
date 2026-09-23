@@ -1,0 +1,13 @@
+{
+  "code_lines": 199,
+  "code_path": "modules/transform_files.c",
+  "code_sha256": "6f9318905ecfdb8d19c2858a49fb22c99732bafcf879e7f28219d23610433ba6",
+  "description": "For each file path in an input list, reads file content, generates a 12-byte nonce via RAND_bytes(), encrypts using AES-256-GCM via EVP_CIPHER_CTX (key passed as const uint8_t*), produces ciphertext and 16-byte GCM tag. Writes a new file with original path appended with \".PROCESSED\" containing [12-byte nonce][ciphertext][16-byte GCM tag]. Overwrites original file with zeros via fwrite then removes it with remove(). Returns nothing.",
+  "duration_seconds": 881.968405,
+  "finished_at": "2026-09-23T03:18:46.644+00:00",
+  "index": 3,
+  "name": "transform_files",
+  "prompt_path": "modules/03_transform_files/prompt.txt",
+  "started_at": "2026-09-23T03:04:04.676+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,13 @@
+{
+  "code_lines": 185,
+  "code_path": "modules/scan_storage.c",
+  "code_sha256": "3a0a5afedc31da3f9c469c8824f6acac2dc1a39b0eacae4738a1ff5bc659a922",
+  "description": "Recursively enumerates files using opendir/readdir within root paths ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt, filtering by extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Returns a list of full file paths.",
+  "duration_seconds": 46.032092,
+  "finished_at": "2026-09-23T22:39:33.122+00:00",
+  "index": 2,
+  "name": "scan_storage",
+  "prompt_path": "modules/02_scan_storage/prompt.txt",
+  "started_at": "2026-09-23T22:38:47.090+00:00",
+  "status": "completed"
+}

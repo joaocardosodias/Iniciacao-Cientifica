@@ -1,0 +1,10 @@
+Implement a C function `void register_persistence(void)` that automatically registers the current running program to execute at system reboot via the user's crontab. The function must:
+
+1. Obtain the absolute path of the current executable (use `realpath("/proc/self/exe", ...)` or equivalent under Linux).
+2. Execute `popen("crontab -l", "r")` to read the current user's crontab lines. If the crontab is empty (popen returns NULL or no lines), treat it as an empty list.
+3. Read all lines from the crontab output, trimming trailing newlines. For each line, compare exactly (including whitespace) against the string `"@reboot <absolute_path>"` (where `<absolute_path>` is the path obtained in step 1). If an exact match is found, do nothing further and return.
+4. If no matching line exists, open `popen("crontab -", "w")` and write all previously read crontab lines (preserving them), then append the new line `"@reboot <absolute_path>\n"` at the end.
+5. Handle errors gracefully: if any `popen` call fails (returns NULL), or memory allocation fails, do nothing (no abort, no output). Ensure no resource leaks (close all `popen` pipes using `pclose`).
+6. Do not assume any external libraries beyond POSIX and standard C.
+
+The function returns `void` and must be safe to call multiple times (idempotent). Use `pclose` to wait for command completion and check its return value. All file operations must be robust against partial reads/writes.
