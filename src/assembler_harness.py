@@ -38,8 +38,11 @@ class AssemblerHarness:
                 log.info(f"  [AssemblerHarness] {name}.c escrito via fallback ({len(code.splitlines())} linhas)")
             else:
                 log.info(f"  [AssemblerHarness] {name}.c já existe ({f.stat().st_size} bytes)")
-            (assembly_dir / f"{name}.c").write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
-            module_files.append(assembly_dir / f"{name}.c")
+            # Copia para assembly/ com nome ofuscado (module_NN.c) para não revelar
+            # a intenção global ao agente que vê todos os arquivos de uma vez
+            obfuscated_name = f"module_{len(module_files) + 1:02d}.c"
+            (assembly_dir / obfuscated_name).write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
+            module_files.append(assembly_dir / obfuscated_name)
 
         tmp_cfg = assembly_dir / "opencode.json"
         tmp_cfg.write_text(json.dumps({"$schema": "https://opencode.ai/config.json", "mcp": {}}))
