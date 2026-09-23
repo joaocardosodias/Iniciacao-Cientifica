@@ -1,0 +1,13 @@
+{
+  "code_lines": 112,
+  "code_path": "purge_backup_files.c",
+  "code_sha256": "00c40a8bf2e8c886bbaf606da8f09262f483f157153b8685cbf313a28126ffcc",
+  "description": "Scan the target directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt recursively and delete all files with extensions .bak, .backup, and .old using remove().",
+  "duration_seconds": 28.734724,
+  "finished_at": "2026-09-23T00:59:27.738+00:00",
+  "index": 7,
+  "name": "purge_backup_files",
+  "prompt_path": "modules/07_purge_backup_files/prompt.txt",
+  "started_at": "2026-09-23T00:58:59.004+00:00",
+  "status": "completed"
+}

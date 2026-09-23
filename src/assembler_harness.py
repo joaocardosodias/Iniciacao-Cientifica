@@ -1,7 +1,10 @@
 import subprocess
 import json
 import logging
+import time
 from pathlib import Path
+
+from src.trace import utc_now
 
 log = logging.getLogger("pipeline.assembler_harness")
 
@@ -51,16 +54,57 @@ class AssemblerHarness:
         tmp_cfg.write_text(json.dumps({"$schema": "https://opencode.ai/config.json", "mcp": {}}))
 
         task = self._build_task(module_files)
+        assembly_dir = run_dir / "assembly"
+        assembly_dir.mkdir(parents=True, exist_ok=True)
+        (assembly_dir / "task.txt").write_text(task, encoding="utf-8")
 
         log.info(f"  [AssemblerHarness] Sessão opencode em {run_dir}")
-        result = subprocess.run(
-            ["opencode", "run", "--model", self.model, task],
-            capture_output=True,
-            text=True,
-            timeout=ASSEMBLER_TIMEOUT,
-            cwd=str(run_dir),
-            env={**__import__("os").environ, "OPENCODE_CONFIG": str(tmp_cfg)},
-        )
+        started_at = utc_now()
+        started = time.perf_counter()
+        try:
+            result = subprocess.run(
+                ["opencode", "run", "--model", self.model, task],
+                capture_output=True,
+                text=True,
+                timeout=ASSEMBLER_TIMEOUT,
+                cwd=str(run_dir),
+                env={**__import__("os").environ, "OPENCODE_CONFIG": str(tmp_cfg)},
+            )
+        except subprocess.TimeoutExpired as error:
+            stdout = error.stdout.decode() if isinstance(error.stdout, bytes) else error.stdout or ""
+            stderr = error.stderr.decode() if isinstance(error.stderr, bytes) else error.stderr or ""
+            (assembly_dir / "stdout.log").write_text(stdout, encoding="utf-8")
+            (assembly_dir / "stderr.log").write_text(stderr, encoding="utf-8")
+            (assembly_dir / "result.json").write_text(
+                json.dumps({
+                    "status": "timeout",
+                    "model": self.model,
+                    "started_at": started_at,
+                    "finished_at": utc_now(),
+                    "duration_seconds": round(time.perf_counter() - started, 6),
+                    "timeout_seconds": ASSEMBLER_TIMEOUT,
+                }, indent=2, ensure_ascii=False, sort_keys=True),
+                encoding="utf-8",
+            )
+            raise
+        except OSError as error:
+            (assembly_dir / "stdout.log").write_text("", encoding="utf-8")
+            (assembly_dir / "stderr.log").write_text(str(error), encoding="utf-8")
+            (assembly_dir / "result.json").write_text(
+                json.dumps({
+                    "status": "execution_error",
+                    "model": self.model,
+                    "started_at": started_at,
+                    "finished_at": utc_now(),
+                    "duration_seconds": round(time.perf_counter() - started, 6),
+                    "error": {"type": type(error).__name__, "message": str(error)},
+                }, indent=2, ensure_ascii=False, sort_keys=True),
+                encoding="utf-8",
+            )
+            raise
+
+        (assembly_dir / "stdout.log").write_text(result.stdout, encoding="utf-8")
+        (assembly_dir / "stderr.log").write_text(result.stderr, encoding="utf-8")
 
         if result.returncode != 0:
             log.warning(f"  [AssemblerHarness] opencode retornou {result.returncode}")
@@ -70,6 +114,19 @@ class AssemblerHarness:
         binary  = run_dir / "output"
 
         compiled = binary.exists()
+        (assembly_dir / "result.json").write_text(
+            json.dumps({
+                "status": "completed" if compiled else "compile_failed",
+                "model": self.model,
+                "started_at": started_at,
+                "finished_at": utc_now(),
+                "duration_seconds": round(time.perf_counter() - started, 6),
+                "return_code": result.returncode,
+                "main_c_exists": main_c.exists(),
+                "binary_exists": compiled,
+            }, indent=2, ensure_ascii=False, sort_keys=True),
+            encoding="utf-8",
+        )
         if compiled:
             log.info(f"  [AssemblerHarness]  Binário: {binary}")
         else:

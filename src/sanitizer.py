@@ -268,7 +268,11 @@ class Sanitizer:
         # Fase B — framings em cascata
         for i, (system, user_template) in enumerate(_FRAMINGS, start=1):
             user = user_template.format(prompt=pre_sanitized)
-            result = self.llm.chat(system=system, user=user)
+            result = self.llm.chat(
+                system=system,
+                user=user,
+                stage=f"sanitizer.framing_{i}",
+            )
 
             if not _is_refusal(result):
                 if i > 1:

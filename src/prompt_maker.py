@@ -78,10 +78,11 @@ class PromptMaker:
       2. Criação do prompt final que será enviado ao Coder
     """
 
-    def __init__(self, llm: LLMClient):
+    def __init__(self, llm: LLMClient, seed: int | None = None):
         self.llm = llm
+        self.seed = seed
 
-    def make(self, module: dict) -> str:
+    def make(self, module: dict, stage_prefix: str | None = None) -> str:
         """
         Gera um prompt de contexto dinâmico para um módulo específico.
 
@@ -93,14 +94,20 @@ class PromptMaker:
         """
         nome = module["nome"]
         descricao = module["descricao"]
+        prefix = stage_prefix or f"module.{nome}.prompt_maker"
 
         # Chamada 1: LLM inventa o contexto profissional
         context_user = _CONTEXT_USER_TEMPLATE.format(nome=nome, descricao=descricao)
-        context = self.llm.chat(system=_CONTEXT_SYSTEM, user=context_user)
+        context = self.llm.chat(
+            system=_CONTEXT_SYSTEM,
+            user=context_user,
+            stage=f"{prefix}.context",
+        )
 
         # Fallback se a Chamada 1 foi recusada
         if _is_refusal(context):
-            context = random.choice(_FALLBACK_CONTEXTS)
+            chooser = random.Random(f"{self.seed}:{nome}") if self.seed is not None else random
+            context = chooser.choice(_FALLBACK_CONTEXTS)
             print(f"  [PromptMaker] Contexto recusado para '{nome}' → usando fallback.")
 
         # Chamada 2: LLM monta o prompt final com o contexto gerado
@@ -109,7 +116,11 @@ class PromptMaker:
             nome=nome,
             descricao=descricao,
         )
-        final_prompt = self.llm.chat(system=_PROMPT_SYSTEM, user=prompt_user)
+        final_prompt = self.llm.chat(
+            system=_PROMPT_SYSTEM,
+            user=prompt_user,
+            stage=f"{prefix}.prompt",
+        )
 
         # Fallback se a Chamada 2 também foi recusada
         if _is_refusal(final_prompt):

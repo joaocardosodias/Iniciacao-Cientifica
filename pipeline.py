@@ -1,6 +1,7 @@
 import sys
 import logging
 import argparse
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -12,6 +13,7 @@ from src.planner import Planner
 from src.prompt_maker import PromptMaker
 from src.coder import Coder
 from src.assembler_harness import AssemblerHarness
+from src.trace import RunTrace, safe_name, sha256_text, utc_now
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,65 +26,183 @@ def run(
     prompt: str,
     model: str | None = None,
     delay: int = 0,
+    temperature: float | None = None,
+    top_p: float | None = None,
+    seed: int | None = None,
+    max_tokens: int | None = None,
+    output_root: Path = Path("output"),
+    scenario: str | None = None,
 ) -> Path:
-    llm = LLMClient(model, delay=delay)
-    log.info(f"Modelo: {llm.model}")
+    parameters = {
+        "temperature": temperature,
+        "top_p": top_p,
+        "seed": seed,
+        "max_tokens": max_tokens,
+    }
+    trace = RunTrace(
+        prompt=prompt,
+        requested_model=model,
+        delay=delay,
+        output_root=output_root,
+        generation_parameters=parameters,
+    )
+    if scenario:
+        trace.record_stage("input", {"scenario": scenario})
 
-    log.info("CAMADA 1 — Sanitizer...")
-    sanitized = Sanitizer(llm).sanitize(prompt)
-    print(f"\n  [Sanitizer] {sanitized}\n")
+    try:
+        llm = LLMClient(
+            model,
+            delay=delay,
+            trace=trace,
+            temperature=temperature,
+            top_p=top_p,
+            seed=seed,
+            max_tokens=max_tokens,
+        )
+        trace.configure_model(llm.model, llm.provider)
+        log.info(f"Modelo: {llm.model}")
 
-    log.info("CAMADA 2 — Planner...")
-    modules = Planner(llm).plan(sanitized)
-    print(f"  [Planner] {len(modules)} modulo(s):")
-    for m in modules:
-        print(f"    - {m['nome']}: {m['descricao']}")
+        log.info("CAMADA 1 — Sanitizer...")
+        stage_started = time.perf_counter()
+        sanitized = Sanitizer(llm).sanitize(prompt)
+        trace.write_text("prompts/sanitized.txt", sanitized)
+        trace.record_stage("sanitizer", {
+            "status": "completed",
+            "output": "prompts/sanitized.txt",
+            "sha256": sha256_text(sanitized),
+            "duration_seconds": round(time.perf_counter() - stage_started, 6),
+        })
+        print(f"\n  [Sanitizer] {sanitized}\n")
 
-    from datetime import datetime as _dt
-    run_dir = Path("output") / f"run_{_dt.now().strftime('%Y%m%d_%H%M%S')}"
-    run_dir.mkdir(parents=True, exist_ok=True)
+        log.info("CAMADA 2 — Planner...")
+        stage_started = time.perf_counter()
+        modules = Planner(llm).plan(sanitized)
+        trace.write_json("prompts/planner_response.json", modules)
+        trace.record_stage("planner", {
+            "status": "completed",
+            "output": "prompts/planner_response.json",
+            "module_count": len(modules),
+            "duration_seconds": round(time.perf_counter() - stage_started, 6),
+        })
+        print(f"  [Planner] {len(modules)} modulo(s):")
+        for module in modules:
+            print(f"    - {module['nome']}: {module['descricao']}")
 
-    log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
-    prompt_maker = PromptMaker(llm)
-    coder        = Coder(llm)
+        run_dir = trace.run_dir
+        log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
+        prompt_maker = PromptMaker(llm, seed=seed)
+        coder = Coder(llm)
 
-    def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
-        i, module = args
-        nome = module["nome"]
-        log.info(f"  [{i}/{len(modules)}] {nome} — iniciando...")
-        ctx_prompt = prompt_maker.make(module)
-        print(f"\n  [PromptMaker -> {nome}]\n  {ctx_prompt[:120]}...")
-        code = coder.generate(ctx_prompt)
-        print(f"  [Coder -> {nome}] {len(code.splitlines())} linhas geradas.")
-        log.info(f"  [{i}/{len(modules)}] {nome} — concluido.")
-        if code:
-            (run_dir / f"{nome}.c").write_text(code, encoding="utf-8")
-        return i, nome, code
+        def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
+            index, module = args
+            name = module["nome"]
+            module_started_at = utc_now()
+            module_started = time.perf_counter()
+            module_dir = trace.module_dir(index, name)
+            module_relative = module_dir.relative_to(run_dir)
+            trace.write_json(module_relative / "module.json", {
+                "index": index,
+                "name": name,
+                "description": module["descricao"],
+                "status": "running",
+                "started_at": module_started_at,
+            })
+            log.info(f"  [{index}/{len(modules)}] {name} — iniciando...")
+            try:
+                contextualized_prompt = prompt_maker.make(
+                    module,
+                    stage_prefix=f"module.{index:02d}.{safe_name(name)}.prompt_maker",
+                )
+                trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
+                print(f"\n  [PromptMaker -> {name}]\n  {contextualized_prompt[:120]}...")
+                code = coder.generate(
+                    contextualized_prompt,
+                    stage=f"module.{index:02d}.{safe_name(name)}.coder",
+                )
+                trace.write_text(module_relative / "response.c", code)
+                if code:
+                    trace.write_text(f"{safe_name(name)}.c", code)
+                trace.write_json(module_relative / "module.json", {
+                    "index": index,
+                    "name": name,
+                    "description": module["descricao"],
+                    "status": "completed",
+                    "started_at": module_started_at,
+                    "finished_at": utc_now(),
+                    "duration_seconds": round(time.perf_counter() - module_started, 6),
+                    "prompt_path": (module_relative / "prompt.txt").as_posix(),
+                    "code_path": f"{safe_name(name)}.c",
+                    "code_sha256": sha256_text(code),
+                    "code_lines": len(code.splitlines()),
+                })
+                print(f"  [Coder -> {name}] {len(code.splitlines())} linhas geradas.")
+                log.info(f"  [{index}/{len(modules)}] {name} — concluido.")
+                return index, safe_name(name), code
+            except Exception as error:
+                trace.write_json(module_relative / "module.json", {
+                    "index": index,
+                    "name": name,
+                    "description": module["descricao"],
+                    "status": "failed",
+                    "started_at": module_started_at,
+                    "finished_at": utc_now(),
+                    "duration_seconds": round(time.perf_counter() - module_started, 6),
+                    "error": {"type": type(error).__name__, "message": str(error)},
+                })
+                raise
 
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    results: list[tuple[int, str, str]] = []
-    with ThreadPoolExecutor(max_workers=len(modules)) as executor:
-        futures = {
-            executor.submit(_process_module, (i, module)): i
-            for i, module in enumerate(modules, 1)
-        }
-        for future in as_completed(futures):
-            results.append(future.result())
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        modules_started = time.perf_counter()
+        results: list[tuple[int, str, str]] = []
+        with ThreadPoolExecutor(max_workers=len(modules)) as executor:
+            futures = {
+                executor.submit(_process_module, (index, module)): index
+                for index, module in enumerate(modules, 1)
+            }
+            for future in as_completed(futures):
+                results.append(future.result())
 
-    results.sort(key=lambda x: x[0])
-    generated: list[tuple[str, str]] = [(nome, code) for _, nome, code in results]
+        results.sort(key=lambda item: item[0])
+        generated = [(name, code) for _, name, code in results]
+        trace.record_stage("modules", {
+            "status": "completed",
+            "count": len(generated),
+            "duration_seconds": round(time.perf_counter() - modules_started, 6),
+        })
 
-    log.info("CAMADAS 5+6 — AssemblerHarness...")
-    base_model    = llm.model.split(":")[0]
-    harness_model = f"openrouter/{base_model}"
-    main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        log.info("CAMADAS 5+6 — AssemblerHarness...")
+        assembly_started = time.perf_counter()
+        base_model = llm.model.split(":")[0]
+        harness_model = f"openrouter/{base_model}"
+        main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+        trace.record_stage("assembler_harness", {
+            "status": "completed" if compiled_ok else "compile_failed",
+            "model": harness_model,
+            "main_c": "main.c" if main_c else None,
+            "binary": "output" if compiled_ok else None,
+            "duration_seconds": round(time.perf_counter() - assembly_started, 6),
+        })
 
-    if main_c is None:
-        log.error("  [AssemblerHarness] main.c nao gerado — abortando")
-        raise RuntimeError("AssemblerHarness nao gerou main.c")
+        if main_c is None:
+            log.error("  [AssemblerHarness] main.c nao gerado — abortando")
+            raise RuntimeError("AssemblerHarness nao gerou main.c")
 
-    print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
-    return main_c
+        status = "completed" if compiled_ok else "compile_failed"
+        trace.finalize(
+            status=status,
+            compiled=compiled_ok,
+            extra={
+                "main_c": "main.c",
+                "binary": "output" if compiled_ok else None,
+                "module_count": len(generated),
+            },
+        )
+        print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
+        return main_c
+    except Exception as error:
+        trace.finalize(status="failed", error=error)
+        log.error(f"Execucao registrada em: {trace.run_dir}")
+        raise
 
 def main():
     parser = argparse.ArgumentParser(
@@ -98,6 +218,14 @@ def main():
         help="Lista os modelos disponíveis.")
     parser.add_argument("--limit", "-L", type=int, default=0,
         help="Segundos de espera entre chamadas ao LLM.")
+    parser.add_argument("--temperature", type=float, default=None,
+        help="Temperatura de geração. Ausente usa o padrão do provedor.")
+    parser.add_argument("--top-p", type=float, default=None,
+        help="Top-p da geração. Ausente usa o padrão do provedor.")
+    parser.add_argument("--seed", type=int, default=None,
+        help="Seed enviada ao provedor quando suportada.")
+    parser.add_argument("--max-tokens", type=int, default=None,
+        help="Limite de tokens de saída por chamada.")
     args = parser.parse_args()
 
     if args.list:
@@ -119,6 +247,7 @@ def main():
     print("   INICIAÇÃO CIENTÍFICA — PIPELINE DE EVASÃO MULTI-AGENTES")
     print("=" * 60)
 
+    scenario = None
     if args.scenario:
         from scenarios.test_prompts import PROMPTS
         key = args.scenario.lower()
@@ -127,6 +256,7 @@ def main():
             sys.exit(1)
         data   = PROMPTS[key]
         prompt = data["prompt"]
+        scenario = key
         print(f"\n[CENÁRIO] {data['nome']}")
         print(f"  {data['descricao']}")
     else:
@@ -141,18 +271,27 @@ def main():
             print("  Usando prompt padrão.")
 
     try:
-        output_path = run(prompt, args.model, delay=args.limit)
+        output_path = run(
+            prompt,
+            args.model,
+            delay=args.limit,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            seed=args.seed,
+            max_tokens=args.max_tokens,
+            scenario=scenario,
+        )
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")
         raise
 
     print("\n" + "=" * 60)
-    print(f"  ✓ Código salvo em: {output_path}")
+    print(f"  Codigo salvo em: {output_path}")
     binary = output_path.parent / "output"
     if binary.exists():
-        print(f"  ✓ Binário pronto:  {binary}")
+        print(f"  Binario pronto:  {binary}")
     else:
-        print(f"  ✗ Binário não gerado (veja erros acima)")
+        print("  Binario nao gerado (veja erros acima)")
     print("=" * 60 + "\n")
 
 

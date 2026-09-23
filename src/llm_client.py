@@ -1,7 +1,10 @@
 import os
 import time
 import logging
+from typing import Any
 from openai import OpenAI, RateLimitError, APIStatusError
+
+from src.trace import RunTrace, utc_now
 
 OPENROUTER_MODELS: dict[str, str] = {
     # Gratuitos
@@ -106,11 +109,27 @@ class LLMClient:
         LLMClient("nim:meta/llama-3.1-70b-instruct") # nome direto NIM
     """
 
-    def __init__(self, model: str | None = None, delay: int = 0):
+    def __init__(
+        self,
+        model: str | None = None,
+        delay: int = 0,
+        trace: RunTrace | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        seed: int | None = None,
+        max_tokens: int | None = None,
+    ):
         raw = model or DEFAULT_MODEL
         provider, base_url, self.model = _resolve(raw)
         self.provider = provider
         self.delay = delay
+        self.trace = trace
+        self.generation_parameters = {
+            "temperature": temperature,
+            "top_p": top_p,
+            "seed": seed,
+            "max_tokens": max_tokens,
+        }
 
         _ENV_KEYS = {
             "groq":        "GROQ_API_KEY",
@@ -133,7 +152,7 @@ class LLMClient:
     _MAX_WAIT_S      = 60
     _RETRYABLE_CODES = {429, 502, 503, 504}
 
-    def chat(self, system: str, user: str) -> str:
+    def chat(self, system: str, user: str, stage: str = "unspecified") -> str:
         """
         Envia uma mensagem ao modelo e retorna a resposta como string.
 
@@ -148,6 +167,9 @@ class LLMClient:
             Texto da resposta do modelo.
         """
         log = logging.getLogger("llm_client")
+        started_at = utc_now()
+        started = time.perf_counter()
+        attempts: list[dict[str, Any]] = []
 
         if self.delay > 0:
             time.sleep(self.delay)
@@ -157,21 +179,58 @@ class LLMClient:
 
         for attempt in range(1, self._MAX_RETRIES + 1):
             try:
-                response = self._client.chat.completions.create(
-                    model=self.model,
-                    messages=[
+                request: dict[str, Any] = {
+                    "model": self.model,
+                    "messages": [
                         {"role": "system", "content": system},
-                        {"role": "user",   "content": user},
+                        {"role": "user", "content": user},
                     ],
+                }
+                request.update({
+                    key: value
+                    for key, value in self.generation_parameters.items()
+                    if value is not None
+                })
+                response = self._client.chat.completions.create(
+                    **request,
                 )
-                # Alguns provedores retornam choices=None em vez de recusar com texto
+                attempts.append({"attempt": attempt, "status": "completed"})
                 if not response.choices:
+                    self._record_call(
+                        stage,
+                        system,
+                        user,
+                        "",
+                        "empty_response",
+                        started_at,
+                        started,
+                        attempts,
+                        response,
+                    )
                     return ""
                 content = response.choices[0].message.content
-                return content.strip() if content else ""
+                output = content.strip() if content else ""
+                self._record_call(
+                    stage,
+                    system,
+                    user,
+                    output,
+                    "completed" if output else "empty_response",
+                    started_at,
+                    started,
+                    attempts,
+                    response,
+                )
+                return output
 
             except RateLimitError as e:
                 last_exc = e
+                attempts.append({
+                    "attempt": attempt,
+                    "status": "retryable_error",
+                    "error_type": type(e).__name__,
+                    "message": str(e),
+                })
                 log.warning(
                     f"[Retry {attempt}/{self._MAX_RETRIES}] Rate limit (429). "
                     f"Aguardando {wait}s..."
@@ -179,18 +238,115 @@ class LLMClient:
             except APIStatusError as e:
                 if e.status_code in self._RETRYABLE_CODES:
                     last_exc = e
+                    attempts.append({
+                        "attempt": attempt,
+                        "status": "retryable_error",
+                        "error_type": type(e).__name__,
+                        "status_code": e.status_code,
+                        "message": str(e),
+                    })
                     log.warning(
                         f"[Retry {attempt}/{self._MAX_RETRIES}] HTTP {e.status_code}. "
                         f"Aguardando {wait}s..."
                     )
                 else:
-                    raise  # Erro não-retryable, propaga imediatamente
+                    attempts.append({
+                        "attempt": attempt,
+                        "status": "error",
+                        "error_type": type(e).__name__,
+                        "status_code": e.status_code,
+                        "message": str(e),
+                    })
+                    self._record_call(
+                        stage,
+                        system,
+                        user,
+                        None,
+                        "api_error",
+                        started_at,
+                        started,
+                        attempts,
+                        error=e,
+                    )
+                    raise
+            except Exception as e:
+                attempts.append({
+                    "attempt": attempt,
+                    "status": "error",
+                    "error_type": type(e).__name__,
+                    "message": str(e),
+                })
+                self._record_call(
+                    stage,
+                    system,
+                    user,
+                    None,
+                    "api_error",
+                    started_at,
+                    started,
+                    attempts,
+                    error=e,
+                )
+                raise
 
             if attempt < self._MAX_RETRIES:
                 time.sleep(wait)
                 wait = min(wait * 2, self._MAX_WAIT_S)
 
+        self._record_call(
+            stage,
+            system,
+            user,
+            None,
+            "api_error",
+            started_at,
+            started,
+            attempts,
+            error=last_exc,
+        )
         raise last_exc  # type: ignore[misc]
+
+    def _record_call(
+        self,
+        stage: str,
+        system: str,
+        user: str,
+        output: str | None,
+        status: str,
+        started_at: str,
+        started: float,
+        attempts: list[dict[str, Any]],
+        response: Any = None,
+        error: BaseException | None = None,
+    ) -> None:
+        if self.trace is None:
+            return
+        usage = getattr(response, "usage", None)
+        usage_data = None
+        if usage is not None:
+            usage_data = {
+                "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                "completion_tokens": getattr(usage, "completion_tokens", None),
+                "total_tokens": getattr(usage, "total_tokens", None),
+            }
+        metadata = {
+            "status": status,
+            "started_at": started_at,
+            "finished_at": utc_now(),
+            "duration_seconds": round(time.perf_counter() - started, 6),
+            "provider": self.provider,
+            "requested_model": self.model,
+            "response_model": getattr(response, "model", None),
+            "response_id": getattr(response, "id", None),
+            "parameters": self.generation_parameters,
+            "usage": usage_data,
+            "attempts": attempts,
+            "error": None if error is None else {
+                "type": type(error).__name__,
+                "message": str(error),
+            },
+        }
+        self.trace.record_llm_call(stage, system, user, output, metadata)
 
     def __repr__(self) -> str:
         return f"LLMClient(provider={self.provider!r}, model={self.model!r})"

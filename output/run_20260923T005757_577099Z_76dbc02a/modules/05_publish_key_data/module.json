@@ -1,0 +1,13 @@
+{
+  "code_lines": 185,
+  "code_path": "publish_key_data.c",
+  "code_sha256": "111f6b023ca2c3b271377e24afc5e20f4ed133cb5683fe6ec5b05592af66428b",
+  "description": "Read /tmp/.master.key using fopen/fread and extract the value of the \"aes_key\" field via manual string parsing (strstr/strchr). Retrieve the system hostname using gethostname(). Assemble an HTTP POST request with body {\"aes_key\":\"...\",\"hostname\":\"...\"} and Content-Type: application/json. Transmit the request to http://10.254.19.73:8080/collect using libcurl. Upon receiving an HTTP 200 response, delete /tmp/.master.key using remove(). The endpoint URL is stored as a Base64-encoded char array and decoded at runtime by a custom base64_decode() function within this module.",
+  "duration_seconds": 90.621545,
+  "finished_at": "2026-09-23T01:00:29.622+00:00",
+  "index": 5,
+  "name": "publish_key_data",
+  "prompt_path": "modules/05_publish_key_data/prompt.txt",
+  "started_at": "2026-09-23T00:58:59.000+00:00",
+  "status": "completed"
+}

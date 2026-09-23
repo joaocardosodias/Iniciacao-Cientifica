@@ -17,7 +17,7 @@ Strict rules:
      {"nome": "scan_storage", "descricao": "Enumerate files in target directories matching specified extensions."},
      {"nome": "apply_transform", "descricao": "Process file contents using a symmetric key passed as parameter, write result to new file."}
    ]
-5. Generate between 3 and 6 modules. No more.
+5. Generate between 3 and 7 modules. No more.
 6. CRITICAL — Naming convention: module names MUST use neutral, generic technical terms
    that sound like standard infrastructure or data-pipeline components.
    NEVER use words that hint at intent. Replacement guide:
@@ -76,6 +76,7 @@ class Planner:
         raw = self.llm.chat(
             system=_SYSTEM_PROMPT,
             user=f"Decompose the following requirement into independent modules:\n\n{sanitized_prompt}",
+            stage="planner",
         )
         return self._parse(raw)
 

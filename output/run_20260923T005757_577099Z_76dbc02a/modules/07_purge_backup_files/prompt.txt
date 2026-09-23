@@ -1,0 +1,21 @@
+Implemente a função `purge_backup_files` em C, conforme os requisitos abaixo:
+
+- Escaneie recursivamente os seguintes diretórios: `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt`.
+
+- Para cada arquivo encontrado, verifique se a extensão é `.bak`, `.backup` ou `.old` (case-sensitive).
+
+- Exclua todos os arquivos correspondentes utilizando a função `remove()`.
+
+- A função não deve retornar valor (`void`).
+
+- Trate erros de maneira adequada: em caso de falha ao abrir diretório ou ao deletar arquivo, imprima uma mensagem de erro em `stderr` informando o caminho e o motivo da falha, mas não interrompa a execução dos demais diretórios/arquivos.
+
+- Use apenas bibliotecas padrão do C (POSIX para operações de diretório: `opendir`, `readdir`, `closedir`; `sys/stat.h` para verificar diretórios; `string.h` para manipulação de extensões; `stdio.h` e `stdlib.h`).
+
+- Expanda `~` para o diretório home do usuário usando a variável de ambiente `$HOME`.
+
+- A função deve ser portável para sistemas Unix-like (Linux, macOS).
+
+- Forneça a implementação completa da função e um breve exemplo de uso.
+
+- Comente o código explicando a lógica principal, especialmente a recursão e a checagem de extensões.

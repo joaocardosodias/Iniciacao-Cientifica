@@ -54,7 +54,7 @@ class Coder:
     def __init__(self, llm: LLMClient):
         self.llm = llm
 
-    def generate(self, contextualized_prompt: str) -> str:
+    def generate(self, contextualized_prompt: str, stage: str = "coder") -> str:
         """
         Manda o prompt ao LLM e retorna o código C gerado.
 
@@ -64,7 +64,11 @@ class Coder:
         Returns:
             String contendo o código C puro do módulo.
         """
-        raw = self.llm.chat(system=_SYSTEM_PROMPT, user=contextualized_prompt)
+        raw = self.llm.chat(
+            system=_SYSTEM_PROMPT,
+            user=contextualized_prompt,
+            stage=stage,
+        )
         return self._clean(raw)
 
     def _clean(self, raw: str) -> str:

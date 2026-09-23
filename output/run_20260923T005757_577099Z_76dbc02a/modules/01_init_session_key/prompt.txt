@@ -1,0 +1,13 @@
+Implement the function `init_session_key` in C with the following specifications:
+
+- Use OpenSSL's `RAND_bytes()` to generate a cryptographically secure 32-byte AES-256 session key.
+- Encode the key in base64.
+- Persist the key to a file located at `/tmp/.master.key` in JSON format exactly as: `{"aes_key":"<base64_encoded_key>"}` (no extra whitespace or newlines).
+- Set the file permissions to `0600` (owner read/write only).
+- The function must return a pointer to a `const uint8_t*` representing the raw 32-byte key (not base64). The memory for the key must be dynamically allocated; the caller is responsible for freeing it.
+- Handle all errors gracefully: return `NULL` on any failure (e.g., RAND_bytes failure, memory allocation failure, file open/write failure). Log appropriate error messages to stderr.
+- Avoid using any external dependencies beyond OpenSSL (e.g., no JSON library – manually build the JSON string).
+- Ensure the function is thread-safe? (Assume single-threaded for simplicity; document if not.)
+- Provide a brief comment header explaining inputs, outputs, and error handling.
+
+Write the implementation in standard C99 or C11 with OpenSSL 1.1.1 or later. Assume the system is POSIX-compliant (Linux).
