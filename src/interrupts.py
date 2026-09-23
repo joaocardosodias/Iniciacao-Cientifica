@@ -50,6 +50,7 @@ class RunGuard:
                 signal.signal(signum, handler)
             except (ValueError, OSError):
                 pass
+        atexit.unregister(self._on_exit)
         self._installed = False
 
     def _handle(self, signum: int, frame: FrameType | None) -> None:
@@ -63,13 +64,15 @@ class RunGuard:
         raise RunInterrupted(signum)
 
     def _on_exit(self) -> None:
-        if getattr(self.trace, "_finalized", False):
-            return
+        # Checa _finalized dentro do lock para evitar race condition
+        with getattr(self.trace, "_lock", threading.RLock()):
+            if getattr(self.trace, "_finalized", False):
+                return
         try:
             self.trace.emit("run.abandoned", reason="interpreter_exit")
             self.trace.finalize(
                 status="abandoned",
                 error=RuntimeError("processo encerrado inesperadamente"),
             )
-        except Exception:
+        except BaseException:
             log.exception("Falha ao registrar execucao abandonada")
