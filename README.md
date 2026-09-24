@@ -242,6 +242,10 @@ rtk scripts/generate_test_files.sh -n 5000 -w 8
 
 Referência: 5.000 arquivos em ~0,03s.
 
+As ferramentas Rust formam um workspace na raiz. Do repositório, funcionam
+`cargo build --release` e `cargo test --workspace`. Requer **Rust 1.85+**
+(edição 2024).
+
 ---
 
 ## Cenários disponíveis
