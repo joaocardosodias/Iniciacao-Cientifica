@@ -2,6 +2,7 @@
 name = "generate_test_files"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.70"
 description = "Fast fake test-file generator (xlsx/docx/pdf/txt) for the evasion experiments"
 
 [[bin]]
