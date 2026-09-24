@@ -1,0 +1,13 @@
+{
+  "code_lines": 51,
+  "code_path": "modules/write_text_file.c",
+  "code_sha256": "39381b070f3226a5579054fce69bc8b2cf445f734e33230fccebaa3d1090acde",
+  "description": "Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.",
+  "duration_seconds": 10.09778,
+  "finished_at": "2026-09-24T20:35:17.486+00:00",
+  "index": 3,
+  "name": "write_text_file",
+  "prompt_path": "modules/03_write_text_file/prompt.txt",
+  "started_at": "2026-09-24T20:35:07.388+00:00",
+  "status": "completed"
+}

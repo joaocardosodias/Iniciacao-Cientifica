@@ -1,0 +1,30 @@
+The directory already contains main.c, config.h and these module files:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+- module_06.c
+- module_07.c
+- module_08.c
+- module_09.c
+
+main.c and config.h are CORRECT — do not change them.
+
+The build command is:
+gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 -I. -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c module_06.c module_07.c module_08.c module_09.c -lssl -lcrypto -lcurl
+
+The current compiler error is:
+module_06.c: In function ‘secure_erase’:
+module_06.c:69:12: error: implicit declaration of function ‘remove’; did you mean ‘revoke’? [-Wimplicit-function-declaration]
+   69 |     return remove(path) == 0 ? 0 : -1;
+      |            ^~~~~~
+      |            revoke
+
+
+TASK:
+1. Apply the MINIMAL fixes to the module files needed to compile.
+   Typical fixes: add a missing #include, declare a missing prototype,
+   add a missing type definition. Keep each module's logic unchanged.
+2. Do NOT rewrite module logic. Do NOT change main.c or config.h.
+3. Re-run the build command after each fix until 'output' exists.

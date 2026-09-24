@@ -1,0 +1,13 @@
+{
+  "code_lines": 212,
+  "code_path": "modules/list_target_files.c",
+  "code_sha256": "4cbf9c3c218da22f355a9ec071a63374e2bbc9277ccfd96593de9cdfbb30809b",
+  "description": "Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with any extension in `exts`. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.",
+  "duration_seconds": 47.72042,
+  "finished_at": "2026-09-24T20:35:55.109+00:00",
+  "index": 4,
+  "name": "list_target_files",
+  "prompt_path": "modules/04_list_target_files/prompt.txt",
+  "started_at": "2026-09-24T20:35:07.389+00:00",
+  "status": "completed"
+}

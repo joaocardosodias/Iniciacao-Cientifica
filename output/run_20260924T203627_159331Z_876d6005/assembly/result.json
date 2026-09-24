@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "binary_exists": true,
+  "duration_seconds": 37.12078,
+  "finished_at": "2026-09-24T20:37:46.622+00:00",
+  "main_c_exists": true,
+  "model": "openrouter/openai/gpt-6-luna",
+  "return_code": 0,
+  "signatures_found": 9,
+  "started_at": "2026-09-24T20:37:09.501+00:00",
+  "status": "completed"
+}

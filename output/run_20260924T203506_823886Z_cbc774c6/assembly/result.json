@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "binary_exists": false,
+  "duration_seconds": 20.273097,
+  "finished_at": "2026-09-24T20:36:15.819+00:00",
+  "main_c_exists": true,
+  "model": "openrouter/openai/gpt-6-sol",
+  "return_code": 0,
+  "signatures_found": 9,
+  "started_at": "2026-09-24T20:35:55.546+00:00",
+  "status": "compile_failed"
+}
