@@ -231,8 +231,12 @@ A geração roda em paralelo por padrão (todos os núcleos). Para ajustar:
 
 ```bash
 rtk python scripts/generate_test_files.py -n 5000 -w 8   # 8 processos
-rtk python scripts/generate_test_files.py -n 5000 --simple  # conteúdo barato (muito mais rápido)
+rtk python scripts/generate_test_files.py -n 5000 --simple  # conteúdo barato (mais rápido)
+rtk python scripts/generate_test_files.py -n 5000 --template  # formatos válidos por cópia
 ```
+
+Referência (5.000 arquivos): realista paralelo ~17s, `--template` ~1,7s, `--simple` ~0,7s.
+`--template` gera um pool de arquivos realistas e os copia, produzindo `.xlsx/.docx/.pdf` válidos.
 
 ---
 

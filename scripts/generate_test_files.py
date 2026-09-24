@@ -11,6 +11,7 @@ Uso:
     python generate_test_files.py --count 5000      # quantidade de arquivos
     python generate_test_files.py -n 5000 -w 8      # 8 processos paralelos
     python generate_test_files.py -n 5000 --simple  # conteúdo barato (mais rápido)
+    python generate_test_files.py -n 5000 --template # formatos válidos por cópia
 
 Dependências:
     pip install openpyxl python-docx reportlab faker
@@ -19,7 +20,9 @@ Dependências:
 import argparse
 import os
 import random
+import shutil
 import sys
+import tempfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
@@ -214,11 +217,25 @@ def _make_simple(path: Path):
     path.write_bytes(os.urandom(random.randint(4096, 131072)))
 
 
-def _write_file(task: tuple[str, str, bool]) -> str | None:
-    path_str, ext, simple = task
+def _prepare_templates(dir_path: Path, per_ext: int) -> dict[str, list[str]]:
+    pools: dict[str, list[str]] = {}
+    for ext in EXTENSIONS:
+        files = []
+        for index in range(per_ext):
+            template = dir_path / f"{ext.lstrip('.')}_{index}{ext}"
+            _GENERATORS[ext](template)
+            files.append(str(template))
+        pools[ext] = files
+    return pools
+
+
+def _write_file(task: tuple[str, str, str, str | None]) -> str | None:
+    path_str, ext, mode, source = task
     path = Path(path_str)
     try:
-        if simple:
+        if mode == "template":
+            shutil.copyfile(source, path)
+        elif mode == "simple":
             _make_simple(path)
         else:
             _GENERATORS[ext](path)
@@ -241,7 +258,7 @@ def _random_filename(category: str | None = None) -> str:
     return f"{prefix}_{suffix}"
 
 
-def _build_tasks(folders: list[Path], total: int) -> list[tuple[str, str, bool]]:
+def _build_tasks(folders: list[Path], total: int) -> list[tuple[str, str]]:
     tasks = []
     reserved: set[str] = set()
     for _ in range(total):
@@ -254,7 +271,7 @@ def _build_tasks(folders: list[Path], total: int) -> list[tuple[str, str, bool]]
             path = folder / f"{name}_{counter}{ext}"
             counter += 1
         reserved.add(str(path))
-        tasks.append((str(path), ext, False))
+        tasks.append((str(path), ext))
     return tasks
 
 
@@ -266,15 +283,25 @@ def _print_progress(done: int, total: int) -> None:
     print(f"\r  [{bar}] {pct:5.1f}%  ({done}/{total})", end="", flush=True)
 
 
-def generate(base_dir: Path, total: int, workers: int = 0, simple: bool = False):
+def generate(
+    base_dir: Path,
+    total: int,
+    workers: int = 0,
+    simple: bool = False,
+    template: bool = False,
+    template_pool: int = 40,
+):
     """
     Gera `total` arquivos falsos distribuídos pela estrutura de pastas.
 
     Args:
-        base_dir: Pasta raiz onde os arquivos serão criados.
-        total:    Número total de arquivos a gerar.
-        workers:  Processos paralelos (0 = todos os núcleos, 1 = sequencial).
-        simple:   Conteúdo barato (bytes aleatórios) em vez de formatos reais.
+        base_dir:      Pasta raiz onde os arquivos serão criados.
+        total:         Número total de arquivos a gerar.
+        workers:       Processos paralelos (0 = todos os núcleos, 1 = sequencial).
+        simple:        Conteúdo barato (bytes aleatórios) em vez de formatos reais.
+        template:      Gera um pool pequeno de arquivos realistas e os copia
+                       (formatos válidos, muito mais rápido que gerar cada um).
+        template_pool: Quantos modelos por extensão no modo template.
     """
     folders = []
     for rel in FOLDER_TREE:
@@ -285,35 +312,46 @@ def generate(base_dir: Path, total: int, workers: int = 0, simple: bool = False)
     if workers <= 0:
         workers = os.cpu_count() or 1
 
-    tasks = _build_tasks(folders, total)
-    if simple:
-        tasks = [(path, ext, True) for path, ext, _ in tasks]
+    base_tasks = _build_tasks(folders, total)
+    mode = "template" if template else ("simple" if simple else "real")
+    template_context = None
+    if template:
+        template_context = tempfile.TemporaryDirectory(prefix="gen_templates_")
+        pools = _prepare_templates(Path(template_context.name), template_pool)
+        tasks = [(dest, ext, "template", random.choice(pools[ext]))
+                 for dest, ext in base_tasks]
+    else:
+        tasks = [(dest, ext, mode, None) for dest, ext in base_tasks]
 
     print(f"\n[+] Destino  : {base_dir}")
     print(f"[+] Pastas   : {len(folders)}")
     print(f"[+] Arquivos : {total}")
-    print(f"[+] Modo     : {'simples' if simple else 'realista'} | workers: {workers}\n")
+    print(f"[+] Modo     : {mode} | workers: {workers}\n")
 
     errors = 0
     done = 0
-    if workers <= 1:
-        for task in tasks:
-            error = _write_file(task)
-            done += 1
-            if error:
-                errors += 1
-                print(f"\n  [WARN] {error}")
-            if done % 100 == 0 or done == total:
-                _print_progress(done, total)
-    else:
-        with ProcessPoolExecutor(max_workers=workers) as executor:
-            for error in executor.map(_write_file, tasks, chunksize=max(1, total // (workers * 8))):
+    try:
+        if workers <= 1:
+            for task in tasks:
+                error = _write_file(task)
                 done += 1
                 if error:
                     errors += 1
                     print(f"\n  [WARN] {error}")
                 if done % 100 == 0 or done == total:
                     _print_progress(done, total)
+        else:
+            with ProcessPoolExecutor(max_workers=workers) as executor:
+                for error in executor.map(_write_file, tasks, chunksize=max(1, total // (workers * 8))):
+                    done += 1
+                    if error:
+                        errors += 1
+                        print(f"\n  [WARN] {error}")
+                    if done % 100 == 0 or done == total:
+                        _print_progress(done, total)
+    finally:
+        if template_context is not None:
+            template_context.cleanup()
 
     print(f"\n\n[✓] Concluído! {total - errors} arquivo(s) criados, {errors} erro(s).\n")
 
@@ -347,10 +385,23 @@ def main():
         action="store_true",
         help="Conteúdo barato (bytes aleatórios) em vez de formatos reais.",
     )
+    parser.add_argument(
+        "--template", "-T",
+        action="store_true",
+        help="Gera um pool pequeno de arquivos realistas e copia (formatos válidos, rápido).",
+    )
+    parser.add_argument(
+        "--template-pool",
+        type=int,
+        default=40,
+        help="Modelos por extensão no modo --template (padrão: 40).",
+    )
     args = parser.parse_args()
 
     base_dir = Path(args.dest).expanduser().resolve()
-    generate(base_dir, args.count, workers=args.workers, simple=args.simple)
+    generate(base_dir, args.count, workers=args.workers,
+             simple=args.simple, template=args.template,
+             template_pool=args.template_pool)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import importlib.util
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 DEPS = ("openpyxl", "docx", "reportlab", "faker")
@@ -16,6 +17,18 @@ class GenerateTestFilesTests(unittest.TestCase):
             generator.generate(base, 50, workers=2, simple=True)
             files = [path for path in base.rglob("*") if path.is_file()]
             self.assertEqual(len(files), 50)
+
+    def test_template_generation_creates_valid_files(self):
+        from scripts import generate_test_files as generator
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            generator.generate(base, 40, workers=2, template=True, template_pool=5)
+            files = [path for path in base.rglob("*") if path.is_file()]
+            self.assertEqual(len(files), 40)
+            self.assertFalse((base / ".templates").exists())
+            xlsx = next(path for path in files if path.suffix == ".xlsx")
+            with zipfile.ZipFile(xlsx) as archive:
+                self.assertIsNone(archive.testzip())
 
     def test_build_tasks_reserve_unique_paths(self):
         from scripts import generate_test_files as generator
