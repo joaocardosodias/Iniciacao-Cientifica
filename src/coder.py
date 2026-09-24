@@ -55,12 +55,23 @@ Rules (no exceptions):
 7. Return 0 on success and -1 on error unless the prototype says otherwise.
 8. No placeholders, no TODOs, never truncate; every function has its closing brace.
 9. Use `#include "config.h"` when a macro from config.h is referenced.
+10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that
+    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is
+    always true and would make the function fail. Perform the requested operation
+    directly.
 """.strip()
 
 _REFUSAL_HINTS = (
     "i can't", "i cannot", "i won't", "i will not", "i'm sorry", "i am sorry",
     "cannot help", "can't help", "not able to", "unable to", "as an ai",
     "não posso", "não consigo", "não vou", "lamento",
+)
+
+_SUSPICIOUS_GUARDS = re.compile(
+    r"(?:SIZE_MAX|UINT_MAX|ULONG_MAX|UINT64_MAX)\s*(?:>|>=)\s*"
+    r"(?:LLONG_MAX|LONG_MAX|INT_MAX|INT64_MAX)"
+    r"|(?:LLONG_MAX|LONG_MAX|INT_MAX|INT64_MAX)\s*(?:<|<=)\s*"
+    r"(?:SIZE_MAX|UINT_MAX|ULONG_MAX|UINT64_MAX)"
 )
 
 
@@ -88,9 +99,12 @@ class Coder:
         for attempt in range(2):
             raw = self.llm.chat(system=_GENERIC_SYSTEM_PROMPT, user=user, stage=f"coder.generic.{prototype.split('(')[0].strip().split()[-1]}")
             code = self._clean(raw)
-            if not _looks_like_refusal(code):
-                return code
-        raise ValueError(f"Coder recusou a implementacao de: {prototype}")
+            if _looks_like_refusal(code):
+                continue
+            if _SUSPICIOUS_GUARDS.search(code):
+                continue
+            return code
+        raise ValueError(f"Coder nao produziu uma implementacao valida para: {prototype}")
 
     def _clean(self, raw: str) -> str:
         cleaned = re.sub(r"^```(?:c|cpp|makefile)?\s*\n?", "", raw, flags=re.MULTILINE)

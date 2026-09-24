@@ -1,0 +1,46 @@
+import unittest
+
+from src.coder import Coder, _SUSPICIOUS_GUARDS
+
+
+class FakeLLM:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.model = "fake/model"
+        self.calls = []
+
+    def chat(self, system, user, stage="unspecified"):
+        self.calls.append(stage)
+        return self.responses.pop(0)
+
+
+class CoderGuardTests(unittest.TestCase):
+    def test_detects_always_true_macro_guards(self):
+        self.assertTrue(_SUSPICIOUS_GUARDS.search("if (SIZE_MAX > LLONG_MAX) return -1;"))
+        self.assertTrue(_SUSPICIOUS_GUARDS.search("if (LLONG_MAX < SIZE_MAX) return -1;"))
+        self.assertFalse(_SUSPICIOUS_GUARDS.search("if (n > SIZE_MAX - 1) return -1;"))
+        self.assertFalse(_SUSPICIOUS_GUARDS.search("if (SIZE_MAX < LLONG_MAX) return -1;"))
+
+    def test_generate_generic_retries_on_suspicious_guard(self):
+        bad = (
+            "#define _GNU_SOURCE\n"
+            "int f(void) { if (SIZE_MAX > LLONG_MAX) return -1; return 0; }\n"
+        )
+        good = "#define _GNU_SOURCE\nint f(void) { return 0; }\n"
+        llm = FakeLLM([bad, good])
+        code = Coder(llm).generate_generic("implement f", "int f(void);")
+        self.assertNotIn("LLONG_MAX", code)
+        self.assertEqual(len(llm.calls), 2)
+
+    def test_generate_generic_raises_when_always_bad(self):
+        bad = (
+            "#define _GNU_SOURCE\n"
+            "int f(void) { if (SIZE_MAX > LLONG_MAX) return -1; return 0; }\n"
+        )
+        llm = FakeLLM([bad, bad])
+        with self.assertRaises(ValueError):
+            Coder(llm).generate_generic("implement f", "int f(void);")
+
+
+if __name__ == "__main__":
+    unittest.main()

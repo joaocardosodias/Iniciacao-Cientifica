@@ -1,0 +1,41 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "0c7a337cf80d",
+  "duration_seconds": 23.725457,
+  "error": null,
+  "finished_at": "2026-09-24T03:19:37.892+00:00",
+  "hashes": {
+    "response_sha256": "b5e42f0b54e87f23f20ac9a88f7924ece75fef444aa5737698d3787f43100a60",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "27de157901b04250d194c368b7ed4585804ab773bab05eb51a8042330c5cb906"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n\n#include <errno.h>\n#include <fcntl.h>\n#include <openssl/evp.h>\n#include <openssl/rand.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <sys/types.h>\n#include <unistd.h>\n\nstatic int\nwrite_all_fd(int fd, const unsigned char *buf, size_t len)\n{\n    while (len > 0) {\n        ssize_t n = write(fd, buf, len);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        buf += (size_t)n;\n        len -= (size_t)n;\n    }\n    return 0;\n}\n\nint\nwrite_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len)\n{\n    unsigned char nonce[12];\n    unsigned char inbuf[65536];\n    unsigned char outbuf[65552];\n    unsigned char tag[16];\n    EVP_CIPHER_CTX *ctx = NULL;\n    char *output_path = NULL;\n    char *temp_path = NULL;\n    int input_fd = -1;\n    int output_fd = -1;\n    int temp_created = 0;\n    int result = -1;\n    int out_len;\n\n    if (path == NULL || key == NULL || key_len != 32)\n        return -1;\n\n    if (asprintf(&output_path, \"%s%s\", path, ENCRYPTED_SUFFIX) < 0)\n        return -1;\n    if (asprintf(&temp_path, \"%s.tmp.XXXXXX\", output_path) < 0)\n        goto done;\n\n    input_fd = open(path, O_RDONLY | O_CLOEXEC);\n    if (input_fd < 0)\n        goto done;\n\n    if (RAND_bytes(nonce, sizeof(nonce)) != 1)\n        goto done;\n\n    ctx = EVP_CIPHER_CTX_new();\n    if (ctx == NULL)\n        goto done;\n    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1 ||\n        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(nonce), NULL) != 1 ||\n        EVP_EncryptInit_ex(ctx, NULL, NULL, key, nonce) != 1)\n        goto done;\n\n    output_fd = mkstemp(temp_path);\n    if (output_fd < 0)\n        goto done;\n    temp_created = 1;\n\n    if (write_all_fd(output_fd, nonce, sizeof(nonce)) < 0)\n        goto done;\n\n    for (;;) {\n        ssize_t n = read(input_fd, inbuf, sizeof(inbuf));\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            goto done;\n        }\n        if (n == 0)\n            break;\n\n        if (EVP_EncryptUpdate(ctx, outbuf, &out_len, inbuf, (int)n) != 1)\n            goto done;\n        if (write_all_fd(output_fd, outbuf, (size_t)out_len) < 0)\n            goto done;\n    }\n\n    if (EVP_EncryptFinal_ex(ctx, outbuf, &out_len) != 1)\n        goto done;\n    if (write_all_fd(output_fd, outbuf, (size_t)out_len) < 0)\n        goto done;\n    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, sizeof(tag), tag) != 1)\n        goto done;\n    if (write_all_fd(output_fd, tag, sizeof(tag)) < 0)\n        goto done;\n\n    if (close(input_fd) < 0) {\n        input_fd = -1;\n        goto done;\n    }\n    input_fd = -1;\n\n    if (close(output_fd) < 0) {\n        output_fd = -1;\n        goto done;\n    }\n    output_fd = -1;\n\n    if (rename(temp_path, output_path) < 0)\n        goto done;\n    temp_created = 0;\n    result = 0;\n\ndone:\n    if (input_fd >= 0)\n        close(input_fd);\n    if (output_fd >= 0)\n        close(output_fd);\n    if (temp_created)\n        unlink(temp_path);\n    EVP_CIPHER_CTX_free(ctx);\n    free(temp_path);\n    free(output_path);\n    return result;\n}",
+  "response_id": "gen-1790219954-U89PqU7bNjyVu1VBzfdY",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.write_encrypted_sibling",
+  "started_at": "2026-09-24T03:19:14.167+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 2792,
+    "cost": 0.0014367,
+    "prompt_tokens": 407,
+    "total_tokens": 3199
+  },
+  "user": "TASK: Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and write the result to a new file whose name is `path` concatenated with the macro `ENCRYPTED_SUFFIX` from `config.h`. The output layout is `[12-byte nonce][ciphertext][16-byte tag]`. Return 0 on success and -1 on failure. Use the OpenSSL EVP API.\n\nEXACT PROTOTYPE (must match): int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);\n\nReturn ONLY the C source implementing that function."
+}

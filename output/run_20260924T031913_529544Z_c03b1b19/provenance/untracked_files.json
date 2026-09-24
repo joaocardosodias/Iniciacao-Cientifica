@@ -1,0 +1,11 @@
+{
+  "files": [
+    {
+      "bytes": 1671,
+      "path": "tests/test_coder.py",
+      "sha256": "5d760cedd8e4104168b26bce796edc549cb9797ca360e5cfb281140e76d28b7e",
+      "stored": "untracked/tests/test_coder.py"
+    }
+  ],
+  "stored_count": 1
+}
