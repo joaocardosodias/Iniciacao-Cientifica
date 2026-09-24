@@ -35,10 +35,11 @@ nenhum modelo individual vê a intenção global.
 ├── scripts/             # Utilitários de laboratório
 │   ├── c2_server.py         # Servidor C2 fake para capturar eventos
 │   ├── generate_test_files.sh   # Wrapper para o gerador Rust de arquivos falsos
-│   └── reset_vm.py          # Limpa todos os artefatos do experimento
+│   └── reset_vm.sh          # Wrapper para o limpador Rust do ambiente
 │
 ├── tools/
-│   └── generate_test_files/ # Gerador de arquivos falsos em Rust (sem dependências)
+│   ├── generate_test_files/ # Gerador de arquivos falsos em Rust (sem dependências)
+│   └── reset_vm/            # Limpador do ambiente de experimento em Rust
 │
 ├── tests/               # Testes automatizados sem chamadas externas
 │   └── test_traceability.py
@@ -227,7 +228,7 @@ Para preparar e limpar o ambiente de VM antes/depois de cada experimento:
 
 ```bash
 rtk scripts/generate_test_files.sh --count 500
-rtk python scripts/reset_vm.py
+rtk scripts/reset_vm.sh
 ```
 
 O gerador é um binário Rust (sem dependências externas) em

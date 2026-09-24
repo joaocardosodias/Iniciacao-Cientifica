@@ -1,0 +1,14 @@
+[package]
+name = "reset_vm"
+version = "0.1.0"
+edition = "2021"
+description = "Cleanup tool for the evasion experiment VM"
+
+[[bin]]
+name = "reset_vm"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
