@@ -231,18 +231,15 @@ rtk python scripts/reset_vm.py
 ```
 
 O gerador é um binário Rust (sem dependências externas) em
-`tools/generate_test_files/`. O wrapper compila uma vez e executa. A geração
-roda em paralelo por padrão (todos os núcleos). Para ajustar:
+`tools/generate_test_files/`. O wrapper compila uma vez e executa. Gera
+`.xlsx`, `.docx`, `.pdf` e `.txt` válidos, em paralelo (todos os núcleos):
 
 ```bash
-rtk scripts/generate_test_files.sh -n 5000 -w 8          # 8 threads
-rtk scripts/generate_test_files.sh -n 5000 --simple      # bytes aleatórios
-rtk scripts/generate_test_files.sh -n 5000 --template    # cópia de um pool realista
-rtk scripts/generate_test_files.sh -n 5000 -T --template-pool 80
+rtk scripts/generate_test_files.sh -n 5000
+rtk scripts/generate_test_files.sh -n 5000 -w 8
 ```
 
-Referência (5.000 arquivos): realista ~0,04s, `--template` ~0,03s,
-`--simple` ~0,05s. Todos geram `.xlsx/.docx/.pdf` válidos no modo realista.
+Referência: 5.000 arquivos em ~0,03s.
 
 ---
 

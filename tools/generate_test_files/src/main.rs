@@ -449,7 +449,7 @@ fn write_txt(path: &Path, rng: &mut Rng) -> io::Result<()> {
     let mut text = format!(
         "{} - {}\nData: {:04}-{:02}-{:02}\nAutor: {}\n\n",
         rng.pick(COMPANIES),
-        xml_escape(&sentence(rng)),
+        sentence(rng),
         rng.range(2018, 2026),
         rng.range(1, 13),
         rng.range(1, 29),
@@ -466,22 +466,7 @@ fn write_txt(path: &Path, rng: &mut Rng) -> io::Result<()> {
     fs::write(path, text)
 }
 
-fn write_simple(path: &Path, rng: &mut Rng) -> io::Result<()> {
-    let size = 4096 + rng.below(127 * 1024);
-    let mut buffer = vec![0u8; size];
-    let mut seed = rng.next_u64();
-    for chunk in buffer.chunks_mut(8) {
-        seed ^= seed >> 12;
-        seed ^= seed << 25;
-        seed ^= seed >> 27;
-        let bytes = seed.wrapping_mul(0x2545F4914F6CDD1D).to_le_bytes();
-        let length = chunk.len().min(8);
-        chunk[..length].copy_from_slice(&bytes[..length]);
-    }
-    fs::write(path, buffer)
-}
-
-fn write_real(path: &Path, extension: usize, rng: &mut Rng) -> io::Result<()> {
+fn write_file(path: &Path, extension: usize, rng: &mut Rng) -> io::Result<()> {
     match extension {
         0 => fs::write(path, build_xlsx(rng)),
         1 => fs::write(path, build_docx(rng)),
@@ -494,21 +479,6 @@ fn write_real(path: &Path, extension: usize, rng: &mut Rng) -> io::Result<()> {
 struct Task {
     path: PathBuf,
     extension: usize,
-    source: Option<PathBuf>,
-}
-
-fn process(task: &Task, mode: u8, rng: &mut Rng) -> io::Result<()> {
-    match mode {
-        2 => {
-            if let Some(source) = &task.source {
-                fs::copy(source, &task.path).map(|_| ())
-            } else {
-                Ok(())
-            }
-        }
-        1 => write_simple(&task.path, rng),
-        _ => write_real(&task.path, task.extension, rng),
-    }
 }
 
 fn build_tasks(folders: &[PathBuf], total: usize, rng: &mut Rng) -> Vec<Task> {
@@ -525,7 +495,7 @@ fn build_tasks(folders: &[PathBuf], total: usize, rng: &mut Rng) -> Vec<Task> {
             counter += 1;
         }
         reserved.insert(path.to_string_lossy().to_string());
-        tasks.push(Task { path, extension, source: None });
+        tasks.push(Task { path, extension });
     }
     tasks
 }
@@ -534,16 +504,12 @@ struct Options {
     dest: PathBuf,
     count: usize,
     workers: usize,
-    mode: u8,
-    template_pool: usize,
 }
 
 fn parse_args() -> Options {
     let mut dest: Option<PathBuf> = None;
     let mut count = 5000usize;
     let mut workers = 0usize;
-    let mut mode = 0u8;
-    let mut template_pool = 40usize;
 
     let args: Vec<String> = env::args().skip(1).collect();
     let mut index = 0;
@@ -557,12 +523,6 @@ fn parse_args() -> Options {
             "-w" | "--workers" => {
                 index += 1;
                 workers = args.get(index).and_then(|v| v.parse().ok()).unwrap_or(workers);
-            }
-            "-S" | "--simple" => mode = 1,
-            "-T" | "--template" => mode = 2,
-            "--template-pool" => {
-                index += 1;
-                template_pool = args.get(index).and_then(|v| v.parse().ok()).unwrap_or(template_pool);
             }
             "-h" | "--help" => {
                 print_usage();
@@ -580,46 +540,27 @@ fn parse_args() -> Options {
 
     let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
     let dest = dest.unwrap_or_else(|| PathBuf::from(home).join("Documentos_Teste"));
-    Options { dest, count, workers, mode, template_pool }
+    Options { dest, count, workers }
 }
 
 fn print_usage() {
     println!(
         "Uso: generate_test_files [DESTINO] [opcoes]\n\
          \n\
+         Gera arquivos realistas .xlsx/.docx/.pdf/.txt em uma arvore de pastas.\n\
+         \n\
          Opcoes:\n\
-           -n, --count N        total de arquivos (padrao: 5000)\n\
-           -w, --workers N      threads (padrao: todos os nucleos)\n\
-           -S, --simple         bytes aleatorios em vez de formatos reais\n\
-           -T, --template       copia um pool realista (formatos validos)\n\
-               --template-pool N  modelos por extensao no modo template (padrao: 40)\n\
-           -h, --help           esta ajuda"
+           -n, --count N      total de arquivos (padrao: 5000)\n\
+           -w, --workers N    threads (padrao: todos os nucleos)\n\
+           -h, --help         esta ajuda"
     );
-}
-
-fn prepare_templates(directory: &Path, per_extension: usize, rng: &mut Rng) -> io::Result<Vec<Vec<PathBuf>>> {
-    let mut pools = vec![Vec::new(); EXTENSIONS.len()];
-    for extension in 0..EXTENSIONS.len() {
-        for index in 0..per_extension {
-            let path = directory.join(format!(
-                "{}_{}{}",
-                EXTENSIONS[extension].trim_start_matches('.'),
-                index,
-                EXTENSIONS[extension]
-            ));
-            write_real(&path, extension, rng)?;
-            pools[extension].push(path);
-        }
-    }
-    Ok(pools)
 }
 
 fn main() {
     let options = parse_args();
-    let mode = options.mode;
     let count = options.count;
-
     let base = options.dest.clone();
+
     let mut folders = Vec::with_capacity(FOLDER_TREE.len());
     for relative in FOLDER_TREE {
         let folder = base.join(relative);
@@ -637,43 +578,12 @@ fn main() {
     };
 
     let mut rng = Rng::new(os_random_u64());
-    let mut tasks = build_tasks(&folders, count, &mut rng);
+    let tasks = build_tasks(&folders, count, &mut rng);
 
-    let mut templates_dir: Option<PathBuf> = None;
-    if mode == 2 {
-        let directory = env::temp_dir().join(format!(
-            "gen_templates_{}_{}",
-            process::id(),
-            rng.next_u64()
-        ));
-        if let Err(error) = fs::create_dir_all(&directory) {
-            eprintln!("[ERRO] nao foi possivel criar {}: {}", directory.display(), error);
-            process::exit(1);
-        }
-        match prepare_templates(&directory, options.template_pool, &mut rng) {
-            Ok(pools) => {
-                for task in tasks.iter_mut() {
-                    let pool = &pools[task.extension];
-                    task.source = Some(pool[rng.below(pool.len())].clone());
-                }
-            }
-            Err(error) => {
-                eprintln!("[ERRO] falha ao preparar modelos: {}", error);
-                process::exit(1);
-            }
-        }
-        templates_dir = Some(directory);
-    }
-
-    let mode_label = match mode {
-        2 => "template",
-        1 => "simple",
-        _ => "real",
-    };
     println!("\n[+] Destino  : {}", base.display());
     println!("[+] Pastas   : {}", folders.len());
     println!("[+] Arquivos : {}", count);
-    println!("[+] Modo     : {} | workers: {}\n", mode_label, workers);
+    println!("[+] Modo     : realista | workers: {}\n", workers);
 
     let tasks = Arc::new(tasks);
     let next = Arc::new(AtomicUsize::new(0));
@@ -698,7 +608,7 @@ fn main() {
                     break;
                 }
                 let task = &tasks[index];
-                if let Err(error) = process(task, mode, &mut rng) {
+                if let Err(error) = write_file(&task.path, task.extension, &mut rng) {
                     errors.fetch_add(1, Ordering::Relaxed);
                     let _guard = output_lock.lock().unwrap();
                     println!("\n  [WARN] {}: {}", task.path.display(), error);
@@ -717,10 +627,6 @@ fn main() {
 
     for handle in handles {
         let _ = handle.join();
-    }
-
-    if let Some(directory) = templates_dir {
-        let _ = fs::remove_dir_all(directory);
     }
 
     let failed = errors.load(Ordering::Relaxed);
