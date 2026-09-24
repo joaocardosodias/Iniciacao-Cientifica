@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "dea8fba7d142",
+  "duration_seconds": 23.274343,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T21:13:23.369+00:00",
+  "hashes": {
+    "response_sha256": "1f3ecb041e05fc60aea992864d4bcc80d302321406e67afca1cd1d82414d2735",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "4eecc31331a76c2fbfa9cd4694b0d888e4725865ac08c9c02a06b5c78bdc9624"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdint.h>\n#include <sys/types.h>\n#include <sys/wait.h>\n\nint schedule_autostart(const char *binary_path)\n{\n    FILE *input = NULL;\n    char *line = NULL;\n    size_t line_capacity = 0;\n    char *content = NULL;\n    size_t content_length = 0;\n    size_t content_capacity = 0;\n    int found = 0;\n    int read_error = 0;\n    int status;\n\n    if (binary_path == NULL)\n        return -1;\n\n    input = popen(\"crontab -l\", \"r\");\n    if (input == NULL)\n        return -1;\n\n    for (;;) {\n        ssize_t nread = getline(&line, &line_capacity, input);\n\n        if (nread < 0)\n            break;\n\n        if (strstr(line, \"@reboot\") != NULL &&\n            strstr(line, binary_path) != NULL)\n            found = 1;\n\n        if ((size_t)nread > SIZE_MAX - content_length - 1) {\n            read_error = 1;\n            break;\n        }\n\n        size_t needed = content_length + (size_t)nread + 1;\n        if (needed > content_capacity) {\n            size_t new_capacity = content_capacity ? content_capacity : 256;\n            while (new_capacity < needed) {\n                if (new_capacity > SIZE_MAX / 2) {\n                    new_capacity = needed;\n                    break;\n                }\n                new_capacity *= 2;\n            }\n\n            char *new_content = realloc(content, new_capacity);\n            if (new_content == NULL) {\n                read_error = 1;\n                break;\n            }\n            content = new_content;\n            content_capacity = new_capacity;\n        }\n\n        memcpy(content + content_length, line, (size_t)nread);\n        content_length += (size_t)nread;\n        content[content_length] = '\\0';\n    }\n\n    if (ferror(input))\n        read_error = 1;\n\n    free(line);\n    status = pclose(input);\n\n    if (read_error) {\n        free(content);\n        return -1;\n    }\n\n    if (status == -1 ||\n        (!WIFEXITED(status) ||\n         (WEXITSTATUS(status) != 0 &&\n          !(WEXITSTATUS(status) == 1 && content_length == 0)))) {\n        free(content);\n        return -1;\n    }\n\n    if (found) {\n        free(content);\n        return 0;\n    }\n\n    int entry_length = snprintf(NULL, 0, CRON_ENTRY_TEMPLATE, binary_path);\n    if (entry_length < 0) {\n        free(content);\n        return -1;\n    }\n\n    char *entry = malloc((size_t)entry_length + 1);\n    if (entry == NULL) {\n        free(content);\n        return -1;\n    }\n\n    if (snprintf(entry, (size_t)entry_length + 1, CRON_ENTRY_TEMPLATE,\n                 binary_path) != entry_length) {\n        free(entry);\n        free(content);\n        return -1;\n    }\n\n    size_t separator_length =\n        content_length > 0 && content[content_length - 1] != '\\n' ? 1 : 0;\n    size_t entry_size = (size_t)entry_length;\n    size_t trailing_newline =\n        entry_size == 0 || entry[entry_size - 1] != '\\n' ? 1 : 0;\n\n    if (separator_length > SIZE_MAX - content_length ||\n        entry_size > SIZE_MAX - content_length - separator_length ||\n        trailing_newline >\n            SIZE_MAX - content_length - separator_length - entry_size) {\n        free(entry);\n        free(content);\n        return -1;\n    }\n\n    size_t updated_length =\n        content_length + separator_length + entry_size + trailing_newline;\n    char *updated = realloc(content, updated_length + 1);\n    if (updated == NULL) {\n        free(entry);\n        free(content);\n        return -1;\n    }\n    content = updated;\n\n    size_t offset = content_length;\n    if (separator_length)\n        content[offset++] = '\\n';\n    memcpy(content + offset, entry, entry_size);\n    offset += entry_size;\n    if (trailing_newline)\n        content[offset++] = '\\n';\n    content[offset] = '\\0';\n    free(entry);\n\n    FILE *output = popen(\"crontab -\", \"w\");\n    if (output == NULL) {\n        free(content);\n        return -1;\n    }\n\n    int write_error = 0;\n    if (updated_length > 0 &&\n        fwrite(content, 1, updated_length, output) != updated_length)\n        write_error = 1;\n    if (fflush(output) != 0)\n        write_error = 1;\n\n    status = pclose(output);\n    free(content);\n\n    if (write_error || status == -1 || !WIFEXITED(status) ||\n        WEXITSTATUS(status) != 0)\n        return -1;\n\n    return 0;\n}",
+  "response_id": "gen-1790284380-u0i312menqhdKQsUQz81",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.schedule_autostart",
+  "started_at": "2026-09-24T21:13:00.095+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 2413,
+    "cost": 0.0012463,
+    "prompt_tokens": 398,
+    "total_tokens": 2811
+  },
+  "user": "TASK: Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int schedule_autostart(const char *binary_path);\n\nReturn ONLY the C source implementing that function."
+}

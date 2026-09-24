@@ -1,0 +1,13 @@
+{
+  "code_lines": 124,
+  "code_path": "modules/transmit_token.c",
+  "code_sha256": "90160024cd1eb1453801d44b7ca8e6018726239df204e7d2da1a1b4a438336a0",
+  "description": "Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.",
+  "duration_seconds": 25.899776,
+  "finished_at": "2026-09-24T21:13:25.987+00:00",
+  "index": 8,
+  "name": "transmit_token",
+  "prompt_path": "modules/08_transmit_token/prompt.txt",
+  "started_at": "2026-09-24T21:13:00.087+00:00",
+  "status": "completed"
+}

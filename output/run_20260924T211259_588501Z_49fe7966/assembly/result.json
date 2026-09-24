@@ -1,0 +1,10 @@
+{
+  "binary_exists": true,
+  "finished_at": "2026-09-24T21:13:26.618+00:00",
+  "main_c_exists": true,
+  "mode": "deterministic",
+  "model": "openrouter/openai/gpt-6-luna",
+  "return_code": 0,
+  "signatures_found": 9,
+  "status": "completed"
+}
