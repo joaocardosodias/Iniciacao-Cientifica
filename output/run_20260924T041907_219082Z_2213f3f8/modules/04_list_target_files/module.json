@@ -1,0 +1,13 @@
+{
+  "description": "Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with any extension in `exts`. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.",
+  "duration_seconds": 4.484891,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:12.367+00:00",
+  "index": 4,
+  "name": "list_target_files",
+  "started_at": "2026-09-24T04:19:07.882+00:00",
+  "status": "failed"
+}

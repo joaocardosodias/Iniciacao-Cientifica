@@ -1,0 +1,13 @@
+{
+  "description": "Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and write the result to a new file whose name is `path` concatenated with the macro `ENCRYPTED_SUFFIX` from `config.h`. The output layout is `[12-byte nonce][ciphertext][16-byte tag]`. Return 0 on success and -1 on failure. Use the OpenSSL EVP API.",
+  "duration_seconds": 3.893146,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:47.983+00:00",
+  "index": 5,
+  "name": "write_encrypted_sibling",
+  "started_at": "2026-09-24T04:19:44.090+00:00",
+  "status": "failed"
+}

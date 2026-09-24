@@ -1,0 +1,13 @@
+{
+  "description": "Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.",
+  "duration_seconds": 3.735055,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int transmit_token(const char *endpoint, const char *token_path);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:47.827+00:00",
+  "index": 8,
+  "name": "transmit_token",
+  "started_at": "2026-09-24T04:19:44.091+00:00",
+  "status": "failed"
+}

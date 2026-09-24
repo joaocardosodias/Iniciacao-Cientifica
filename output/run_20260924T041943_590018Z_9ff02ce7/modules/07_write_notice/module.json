@@ -1,0 +1,13 @@
+{
+  "description": "Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write the NUL-terminated contents of the macro `NOTICE_TEXT` (both from `config.h`). Return 0 on success and -1 on failure.",
+  "duration_seconds": 4.105434,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int write_notice(const char *directory);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:48.196+00:00",
+  "index": 7,
+  "name": "write_notice",
+  "started_at": "2026-09-24T04:19:44.091+00:00",
+  "status": "failed"
+}

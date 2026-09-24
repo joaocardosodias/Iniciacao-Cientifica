@@ -1,0 +1,10 @@
+{
+  "binary_exists": true,
+  "finished_at": "2026-09-24T04:29:09.101+00:00",
+  "main_c_exists": true,
+  "mode": "deterministic",
+  "model": "openrouter/openai/gpt-6-sol",
+  "return_code": 0,
+  "signatures_found": 9,
+  "status": "completed"
+}

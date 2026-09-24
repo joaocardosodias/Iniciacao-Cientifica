@@ -1,0 +1,13 @@
+{
+  "description": "Implement `secure_erase`: overwrite the file at `path` with zero bytes using its current length, close it, then remove it with `remove()`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 4.387384,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int secure_erase(const char *path);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:12.270+00:00",
+  "index": 6,
+  "name": "secure_erase",
+  "started_at": "2026-09-24T04:19:07.883+00:00",
+  "status": "failed"
+}

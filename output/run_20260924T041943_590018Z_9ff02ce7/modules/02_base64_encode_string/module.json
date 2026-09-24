@@ -1,0 +1,13 @@
+{
+  "description": "Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size` using OpenSSL `EVP_EncodeBlock`. Return 0 on success and -1 if the buffer is too small.",
+  "duration_seconds": 3.659511,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size);",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T04:19:47.748+00:00",
+  "index": 2,
+  "name": "base64_encode_string",
+  "started_at": "2026-09-24T04:19:44.088+00:00",
+  "status": "failed"
+}
