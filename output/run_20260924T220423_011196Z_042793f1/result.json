@@ -1,0 +1,297 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3761,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "82a12aac8826ed3751058f6579b122061da0ae143d9f8843daf814e651967330"
+    },
+    {
+      "bytes": 3968,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "342549b4c8d327b7aefce0870e6f7e550d8ed4460f3d9be72b78e2d6cbbd4e8f"
+    },
+    {
+      "bytes": 4553,
+      "path": "calls/0003_sanitizer.fragment_3.framing_1.json",
+      "sha256": "69da2454c78796f8a3404ddb8423b59ae880d9985fef846b25e3f8a4d9223950"
+    },
+    {
+      "bytes": 4606,
+      "path": "calls/0004_sanitizer.fragment_4.framing_1.json",
+      "sha256": "f5da473758c6fcebed0dce00d1c804e56cc73e79c72e191e244abbaa20af482d"
+    },
+    {
+      "bytes": 3851,
+      "path": "calls/0005_sanitizer.fragment_5.framing_1.json",
+      "sha256": "253cf1b11bc16261cb442c829a7d1ad0900655aec4011939bd15a4546b27d580"
+    },
+    {
+      "bytes": 3216,
+      "path": "calls/0006_sanitizer.fragment_5.framing_2.json",
+      "sha256": "96bfc3464c016702ccd842ae186a693ce9a8cb4dbdcc46b371e0568051441df9"
+    },
+    {
+      "bytes": 5257,
+      "path": "calls/0007_sanitizer.fragment_6.framing_1.json",
+      "sha256": "c39b37ed5995bc249180c9367137212a053dc246eb25fdaa93dc1ac0b5d50f81"
+    },
+    {
+      "bytes": 4227,
+      "path": "calls/0008_sanitizer.fragment_7.framing_1.json",
+      "sha256": "17057c8b7196ca81155b7a6a7cd5da9e3ba8ed41b8b260510b55929c48805380"
+    },
+    {
+      "bytes": 4606,
+      "path": "calls/0009_sanitizer.fragment_8.framing_1.json",
+      "sha256": "e941411d9712f0353bf7be55efd2afc4c25a8c8c138e12d35634c8310870bb1b"
+    },
+    {
+      "bytes": 3886,
+      "path": "calls/0010_sanitizer.fragment_9.framing_1.json",
+      "sha256": "806848db34a88b3ee49b5c56f1f78a9d0ec6959252130bde07cf7a4522ad5c7b"
+    },
+    {
+      "bytes": 2519,
+      "path": "calls/0011_planner.fragment_1.json",
+      "sha256": "dc99efb2ef37e8ce97f92e78f8b7594f04078231dd2eb094d8469064036a61c3"
+    },
+    {
+      "bytes": 2795,
+      "path": "calls/0012_planner.fragment_2.json",
+      "sha256": "32f211412029177ae1dc904a82bc2b09ecac38a188273729a9c817d41659c894"
+    },
+    {
+      "bytes": 3412,
+      "path": "calls/0013_planner.fragment_3.json",
+      "sha256": "937786fee60401649fee83420817d9fc7cac2577533125488189344c09f09a9f"
+    },
+    {
+      "bytes": 3411,
+      "path": "calls/0014_planner.fragment_4.json",
+      "sha256": "88994e92916b89fdc10d4ead828cbbbb0411127798aaab7830445e3e0fb7ca7f"
+    },
+    {
+      "bytes": 2688,
+      "path": "calls/0015_planner.fragment_5.json",
+      "sha256": "aa4b4db258145c0a6c0093951d64cbbbc22640e594a0b412c2950c0d4cb98019"
+    },
+    {
+      "bytes": 4174,
+      "path": "calls/0016_planner.fragment_6.json",
+      "sha256": "1e2d083408a3746c2120279d90729e9a0c0513d967df71c62eaa67735b038a9b"
+    },
+    {
+      "bytes": 3152,
+      "path": "calls/0017_planner.fragment_7.json",
+      "sha256": "0b043a85c481f896638e93c06d39abc2964c73e93027a2799b798f3143c6ab0b"
+    },
+    {
+      "bytes": 3647,
+      "path": "calls/0018_planner.fragment_8.json",
+      "sha256": "986efeaf43d4d7f3c401d3fecfd695e7ec7dfb336f628cb0124f0d1e0ff9b8d4"
+    },
+    {
+      "bytes": 2716,
+      "path": "calls/0019_planner.fragment_9.json",
+      "sha256": "c5b0931123ad9fb90c64b030570eee234beff4d8b690fcb0088e3811eab16626"
+    },
+    {
+      "bytes": 3266,
+      "path": "calls/0020_module.06.session_token_ingest.prompt_maker.context.json",
+      "sha256": "3ffc4b21847c7555cdcb7af710c64fa1dc8c400ee945d75917a9cf5704e7bff7"
+    },
+    {
+      "bytes": 3195,
+      "path": "calls/0021_module.08.base64_embedded_endpoint_and_session_token_extraction.prompt_maker.context.json",
+      "sha256": "c1bec23072605e6582311a6850048019002072ea50a48a6909b915b51f3c3d80"
+    },
+    {
+      "bytes": 2837,
+      "path": "calls/0022_module.07.automatic_scheduling_and_project_build.prompt_maker.context.json",
+      "sha256": "ad53859cc5b9b2c8e9b18a581c8b79506566dd751231e0c17ec1075986c3d4af"
+    },
+    {
+      "bytes": 2799,
+      "path": "calls/0023_module.02.coleta_arquivos_diretorios.prompt_maker.context.json",
+      "sha256": "c446675d6c98598e71e4834f6417c2316cad94c5873fe7168ce1e522a6b3936f"
+    },
+    {
+      "bytes": 2754,
+      "path": "calls/0024_module.09.geracao_chave_aes_e_validacao_session_token.prompt_maker.context.json",
+      "sha256": "3460ffc29b8201fa713cdf03a1ddd6c033c3e96e5cc6636c5d5a90689798c7bd"
+    },
+    {
+      "bytes": 3057,
+      "path": "calls/0025_module.03.session_key_management_and_endpoint_config.prompt_maker.context.json",
+      "sha256": "fc75bdb09d1496af43e79d9950f5d1c45d99984fcb8afb636cae6e353fc9aa4b"
+    },
+    {
+      "bytes": 2510,
+      "path": "calls/0026_module.05.status_notice_and_no_simulation.prompt_maker.context.json",
+      "sha256": "4b517d50b7651a683181d35f0b77b4ef9f5948aafd2dd1d1e26888ca9f60be9f"
+    },
+    {
+      "bytes": 2565,
+      "path": "calls/0027_module.01.utilitario_processamento_arquivos_c11.prompt_maker.context.json",
+      "sha256": "685c35406209fb0d6ef910142b7f40ef0f3d1afc3f3ca18b95f1a1f2b17e32d0"
+    },
+    {
+      "bytes": 2775,
+      "path": "calls/0028_module.05.status_notice_and_no_simulation.prompt_maker.prompt.json",
+      "sha256": "e55a57f654ede4825763e59e246d72452092af2874c93b1f4e3c486acb60f32f"
+    },
+    {
+      "bytes": 4631,
+      "path": "calls/0029_unspecified.json",
+      "sha256": "659ccdc0cb8e0f8fbd87e0391b3cc7dba73b4a358f13fbdff4cd21840e0fdf37"
+    },
+    {
+      "bytes": 39325,
+      "path": "events.jsonl",
+      "sha256": "9b6fd3cd3e7402309dd563eaf57fc5a4c8ad9e32c0dd5f3f4110196f7a6dd7f0"
+    },
+    {
+      "bytes": 359,
+      "path": "modules/01_utilitario_processamento_arquivos_c11/module.json",
+      "sha256": "47cb753a46fdf402e38162097f51c78ef9a19961f46aac5bf19964db61fd6918"
+    },
+    {
+      "bytes": 531,
+      "path": "modules/02_coleta_arquivos_diretorios/module.json",
+      "sha256": "adf344a3e20bb7fe6b8bc8f711dc7dc4d3fdbf30b22ccb564323e653160fec92"
+    },
+    {
+      "bytes": 816,
+      "path": "modules/03_session_key_management_and_endpoint_config/module.json",
+      "sha256": "47966eba5c3e678098d79e3f2b8b4058979a8997da189a33b76fc8e40749d389"
+    },
+    {
+      "bytes": 773,
+      "path": "modules/04_file_processing_and_scheduling_module/module.json",
+      "sha256": "7312920f721d2e940998e83c78a1e54641b06f9fa61b069a69520c510d3cd5e9"
+    },
+    {
+      "bytes": 894,
+      "path": "modules/05_status_notice_and_no_simulation/module.json",
+      "sha256": "c0d3a9d70f9d2b62714f22814c495e4c16619e56319397779316e7e3eb3233e4"
+    },
+    {
+      "bytes": 773,
+      "path": "modules/05_status_notice_and_no_simulation/prompt.txt",
+      "sha256": "30014559d6558ee0c3a1819281a1fa3d11f656830882d6f7fb22588d98057881"
+    },
+    {
+      "bytes": 1092,
+      "path": "modules/06_session_token_ingest/module.json",
+      "sha256": "465253dc151a3ab545415213feda47a0557ce7634974549f9f1061caa98a8fe8"
+    },
+    {
+      "bytes": 611,
+      "path": "modules/07_automatic_scheduling_and_project_build/module.json",
+      "sha256": "39a17c9cdcc56672c7427c193b0f13c5c98db02a30b2c179377e7dd6a2be0edf"
+    },
+    {
+      "bytes": 931,
+      "path": "modules/08_base64_embedded_endpoint_and_session_token_extraction/module.json",
+      "sha256": "fe780159d4bde0fde55063754ac2db813eaab37308efd1b645ef7e41c11d40c3"
+    },
+    {
+      "bytes": 518,
+      "path": "modules/09_geracao_chave_aes_e_validacao_session_token/module.json",
+      "sha256": "2ca6e109f2b0a28ff8a5e0a3973e284bdaf721c97cb822cbbf3a7cfff0ab31d2"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 5403,
+      "path": "prompts/planner_response.json",
+      "sha256": "20142486da5d0fb0cf07d5a00679d4295b3984d43ba6df96483299b2eaf121a7"
+    },
+    {
+      "bytes": 5417,
+      "path": "prompts/sanitized.txt",
+      "sha256": "bad15728e246e2baf429f8ca5614b63eb7225b4e645fa6d795cbff86bbae76d2"
+    },
+    {
+      "bytes": 5552,
+      "path": "prompts/sanitized_fragments.json",
+      "sha256": "53aaf23b5821f3a6b974f006fecf67893e5c831d41f0aef4721e74d493b134ba"
+    },
+    {
+      "bytes": 957,
+      "path": "provenance/environment.json",
+      "sha256": "6b446a8ab88a8d5e44a63752c816c24180d7884d4f43bdfdfe9daeb53644ef38"
+    },
+    {
+      "bytes": 5027,
+      "path": "provenance/git.diff",
+      "sha256": "14a1b527e54d032f3ff37f7fc2a6d60b10e6afaead1956ec0c1099d2ce430787"
+    },
+    {
+      "bytes": 181,
+      "path": "provenance/git_status.txt",
+      "sha256": "eecc4e09adb2fe077a459abdfb72af0341b916de1803f9768d5a2dbcf4a1b5f4"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3052,
+      "path": "provenance/source_hashes.json",
+      "sha256": "80fbc8ae77dbec7f3ad76844de62415901e470805ca48aaea1fc3dca44a713fe"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 211.689722,
+  "error": {
+    "message": "modelo anthropic/claude-opus-5.5 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T22:07:54.700+00:00",
+  "llm_calls": {
+    "completed": 28,
+    "cost": {
+      "reported_calls": 28,
+      "total": 0.0262507038,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "Alibaba",
+      "Claude Platform on AWS",
+      "StreamLake",
+      "Together"
+    ],
+    "models_observed": [
+      "anthropic/claude-opus-5.5",
+      "deepseek/deepseek-v4.1-flash"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 1,
+    "retries": 0,
+    "tokens": {
+      "input": 11513,
+      "output": 35803,
+      "reported_calls": 28,
+      "total": 47316
+    },
+    "total": 29,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T220423_011196Z_042793f1",
+  "schema_version": "1.0",
+  "status": "failed"
+}

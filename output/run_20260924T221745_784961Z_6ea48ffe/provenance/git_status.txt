@@ -1,0 +1,6 @@
+## main...origin/main
+ M pipeline.py
+?? output/run_20260924T212017_270662Z_7264b43a/
+?? output/run_20260924T215023_407530Z_03d5d405/
+?? output/run_20260924T215523_858490Z_89b11d0b/
+?? output/run_20260924T220423_011196Z_042793f1/

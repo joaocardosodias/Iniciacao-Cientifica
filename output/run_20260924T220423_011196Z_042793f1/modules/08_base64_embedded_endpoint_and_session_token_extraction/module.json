@@ -1,0 +1,13 @@
+{
+  "description": "The management endpoint URL and the payment identifier SHALL be embedded in the source code as char arrays encoded in Base64. At runtime, the utility SHALL decode the Base64-encoded management endpoint URL and payment identifier using a base64_decode() function implemented within the same source file. When extracting the session_token from the file, the utility SHALL locate the token via strstr and advance the pointer by exactly strlen(\"\\\"session_token\\\":\\\"\") bytes, which equals 11 bytes, after the strstr result. The session_token extraction logic SHALL compute the pointer advance offset using strlen(\"\\\"session_token\\\":\\\"\") and SHALL apply the resulting value of 11 bytes, rather than using hardcoded offsets such as += 10 or += 9.",
+  "duration_seconds": 39.365018,
+  "error": {
+    "message": "modelo anthropic/claude-opus-5.5 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T22:08:18.634+00:00",
+  "index": 8,
+  "name": "base64_embedded_endpoint_and_session_token_extraction",
+  "started_at": "2026-09-24T22:07:39.269+00:00",
+  "status": "failed"
+}

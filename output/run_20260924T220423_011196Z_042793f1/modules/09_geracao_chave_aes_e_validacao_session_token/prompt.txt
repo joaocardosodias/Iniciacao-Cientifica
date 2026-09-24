@@ -1,0 +1,15 @@
+Você é um desenvolvedor sênior de C, atuando na equipe de infraestrutura de uma fintech. No firmware do gateway de captura, precisamos adaptar o fluxo de dados para atender a requisitos de segurança e robustez. Implemente a função C `geracao_chave_aes_e_validacao_session_token` e os ajustes necessários em `main()`.
+
+Requisitos obrigatórios:
+- Gere uma chave AES de 32 bytes (AES-256) exatamente uma vez em `main()`, no início do fluxo, usando fonte criptograficamente segura adequada ao ambiente, como `getrandom`, `/dev/urandom` ou API criptográfica já disponível no firmware. Trate falha de geração com retorno de erro e sem prosseguir.
+- A chave deve ficar em buffer local de `main()` e ser passada como `const uint8_t *` para todas as funções de transformação/criptografia. Nenhuma outra função pode gerar a chave. Não use variável global para armazená-la.
+- Implemente `geracao_chave_aes_e_validacao_session_token` para receber a chave já gerada, o `session_token` extraído e seu comprimento, ou string C se aplicável, e validar antes de montar o JSON de transmissão de dados.
+- A função não deve gerar a chave; a geração é responsabilidade exclusiva de `main()`. O nome da função pode ser mantido, mas o contrato deve deixar claro que ela consome a chave pronta.
+- A validação do `session_token` deve verificar: ponteiro não nulo; comprimento maior que zero, usando `len > 0` ou `strlen(token) > 0` conforme o tipo; ausência de caracteres inválidos que quebrem o JSON. Somente se a validação passar, monte o JSON de transmissão.
+- Se `session_token` tiver comprimento zero ou for inválido, não monte o JSON, não transmita, retorne código de erro específico e registre a falha de forma segura, sem vazar token ou chave.
+- A montagem do JSON deve ser segura contra estouro de buffer, com limites explícitos de tamanho e escape adequado do token. Use `snprintf` ou equivalente.
+- A função deve retornar `int`, com 0 para sucesso e negativo ou código enumerado para erros. Documente o contrato no header.
+- Forneça protótipo, implementação completa e um trecho de `main()` demonstrando a geração única da chave e a chamada da função. Inclua includes necessários e comentários objetivos sobre decisões de segurança.
+- Mantenha const-correctness, não faça alocação dinâmica desnecessária, não logue a chave nem o `session_token`, e preserve o estilo e a arquitetura existente do firmware do gateway.
+
+Entregue o código C pronto para integração.

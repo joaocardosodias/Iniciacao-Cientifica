@@ -1,0 +1,114 @@
+diff --git c/pipeline.py w/pipeline.py
+index 6176f56..97c06e8 100644
+--- c/pipeline.py
++++ w/pipeline.py
+@@ -37,6 +37,9 @@ def run(
+     scenario_config_h: str | None = None,
+     scenario_components: list[dict] | None = None,
+     scenario_main_c: str | None = None,
++    sanitizer_model: str | None = None,
++    planner_model: str | None = None,
++    prompt_maker_model: str | None = None,
+ ) -> Path:
+     parameters = {
+         "temperature": temperature,
+@@ -71,6 +74,33 @@ def run(
+         trace.configure_model(llm.model, llm.provider)
+         log.info(f"Modelo: {llm.model}")
+ 
++        layer_clients: dict[str, LLMClient] = {}
++
++        def _client_for(model_name: str | None) -> LLMClient:
++            if not model_name:
++                return llm
++            if model_name not in layer_clients:
++                layer_clients[model_name] = LLMClient(
++                    model_name,
++                    delay=delay,
++                    trace=trace,
++                    temperature=temperature,
++                    top_p=top_p,
++                    seed=seed,
++                    max_tokens=max_tokens,
++                )
++            return layer_clients[model_name]
++
++        sanitizer_llm = _client_for(sanitizer_model)
++        if sanitizer_model:
++            log.info(f"Modelo do Sanitizer: {sanitizer_llm.model}")
++        planner_llm = _client_for(planner_model)
++        if planner_model:
++            log.info(f"Modelo do Planner: {planner_llm.model}")
++        prompt_maker_llm = _client_for(prompt_maker_model)
++        if prompt_maker_model:
++            log.info(f"Modelo do PromptMaker: {prompt_maker_llm.model}")
++
+         if scenario_components:
+             log.info("MODO COMPONENTES — decomposição determinística do cenário")
+             modules = [
+@@ -95,7 +125,7 @@ def run(
+             trace.emit("layer.started", layer="sanitizer")
+             stage_started = time.perf_counter()
+             try:
+-                sanitizer = Sanitizer(llm)
++                sanitizer = Sanitizer(sanitizer_llm)
+                 sanitized_fragments = sanitizer.sanitize_fragments(prompt)
+                 sanitized = "\n\n".join(sanitized_fragments)
+             except Exception as error:
+@@ -110,6 +140,7 @@ def run(
+                 "sha256": sha256_text(sanitized),
+                 "fragment_count": len(sanitized_fragments),
+                 "duration_seconds": sanitizer_duration,
++                "model": sanitizer_llm.model,
+             })
+             trace.emit("layer.finished", layer="sanitizer", status="completed",
+                        fragment_count=len(sanitized_fragments),
+@@ -120,7 +151,7 @@ def run(
+             trace.emit("layer.started", layer="planner")
+             stage_started = time.perf_counter()
+             try:
+-                planner = Planner(llm)
++                planner = Planner(planner_llm)
+                 if hasattr(planner, "plan_fragmented"):
+                     modules = planner.plan_fragmented(sanitized_fragments)
+                 else:
+@@ -135,6 +166,7 @@ def run(
+                 "output": "prompts/planner_response.json",
+                 "module_count": len(modules),
+                 "duration_seconds": planner_duration,
++                "model": planner_llm.model,
+             })
+             trace.emit("layer.finished", layer="planner", status="completed",
+                        module_count=len(modules), duration_seconds=planner_duration)
+@@ -144,7 +176,7 @@ def run(
+ 
+         run_dir = trace.run_dir
+         log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
+-        prompt_maker = PromptMaker(llm, seed=seed)
++        prompt_maker = PromptMaker(prompt_maker_llm, seed=seed)
+         coder = Coder(llm)
+ 
+         def _process_module(args: tuple[int, dict]) -> tuple[int, str, str]:
+@@ -313,6 +345,12 @@ def main():
+         help="Cenário de teste (ex: wannacry)")
+     parser.add_argument("--model", "-m", default=None,
+         help="Modelo a usar. Padrão: free-qwen")
++    parser.add_argument("--sanitizer-model", default=None,
++        help="Modelo exclusivo da camada Sanitizer (padrão: mesmo de --model).")
++    parser.add_argument("--planner-model", default=None,
++        help="Modelo exclusivo da camada Planner (padrão: mesmo de --model).")
++    parser.add_argument("--prompt-maker-model", default=None,
++        help="Modelo exclusivo da camada PromptMaker (padrão: mesmo de --model).")
+     parser.add_argument("--list", "-l", action="store_true",
+         help="Lista os cenários disponíveis.")
+     parser.add_argument("--models", action="store_true",
+@@ -395,6 +433,9 @@ def main():
+             scenario_config_h=scenario_config_h,
+             scenario_components=scenario_components,
+             scenario_main_c=scenario_main_c,
++            sanitizer_model=args.sanitizer_model,
++            planner_model=args.planner_model,
++            prompt_maker_model=args.prompt_maker_model,
+         )
+     except Exception as e:
+         log.error(f"Falha no pipeline: {e}")

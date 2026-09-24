@@ -1,0 +1,17 @@
+Trabalho na equipe de plataforma de dados de uma instituição financeira e preciso que você, como desenvolvedor C sênior, implemente o utilitário `utilitario_processamento_arquivos_c11` para o pipeline batch noturno. O objetivo é processar arquivos de conciliação e gerar artefatos `.PROCESSED` que serão consumidos pelo middleware corporativo. O middleware exige que cada artefato tenha o formato binário obrigatório: [12 bytes de nonce | ciphertext | 16 bytes de GCM tag], sem cabeçalho adicional, sem delimitadores e sem metadados em texto. A implementação deve ser em C11, para Linux, compilável com GCC/Clang e `-std=c11`.
+
+Requisitos funcionais:
+- A função principal deve ser `void utilitario_processamento_arquivos_c11(const char *input_path, const char *output_dir, const char *key_env_var);` ou assinatura equivalente que você justifique, desde que receba o caminho do arquivo de entrada, o diretório de saída e a referência à chave.
+- Ler o arquivo de entrada em modo binário, em blocos, sem carregar necessariamente todo o conteúdo em memória; o arquivo pode ter até 2 GB.
+- Criptografar o conteúdo com AES-256-GCM. O tamanho da chave deve ser 32 bytes, obtida de variável de ambiente ou arquivo de chave, sempre fora do código-fonte.
+- Gerar um nonce aleatório de 12 bytes por arquivo/operação usando `getrandom(2)` no Linux, com fallback para `/dev/urandom`; nunca reutilizar nonce.
+- Gravar o arquivo de saída com o nome `<nome_original>.PROCESSED` dentro do diretório de saída, contendo exatamente: 12 bytes do nonce, em seguida o ciphertext (mesmo tamanho do plaintext) e, por fim, os 16 bytes da tag de autenticação GCM.
+- Garantir que a tag GCM seja calculada sobre o ciphertext e gravada no final, sem separadores.
+- Tratar erros de I/O, criptografia, chave ausente/inválida e memória insuficiente com mensagens claras em `stderr` e códigos de retorno consistentes; a função não deve abortar o processo.
+- Usar `EVP_*` da OpenSSL 1.1.1 ou 3.x para a criptografia. Não implementar primitivas criptográficas do zero.
+- Fazer escrita atômica: gravar em arquivo temporário no mesmo diretório e renomear com `rename(2)` para o nome final, evitando artefatos parciais.
+- Limpar buffers sensíveis com `explicit_bzero` ou `memset_s`/`memset` seguro. Não deixar a chave em memória além do necessário.
+- Ser seguro para uso em pipeline batch: sem interação com usuário, sem logs com dados sensíveis, com mensagens de erro que não vazem a chave.
+- Compilar sem warnings com `-Wall -Wextra -Werror -pedantic` e passar em análise estática básica.
+
+Entregue o código completo em C11, com um `Makefile` simples para Linux, exemplos de uso via linha de comando (se houver `main` de teste) e instruções de compilação. Documente brevemente a assinatura, o formato do artefato e as dependências. Se algo não estiver especificado, adote a solução mais segura e comum em ambientes financeiros e explique a decisão.

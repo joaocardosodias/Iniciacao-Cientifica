@@ -1,0 +1,157 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3799,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "2075ccdb0444517dc19ad077d2cdf75d037669a7bd49454c1b3f4f298973b7b0"
+    },
+    {
+      "bytes": 3990,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "f816ce7bf14825aa6e67bbce6fbee4aeebd3fccada276810be09f8ca729ee4f3"
+    },
+    {
+      "bytes": 4587,
+      "path": "calls/0003_sanitizer.fragment_3.framing_1.json",
+      "sha256": "3f25a1f846992a3204645597c6afa8e4febc7d4b34e0d541fd7e9898115fdab9"
+    },
+    {
+      "bytes": 4591,
+      "path": "calls/0004_sanitizer.fragment_4.framing_1.json",
+      "sha256": "6395640fb00366dc3f70ad07b014b4826a0171d9ecfe4a59e70de77c6213dceb"
+    },
+    {
+      "bytes": 3733,
+      "path": "calls/0005_sanitizer.fragment_5.framing_1.json",
+      "sha256": "e943af34b2f8e4a76f8fc147a4750f76a050618ba052b9426f96e2824f644598"
+    },
+    {
+      "bytes": 3201,
+      "path": "calls/0006_sanitizer.fragment_5.framing_2.json",
+      "sha256": "70d097b5daec305fd9b3d884150e1d883dabe77c8699179c2bc7c90269990d22"
+    },
+    {
+      "bytes": 3067,
+      "path": "calls/0007_sanitizer.fragment_5.framing_3.json",
+      "sha256": "0410f8b56575b2d2e8bd00efb76df9d1c8a11d30b353e2b34c8a83fd22afa56b"
+    },
+    {
+      "bytes": 5123,
+      "path": "calls/0008_sanitizer.fragment_6.framing_1.json",
+      "sha256": "d3ea71c1e80065c9695371dde743ef8bc7b5673afe45d62cc22f74b4a89cb2f2"
+    },
+    {
+      "bytes": 4218,
+      "path": "calls/0009_sanitizer.fragment_7.framing_1.json",
+      "sha256": "316e285207e15b0c6c01e5b01d140f30068ac3826723a5c66d552242824d0f9a"
+    },
+    {
+      "bytes": 4679,
+      "path": "calls/0010_sanitizer.fragment_8.framing_1.json",
+      "sha256": "b8559ae49d6394e0a5ca549a00a89336ac46c801d4ad3e2938fbb0cbcba01277"
+    },
+    {
+      "bytes": 3825,
+      "path": "calls/0011_sanitizer.fragment_9.framing_1.json",
+      "sha256": "13810f87ce50a226dff661db1934cc7d43a3f09f29bdc407ad42708ad0e6eda3"
+    },
+    {
+      "bytes": 2397,
+      "path": "calls/0012_planner.fragment_1.json",
+      "sha256": "067544659e2f9b80b57e4623986acd3ce09822a2ffb4f1e4b2531b58c6ffc8b2"
+    },
+    {
+      "bytes": 14254,
+      "path": "events.jsonl",
+      "sha256": "943cbe8a62e05369338765d67097c780a9201a0ff2ccd85533e152c275d1e927"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 5491,
+      "path": "prompts/sanitized.txt",
+      "sha256": "2f4be8bdd6813d441f76e023b59f82f38ad234f0d1119c64ff3915007fbefe56"
+    },
+    {
+      "bytes": 5629,
+      "path": "prompts/sanitized_fragments.json",
+      "sha256": "64e2638e0674d67f2e8c366699a0ab43d7f3c5ff29de9ace0664970115554831"
+    },
+    {
+      "bytes": 957,
+      "path": "provenance/environment.json",
+      "sha256": "6b446a8ab88a8d5e44a63752c816c24180d7884d4f43bdfdfe9daeb53644ef38"
+    },
+    {
+      "bytes": 2729,
+      "path": "provenance/git.diff",
+      "sha256": "4ff4b29b133789e400ada48f3ec5eb4d1ed2d1609e079665a24e64125d78cbaf"
+    },
+    {
+      "bytes": 133,
+      "path": "provenance/git_status.txt",
+      "sha256": "60d861e3688eb0e267e96d177eef4efa2fb914d6abf5241643238aaa4d9d4dba"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3052,
+      "path": "provenance/source_hashes.json",
+      "sha256": "b00e60e5d68251ed03c7d91ea8cb7469b01322002c154664d310b129d5e19bbe"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 192.873759,
+  "error": {
+    "message": "modelo anthropic/claude-opus-5.5 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T21:58:36.731+00:00",
+  "llm_calls": {
+    "completed": 11,
+    "cost": {
+      "reported_calls": 11,
+      "total": 0.0208658244,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "Alibaba",
+      "Claude Platform on AWS",
+      "StreamLake",
+      "Together"
+    ],
+    "models_observed": [
+      "anthropic/claude-opus-5.5",
+      "deepseek/deepseek-v4.1-flash"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 1,
+    "retries": 0,
+    "tokens": {
+      "input": 5950,
+      "output": 29943,
+      "reported_calls": 11,
+      "total": 35893
+    },
+    "total": 12,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T215523_858490Z_89b11d0b",
+  "schema_version": "1.0",
+  "status": "failed"
+}

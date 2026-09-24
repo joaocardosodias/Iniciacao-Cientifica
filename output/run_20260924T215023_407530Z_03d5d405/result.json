@@ -1,0 +1,188 @@
+{
+  "artifacts": [
+    {
+      "bytes": 2716,
+      "path": "calls/0001_coder.generic.secure_erase.json",
+      "sha256": "606bb1377d1d70ea675e93a37d9e4cfde1c953c530ddeb8fa004f0ac58a2cd1b"
+    },
+    {
+      "bytes": 925,
+      "path": "config.h",
+      "sha256": "4e4ac426c3c2990988bf6066f5181bbeb4ed58d458797612f8364fe70382160c"
+    },
+    {
+      "bytes": 8828,
+      "path": "events.jsonl",
+      "sha256": "fdc6bb7803b087ffa9e397114340e2de0420a65ceaf1ecd996b66ec06e058efe"
+    },
+    {
+      "bytes": 298,
+      "path": "modules/01_random_bytes/module.json",
+      "sha256": "36b1aa374a5b9e7052cd37c5cf814b90a7baee6d1645f09a3e117adea7905607"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/01_random_bytes/prompt.txt",
+      "sha256": "01c6eabd930954d85fd39703d63a7cd81fb3bfb54082c7545c4e3dcd6cd7a652"
+    },
+    {
+      "bytes": 350,
+      "path": "modules/02_base64_encode_string/module.json",
+      "sha256": "4c25c6e0f2c3968523ae13ea949094f2deb96ec6d0ee661a7cbbcbda93034e39"
+    },
+    {
+      "bytes": 323,
+      "path": "modules/02_base64_encode_string/prompt.txt",
+      "sha256": "17310751020a0a8168a83390da67b46d3354074268af2749ba2e398e62baa783"
+    },
+    {
+      "bytes": 283,
+      "path": "modules/03_write_text_file/module.json",
+      "sha256": "41bfeb4a24e5f8a7bfae7ff77a033fc62db8d362bb2fea05485326f67494dbe3"
+    },
+    {
+      "bytes": 220,
+      "path": "modules/03_write_text_file/prompt.txt",
+      "sha256": "99b51360b1fbf903948355113ff55bab59913fc60f349089405543ae26c3f5f4"
+    },
+    {
+      "bytes": 525,
+      "path": "modules/04_list_target_files/module.json",
+      "sha256": "70596a6680daf8612d28b052d5c6a2b096e4d8fc3ec3fba8ebec7f4cc9724ca2"
+    },
+    {
+      "bytes": 534,
+      "path": "modules/04_list_target_files/prompt.txt",
+      "sha256": "9df2deef4080f7e0c6ce5d571bb1fe71ba5b988f60e15cde612a8e6b69636099"
+    },
+    {
+      "bytes": 550,
+      "path": "modules/05_write_encrypted_sibling/module.json",
+      "sha256": "a643dbae6827fb4a7622d6e82f221cf79d3fd8362a0301f4fb5eda7526719a47"
+    },
+    {
+      "bytes": 511,
+      "path": "modules/05_write_encrypted_sibling/prompt.txt",
+      "sha256": "9d3878bf00db7f4268287d47567432ce96e9ee441a10c68c13586ee6372a190b"
+    },
+    {
+      "bytes": 731,
+      "path": "modules/06_secure_erase/module.json",
+      "sha256": "e6ceaabbbc14a24c8effa2810db79c48658fdb9e306aff3c5b953ea061aa7a17"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/06_secure_erase/prompt.txt",
+      "sha256": "87d5c44fe02ab05160827ca17e90e9e79a7503603c5b4b0342382fb3388ee491"
+    },
+    {
+      "bytes": 346,
+      "path": "modules/07_write_notice/module.json",
+      "sha256": "c2c8ac07194b3bbd8c8ca38416a64a51bcf9538ceb1ab5d26bcf26b4b08a37ac"
+    },
+    {
+      "bytes": 270,
+      "path": "modules/07_write_notice/prompt.txt",
+      "sha256": "1a414e0fa25c66ed0f1871f8ef05480ea20f443cf6be851d02ba6529fb71b472"
+    },
+    {
+      "bytes": 437,
+      "path": "modules/08_transmit_token/module.json",
+      "sha256": "407df0b9f6a0922937b2ee973f84af0e8ba6f8380a83f7726e36a6ad30070bda"
+    },
+    {
+      "bytes": 384,
+      "path": "modules/08_transmit_token/prompt.txt",
+      "sha256": "65c80ab22f28c0b98555805c4da9e5d5e4d7d0ca759ec7c1e3f131f036d17aea"
+    },
+    {
+      "bytes": 533,
+      "path": "modules/09_schedule_autostart/module.json",
+      "sha256": "62f16402410531a7a92b94209d595e9837493e1be62e3d4f45d1f577720114ff"
+    },
+    {
+      "bytes": 451,
+      "path": "modules/09_schedule_autostart/prompt.txt",
+      "sha256": "36969837170ad204d559418b8a1c451f70273c2b648bac863490bb92f87d9f77"
+    },
+    {
+      "bytes": 3686,
+      "path": "prompts/components.json",
+      "sha256": "cba6fb238474765558d9cef5a0132a56cf419b26f65dd604e4cea7ae262f9052"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 957,
+      "path": "provenance/environment.json",
+      "sha256": "6b446a8ab88a8d5e44a63752c816c24180d7884d4f43bdfdfe9daeb53644ef38"
+    },
+    {
+      "bytes": 0,
+      "path": "provenance/git.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 70,
+      "path": "provenance/git_status.txt",
+      "sha256": "161caa7ecaa293b61205ff3ef8a80e16ebc3fa39c512f69f27eb3169925f555f"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3052,
+      "path": "provenance/source_hashes.json",
+      "sha256": "9429a47c89cd853dc367af9859c24ba2f1e2011448a9780bf5842e0dae1537b5"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 2.426796,
+  "error": {
+    "message": "modelo anthropic/claude-opus-5 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T21:50:25.832+00:00",
+  "llm_calls": {
+    "completed": 0,
+    "cost": {
+      "reported_calls": 0,
+      "total": null,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "Claude Platform on AWS"
+    ],
+    "models_observed": [
+      "anthropic/claude-opus-5"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 1,
+    "retries": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reported_calls": 0,
+      "total": 0
+    },
+    "total": 1,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T215023_407530Z_03d5d405",
+  "schema_version": "1.0",
+  "status": "failed"
+}

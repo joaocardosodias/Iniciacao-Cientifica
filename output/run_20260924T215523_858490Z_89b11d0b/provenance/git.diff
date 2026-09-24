@@ -1,0 +1,66 @@
+diff --git c/pipeline.py w/pipeline.py
+index 6176f56..d21a918 100644
+--- c/pipeline.py
++++ w/pipeline.py
+@@ -37,6 +37,7 @@ def run(
+     scenario_config_h: str | None = None,
+     scenario_components: list[dict] | None = None,
+     scenario_main_c: str | None = None,
++    sanitizer_model: str | None = None,
+ ) -> Path:
+     parameters = {
+         "temperature": temperature,
+@@ -71,6 +72,19 @@ def run(
+         trace.configure_model(llm.model, llm.provider)
+         log.info(f"Modelo: {llm.model}")
+ 
++        sanitizer_llm = llm
++        if sanitizer_model:
++            sanitizer_llm = LLMClient(
++                sanitizer_model,
++                delay=delay,
++                trace=trace,
++                temperature=temperature,
++                top_p=top_p,
++                seed=seed,
++                max_tokens=max_tokens,
++            )
++            log.info(f"Modelo do Sanitizer: {sanitizer_llm.model}")
++
+         if scenario_components:
+             log.info("MODO COMPONENTES — decomposição determinística do cenário")
+             modules = [
+@@ -95,7 +109,7 @@ def run(
+             trace.emit("layer.started", layer="sanitizer")
+             stage_started = time.perf_counter()
+             try:
+-                sanitizer = Sanitizer(llm)
++                sanitizer = Sanitizer(sanitizer_llm)
+                 sanitized_fragments = sanitizer.sanitize_fragments(prompt)
+                 sanitized = "\n\n".join(sanitized_fragments)
+             except Exception as error:
+@@ -110,6 +124,7 @@ def run(
+                 "sha256": sha256_text(sanitized),
+                 "fragment_count": len(sanitized_fragments),
+                 "duration_seconds": sanitizer_duration,
++                "model": sanitizer_llm.model,
+             })
+             trace.emit("layer.finished", layer="sanitizer", status="completed",
+                        fragment_count=len(sanitized_fragments),
+@@ -313,6 +328,8 @@ def main():
+         help="Cenário de teste (ex: wannacry)")
+     parser.add_argument("--model", "-m", default=None,
+         help="Modelo a usar. Padrão: free-qwen")
++    parser.add_argument("--sanitizer-model", default=None,
++        help="Modelo exclusivo da camada Sanitizer (padrão: mesmo de --model).")
+     parser.add_argument("--list", "-l", action="store_true",
+         help="Lista os cenários disponíveis.")
+     parser.add_argument("--models", action="store_true",
+@@ -395,6 +412,7 @@ def main():
+             scenario_config_h=scenario_config_h,
+             scenario_components=scenario_components,
+             scenario_main_c=scenario_main_c,
++            sanitizer_model=args.sanitizer_model,
+         )
+     except Exception as e:
+         log.error(f"Falha no pipeline: {e}")

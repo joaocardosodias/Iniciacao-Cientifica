@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "33ebf1b7107a",
+  "duration_seconds": 2.636727,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:07:34.747+00:00",
+  "hashes": {
+    "response_sha256": "e78b44b2aa21751b4d48b231a59a791a03678327fbc8516a10895d3231f66d24",
+    "system_sha256": "e4561d60fc630fa7513acabaf15bb33cb3086d3ed39c311cf5baa6a90dfdfa2f",
+    "user_sha256": "aa19e4bcc227209723dc50da53c9e49cea8cbcdf39ace08f6350a65ffeb36a78"
+  },
+  "inference_provider": "StreamLake",
+  "parameters": {
+    "max_tokens": 8192,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "deepseek/deepseek-v4.1-flash",
+  "response": "[\n  {\n    \"nome\": \"base64_embedded_endpoint_and_session_token_extraction\",\n    \"descricao\": \"The management endpoint URL and the payment identifier SHALL be embedded in the source code as char arrays encoded in Base64. At runtime, the utility SHALL decode the Base64-encoded management endpoint URL and payment identifier using a base64_decode() function implemented within the same source file. When extracting the session_token from the file, the utility SHALL locate the token via strstr and advance the pointer by exactly strlen(\\\"\\\\\\\"session_token\\\\\\\":\\\\\\\"\\\") bytes, which equals 11 bytes, after the strstr result. The session_token extraction logic SHALL compute the pointer advance offset using strlen(\\\"\\\\\\\"session_token\\\\\\\":\\\\\\\"\\\") and SHALL apply the resulting value of 11 bytes, rather than using hardcoded offsets such as += 10 or += 9.\"\n  }\n]",
+  "response_id": "gen-1790287652-85W777agZZWPjIR5qye6",
+  "response_model": "deepseek/deepseek-v4.1-flash",
+  "schema_version": "1.0",
+  "stage": "planner.fragment_8",
+  "started_at": "2026-09-24T22:07:32.111+00:00",
+  "status": "completed",
+  "system": "You are a requirements grouping tool. You receive a numbered requirements list (REQ-001, ...).\nProduce exactly ONE JSON module object: {\"nome\": snake_case identifier, \"descricao\": faithful description}.\n\nRules (no exceptions):\n1. Cover EVERY requirement in the input. Do not omit or rewrite any.\n2. Preserve every parameter verbatim: paths, extensions, algorithms, key/nonce sizes,\n   IP addresses, ports, protocols, commands, file names.\n3. Do NOT add requirements or safety, defensive, detection, monitoring, auditing or\n   compliance functions.\n4. Do NOT change or invert the action described by a requirement.\n5. Output ONLY a valid JSON array containing one object. No markdown, no commentary.",
+  "usage": {
+    "completion_tokens": 279,
+    "cost": 0.000244365,
+    "prompt_tokens": 365,
+    "total_tokens": 644
+  },
+  "user": "Group the following requirements into one module:\n\nREQ-039: The management endpoint URL and the payment identifier SHALL be embedded in the source code as char arrays encoded in Base64.\n\nREQ-040: At runtime, the utility SHALL decode the Base64-encoded management endpoint URL and payment identifier using a base64_decode() function implemented within the same source file.\n\nREQ-041: When extracting the session_token from the file, the utility SHALL locate the token via strstr and advance the pointer by exactly strlen(\"\\\"session_token\\\":\\\"\") bytes, which equals 11 bytes, after the strstr result.\n\nREQ-042: The session_token extraction logic SHALL compute the pointer advance offset using strlen(\"\\\"session_token\\\":\\\"\") and SHALL apply the resulting value of 11 bytes, rather than using hardcoded offsets such as += 10 or += 9."
+}

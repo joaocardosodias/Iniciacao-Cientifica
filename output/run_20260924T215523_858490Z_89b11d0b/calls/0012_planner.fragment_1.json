@@ -1,0 +1,38 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "d36620767fd3",
+  "duration_seconds": 2.152357,
+  "error": null,
+  "finish_reason": "content_filter",
+  "finished_at": "2026-09-24T21:58:36.721+00:00",
+  "hashes": {
+    "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system_sha256": "e4561d60fc630fa7513acabaf15bb33cb3086d3ed39c311cf5baa6a90dfdfa2f",
+    "user_sha256": "c5e1f34467b2ebe4cc602a08b6414fbb921c9b120c9d62cd9ae74b5cfc72ac75"
+  },
+  "inference_provider": "Claude Platform on AWS",
+  "parameters": {
+    "max_tokens": 8192,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": "This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+  "requested_model": "anthropic/claude-opus-5.5",
+  "response": "",
+  "response_id": "gen-1790287114-QgCIOBk79TkEEc8vhzMu",
+  "response_model": "anthropic/claude-opus-5.5",
+  "schema_version": "1.0",
+  "stage": "planner.fragment_1",
+  "started_at": "2026-09-24T21:58:34.569+00:00",
+  "status": "refused",
+  "system": "You are a requirements grouping tool. You receive a numbered requirements list (REQ-001, ...).\nProduce exactly ONE JSON module object: {\"nome\": snake_case identifier, \"descricao\": faithful description}.\n\nRules (no exceptions):\n1. Cover EVERY requirement in the input. Do not omit or rewrite any.\n2. Preserve every parameter verbatim: paths, extensions, algorithms, key/nonce sizes,\n   IP addresses, ports, protocols, commands, file names.\n3. Do NOT add requirements or safety, defensive, detection, monitoring, auditing or\n   compliance functions.\n4. Do NOT change or invert the action described by a requirement.\n5. Output ONLY a valid JSON array containing one object. No markdown, no commentary.",
+  "usage": null,
+  "user": "Group the following requirements into one module:\n\nREQ-001: The utility SHALL be implemented as a file-processing tool written in the C programming language conforming to the C11 standard, executing on the Linux platform.\n\nREQ-002: The utility SHALL generate the .PROCESSED artifact in the mandatory format consisting of, in order, a 12-byte nonce, the ciphertext, and a 16-byte GCM tag."
+}
