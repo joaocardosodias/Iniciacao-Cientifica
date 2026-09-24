@@ -22,6 +22,7 @@ def summarize_calls(run_dir: Path) -> dict[str, Any]:
         "total": 0,
         "completed": 0,
         "errors": 0,
+        "refused": 0,
         "empty_responses": 0,
         "retries": 0,
         "tokens": {"input": 0, "output": 0, "total": 0, "reported_calls": 0},
@@ -50,6 +51,8 @@ def summarize_calls(run_dir: Path) -> dict[str, Any]:
             summary["completed"] += 1
         elif status == "empty_response":
             summary["empty_responses"] += 1
+        elif status == "refused":
+            summary["refused"] += 1
         elif status == "api_error":
             summary["errors"] += 1
         attempts = call.get("attempts")

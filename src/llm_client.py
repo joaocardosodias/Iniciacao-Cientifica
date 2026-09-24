@@ -63,6 +63,14 @@ _GROQ_BASE_URL       = "https://api.groq.com/openai/v1"
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 _NIM_BASE_URL        = "https://integrate.api.nvidia.com/v1"
 
+
+class ModelRefusalError(RuntimeError):
+    def __init__(self, model: str, reason: str):
+        self.model = model
+        self.reason = reason
+        super().__init__(f"modelo {model} recusou o conteudo no provedor: {reason}")
+
+
 def _resolve(model_str: str) -> tuple[str, str, str]:
     """
     Retorna (provider, base_url, model_name) a partir de um alias ou nome direto.
@@ -154,7 +162,8 @@ class LLMClient:
     _MAX_WAIT_S      = 60
     _RETRYABLE_CODES = {429, 502, 503, 504}
 
-    def chat(self, system: str, user: str, stage: str = "unspecified") -> str:
+    def chat(self, system: str, user: str, stage: str = "unspecified",
+             max_tokens: int | None = None) -> str:
         """
         Envia uma mensagem ao modelo e retorna a resposta como string.
 
@@ -199,6 +208,8 @@ class LLMClient:
                     for key, value in self.generation_parameters.items()
                     if value is not None
                 })
+                if max_tokens is not None:
+                    request["max_tokens"] = max_tokens
                 response = self._client.chat.completions.create(
                     **request,
                 )
@@ -217,8 +228,24 @@ class LLMClient:
                         response,
                     )
                     return ""
-                content = response.choices[0].message.content
+                message = response.choices[0].message
+                content = message.content
                 output = content.strip() if content else ""
+                refusal = getattr(message, "refusal", None)
+                if not output and (refusal or self._finish_reason(response) == "content_filter"):
+                    self._record_call(
+                        stage,
+                        system,
+                        user,
+                        "",
+                        "refused",
+                        started_at,
+                        started,
+                        attempts,
+                        call_id,
+                        response,
+                    )
+                    raise ModelRefusalError(self.model, refusal or "content_filter")
                 self._record_call(
                     stage,
                     system,
@@ -288,6 +315,8 @@ class LLMClient:
                         error=e,
                     )
                     raise
+            except ModelRefusalError:
+                raise
             except Exception as e:
                 attempts.append({
                     "attempt": attempt,
@@ -326,6 +355,21 @@ class LLMClient:
             error=last_exc,
         )
         raise last_exc  # type: ignore[misc]
+
+    @staticmethod
+    def _finish_reason(response: Any) -> str | None:
+        choices = getattr(response, "choices", None)
+        if not choices:
+            return None
+        return getattr(choices[0], "finish_reason", None)
+
+    @staticmethod
+    def _refusal(response: Any) -> str | None:
+        choices = getattr(response, "choices", None)
+        if not choices:
+            return None
+        message = getattr(choices[0], "message", None)
+        return getattr(message, "refusal", None)
 
     def _record_call(
         self,
@@ -375,6 +419,8 @@ class LLMClient:
             "requested_model": self.model,
             "response_model": getattr(response, "model", None),
             "response_id": getattr(response, "id", None),
+            "finish_reason": self._finish_reason(response),
+            "refusal": self._refusal(response),
             "parameters": self.generation_parameters,
             "usage": usage_data,
             "attempts": attempts,

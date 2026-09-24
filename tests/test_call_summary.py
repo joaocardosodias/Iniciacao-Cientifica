@@ -6,7 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from src.llm_client import LLMClient
+from src.llm_client import LLMClient, ModelRefusalError
 from src.recovery import recover_run
 from src.trace import RunTrace
 
@@ -132,6 +132,31 @@ class CallSummaryTests(unittest.TestCase):
             finished = [event["data"]["inference_provider"] for event in events
                         if event["event"] == "llm.call.finished"]
             self.assertEqual(finished, ["provedor-via-extra", "provedor-direto", None])
+
+    def test_chat_raises_on_provider_content_filter(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
+            client = object.__new__(LLMClient)
+            client.trace = trace
+            client.provider = "openrouter"
+            client.model = "anthropic/claude-opus-5.5"
+            client.delay = 0
+            client.generation_parameters = {}
+            message = SimpleNamespace(content=None, refusal="blocked by policy")
+            response = SimpleNamespace(
+                choices=[SimpleNamespace(message=message, finish_reason="content_filter")],
+                model="anthropic/claude-opus-5.5",
+                id="resp-1",
+                usage=None,
+            )
+            client._client = SimpleNamespace(chat=SimpleNamespace(
+                completions=SimpleNamespace(create=lambda **request: response)))
+            with self.assertRaises(ModelRefusalError):
+                client.chat("sistema", "usuario", stage="coder.generic.f")
+            call = json.loads(next((trace.run_dir / "calls").glob("*.json")).read_text())
+            self.assertEqual(call["status"], "refused")
+            self.assertEqual(call["finish_reason"], "content_filter")
+            self.assertEqual(call["refusal"], "blocked by policy")
 
     def test_zero_cost_is_reported(self):
         with tempfile.TemporaryDirectory() as temporary:

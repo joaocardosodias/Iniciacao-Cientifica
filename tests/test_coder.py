@@ -9,7 +9,7 @@ class FakeLLM:
         self.model = "fake/model"
         self.calls = []
 
-    def chat(self, system, user, stage="unspecified"):
+    def chat(self, system, user, stage="unspecified", max_tokens=None):
         self.calls.append(stage)
         return self.responses.pop(0)
 
@@ -37,9 +37,16 @@ class CoderGuardTests(unittest.TestCase):
             "#define _GNU_SOURCE\n"
             "int f(void) { if (SIZE_MAX > LLONG_MAX) return -1; return 0; }\n"
         )
-        llm = FakeLLM([bad, bad])
+        llm = FakeLLM([bad, bad, bad])
         with self.assertRaises(ValueError):
             Coder(llm).generate_generic("implement f", "int f(void);")
+
+    def test_generate_generic_retries_on_empty_response(self):
+        good = "#define _GNU_SOURCE\nint f(void) { return 0; }\n"
+        llm = FakeLLM(["", good])
+        code = Coder(llm).generate_generic("implement f", "int f(void);")
+        self.assertIn("return 0;", code)
+        self.assertEqual(len(llm.calls), 2)
 
 
 if __name__ == "__main__":

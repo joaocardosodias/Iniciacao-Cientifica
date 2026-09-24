@@ -204,8 +204,8 @@ e identificadores retornados pela API.
 
 O `result.json` registra o estado final, duração, erro estruturado quando houver
 e SHA-256 de todos os artefatos. O campo `llm_calls` consolida chamadas gravadas,
-conclusões, erros, respostas vazias, retries, tokens, custo informado pela API e
-modelos retornados. `providers_observed` representa os gateways usados; o provedor
+conclusões, erros, recusas do provedor, respostas vazias, retries, tokens, custo
+informado pela API e modelos retornados. `providers_observed` representa os gateways usados; o provedor
 de inferência, quando informado pela API, aparece em `inference_providers_observed`.
 O custo usa `unit: provider_reported`, sem presumir moeda; sem custo informado,
 o total fica `null`. Execuções interrompidas e abandonadas também produzem

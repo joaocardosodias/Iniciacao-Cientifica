@@ -83,6 +83,9 @@ def _looks_like_refusal(text: str) -> bool:
 
 
 class Coder:
+    GENERIC_MAX_TOKENS = 8192
+    GENERIC_ATTEMPTS = 3
+
     def __init__(self, llm: LLMClient):
         self.llm = llm
 
@@ -91,20 +94,34 @@ class Coder:
         return self._clean(raw)
 
     def generate_generic(self, task: str, prototype: str) -> str:
+        name = prototype.split("(")[0].strip().split()[-1]
         user = (
             f"TASK: {task}\n\n"
             f"EXACT PROTOTYPE (must match): {prototype}\n\n"
             f"Return ONLY the C source implementing that function."
         )
-        for attempt in range(2):
-            raw = self.llm.chat(system=_GENERIC_SYSTEM_PROMPT, user=user, stage=f"coder.generic.{prototype.split('(')[0].strip().split()[-1]}")
+        reason = "unknown"
+        for _ in range(self.GENERIC_ATTEMPTS):
+            raw = self.llm.chat(
+                system=_GENERIC_SYSTEM_PROMPT,
+                user=user,
+                stage=f"coder.generic.{name}",
+                max_tokens=self.GENERIC_MAX_TOKENS,
+            )
             code = self._clean(raw)
+            if not code.strip():
+                reason = "empty_response"
+                continue
             if _looks_like_refusal(code):
+                reason = "refusal"
                 continue
             if _SUSPICIOUS_GUARDS.search(code):
+                reason = "suspicious_guard"
                 continue
             return code
-        raise ValueError(f"Coder nao produziu uma implementacao valida para: {prototype}")
+        raise ValueError(
+            f"Coder nao produziu uma implementacao valida para: {prototype} ({reason})"
+        )
 
     def _clean(self, raw: str) -> str:
         cleaned = re.sub(r"^```(?:c|cpp|makefile)?\s*\n?", "", raw, flags=re.MULTILINE)
