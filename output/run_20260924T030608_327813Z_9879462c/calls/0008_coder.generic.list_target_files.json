@@ -1,0 +1,41 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "0fbfe05b804c",
+  "duration_seconds": 25.277679,
+  "error": null,
+  "finished_at": "2026-09-24T03:06:34.242+00:00",
+  "hashes": {
+    "response_sha256": "1abccff80ff55e4c7ef48d2ec613b92ab2282f63bd49c226ba2276638b17db38",
+    "system_sha256": "5af67390bb4e6ed7854216abc4a639510f154508fe40eb6fefc8e2900e5ef1ea",
+    "user_sha256": "d6b68895fe191f892ef34d1727e86fb8edac30708eb51963b067790c7bf50036"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include <dirent.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <string.h>\n#include <sys/stat.h>\n\nstruct target_file_list {\n    char **paths;\n    size_t count;\n    size_t capacity;\n};\n\nstatic int target_file_matches(const char *path, const char *const *exts,\n                               size_t ext_count)\n{\n    size_t path_len = strlen(path);\n\n    for (size_t i = 0; i < ext_count; ++i) {\n        if (exts[i] == NULL)\n            continue;\n        size_t ext_len = strlen(exts[i]);\n        if (ext_len <= path_len &&\n            memcmp(path + path_len - ext_len, exts[i], ext_len) == 0)\n            return 1;\n    }\n    return 0;\n}\n\nstatic int target_file_add(struct target_file_list *list, const char *path)\n{\n    if (list->count == list->capacity) {\n        size_t new_capacity = list->capacity ? list->capacity * 2 : 16;\n        if (new_capacity < list->capacity ||\n            new_capacity > SIZE_MAX / sizeof(*list->paths))\n            return -1;\n        char **new_paths = realloc(list->paths,\n                                   new_capacity * sizeof(*list->paths));\n        if (new_paths == NULL)\n            return -1;\n        list->paths = new_paths;\n        list->capacity = new_capacity;\n    }\n\n    size_t length = strlen(path);\n    if (length == SIZE_MAX)\n        return -1;\n    char *copy = malloc(length + 1);\n    if (copy == NULL)\n        return -1;\n    memcpy(copy, path, length + 1);\n    list->paths[list->count++] = copy;\n    return 0;\n}\n\nstatic char *target_file_join(const char *directory, const char *name)\n{\n    size_t directory_len = strlen(directory);\n    size_t name_len = strlen(name);\n    int add_slash = directory_len == 0 || directory[directory_len - 1] != '/';\n\n    if (directory_len > SIZE_MAX - name_len - (size_t)add_slash - 1)\n        return NULL;\n\n    size_t length = directory_len + name_len + (size_t)add_slash;\n    char *path = malloc(length + 1);\n    if (path == NULL)\n        return NULL;\n\n    memcpy(path, directory, directory_len);\n    if (add_slash)\n        path[directory_len++] = '/';\n    memcpy(path + directory_len, name, name_len);\n    path[length] = '\\0';\n    return path;\n}\n\nstatic int target_file_walk(const char *path, const char *const *exts,\n                            size_t ext_count, struct target_file_list *list)\n{\n    struct stat st;\n    if (lstat(path, &st) != 0)\n        return 0;\n\n    if (S_ISREG(st.st_mode))\n        return target_file_matches(path, exts, ext_count)\n                   ? target_file_add(list, path)\n                   : 0;\n\n    if (!S_ISDIR(st.st_mode))\n        return 0;\n\n    DIR *directory = opendir(path);\n    if (directory == NULL)\n        return 0;\n\n    struct dirent *entry;\n    while ((entry = readdir(directory)) != NULL) {\n        if (strcmp(entry->d_name, \".\") == 0 ||\n            strcmp(entry->d_name, \"..\") == 0)\n            continue;\n\n        char *child = target_file_join(path, entry->d_name);\n        if (child == NULL) {\n            closedir(directory);\n            return -1;\n        }\n\n        int result = target_file_walk(child, exts, ext_count, list);\n        free(child);\n        if (result != 0) {\n            closedir(directory);\n            return -1;\n        }\n    }\n\n    closedir(directory);\n    return 0;\n}\n\nstatic char *target_file_expand_home(const char *path)\n{\n    if (path[0] != '~')\n        return strdup(path);\n\n    const char *home = getenv(\"HOME\");\n    if (home == NULL)\n        return strdup(path);\n\n    size_t home_len = strlen(home);\n    size_t suffix_len = strlen(path + 1);\n    if (home_len > SIZE_MAX - suffix_len - 1)\n        return NULL;\n\n    char *expanded = malloc(home_len + suffix_len + 1);\n    if (expanded == NULL)\n        return NULL;\n    memcpy(expanded, home, home_len);\n    memcpy(expanded + home_len, path + 1, suffix_len + 1);\n    return expanded;\n}\n\nsize_t list_target_files(const char *const *dirs, size_t dir_count,\n                         const char *const *exts, size_t ext_count,\n                         char ***out_paths)\n{\n    if (out_paths == NULL)\n        return SIZE_MAX;\n    *out_paths = NULL;\n\n    if ((dir_count != 0 && dirs == NULL) ||\n        (ext_count != 0 && exts == NULL))\n        return SIZE_MAX;\n\n    struct target_file_list list = {0};\n\n    for (size_t i = 0; i < dir_count; ++i) {\n        if (dirs[i] == NULL)\n            continue;\n\n        char *directory = target_file_expand_home(dirs[i]);\n        if (directory == NULL)\n            goto error;\n\n        int result = target_file_walk(directory, exts, ext_count, &list);\n        free(directory);\n        if (result != 0)\n            goto error;\n    }\n\n    if (list.count == 0) {\n        free(list.paths);\n        return 0;\n    }\n\n    if (list.count == SIZE_MAX ||\n        list.count + 1 > SIZE_MAX / sizeof(*list.paths))\n        goto error;\n\n    char **result_paths = malloc((list.count + 1) * sizeof(*result_paths));\n    if (result_paths == NULL)\n        goto error;\n\n    memcpy(result_paths, list.paths, list.count * sizeof(*result_paths));\n    result_paths[list.count] = NULL;\n    free(list.paths);\n    *out_paths = result_paths;\n    return list.count;\n\nerror:\n    for (size_t i = 0; i < list.count; ++i)\n        free(list.paths[i]);\n    free(list.paths);\n    return SIZE_MAX;\n}",
+  "response_id": "gen-1790219169-FXRmglkQheTl4iehtsWs",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.list_target_files",
+  "started_at": "2026-09-24T03:06:08.964+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.",
+  "usage": {
+    "completion_tokens": 2966,
+    "cost": 0.0015172,
+    "prompt_tokens": 342,
+    "total_tokens": 3308
+  },
+  "user": "TASK: Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with any extension in `exts`. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.\n\nEXACT PROTOTYPE (must match): size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths);\n\nReturn ONLY the C source implementing that function."
+}

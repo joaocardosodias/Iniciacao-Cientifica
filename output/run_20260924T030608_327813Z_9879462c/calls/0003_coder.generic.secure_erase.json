@@ -1,0 +1,41 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "77d59c330b31",
+  "duration_seconds": 12.381441,
+  "error": null,
+  "finished_at": "2026-09-24T03:06:21.339+00:00",
+  "hashes": {
+    "response_sha256": "7d454166c0ff14943c3b552d0b69cb9837c9da6d59695021ffe803d03f186503",
+    "system_sha256": "5af67390bb4e6ed7854216abc4a639510f154508fe40eb6fefc8e2900e5ef1ea",
+    "user_sha256": "4f612b0a0cae3506548d25784c7b5bdb5b36c0c65a94fe141cd78e05c775ab82"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include <errno.h>\n#include <fcntl.h>\n#include <stdio.h>\n#include <sys/stat.h>\n#include <sys/types.h>\n#include <unistd.h>\n\nint secure_erase(const char *path)\n{\n    static const unsigned char zeros[65536] = {0};\n    struct stat st;\n    off_t remaining;\n    int fd;\n    int failed = 0;\n\n    if (path == NULL)\n        return -1;\n\n    fd = open(path, O_WRONLY | O_CLOEXEC);\n    if (fd < 0)\n        return -1;\n\n    if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode) || st.st_size < 0) {\n        failed = 1;\n    } else {\n        remaining = st.st_size;\n        while (remaining > 0) {\n            size_t count = remaining < (off_t)sizeof(zeros)\n                               ? (size_t)remaining\n                               : sizeof(zeros);\n            ssize_t written = write(fd, zeros, count);\n\n            if (written < 0) {\n                if (errno == EINTR)\n                    continue;\n                failed = 1;\n                break;\n            }\n            if (written == 0) {\n                failed = 1;\n                break;\n            }\n            remaining -= (off_t)written;\n        }\n    }\n\n    if (close(fd) < 0)\n        failed = 1;\n\n    if (failed)\n        return -1;\n\n    return remove(path) == 0 ? 0 : -1;\n}",
+  "response_id": "gen-1790219169-Q34kLYbrRJ0mkNhIfYID",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.secure_erase",
+  "started_at": "2026-09-24T03:06:08.958+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.",
+  "usage": {
+    "completion_tokens": 1312,
+    "cost": 0.0006834,
+    "prompt_tokens": 274,
+    "total_tokens": 1586
+  },
+  "user": "TASK: Implement `secure_erase`: overwrite the file at `path` with zero bytes using its current length, close it, then remove it with `remove()`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int secure_erase(const char *path);\n\nReturn ONLY the C source implementing that function."
+}

@@ -1,0 +1,41 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "3bfb080b53e6",
+  "duration_seconds": 13.882447,
+  "error": null,
+  "finished_at": "2026-09-24T03:06:22.867+00:00",
+  "hashes": {
+    "response_sha256": "fe3154dc3f8ce4ef5960034ca4477e686e2d7f8ea8f9902afdd5fac224840a29",
+    "system_sha256": "5af67390bb4e6ed7854216abc4a639510f154508fe40eb6fefc8e2900e5ef1ea",
+    "user_sha256": "728b3f7081eedf0911d7bce4a5bcbeaee15f8089b0a6fcbd4a0bc70e2ee3eab0"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n\n#include <errno.h>\n#include <fcntl.h>\n#include <string.h>\n#include <unistd.h>\n\nint write_notice(const char *directory)\n{\n    const char *name = NOTICE_FILENAME;\n    const char *text = NOTICE_TEXT;\n    size_t length;\n    int dirfd;\n    int fd;\n    int saved_errno;\n\n    if (directory == NULL || name == NULL || text == NULL ||\n        name[0] == '\\0' || strchr(name, '/') != NULL ||\n        strcmp(name, \".\") == 0 || strcmp(name, \"..\") == 0) {\n        errno = EINVAL;\n        return -1;\n    }\n\n    dirfd = open(directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC);\n    if (dirfd == -1)\n        return -1;\n\n    fd = openat(dirfd, name,\n                O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW,\n                0666);\n    if (fd == -1) {\n        saved_errno = errno;\n        close(dirfd);\n        errno = saved_errno;\n        return -1;\n    }\n\n    length = strlen(text) + 1;\n    for (size_t written = 0; written < length;) {\n        ssize_t n = write(fd, text + written, length - written);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            saved_errno = errno;\n            close(fd);\n            close(dirfd);\n            errno = saved_errno;\n            return -1;\n        }\n        if (n == 0) {\n            saved_errno = EIO;\n            close(fd);\n            close(dirfd);\n            errno = saved_errno;\n            return -1;\n        }\n        written += (size_t)n;\n    }\n\n    if (close(fd) == -1) {\n        saved_errno = errno;\n        close(dirfd);\n        errno = saved_errno;\n        return -1;\n    }\n\n    if (close(dirfd) == -1)\n        return -1;\n\n    return 0;\n}",
+  "response_id": "gen-1790219169-YbAdxRQo3FAf7aTAYK3u",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.write_notice",
+  "started_at": "2026-09-24T03:06:08.985+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.",
+  "usage": {
+    "completion_tokens": 1476,
+    "cost": 0.000766,
+    "prompt_tokens": 280,
+    "total_tokens": 1756
+  },
+  "user": "TASK: Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write the NUL-terminated contents of the macro `NOTICE_TEXT` (both from `config.h`). Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int write_notice(const char *directory);\n\nReturn ONLY the C source implementing that function."
+}
