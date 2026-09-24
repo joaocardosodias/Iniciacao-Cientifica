@@ -1,0 +1,4 @@
+## main...origin/main
+ M src/assembler_harness.py
+ M tests/test_assembler_harness.py
+?? output/run_20260924T205920_938048Z_5eaf0a5b/

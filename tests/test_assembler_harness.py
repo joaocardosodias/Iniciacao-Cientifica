@@ -10,6 +10,7 @@ from src.assembler_harness import (
     _extract_signatures,
     _prepare_module_source,
     _remove_main_definition,
+    _with_standard_prelude,
 )
 
 MODULE = """
@@ -147,6 +148,17 @@ int after(const char *url)
         for expected in ("-lcurl", "-ljson-c", "-lpthread", "-lssl", "-lcrypto"):
             self.assertIn(expected, flags)
 
+    def test_standard_prelude_after_gnu_source(self):
+        code = '#define _GNU_SOURCE\n#include "config.h"\nint f(void) { return 0; }\n'
+        result = _with_standard_prelude(code)
+        self.assertTrue(result.startswith("#define _GNU_SOURCE\n"))
+        self.assertLess(result.index("#include <errno.h>"), result.index('#include "config.h"'))
+        self.assertLess(result.index("#include <fcntl.h>"), result.index('#include "config.h"'))
+
+    def test_standard_prelude_adds_gnu_source_when_absent(self):
+        result = _with_standard_prelude("int f(void) { return 0; }\n")
+        self.assertTrue(result.startswith("#define _GNU_SOURCE\n#include <errno.h>"))
+
 
 class NoLinkableFunctionsTests(unittest.TestCase):
     def test_assemble_skips_agent_when_no_external_functions(self):
@@ -192,6 +204,39 @@ class DeterministicAssemblyTests(unittest.TestCase):
             self.assertTrue((run_dir / "assembly" / "output").exists())
             assembly_result = json.loads((run_dir / "assembly" / "result.json").read_text())
             self.assertEqual(assembly_result["mode"], "deterministic")
+
+    def test_deterministic_compile_repairs_missing_standard_includes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            run_dir = Path(temporary) / "run_missing"
+            config = "#define ANSWER 0\n"
+            main_source = (
+                '#define _GNU_SOURCE\n#include "config.h"\n'
+                "int ping(void);\nint main(void) { return ping(); }\n"
+            )
+            module = (
+                '#define _GNU_SOURCE\n#include "config.h"\n'
+                "int ping(void)\n{\n"
+                "    struct stat st;\n"
+                "    if (errno == EINTR) { return ANSWER; }\n"
+                "    if (fstatat(AT_FDCWD, \".\", &st, AT_SYMLINK_NOFOLLOW) != 0) { return ANSWER; }\n"
+                "    remove(\"x\");\n"
+                "    return ANSWER;\n"
+                "}\n"
+            )
+            harness = AssemblerHarness(model="openrouter/fake")
+            main_c, compiled = harness.assemble(
+                [("ping", module)],
+                run_dir,
+                config_header=config,
+                main_source=main_source,
+            )
+            self.assertTrue(compiled)
+            self.assertEqual(harness.last_status, "completed")
+            self.assertTrue((run_dir / "assembly" / "output").exists())
+            prepared = (run_dir / "assembly" / "module_01.c").read_text()
+            self.assertIn("#include <errno.h>", prepared)
+            self.assertIn("#include <fcntl.h>", prepared)
+            self.assertIn("#include <stdio.h>", prepared)
 
 
 if __name__ == "__main__":

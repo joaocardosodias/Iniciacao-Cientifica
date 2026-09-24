@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import re
 import subprocess
 import time
@@ -44,6 +45,26 @@ def _link_flags(includes: list[str]) -> str:
                     if flag not in flags:
                         flags.append(flag)
     return " ".join(flags)
+
+_STANDARD_HEADERS = (
+    "errno.h", "fcntl.h", "limits.h", "signal.h", "stdarg.h", "stdbool.h",
+    "stddef.h", "stdint.h", "stdio.h", "stdlib.h", "string.h", "time.h",
+    "unistd.h", "ctype.h", "dirent.h", "poll.h", "pthread.h", "math.h",
+    "sys/types.h", "sys/stat.h", "sys/time.h", "sys/wait.h", "sys/mman.h",
+    "sys/file.h", "sys/ioctl.h", "sys/socket.h", "sys/select.h",
+    "netinet/in.h", "arpa/inet.h", "netdb.h", "pwd.h", "grp.h", "utime.h",
+    "syslog.h", "wchar.h",
+)
+
+_GNU_SOURCE_DEFINE = re.compile(r"(?m)^[ \t]*#\s*define\s+_GNU_SOURCE\b[^\n]*\n")
+
+
+def _with_standard_prelude(code: str) -> str:
+    prelude = "".join(f"#include <{header}>\n" for header in _STANDARD_HEADERS)
+    match = _GNU_SOURCE_DEFINE.search(code)
+    if match:
+        return code[:match.end()] + prelude + code[match.end():]
+    return "#define _GNU_SOURCE\n" + prelude + code
 
 _TYPE_DEFINITION = re.compile(
     r"(?m)^(?:"
@@ -288,7 +309,7 @@ class AssemblerHarness:
 
             # Copia para assembly/ sem main, sem testes e sem comentários
             src_code = f.read_text(encoding="utf-8")
-            prepared = _prepare_module_source(src_code)
+            prepared = _with_standard_prelude(_prepare_module_source(src_code))
             obfuscated = f"module_{idx:02d}.c"
             (assembly_dir / obfuscated).write_text(prepared, encoding="utf-8")
             module_files.append(assembly_dir / obfuscated)
@@ -378,7 +399,11 @@ class AssemblerHarness:
                     text=True,
                     timeout=ASSEMBLER_TIMEOUT,
                     cwd=str(assembly_dir),
-                    env={**__import__("os").environ, "OPENCODE_CONFIG": str(tmp_cfg)},
+                    env={
+                        **os.environ,
+                        "OPENCODE_CONFIG": str(tmp_cfg),
+                        "GIT_CEILING_DIRECTORIES": str(run_dir.resolve()),
+                    },
                 )
                 if result.returncode < 0:
                     log.warning(
@@ -528,7 +553,7 @@ class AssemblerHarness:
     def _compile_command(self, module_files: list[Path], includes: list[str]) -> list[str]:
         return [
             "gcc", "-O2", "-Wall", "-Wno-discarded-qualifiers", "-std=c11",
-            "-I.", "-o", "output", "main.c",
+            "-D_GNU_SOURCE", "-I.", "-o", "output", "main.c",
             *[f.name for f in module_files],
             *_link_flags(includes).split(),
         ]

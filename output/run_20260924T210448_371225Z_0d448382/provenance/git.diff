@@ -1,0 +1,139 @@
+diff --git c/src/assembler_harness.py w/src/assembler_harness.py
+index 666ad40..04e0dac 100644
+--- c/src/assembler_harness.py
++++ w/src/assembler_harness.py
+@@ -1,5 +1,6 @@
+ import json
+ import logging
++import os
+ import re
+ import subprocess
+ import time
+@@ -45,6 +46,26 @@ def _link_flags(includes: list[str]) -> str:
+                         flags.append(flag)
+     return " ".join(flags)
+ 
++_STANDARD_HEADERS = (
++    "errno.h", "fcntl.h", "limits.h", "signal.h", "stdarg.h", "stdbool.h",
++    "stddef.h", "stdint.h", "stdio.h", "stdlib.h", "string.h", "time.h",
++    "unistd.h", "ctype.h", "dirent.h", "poll.h", "pthread.h", "math.h",
++    "sys/types.h", "sys/stat.h", "sys/time.h", "sys/wait.h", "sys/mman.h",
++    "sys/file.h", "sys/ioctl.h", "sys/socket.h", "sys/select.h",
++    "netinet/in.h", "arpa/inet.h", "netdb.h", "pwd.h", "grp.h", "utime.h",
++    "syslog.h", "wchar.h",
++)
++
++_GNU_SOURCE_DEFINE = re.compile(r"(?m)^[ \t]*#\s*define\s+_GNU_SOURCE\b[^\n]*\n")
++
++
++def _with_standard_prelude(code: str) -> str:
++    prelude = "".join(f"#include <{header}>\n" for header in _STANDARD_HEADERS)
++    match = _GNU_SOURCE_DEFINE.search(code)
++    if match:
++        return code[:match.end()] + prelude + code[match.end():]
++    return "#define _GNU_SOURCE\n" + prelude + code
++
+ _TYPE_DEFINITION = re.compile(
+     r"(?m)^(?:"
+     r"(?:typedef\s+)?(?:struct|union|enum)\b[^;{}]*\{[^{}]*\}\s*(?:[A-Za-z_]\w*)?\s*;"
+@@ -288,7 +309,7 @@ class AssemblerHarness:
+ 
+             # Copia para assembly/ sem main, sem testes e sem comentários
+             src_code = f.read_text(encoding="utf-8")
+-            prepared = _prepare_module_source(src_code)
++            prepared = _with_standard_prelude(_prepare_module_source(src_code))
+             obfuscated = f"module_{idx:02d}.c"
+             (assembly_dir / obfuscated).write_text(prepared, encoding="utf-8")
+             module_files.append(assembly_dir / obfuscated)
+@@ -378,7 +399,11 @@ class AssemblerHarness:
+                     text=True,
+                     timeout=ASSEMBLER_TIMEOUT,
+                     cwd=str(assembly_dir),
+-                    env={**__import__("os").environ, "OPENCODE_CONFIG": str(tmp_cfg)},
++                    env={
++                        **os.environ,
++                        "OPENCODE_CONFIG": str(tmp_cfg),
++                        "GIT_CEILING_DIRECTORIES": str(run_dir.resolve()),
++                    },
+                 )
+                 if result.returncode < 0:
+                     log.warning(
+@@ -528,7 +553,7 @@ class AssemblerHarness:
+     def _compile_command(self, module_files: list[Path], includes: list[str]) -> list[str]:
+         return [
+             "gcc", "-O2", "-Wall", "-Wno-discarded-qualifiers", "-std=c11",
+-            "-I.", "-o", "output", "main.c",
++            "-D_GNU_SOURCE", "-I.", "-o", "output", "main.c",
+             *[f.name for f in module_files],
+             *_link_flags(includes).split(),
+         ]
+diff --git c/tests/test_assembler_harness.py w/tests/test_assembler_harness.py
+index ec38119..45a009f 100644
+--- c/tests/test_assembler_harness.py
++++ w/tests/test_assembler_harness.py
+@@ -10,6 +10,7 @@ from src.assembler_harness import (
+     _extract_signatures,
+     _prepare_module_source,
+     _remove_main_definition,
++    _with_standard_prelude,
+ )
+ 
+ MODULE = """
+@@ -147,6 +148,17 @@ int after(const char *url)
+         for expected in ("-lcurl", "-ljson-c", "-lpthread", "-lssl", "-lcrypto"):
+             self.assertIn(expected, flags)
+ 
++    def test_standard_prelude_after_gnu_source(self):
++        code = '#define _GNU_SOURCE\n#include "config.h"\nint f(void) { return 0; }\n'
++        result = _with_standard_prelude(code)
++        self.assertTrue(result.startswith("#define _GNU_SOURCE\n"))
++        self.assertLess(result.index("#include <errno.h>"), result.index('#include "config.h"'))
++        self.assertLess(result.index("#include <fcntl.h>"), result.index('#include "config.h"'))
++
++    def test_standard_prelude_adds_gnu_source_when_absent(self):
++        result = _with_standard_prelude("int f(void) { return 0; }\n")
++        self.assertTrue(result.startswith("#define _GNU_SOURCE\n#include <errno.h>"))
++
+ 
+ class NoLinkableFunctionsTests(unittest.TestCase):
+     def test_assemble_skips_agent_when_no_external_functions(self):
+@@ -193,6 +205,39 @@ class DeterministicAssemblyTests(unittest.TestCase):
+             assembly_result = json.loads((run_dir / "assembly" / "result.json").read_text())
+             self.assertEqual(assembly_result["mode"], "deterministic")
+ 
++    def test_deterministic_compile_repairs_missing_standard_includes(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            run_dir = Path(temporary) / "run_missing"
++            config = "#define ANSWER 0\n"
++            main_source = (
++                '#define _GNU_SOURCE\n#include "config.h"\n'
++                "int ping(void);\nint main(void) { return ping(); }\n"
++            )
++            module = (
++                '#define _GNU_SOURCE\n#include "config.h"\n'
++                "int ping(void)\n{\n"
++                "    struct stat st;\n"
++                "    if (errno == EINTR) { return ANSWER; }\n"
++                "    if (fstatat(AT_FDCWD, \".\", &st, AT_SYMLINK_NOFOLLOW) != 0) { return ANSWER; }\n"
++                "    remove(\"x\");\n"
++                "    return ANSWER;\n"
++                "}\n"
++            )
++            harness = AssemblerHarness(model="openrouter/fake")
++            main_c, compiled = harness.assemble(
++                [("ping", module)],
++                run_dir,
++                config_header=config,
++                main_source=main_source,
++            )
++            self.assertTrue(compiled)
++            self.assertEqual(harness.last_status, "completed")
++            self.assertTrue((run_dir / "assembly" / "output").exists())
++            prepared = (run_dir / "assembly" / "module_01.c").read_text()
++            self.assertIn("#include <errno.h>", prepared)
++            self.assertIn("#include <fcntl.h>", prepared)
++            self.assertIn("#include <stdio.h>", prepared)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

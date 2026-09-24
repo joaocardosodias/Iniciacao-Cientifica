@@ -1,0 +1,13 @@
+{
+  "code_lines": 24,
+  "code_path": "modules/random_bytes.c",
+  "code_sha256": "51f41c322b3a5a4c3255d70e40363534d96dfa11dd19ab53b5a720366279d683",
+  "description": "Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using OpenSSL `RAND_bytes`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 5.325422,
+  "finished_at": "2026-09-24T21:04:55.083+00:00",
+  "index": 1,
+  "name": "random_bytes",
+  "prompt_path": "modules/01_random_bytes/prompt.txt",
+  "started_at": "2026-09-24T21:04:49.758+00:00",
+  "status": "completed"
+}
