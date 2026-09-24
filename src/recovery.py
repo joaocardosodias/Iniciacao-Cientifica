@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from src.call_summary import summarize_calls
 from src.events import EventLog, utc_now
 from src.trace import artifact_index, write_json_atomic
 
@@ -102,6 +103,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
             },
             "recovered": True,
             "recovered_at": now,
+            "llm_calls": summarize_calls(run_dir),
             "artifacts": artifact_index(run_dir),
         })
 

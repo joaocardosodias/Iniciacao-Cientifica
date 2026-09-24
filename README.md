@@ -139,6 +139,13 @@ uma pasta existente.
 output/run_<id>/
 ├── manifest.json
 ├── result.json
+├── provenance/
+│   ├── environment.json
+│   ├── python_packages.json
+│   ├── git.diff
+│   ├── git_status.txt
+│   ├── untracked_files.json
+│   └── source_hashes.json
 ├── calls/
 │   └── <sequencia>_<etapa>.json
 ├── prompts/
@@ -161,14 +168,23 @@ output/run_<id>/
 ```
 
 O `manifest.json` registra o modelo solicitado e resolvido, provedor,
-parâmetros de geração, commit Git, estado da árvore de trabalho, versões do
-Python, dependências, GCC e OpenCode. Cada chamada ao modelo conserva mensagens,
-resposta, duração, tentativas, uso de tokens quando fornecido e identificadores
-retornados pela API.
+parâmetros de geração, commit Git, estado da árvore de trabalho e resumo do
+ambiente da máquina que executa o pipeline. `provenance/environment.json`
+identifica esse escopo como `pipeline_host` e detalha Python, sistema operacional,
+arquitetura, CPU, locale, timezone, GCC, OpenCode, OpenSSL e libcurl.
+`provenance/python_packages.json` lista todos os pacotes Python instalados com
+suas versões. Cada chamada ao modelo
+conserva mensagens, resposta, duração, tentativas, uso de tokens quando fornecido
+e identificadores retornados pela API.
 
 O `result.json` registra o estado final, duração, erro estruturado quando houver
-e SHA-256 de todos os artefatos. Execuções interrompidas também produzem esse
-arquivo com estado `failed`.
+e SHA-256 de todos os artefatos. O campo `llm_calls` consolida chamadas gravadas,
+conclusões, erros, respostas vazias, retries, tokens, custo informado pela API e
+modelos retornados. `providers_observed` representa os gateways usados; o provedor
+de inferência, quando informado pela API, aparece em `inference_providers_observed`.
+O custo usa `unit: provider_reported`, sem presumir moeda; sem custo informado,
+o total fica `null`. Execuções interrompidas e abandonadas também produzem
+`result.json` com os registros de chamadas disponíveis.
 
 ## Testes
 

@@ -1,12 +1,8 @@
 import hashlib
-import importlib.metadata
 import json
 import os
-import platform
 import re
 import socket
-import subprocess
-import sys
 import threading
 import uuid
 from datetime import datetime, timezone
@@ -14,7 +10,9 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from src.call_summary import summarize_calls
 from src.events import EventLog, utc_now
+from src.environment import collect as collect_environment
 from src.provenance import collect as collect_provenance
 from src.provenance import find_repo_root
 
@@ -111,7 +109,7 @@ class RunTrace:
         repo = find_repo_root(Path.cwd())
         git = collect_provenance(repo, self.provenance_dir,
                                  exclude_dirs=_output_exclude(output_root, repo))
-        software = self._software_snapshot(git)
+        software = {"git": git, **collect_environment(self.provenance_dir)}
         self.events = EventLog(self.events_path, self.run_id)
         self.write_text("prompts/original.txt", prompt)
         self.manifest = {
@@ -231,6 +229,7 @@ class RunTrace:
                 "finished_at": finished_at,
                 "duration_seconds": round(perf_counter() - self._started, 6),
                 "error": self._serialize_error(error),
+                "llm_calls": summarize_calls(self.run_dir),
                 "artifacts": self._artifact_index(),
             }
             if extra:
@@ -248,39 +247,6 @@ class RunTrace:
 
     def _artifact_index(self) -> list[dict[str, Any]]:
         return artifact_index(self.run_dir)
-
-    def _software_snapshot(self, git: dict[str, Any]) -> dict[str, Any]:
-        packages = {}
-        for name in ["openai", "python-dotenv", "flask", "cryptography", "requests", "openpyxl", "python-docx", "reportlab", "faker"]:
-            try:
-                packages[name] = importlib.metadata.version(name)
-            except importlib.metadata.PackageNotFoundError:
-                packages[name] = None
-        return {
-            "python": sys.version,
-            "platform": platform.platform(),
-            "executable": sys.executable,
-            "working_directory": str(Path.cwd()),
-            "git": git,
-            "commands": {
-                "gcc": self._command_version(["gcc", "--version"]),
-                "opencode": self._command_version(["opencode", "--version"]),
-            },
-            "packages": packages,
-        }
-
-    def _command_version(self, command: list[str]) -> str | None:
-        try:
-            result = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                timeout=5,
-                check=True,
-            )
-            return result.stdout.strip().splitlines()[0]
-        except (OSError, subprocess.SubprocessError, IndexError):
-            return None
 
     def _write_json_atomic(self, path: Path, content: Any) -> None:
         write_json_atomic(path, content)

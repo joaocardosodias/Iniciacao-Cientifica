@@ -2,6 +2,7 @@ import os
 import time
 import uuid
 import logging
+import math
 from typing import Any
 from openai import OpenAI, RateLimitError, APIStatusError
 
@@ -350,6 +351,19 @@ class LLMClient:
                 "completion_tokens": getattr(usage, "completion_tokens", None),
                 "total_tokens": getattr(usage, "total_tokens", None),
             }
+            cost = getattr(usage, "cost", None)
+            if cost is None:
+                cost = (getattr(usage, "model_extra", None) or {}).get("cost")
+            if isinstance(cost, (int, float)) and not isinstance(cost, bool) and math.isfinite(cost):
+                usage_data["cost"] = cost
+        inference_provider = getattr(response, "provider", None)
+        if not isinstance(inference_provider, str) or not inference_provider.strip():
+            response_extra = getattr(response, "model_extra", None)
+            inference_provider = response_extra.get("provider") if isinstance(response_extra, dict) else None
+        if not isinstance(inference_provider, str) or not inference_provider.strip():
+            inference_provider = None
+        else:
+            inference_provider = inference_provider.strip()
         metadata = {
             "call_id": call_id,
             "status": status,
@@ -357,6 +371,7 @@ class LLMClient:
             "finished_at": utc_now(),
             "duration_seconds": round(time.perf_counter() - started, 6),
             "provider": self.provider,
+            "inference_provider": inference_provider,
             "requested_model": self.model,
             "response_model": getattr(response, "model", None),
             "response_id": getattr(response, "id", None),
@@ -375,6 +390,7 @@ class LLMClient:
             stage=stage,
             status=status,
             provider=self.provider,
+            inference_provider=inference_provider,
             model=self.model,
             response_model=metadata["response_model"],
             response_id=metadata["response_id"],
