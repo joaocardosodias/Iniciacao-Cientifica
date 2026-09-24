@@ -227,6 +227,13 @@ rtk python scripts/generate_test_files.py --count 500
 rtk python scripts/reset_vm.py
 ```
 
+A geração roda em paralelo por padrão (todos os núcleos). Para ajustar:
+
+```bash
+rtk python scripts/generate_test_files.py -n 5000 -w 8   # 8 processos
+rtk python scripts/generate_test_files.py -n 5000 --simple  # conteúdo barato (muito mais rápido)
+```
+
 ---
 
 ## Cenários disponíveis

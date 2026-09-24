@@ -9,6 +9,8 @@ Uso:
     python generate_test_files.py                   # usa ~/Documentos por padrão
     python generate_test_files.py /caminho/destino  # pasta personalizada
     python generate_test_files.py --count 5000      # quantidade de arquivos
+    python generate_test_files.py -n 5000 -w 8      # 8 processos paralelos
+    python generate_test_files.py -n 5000 --simple  # conteúdo barato (mais rápido)
 
 Dependências:
     pip install openpyxl python-docx reportlab faker
@@ -18,6 +20,7 @@ import argparse
 import os
 import random
 import sys
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 # ── Verificação de dependências ────────────────────────────────────────────────
@@ -206,6 +209,23 @@ _GENERATORS = {
     ".pdf":  _make_pdf,
 }
 
+
+def _make_simple(path: Path):
+    path.write_bytes(os.urandom(random.randint(4096, 131072)))
+
+
+def _write_file(task: tuple[str, str, bool]) -> str | None:
+    path_str, ext, simple = task
+    path = Path(path_str)
+    try:
+        if simple:
+            _make_simple(path)
+        else:
+            _GENERATORS[ext](path)
+    except Exception as error:
+        return f"{path.name}: {error}"
+    return None
+
 # ── Lógica principal ───────────────────────────────────────────────────────────
 
 def _random_filename(category: str | None = None) -> str:
@@ -221,53 +241,79 @@ def _random_filename(category: str | None = None) -> str:
     return f"{prefix}_{suffix}"
 
 
-def generate(base_dir: Path, total: int):
+def _build_tasks(folders: list[Path], total: int) -> list[tuple[str, str, bool]]:
+    tasks = []
+    reserved: set[str] = set()
+    for _ in range(total):
+        folder = random.choice(folders)
+        ext = random.choices(EXTENSIONS, weights=EXT_WEIGHTS)[0]
+        name = _random_filename()
+        path = folder / f"{name}{ext}"
+        counter = 1
+        while path.exists() or str(path) in reserved:
+            path = folder / f"{name}_{counter}{ext}"
+            counter += 1
+        reserved.add(str(path))
+        tasks.append((str(path), ext, False))
+    return tasks
+
+
+def _print_progress(done: int, total: int) -> None:
+    bar_len = 30
+    filled = int(bar_len * done / total)
+    bar = "█" * filled + "░" * (bar_len - filled)
+    pct = done / total * 100
+    print(f"\r  [{bar}] {pct:5.1f}%  ({done}/{total})", end="", flush=True)
+
+
+def generate(base_dir: Path, total: int, workers: int = 0, simple: bool = False):
     """
     Gera `total` arquivos falsos distribuídos pela estrutura de pastas.
 
     Args:
         base_dir: Pasta raiz onde os arquivos serão criados.
         total:    Número total de arquivos a gerar.
+        workers:  Processos paralelos (0 = todos os núcleos, 1 = sequencial).
+        simple:   Conteúdo barato (bytes aleatórios) em vez de formatos reais.
     """
-    # Cria todas as pastas
     folders = []
     for rel in FOLDER_TREE:
         folder = base_dir / rel
         folder.mkdir(parents=True, exist_ok=True)
         folders.append(folder)
 
+    if workers <= 0:
+        workers = os.cpu_count() or 1
+
+    tasks = _build_tasks(folders, total)
+    if simple:
+        tasks = [(path, ext, True) for path, ext, _ in tasks]
+
     print(f"\n[+] Destino  : {base_dir}")
     print(f"[+] Pastas   : {len(folders)}")
     print(f"[+] Arquivos : {total}")
-    print(f"[+] Tipos    : .xlsx .docx .pdf .txt\n")
+    print(f"[+] Modo     : {'simples' if simple else 'realista'} | workers: {workers}\n")
 
     errors = 0
-    for i in range(1, total + 1):
-        folder = random.choice(folders)
-        ext    = random.choices(EXTENSIONS, weights=EXT_WEIGHTS)[0]
-        name   = _random_filename()
-        path   = folder / f"{name}{ext}"
-
-        # Evita sobrescrever: adiciona número se já existir
-        counter = 1
-        while path.exists():
-            path = folder / f"{name}_{counter}{ext}"
-            counter += 1
-
-        try:
-            _GENERATORS[ext](path)
-        except Exception as e:
-            errors += 1
-            print(f"  [WARN] Falha ao criar {path.name}: {e}")
-            continue
-
-        # Progresso a cada 100 arquivos
-        if i % 100 == 0 or i == total:
-            bar_len = 30
-            filled  = int(bar_len * i / total)
-            bar     = "█" * filled + "░" * (bar_len - filled)
-            pct     = i / total * 100
-            print(f"\r  [{bar}] {pct:5.1f}%  ({i}/{total})", end="", flush=True)
+    done = 0
+    if workers <= 1:
+        for task in tasks:
+            error = _write_file(task)
+            done += 1
+            if error:
+                errors += 1
+                print(f"\n  [WARN] {error}")
+            if done % 100 == 0 or done == total:
+                _print_progress(done, total)
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            for error in executor.map(_write_file, tasks, chunksize=max(1, total // (workers * 8))):
+                done += 1
+                if error:
+                    errors += 1
+                    print(f"\n  [WARN] {error}")
+                if done % 100 == 0 or done == total:
+                    _print_progress(done, total)
 
     print(f"\n\n[✓] Concluído! {total - errors} arquivo(s) criados, {errors} erro(s).\n")
 
@@ -290,10 +336,21 @@ def main():
         default=5000,
         help="Número total de arquivos a gerar (padrão: 2000)",
     )
+    parser.add_argument(
+        "--workers", "-w",
+        type=int,
+        default=0,
+        help="Processos paralelos (padrão: todos os núcleos; 1 = sequencial).",
+    )
+    parser.add_argument(
+        "--simple", "-S",
+        action="store_true",
+        help="Conteúdo barato (bytes aleatórios) em vez de formatos reais.",
+    )
     args = parser.parse_args()
 
     base_dir = Path(args.dest).expanduser().resolve()
-    generate(base_dir, args.count)
+    generate(base_dir, args.count, workers=args.workers, simple=args.simple)
 
 
 if __name__ == "__main__":
