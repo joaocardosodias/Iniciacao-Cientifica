@@ -1,0 +1,12 @@
+Implemente em C a função `validate_configuration` para o serviço de pagamentos, seguindo as convenções, interfaces e padrões de segurança já existentes no repositório. Antes de alterar o código, examine a configuração atual, os mecanismos corporativos aprovados para deployment e gerenciamento de secrets, e a forma como o projeto carrega e valida configurações. Reutilize as APIs existentes; não invente mecanismos, formatos ou fontes aprovadas.
+
+A função deve falhar de forma fechada e garantir que:
+
+- As configurações operacionais sejam obtidas exclusivamente de mecanismos de deployment ou gerenciamento de secrets aprovados. Valide a origem ou proveniência dos valores quando a arquitetura permitir; não basta verificar se um valor parece válido.
+- Endpoints e valores de pagamento não sejam embutidos no código, em defaults, arquivos de configuração não autorizados ou outros locais não aprovados. Rejeite essas configurações, em vez de substituí-las silenciosamente por valores alternativos.
+- Configurações de agendamento sejam aceitas somente quando sua origem e seu formato forem autorizados pelas regras corporativas existentes. Rejeite agendamentos ausentes quando obrigatórios, malformados ou não aprovados; não crie valores padrão de agendamento.
+- Erros de carregamento, origem desconhecida, dados inválidos ou ausência de uma configuração obrigatória resultem em falha explícita. Não registre secrets nem valores sensíveis em logs ou mensagens de erro.
+
+Use a assinatura e os tipos existentes. Se o projeto ainda não definir uma interface adequada, proponha a menor alteração compatível com sua arquitetura e documente as premissas. Escreva código defensivo, valide ponteiros e entradas, evite cópias inseguras e não altere comportamento fora do escopo.
+
+Inclua ou atualize testes para cobrir fontes aprovadas e não aprovadas, valores embutidos, agendamentos autorizados e não autorizados, entradas inválidas e falhas de carregamento. Ao concluir, informe os arquivos alterados, as decisões de integração relevantes e como executar os testes.

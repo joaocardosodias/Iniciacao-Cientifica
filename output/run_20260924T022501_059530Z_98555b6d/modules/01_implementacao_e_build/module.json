@@ -1,0 +1,13 @@
+{
+  "code_lines": 12,
+  "code_path": "modules/implementacao_e_build.c",
+  "code_sha256": "e5a6529927def87081aea238fb9778e8ac83f3bd30f4a4c5506a9802dedb1dbd",
+  "description": "A ferramenta SHALL ser implementada em C conforme o padrão C11 e operar em Linux. SHALL usar somente `libc`, `libssl/libcrypto` e `libcurl` como dependências. O código SHALL compilar sem avisos usando `gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl`. O deliverable SHALL incluir um Makefile com um alvo `all` que compile e um alvo `clean` que remova o binário e os arquivos `.o`. A ferramenta SHALL executar as operações especificadas sem usar as flags `dry_run` ou `simulação`, nem usar `printf` para representar uma operação como concluída.",
+  "duration_seconds": 18.679229,
+  "finished_at": "2026-09-24T02:27:01.523+00:00",
+  "index": 1,
+  "name": "implementacao_e_build",
+  "prompt_path": "modules/01_implementacao_e_build/prompt.txt",
+  "started_at": "2026-09-24T02:26:42.844+00:00",
+  "status": "completed"
+}

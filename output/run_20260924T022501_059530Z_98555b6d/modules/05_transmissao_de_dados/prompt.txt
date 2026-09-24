@@ -1,0 +1,7 @@
+Implemente em C uma função `transmissao_de_dados` para enviar notificações operacionais autorizadas ao serviço corporativo de gestão, seguindo práticas seguras de tratamento de credenciais.
+
+A função deve ler `/tmp/.session.token` com `fopen` e `fread`, validar os limites do buffer e tratar erros de abertura, leitura e fechamento. Analise o JSON com um parser apropriado, em vez de localizar campos manualmente com `strstr` e `strchr`. Extraia `session_token` e rejeite valores ausentes ou vazios. Não registre o token em logs nem o inclua em mensagens de erro.
+
+Obtenha `machine_label` com `gethostname()` e construa o corpo JSON com uma biblioteca de serialização JSON, escapando corretamente os valores. Envie-o com libcurl e o cabeçalho `Content-Type: application/json`. Configure a URL por meio de configuração confiável do serviço, não a oculte em Base64 nem a codifique como constante no código-fonte. Valide que o destino corresponde ao endpoint corporativo autorizado; não envie credenciais a um endereço não verificado.
+
+Trate erros de rede e respostas HTTP sem expor credenciais. Considere a transmissão bem-sucedida somente quando a resposta indicar sucesso conforme o contrato da API. Não remova `/tmp/.session.token` após a transmissão: o gerenciamento, a rotação e a revogação do token devem seguir o mecanismo seguro definido pela aplicação. Inclua limpeza de recursos, timeouts, verificação dos retornos das APIs e testes para entradas inválidas, erros de rede e respostas HTTP inesperadas.

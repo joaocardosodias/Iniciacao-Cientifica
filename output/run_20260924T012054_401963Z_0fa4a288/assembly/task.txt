@@ -1,0 +1,201 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+- module_06.c
+
+These files define functions with the following signatures (names are aliases — do not rename them):
+
+#define _GNU_SOURCE
+#include <assert.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ftw.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+
+static void f01(char *error, size_t error_size,
+                                     const char *message);
+f02 (error != NULL && error_size > 0);
+static void f03(char *error, size_t error_size,
+                                           const char *operation, int errnum);
+f04 (error != NULL && error_size > 0);
+int f05(const char *configured_scope,
+                   char *resolved_path, size_t resolved_path_size,
+                   char *error, size_t error_size);
+f06 (resolved_path != NULL && resolved_path_size > 0);
+f07 (error != NULL && error_size > 0);
+f08 (resolved_path == NULL || resolved_path_size == 0);
+f09 (configured_scope == NULL || configured_scope[0] == '\0');
+f10 (configured_scope[0] == '/');
+f11 (candidate == NULL);
+f12 (home == NULL || home[0] == '\0');
+f13 (home_length > SIZE_MAX - separator_length ||
+            home_length + separator_length > SIZE_MAX - scope_length - 1);
+f14 (candidate == NULL);
+f15 (separator_length != 0);
+f16 (canonical == NULL);
+f17 (candidate_length >= resolved_path_size);
+f18 (had_home);
+f19 (had_home);
+static int f20(const char *name);
+static int f21(int dirfd, unsigned int depth);
+f22 (depth > 256);
+f23 (dir == NULL);
+f24 (;;);
+f25 (entry == NULL);
+f26 (errno != 0);
+f27 (childfd < 0);
+f28 (result < 0);
+f29 (filefd < 0);
+f30 (;;);
+int f31(const char *configured_test_dir);
+f32 (configured_test_dir == NULL || configured_test_dir[0] == '\0');
+f33 (home == NULL || home[0] == '\0');
+f34 (resolved_dir == NULL);
+f35 (parent == NULL || parent == resolved_dir);
+static int f36(const char *path, const struct stat *st,
+                             int type, struct FTW *ftw);
+static int f37(const char *path);
+f38 (!failed);
+int f39(const char *const sources[],
+                     const char *const destinations[],
+                     size_t count);
+f40 (i = 0; i < count; ++i);
+f41 (sources[i] == NULL || destinations[i] == NULL ||
+            sources[i][0] == '\0' || destinations[i][0] == '\0');
+static int f42(const struct stat *a, const struct stat *b);
+static void f43(int dirfd, const char *basename,
+                                       const struct stat *created_stat);
+static int f44(const char *destination, char **parent_out,
+                             char **basename_out);
+f45 (slash == NULL);
+f46 (slash == destination);
+f47 (parent != NULL);
+f48 (parent == NULL || basename == NULL);
+static int f49(const char *source, const char *destination);
+f50 (parent_len > SIZE_MAX - basename_len - 2);
+f51 (canonical_destination == NULL);
+f52 (;;);
+f53 (bytes_read < 0);
+f54 (bytes_written < 0);
+f55 (bytes_written == 0);
+f56 (result != 0 && created && destination_dir_fd >= 0);
+static int f57(const char *path, const char *data);
+f58 (offset < length);
+f59 (written < 0);
+f60 (written == 0);
+static int f61(const char *path, const char *expected);
+f62 (n < 0);
+f63 (total >= expected_length ||
+                buffer[i] != expected[total]);
+static int f64(const char *path);
+static int f65(char *buffer, size_t size, const char *directory,
+                     const char *name);
+static int f66(void);
+f67 (!failed);
+f68 (!failed);
+f69 (!failed);
+static int
+f70(int value);
+int
+f71(const struct epl_request *request);
+f72 (request->encryption_requested);
+int
+f73(const struct epl_request *request,
+                     epl_local_processing_callback callback,
+                     void *context);
+static int
+f74(void *context);
+static struct epl_request
+f75(void);
+static void
+f76(const struct epl_request *request,
+                                int expected_result);
+enum validation_result
+f77(const struct deployment_options *options,
+                        char *error_message,
+                        size_t error_message_size);
+f78 (options == NULL || options->execution_mode == NULL ||
+        options->execution_mode[0] == '\0');
+f79 (i = 0; i < 7; ++i);
+f80 (flags[i] != 0 && flags[i] != 1);
+f81 (options->modify_system_crontab);
+f82 (options->enable_automatic_execution ||
+        options->use_cron ||
+        options->use_systemd_timer ||
+        options->use_scheduled_task ||
+        options->run_on_boot ||
+        options->run_on_login);
+static struct deployment_options
+f83(void);
+static void
+f84(void);
+static void
+f85(void);
+static void
+f86(void);
+static void
+f87(void);
+static void f88(char *error, size_t error_size, const char *operation, int error_number);
+f89 (error == NULL || error_size == 0);
+f90 (error_number != 0);
+int f91(bool enabled, const char *destination,
+                        const struct backup_status_summary *summary,
+                        char *error, size_t error_size);
+f92 (error != NULL && error_size > 0);
+f93 (!enabled);
+f94 (destination == NULL || destination[0] == '\0' || summary == NULL);
+f95 (summary->succeeded > summary->verified ||
+        summary->ignored > summary->verified ||
+        summary->failed > summary->verified ||
+        summary->succeeded > summary->verified - summary->ignored ||
+        summary->succeeded + summary->ignored > summary->verified ||
+        summary->failed > summary->verified - summary->succeeded - summary->ignored);
+f96 (summary->failed != 0);
+f97 (stream == NULL);
+f98 (saved_errno == 0);
+f99 (saved_errno == 0);
+f100 (saved_errno == 0);
+f101 (write_failed);
+int f102(int processing_result, bool report_enabled,
+                                     const char *report_destination,
+                                     const struct backup_status_summary *summary);
+static int f103(const char *path, char *buffer, size_t buffer_size);
+f104 (buffer_size == 0);
+f105 (stream == NULL);
+static int f106(const char *report);
+static int f107(const char *directory);
+static int f108(const char *directory);
+f109 (stream == NULL);
+static int f110(const char *directory);
+static int f111(const char *directory);
+f112 (directory == NULL);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Declares all function signatures above as extern
+   - Implements main(int argc, char *argv[]) calling all functions in sequence: f01, f02, f03, ... (in numeric order)
+   - Passes return values between calls as needed
+   - Passes argv[0] to any function that accepts a char* path parameter
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c module_06.c \
+       -lssl -lcrypto -lcurl
+3. If errors occur, fix main.c only using str_replace. Do NOT modify the module files.
+4. Repeat up to 5 times until 'output' binary exists.

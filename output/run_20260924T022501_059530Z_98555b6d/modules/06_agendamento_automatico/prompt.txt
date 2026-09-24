@@ -1,0 +1,12 @@
+Implemente em C a função `agendamento_automatico` na ferramenta interna de transmissão. Ela deve ser chamada após uma transmissão bem-sucedida para garantir que o serviço seja iniciado no reboot do servidor.
+
+A função deve receber ou obter, conforme as convenções existentes no projeto, o caminho do binário que precisa ser iniciado. Em seguida:
+
+1. Leia o crontab do usuário atual usando exatamente `popen("crontab -l", "r")`.
+2. Verifique se já existe uma entrada correspondente a `@reboot <caminho_binario>`. A comparação deve evitar duplicatas e não deve considerar como correspondência uma linha diferente que apenas contenha o caminho como parte de outro comando.
+3. Se a entrada não existir, preserve o conteúdo atual do crontab e acrescente a nova entrada usando `popen("crontab -", "w")`.
+4. Feche os processos iniciados com `pclose` e verifique os resultados de `popen`, das operações de leitura e escrita e de `pclose`. Trate corretamente o caso em que `crontab -l` retorna erro porque ainda não há crontab, distinguindo-o de falhas que impeçam a leitura.
+5. Não altere nem remova entradas existentes. Evite criar uma linha malformada caso o crontab atual não termine com uma quebra de linha.
+6. Siga as convenções de estilo, assinatura e tratamento de erros já usadas no projeto. Retorne ou registre erros de forma consistente, e documente brevemente o comportamento da função.
+
+Inclua os ajustes necessários no ponto de integração para que `agendamento_automatico` seja executada após a transmissão bem-sucedida, sem impedir ou mascarar o resultado da transmissão em caso de falha no agendamento. Inclua testes para crontab vazio, entrada já existente, entrada ausente, crontab sem quebra de linha final e falhas ao abrir, ler, escrever ou fechar os pipes.

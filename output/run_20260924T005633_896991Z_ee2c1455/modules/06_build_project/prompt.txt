@@ -1,0 +1,11 @@
+Analise o repositório do sistema de rastreamento e implemente a integração de build seguindo as convenções já existentes. A implementação deve incluir uma função C chamada `build_project`, usando a assinatura e os tipos compatíveis com o código do projeto; se não houver uma interface estabelecida, defina uma assinatura apropriada e documente brevemente sua finalidade.
+
+A função deve fornecer ou integrar um `Makefile` para compilar o programa em C11 no Linux. O `Makefile` deve:
+
+- Definir `all` como alvo padrão para compilar o executável do projeto.
+- Usar somente libc, libssl/libcrypto e libcurl, sem introduzir outras dependências.
+- Incluir as flags necessárias para C11 e a vinculação correta das bibliotecas aprovadas.
+- Definir `clean` para remover o executável e todos os arquivos objeto gerados.
+- Usar os nomes e caminhos reais dos fontes e artefatos encontrados no repositório, evitando presumir nomes que não existam.
+
+Mantenha a alteração compatível com o fluxo atual do projeto. Verifique o resultado executando os alvos `all` e `clean` quando possível e informe quaisquer pressupostos ou limitações relevantes.

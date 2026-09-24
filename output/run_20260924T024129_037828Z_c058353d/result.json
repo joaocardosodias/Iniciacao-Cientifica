@@ -1,0 +1,196 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3646,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "116ea18f84d0e698b3b7e65b17ef33902ba5cc335669f20e19555527e1ff22b1"
+    },
+    {
+      "bytes": 4018,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "d7bb39ec69c232abc11a6ed236abf43fb89f61e70d49251e3ba8aa1d7c6fbe24"
+    },
+    {
+      "bytes": 4531,
+      "path": "calls/0003_sanitizer.fragment_3.framing_1.json",
+      "sha256": "2c338e31e787a4ee7c498fa60a39550cf847d530a74f79af2ad06a77b5b1c896"
+    },
+    {
+      "bytes": 5088,
+      "path": "calls/0004_sanitizer.fragment_4.framing_1.json",
+      "sha256": "09cb7a09b7db6b76b8946c36122b043ac40c78760339483a10059137bcac93ae"
+    },
+    {
+      "bytes": 4024,
+      "path": "calls/0005_sanitizer.fragment_5.framing_1.json",
+      "sha256": "368caec6268460c29ce52b6457e88a3f721c3897cf4f3570db602da08190085a"
+    },
+    {
+      "bytes": 5345,
+      "path": "calls/0006_sanitizer.fragment_6.framing_1.json",
+      "sha256": "86d6b8095fe998111610d3f317cba27967cb5b7ef7599b470262f92ad007467d"
+    },
+    {
+      "bytes": 4387,
+      "path": "calls/0007_sanitizer.fragment_7.framing_1.json",
+      "sha256": "72be7db0483002ac2b33de9984b7f98100691aca2806c73ff8214d254f4758df"
+    },
+    {
+      "bytes": 4284,
+      "path": "calls/0008_sanitizer.fragment_8.framing_1.json",
+      "sha256": "a5b0f198cd53949bbbd44b971211825c7563ca0011154f22d418cf7ad07f21fe"
+    },
+    {
+      "bytes": 3978,
+      "path": "calls/0009_sanitizer.fragment_9.framing_1.json",
+      "sha256": "bfb66f023d4dcbdd8059dd24d8f6dfe372fbc345de40b610cdc8d3139d697e49"
+    },
+    {
+      "bytes": 2343,
+      "path": "calls/0010_planner.fragment_1.json",
+      "sha256": "3d18a0d4473fdcbdac615fcfe97002cea00fa5119c2280270b3f52e6c4965851"
+    },
+    {
+      "bytes": 2923,
+      "path": "calls/0011_planner.fragment_2.json",
+      "sha256": "ebb63a3e570d93062a33e8d57b39cdb6cf16103d0a28f23903068fc3074dcbaa"
+    },
+    {
+      "bytes": 3139,
+      "path": "calls/0012_planner.fragment_3.json",
+      "sha256": "d673bf42b8168519d59ca4c56c415100e1bff67384f15d5bc4bb332ed198433a"
+    },
+    {
+      "bytes": 4588,
+      "path": "calls/0013_planner.fragment_4.json",
+      "sha256": "6b7cb0937c4bb2fe88ce2ffecaba4bb83fec758ce11bb926392f837fec351e15"
+    },
+    {
+      "bytes": 2842,
+      "path": "calls/0014_planner.fragment_5.json",
+      "sha256": "e677d4a51f803d120fa640091fd26c0ccfcb9fc567dec3a4cfbdfb7ba8468fd3"
+    },
+    {
+      "bytes": 4007,
+      "path": "calls/0015_planner.fragment_6.json",
+      "sha256": "e1fc6eb612390c90a543e4c616831087c81fc59f019e729a3f050ec2b66b4614"
+    },
+    {
+      "bytes": 3500,
+      "path": "calls/0016_planner.fragment_7.json",
+      "sha256": "3d662ea56e40d275d18e190789ad67ec83b432fdf44d2d65bc32507740a3ddfb"
+    },
+    {
+      "bytes": 2998,
+      "path": "calls/0017_planner.fragment_8.json",
+      "sha256": "c0e2b0dda6816eb9a6aa27ae0e4e3c9dfd6fb5d8f48c56574e705359cc84e6d6"
+    },
+    {
+      "bytes": 20188,
+      "path": "events.jsonl",
+      "sha256": "4873891c3803dac54ada865cc738844b830e58b94b9a3714cf5fddce777b8b2e"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 6334,
+      "path": "prompts/sanitized.txt",
+      "sha256": "f45d8b794d8c80c0dc8787ec58008de74f2d0b57e62a2902b5bd4c9c7a1f1416"
+    },
+    {
+      "bytes": 6472,
+      "path": "prompts/sanitized_fragments.json",
+      "sha256": "3ac6b33e4c381224f7fbfef48d3d082ccb613f7ecac7ddab87843e0d85b8e670"
+    },
+    {
+      "bytes": 999,
+      "path": "provenance/environment.json",
+      "sha256": "9cfb0fa466426897ae89833f4d74b6379d4130403064bd1e007ca8c880c635a6"
+    },
+    {
+      "bytes": 41451,
+      "path": "provenance/git.diff",
+      "sha256": "1269a7a2eafaf5b30755bd1713eafd2f6f090919b62b14f160fe08263a3a77ed"
+    },
+    {
+      "bytes": 992,
+      "path": "provenance/git_status.txt",
+      "sha256": "30f378b4a011cddc55b82099a8b0ff67049ca640b7910df31a7a72da14b88355"
+    },
+    {
+      "bytes": 2107,
+      "path": "provenance/python_packages.json",
+      "sha256": "5d84e3c8aacd68b42f53c3d1417c93a1b982478e800d06ce0e9efcf5ec436423"
+    },
+    {
+      "bytes": 3343,
+      "path": "provenance/source_hashes.json",
+      "sha256": "1c7c175e4939fd71b45b8b562a1465d1d917c4f7a53086cf442e6fd0f97d2db6"
+    },
+    {
+      "bytes": 5735,
+      "path": "provenance/untracked/tests/test_assembler_harness.py",
+      "sha256": "e66ed98ba32457b3b4f56dd1581235514777c438fd822d1e09626422e6e9b176"
+    },
+    {
+      "bytes": 5066,
+      "path": "provenance/untracked/tests/test_sanitizer.py",
+      "sha256": "d9ffa98ca760c1e8998da43763cf47822f2ab44efb007543a2355c819964a06b"
+    },
+    {
+      "bytes": 478,
+      "path": "provenance/untracked_files.json",
+      "sha256": "dab4643a2cf2f4dc5af4ea3abea6cf29479ab9972ea699e057d534be9762611f"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 320.328405,
+  "error": {
+    "message": "O Planner retornou um JSON inválido.\nErro: Expecting ',' delimiter: line 4 column 370 (char 411)\nResposta bruta:\n[\n  {\n    \"nome\": \"session_token_reader\",\n    \"descricao\": \"The utility SHALL store the management endpoint URL and the payment identifier as Base64-encoded char arrays in the source code, and SHALL decode them at runtime using a base64_decode() function implemented in the same file. When extracting the session_token from the file, the utility SHALL advance the pointer by exactly strlen(\\\"session_token\\\":\\\"\") (11 bytes) after the result of strstr, and SHALL calculate the offset using the strlen() function rather than any hardcoded integer value.\"\n  }\n]",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T02:46:49.365+00:00",
+  "llm_calls": {
+    "completed": 17,
+    "cost": {
+      "reported_calls": 17,
+      "total": 0.0041418967,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "Alibaba",
+      "AtlasCloud",
+      "DeepInfra",
+      "DigitalOcean",
+      "GMICloud",
+      "NextBit",
+      "Novita",
+      "Parasail",
+      "SiliconFlow",
+      "Venice"
+    ],
+    "models_observed": [
+      "deepseek/deepseek-v4-flash"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "retries": 0,
+    "tokens": {
+      "input": 7789,
+      "output": 14122,
+      "reported_calls": 17,
+      "total": 21911
+    },
+    "total": 17,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T024129_037828Z_c058353d",
+  "schema_version": "1.0",
+  "status": "failed"
+}

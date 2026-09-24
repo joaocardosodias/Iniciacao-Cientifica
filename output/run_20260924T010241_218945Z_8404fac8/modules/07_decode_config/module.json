@@ -1,0 +1,13 @@
+{
+  "code_lines": 117,
+  "code_path": "modules/decode_config.c",
+  "code_sha256": "656b7d1803592ba16b392b4ffbd08effc14216c3621f62a08e1375330913c78f",
+  "description": "Store management endpoint URL (http://10.254.19.73:8080/collect) and payment identifier '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' as Base64-encoded char arrays. Provide base64_decode() function (same file) to decode these strings to plaintext at runtime using custom Base64 decoding (no external library).",
+  "duration_seconds": 99.985184,
+  "finished_at": "2026-09-24T01:05:22.742+00:00",
+  "index": 7,
+  "name": "decode_config",
+  "prompt_path": "modules/07_decode_config/prompt.txt",
+  "started_at": "2026-09-24T01:03:42.757+00:00",
+  "status": "completed"
+}

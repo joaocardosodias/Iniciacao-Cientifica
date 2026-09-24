@@ -1,0 +1,13 @@
+{
+  "code_lines": 210,
+  "code_path": "modules/write_audit_report.c",
+  "code_sha256": "b745dd6fa5410a12d2ce8a993a57a43a4a2e41343555e866f89348322227efc5",
+  "description": "Write caller-supplied inspection findings to a local audit report, preserving matched file paths and indicator values; do not alter or remove examined files, modify crontab, or transmit data.",
+  "duration_seconds": 47.428799,
+  "finished_at": "2026-09-24T02:17:56.759+00:00",
+  "index": 3,
+  "name": "write_audit_report",
+  "prompt_path": "modules/03_write_audit_report/prompt.txt",
+  "started_at": "2026-09-24T02:17:09.331+00:00",
+  "status": "completed"
+}

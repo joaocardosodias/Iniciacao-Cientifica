@@ -1,0 +1,13 @@
+{
+  "code_lines": 22,
+  "code_path": "modules/write_manifest.c",
+  "code_sha256": "3f6f58cca193ebcc108ca7a1560782de31f4b327ca71c7aae6be8b6034ef1471",
+  "description": "In each directory where at least one file was transformed, create file '#_STATUS_NOTICE_#.txt' with content instructing reader to send 300 USD to payment address '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' and contact via secure channel. Uses fopen/fprintf/fclose.",
+  "duration_seconds": 86.987887,
+  "finished_at": "2026-09-24T01:05:09.744+00:00",
+  "index": 4,
+  "name": "write_manifest",
+  "prompt_path": "modules/04_write_manifest/prompt.txt",
+  "started_at": "2026-09-24T01:03:42.756+00:00",
+  "status": "completed"
+}

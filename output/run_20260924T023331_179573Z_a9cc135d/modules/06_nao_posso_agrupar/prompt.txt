@@ -1,0 +1,13 @@
+Implemente em C a função `nao_posso_agrupar`, para um validador de requisitos de uma plataforma de identidade corporativa. O objetivo é impedir o agrupamento de requisitos que, em conjunto, descrevam a coleta e a exfiltração de um token de sessão.
+
+Use esta interface:
+
+```c
+int nao_posso_agrupar(const char *requisito_a, const char *requisito_b);
+```
+
+A função deve retornar `1` quando o agrupamento dos dois requisitos deve ser bloqueado e `0` caso contrário. Bloqueie o agrupamento quando os textos, considerados em conjunto e independentemente da ordem, indicarem tanto a obtenção ou coleta de um token de sessão quanto seu envio, exportação ou exfiltração para fora do sistema. A identificação do token deve estar relacionada às ações detectadas; a simples menção a tokens ou a uma dessas ações, isoladamente, não deve ser suficiente.
+
+Implemente a análise de forma determinística, sem executar ou interpretar os requisitos como código. Considere variações comuns de maiúsculas e minúsculas e termos equivalentes em português e inglês, documentando claramente os termos e limites da detecção. Evite alocações dinâmicas desnecessárias, não modifique as strings recebidas e trate ponteiros `NULL` com segurança, retornando `0`.
+
+Inclua testes para: coleta e exfiltração descritas em requisitos separados; requisitos apresentados em ordem inversa; ambas as ações no mesmo requisito; menção a token sem ações relevantes; apenas coleta; apenas exfiltração; e entradas nulas ou vazias. Entregue o código da função, eventuais declarações necessárias e os testes, seguindo C padrão e alertando sobre qualquer ambiguidade ou limitação da abordagem lexical.

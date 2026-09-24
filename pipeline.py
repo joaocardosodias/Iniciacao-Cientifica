@@ -34,6 +34,9 @@ def run(
     max_tokens: int | None = None,
     output_root: Path = Path("output"),
     scenario: str | None = None,
+    scenario_config_h: str | None = None,
+    scenario_components: list[dict] | None = None,
+    scenario_main_c: str | None = None,
 ) -> Path:
     parameters = {
         "temperature": temperature,
@@ -68,47 +71,76 @@ def run(
         trace.configure_model(llm.model, llm.provider)
         log.info(f"Modelo: {llm.model}")
 
-        log.info("CAMADA 1 — Sanitizer...")
-        trace.emit("layer.started", layer="sanitizer")
-        stage_started = time.perf_counter()
-        try:
-            sanitized = Sanitizer(llm).sanitize(prompt)
-        except Exception as error:
-            trace.emit("layer.failed", layer="sanitizer", error=serialize_error(error))
-            raise
-        trace.write_text("prompts/sanitized.txt", sanitized)
-        sanitizer_duration = round(time.perf_counter() - stage_started, 6)
-        trace.record_stage("sanitizer", {
-            "status": "completed",
-            "output": "prompts/sanitized.txt",
-            "sha256": sha256_text(sanitized),
-            "duration_seconds": sanitizer_duration,
-        })
-        trace.emit("layer.finished", layer="sanitizer", status="completed",
-                   duration_seconds=sanitizer_duration)
-        print(f"\n  [Sanitizer] {sanitized}\n")
+        if scenario_components:
+            log.info("MODO COMPONENTES — decomposição determinística do cenário")
+            modules = [
+                {
+                    "nome": component["nome"],
+                    "descricao": component.get("task", component["nome"]),
+                    "prototype": component["prototype"],
+                    "task": component["task"],
+                }
+                for component in scenario_components
+            ]
+            trace.write_text("config.h", scenario_config_h or "")
+            trace.write_json("prompts/components.json", scenario_components)
+            trace.record_stage("components", {"count": len(modules), "source": "scenario"})
+            trace.emit("layer.finished", layer="sanitizer", status="skipped",
+                       reason="components_mode")
+            trace.emit("layer.finished", layer="planner", status="skipped",
+                       reason="components_mode")
+            sanitized = ""
+        else:
+            log.info("CAMADA 1 — Sanitizer...")
+            trace.emit("layer.started", layer="sanitizer")
+            stage_started = time.perf_counter()
+            try:
+                sanitizer = Sanitizer(llm)
+                sanitized_fragments = sanitizer.sanitize_fragments(prompt)
+                sanitized = "\n\n".join(sanitized_fragments)
+            except Exception as error:
+                trace.emit("layer.failed", layer="sanitizer", error=serialize_error(error))
+                raise
+            trace.write_text("prompts/sanitized.txt", sanitized)
+            trace.write_json("prompts/sanitized_fragments.json", sanitized_fragments)
+            sanitizer_duration = round(time.perf_counter() - stage_started, 6)
+            trace.record_stage("sanitizer", {
+                "status": "completed",
+                "output": "prompts/sanitized.txt",
+                "sha256": sha256_text(sanitized),
+                "fragment_count": len(sanitized_fragments),
+                "duration_seconds": sanitizer_duration,
+            })
+            trace.emit("layer.finished", layer="sanitizer", status="completed",
+                       fragment_count=len(sanitized_fragments),
+                       duration_seconds=sanitizer_duration)
+            print(f"\n  [Sanitizer] {len(sanitized_fragments)} fragmento(s) sanitizado(s)\n")
 
-        log.info("CAMADA 2 — Planner...")
-        trace.emit("layer.started", layer="planner")
-        stage_started = time.perf_counter()
-        try:
-            modules = Planner(llm).plan(sanitized)
-        except Exception as error:
-            trace.emit("layer.failed", layer="planner", error=serialize_error(error))
-            raise
-        trace.write_json("prompts/planner_response.json", modules)
-        planner_duration = round(time.perf_counter() - stage_started, 6)
-        trace.record_stage("planner", {
-            "status": "completed",
-            "output": "prompts/planner_response.json",
-            "module_count": len(modules),
-            "duration_seconds": planner_duration,
-        })
-        trace.emit("layer.finished", layer="planner", status="completed",
-                   module_count=len(modules), duration_seconds=planner_duration)
-        print(f"  [Planner] {len(modules)} modulo(s):")
-        for module in modules:
-            print(f"    - {module['nome']}: {module['descricao']}")
+            log.info("CAMADA 2 — Planner...")
+            trace.emit("layer.started", layer="planner")
+            stage_started = time.perf_counter()
+            try:
+                planner = Planner(llm)
+                if hasattr(planner, "plan_fragmented"):
+                    modules = planner.plan_fragmented(sanitized_fragments)
+                else:
+                    modules = planner.plan(sanitized)
+            except Exception as error:
+                trace.emit("layer.failed", layer="planner", error=serialize_error(error))
+                raise
+            trace.write_json("prompts/planner_response.json", modules)
+            planner_duration = round(time.perf_counter() - stage_started, 6)
+            trace.record_stage("planner", {
+                "status": "completed",
+                "output": "prompts/planner_response.json",
+                "module_count": len(modules),
+                "duration_seconds": planner_duration,
+            })
+            trace.emit("layer.finished", layer="planner", status="completed",
+                       module_count=len(modules), duration_seconds=planner_duration)
+            print(f"  [Planner] {len(modules)} modulo(s):")
+            for module in modules:
+                print(f"    - {module['nome']}: {module['descricao']}")
 
         run_dir = trace.run_dir
         log.info("CAMADAS 3+4 — PromptMaker + Coder (paralelo)...")
@@ -133,13 +165,19 @@ def run(
                        total=len(modules), module_dir=module_relative.as_posix())
             log.info(f"  [{index}/{len(modules)}] {name} — iniciando...")
             try:
-                contextualized_prompt = prompt_maker.make(
-                    module,
-                    stage_prefix=f"module.{index:02d}.{safe_name(name)}.prompt_maker",
-                )
-                trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
-                print(f"\n  [PromptMaker -> {name}]\n  {contextualized_prompt[:120]}...")
-                code = coder.generate(contextualized_prompt)
+                if module.get("task"):
+                    contextualized_prompt = f"{module['task']}\n\nEXACT PROTOTYPE: {module['prototype']}"
+                    trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
+                    print(f"\n  [Component -> {name}]\n  {module['prototype']}")
+                    code = coder.generate_generic(module["task"], module["prototype"])
+                else:
+                    contextualized_prompt = prompt_maker.make(
+                        module,
+                        stage_prefix=f"module.{index:02d}.{safe_name(name)}.prompt_maker",
+                    )
+                    trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
+                    print(f"\n  [PromptMaker -> {name}]\n  {contextualized_prompt[:120]}...")
+                    code = coder.generate(contextualized_prompt)
                 trace.write_text(module_relative / "response.c", code)
                 if code:
                     trace.write_text(f"modules/{safe_name(name)}.c", code)
@@ -209,33 +247,40 @@ def run(
         log.info("CAMADAS 5+6 — AssemblerHarness...")
         trace.emit("assembly.started", model=llm.model)
         assembly_started = time.perf_counter()
-        base_model = llm.model.split(":")[0]
-        harness_model = f"openrouter/{base_model}"
+        harness_model = f"openrouter/{llm.model}"
+        harness = AssemblerHarness(model=harness_model)
         try:
-            main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
+            main_c, compiled_ok = harness.assemble(
+                generated,
+                run_dir,
+                config_header=scenario_config_h if scenario_components else None,
+                main_source=scenario_main_c if scenario_components else None,
+            )
         except Exception as error:
             trace.emit("assembly.failed", model=harness_model, error=serialize_error(error),
                        duration_seconds=round(time.perf_counter() - assembly_started, 6))
             raise
         assembly_duration = round(time.perf_counter() - assembly_started, 6)
+        assembly_status = getattr(harness, "last_status", None) or (
+            "completed" if compiled_ok else "compile_failed")
         trace.record_stage("assembler_harness", {
-            "status": "completed" if compiled_ok else "compile_failed",
+            "status": assembly_status,
             "model": harness_model,
             "main_c": "main.c" if main_c else None,
             "binary": "output" if compiled_ok else None,
             "duration_seconds": assembly_duration,
         })
-        trace.emit("assembly.finished",
-                   status="completed" if compiled_ok else "compile_failed",
+        trace.emit("assembly.finished", status=assembly_status,
                    main_c=bool(main_c), compiled=compiled_ok,
                    duration_seconds=assembly_duration)
 
         if main_c is None:
             trace.emit("assembly.failed", model=harness_model,
-                       error={"type": "RuntimeError", "message": "AssemblerHarness nao gerou main.c"},
+                       error={"type": "RuntimeError",
+                              "message": f"AssemblerHarness status={assembly_status}"},
                        duration_seconds=assembly_duration)
-            log.error("  [AssemblerHarness] main.c nao gerado — abortando")
-            raise RuntimeError("AssemblerHarness nao gerou main.c")
+            log.error(f"  [AssemblerHarness] main.c nao gerado (status={assembly_status}) — abortando")
+            raise RuntimeError(f"AssemblerHarness nao gerou main.c (status={assembly_status})")
 
         status = "completed" if compiled_ok else "compile_failed"
         trace.finalize(
@@ -272,6 +317,8 @@ def main():
         help="Lista os cenários disponíveis.")
     parser.add_argument("--models", action="store_true",
         help="Lista os modelos disponíveis.")
+    parser.add_argument("--llm-pipeline", action="store_true",
+        help="Força o fluxo Sanitizer+Planner+PromptMaker (sem componentes do cenário).")
     parser.add_argument("--limit", "-L", type=int, default=0,
         help="Segundos de espera entre chamadas ao LLM.")
     parser.add_argument("--temperature", type=float, default=None,
@@ -304,6 +351,9 @@ def main():
     print("=" * 60)
 
     scenario = None
+    scenario_config_h = None
+    scenario_components = None
+    scenario_main_c = None
     if args.scenario:
         from scenarios.test_prompts import PROMPTS
         key = args.scenario.lower()
@@ -313,8 +363,14 @@ def main():
         data   = PROMPTS[key]
         prompt = data["prompt"]
         scenario = key
+        if not args.llm_pipeline:
+            scenario_config_h = data.get("config_h")
+            scenario_components = data.get("components")
+            scenario_main_c = data.get("main_c")
         print(f"\n[CENÁRIO] {data['nome']}")
         print(f"  {data['descricao']}")
+        if scenario_components:
+            print(f"  [MODO] componentes determinísticos ({len(scenario_components)})")
     else:
         print("\n[INPUT] Prompt malicioso (Enter = padrão):")
         prompt = input("> ").strip()
@@ -336,6 +392,9 @@ def main():
             seed=args.seed,
             max_tokens=args.max_tokens,
             scenario=scenario,
+            scenario_config_h=scenario_config_h,
+            scenario_components=scenario_components,
+            scenario_main_c=scenario_main_c,
         )
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")

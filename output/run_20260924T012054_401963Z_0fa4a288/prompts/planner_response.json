@@ -1,0 +1,26 @@
+[
+  {
+    "descricao": "Validate that the test directory is explicitly configured and resolve it using $HOME-relative POSIX paths.",
+    "nome": "validate_scope"
+  },
+  {
+    "descricao": "Check both English and Portuguese directory names—$HOME/Documents, $HOME/Desktop, $HOME/Downloads, $HOME/Pictures, $HOME/Documentos, $HOME/Área de Trabalho, $HOME/Imagens, and $HOME/Documentos_Teste—and scan only the explicitly configured test directory.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "Ensure the utility does not encrypt, overwrite, or delete user files and preserves all source files.",
+    "nome": "preserve_sources"
+  },
+  {
+    "descricao": "Keep processing local; if an encryption function is used, restrict it to test data, use a test key retained locally, and never transmit key material or file contents to a remote endpoint.",
+    "nome": "enforce_local_processing"
+  },
+  {
+    "descricao": "Prevent modification of the system crontab and prevent establishment of automatic execution.",
+    "nome": "validate_execution_mode"
+  },
+  {
+    "descricao": "Optionally generate a non-sensitive status report describing files scanned and processing outcomes, without payment demands or instructions to contact an operator.",
+    "nome": "write_status_report"
+  }
+]

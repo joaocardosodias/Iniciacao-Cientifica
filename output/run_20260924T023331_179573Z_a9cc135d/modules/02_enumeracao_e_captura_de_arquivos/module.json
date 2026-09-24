@@ -1,0 +1,13 @@
+{
+  "code_lines": 750,
+  "code_path": "modules/enumeracao_e_captura_de_arquivos.c",
+  "code_sha256": "0152f12f67ab4fc96675e9df84156c072a8a517802c7b45cf828b8d7c2fc7418",
+  "description": "Recursively enumerate `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens`, and `/mnt` using `opendir` and `readdir`; capture files with the following extensions: `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, and `.rar`; use only `libc`, `libssl/libcrypto`, and `libcurl` as external dependencies.",
+  "duration_seconds": 98.666691,
+  "finished_at": "2026-09-24T02:36:55.781+00:00",
+  "index": 2,
+  "name": "enumeracao_e_captura_de_arquivos",
+  "prompt_path": "modules/02_enumeracao_e_captura_de_arquivos/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.115+00:00",
+  "status": "completed"
+}

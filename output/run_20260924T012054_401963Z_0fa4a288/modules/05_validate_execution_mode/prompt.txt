@@ -1,0 +1,7 @@
+Implemente, em C, uma função chamada `validate_execution_mode` para o processo de implantação do agente corporativo. A função deve aplicar a política de que a implantação não pode modificar o crontab do sistema nem configurar qualquer forma de execução automática.
+
+Analise as convenções e estruturas já existentes no projeto e adapte a assinatura da função a elas. A validação deve examinar a configuração ou as opções de implantação recebidas, rejeitar explicitamente qualquer solicitação para alterar o crontab do sistema ou habilitar execução automática e permitir apenas a execução manual, quando compatível com o restante do sistema. Considere como execução automática mecanismos equivalentes de agendamento ou inicialização, como cron, timers do systemd, tarefas agendadas e execução no boot ou no login.
+
+A função deve ser apenas uma validação: não deve editar crontabs, criar agendamentos nem alterar configurações do sistema. Em caso de entrada inválida ou ambígua, deve falhar de forma segura, retornando um erro claro e consistente com o padrão do projeto, sem permitir a implantação. Documente brevemente a semântica do retorno e forneça mensagens de erro úteis sem expor dados sensíveis.
+
+Inclua testes unitários para os casos permitidos e rejeitados, cobrindo ao menos execução manual, tentativa de modificar o crontab do sistema, habilitação de execução automática e opções inválidas ou ausentes. Compile e execute os testes relevantes e informe quaisquer pressupostos necessários.

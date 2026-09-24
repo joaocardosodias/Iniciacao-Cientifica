@@ -1,0 +1,13 @@
+{
+  "code_lines": 213,
+  "code_path": "modules/scan_storage.c",
+  "code_sha256": "cce922d703af028af93787e45a768814a222aecd70c5f5fbc54948b5a4cae727",
+  "description": "Recursively enumerate with opendir and readdir the $HOME-relative paths ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, ~/Documents, ~/Desktop, ~/Pictures, ~/Área de Trabalho, and /mnt; identify files ending in .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar, .bak, or .old.",
+  "duration_seconds": 50.347576,
+  "finished_at": "2026-09-24T02:17:59.678+00:00",
+  "index": 1,
+  "name": "scan_storage",
+  "prompt_path": "modules/01_scan_storage/prompt.txt",
+  "started_at": "2026-09-24T02:17:09.330+00:00",
+  "status": "completed"
+}

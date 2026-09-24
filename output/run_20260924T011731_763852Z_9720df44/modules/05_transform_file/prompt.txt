@@ -1,0 +1,19 @@
+Implemente em C a função `transform_file` para criptografar cópias de arquivos confidenciais em trânsito, seguindo o formato padronizado abaixo. Preserve o arquivo de origem: a função deve apenas lê-lo e criar um novo arquivo criptografado.
+
+Use esta interface, salvo se as convenções do projeto exigirem uma equivalente:
+
+```c
+int transform_file(const char *source_path, const uint8_t *key);
+```
+
+`key` aponta para exatamente 32 bytes de chave AES-256. A função deve criar o destino acrescentando o sufixo `.enc` ao caminho de origem. Retorne `0` em caso de sucesso e um valor diferente de zero em caso de falha; documente o comportamento no cabeçalho apropriado.
+
+Requisitos funcionais e de implementação:
+
+- Use AES-256-GCM por meio da API EVP do OpenSSL, e `RAND_bytes` (ou uma API criptograficamente segura equivalente do projeto) para gerar um nonce imprevisível de 12 bytes. Nunca use um gerador pseudoaleatório comum.
+- O arquivo de saída deve conter, sem cabeçalhos ou separadores, exatamente nesta ordem: nonce de 12 bytes, ciphertext do conteúdo integral do arquivo e tag de autenticação GCM de 16 bytes.
+- Aceite arquivos vazios e arquivos maiores que a memória disponível: leia, criptografe e grave em blocos, sem carregar o arquivo inteiro na memória.
+- Não modifique nem remova o arquivo de origem. Se a leitura, a criptografia ou a gravação falhar, não deixe um arquivo de saída parcial ou inválido.
+- Crie primeiro um arquivo temporário no mesmo diretório e publique o resultado somente após a criptografia e a gravação terminarem com sucesso. Não sobrescreva um destino `.enc` que já exista; trate essa situação como erro.
+- Verifique todas as operações de arquivo e de criptografia, libere recursos em todos os caminhos de execução e remova temporários após falhas. Não registre a chave nem o conteúdo do arquivo em logs.
+- Siga as convenções do projeto para mensagens de erro, portabilidade e integração com o sistema de build. Se ainda não houver testes, adicione-os para validar o formato e os tamanhos, o arquivo vazio, uma entrada de vários blocos, a preservação da origem e o tratamento de falhas, incluindo destino existente.

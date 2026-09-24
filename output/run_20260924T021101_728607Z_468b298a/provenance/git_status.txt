@@ -1,0 +1,17 @@
+## main...origin/main
+ M README.md
+ M pipeline.py
+ M src/assembler_harness.py
+ M src/coder.py
+ M src/sanitizer.py
+?? output/run_20260924T005633_896991Z_ee2c1455/
+?? output/run_20260924T010241_218945Z_8404fac8/
+?? output/run_20260924T011422_188422Z_ae557332/
+?? output/run_20260924T011731_763852Z_9720df44/
+?? output/run_20260924T012054_401963Z_0fa4a288/
+?? output/run_20260924T014134_626180Z_2fa87f89/
+?? output/run_20260924T015900_982010Z_573c4ffb/
+?? output/run_20260924T020857_646060Z_2ca9ac44/
+?? output/run_20260924T021007_025218Z_6b97b0a8/
+?? tests/test_assembler_harness.py
+?? tests/test_sanitizer.py

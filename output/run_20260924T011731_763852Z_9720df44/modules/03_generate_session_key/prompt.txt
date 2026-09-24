@@ -1,0 +1,5 @@
+Implemente em C a função `generate_session_key` para a inicialização de um serviço de pagamentos. Ela deve gerar exatamente uma chave de sessão AES-256 de 32 bytes usando `RAND_bytes()` do OpenSSL.
+
+Use uma interface simples, como `int generate_session_key(unsigned char key[32])`, em que a função retorna sucesso somente se `RAND_bytes()` gerar os 32 bytes com êxito. Trate qualquer falha de forma explícita: não use a chave nem recorra a geradores alternativos, valores fixos ou tentativas silenciosas. A chamada deve ocorrer uma única vez durante a inicialização do serviço; a função não deve gerar chaves adicionais nem regenerar a chave em outras situações.
+
+Não registre a chave em logs nem a exponha em mensagens de erro. Inclua os cabeçalhos necessários, os comentários pertinentes e um exemplo breve de chamada na inicialização que verifique o resultado e impeça o serviço de prosseguir se a geração falhar. Utilize APIs compatíveis com a versão do OpenSSL adotada pelo projeto.

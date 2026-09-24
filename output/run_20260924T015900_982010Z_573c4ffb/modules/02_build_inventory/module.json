@@ -1,0 +1,13 @@
+{
+  "code_lines": 358,
+  "code_path": "modules/build_inventory.c",
+  "code_sha256": "f030a63158763a2e9b5a7d45235f79fa09121dca92fdf3d6baa6d9045fbc346f",
+  "description": "Create a metadata-only inventory of explicitly authorized files selected by the user, without recursively scanning broad system or home-directory locations and without reading or transforming file contents.",
+  "duration_seconds": 76.416707,
+  "finished_at": "2026-09-24T02:01:26.766+00:00",
+  "index": 2,
+  "name": "build_inventory",
+  "prompt_path": "modules/02_build_inventory/prompt.txt",
+  "started_at": "2026-09-24T02:00:10.350+00:00",
+  "status": "completed"
+}

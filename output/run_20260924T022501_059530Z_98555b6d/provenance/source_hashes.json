@@ -1,0 +1,98 @@
+{
+  "combined_sha256": "ba007ae8dbd0a88e01268abf4809eb0686c3f11d10e5527a1ef3f97d657d1af2",
+  "files": {
+    ".env.example": {
+      "bytes": 352,
+      "sha256": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c"
+    },
+    "pipeline.py": {
+      "bytes": 14651,
+      "sha256": "baca5141d3933de5f7f18d43b22eaa2fe8748116299d9a4b9b9051a91a7c5c70"
+    },
+    "requirements.txt": {
+      "bytes": 298,
+      "sha256": "3109e7451e904e156bc1b22491ef18952c18d57b526b10149da31dc0a08f5627"
+    },
+    "scenarios/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scenarios/test_prompts.py": {
+      "bytes": 5547,
+      "sha256": "6566def892f78bc5dcc1213c56981e9884fbe770127285029989d053d55eb48d"
+    },
+    "scripts/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scripts/c2_server.py": {
+      "bytes": 12457,
+      "sha256": "b5ab826f05943a4455cddfb4d0610b74f137943ce5dd5f38659332789b320371"
+    },
+    "scripts/generate_test_files.py": {
+      "bytes": 10306,
+      "sha256": "e080b43e46952e89220ca8c26d362a15ba07e341e87b81cab87795fd61bf4e9a"
+    },
+    "scripts/reset_vm.py": {
+      "bytes": 9234,
+      "sha256": "8e15a94192d0b949eee85249c6740c76778b9879e64fab8735022ef92fc345a7"
+    },
+    "src/__init__.py": {
+      "bytes": 14,
+      "sha256": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73"
+    },
+    "src/assembler_harness.py": {
+      "bytes": 17644,
+      "sha256": "f8180e8946bb6d024cf6402b22937244f9e71c7bdca9a05782ed521216cdbe13"
+    },
+    "src/call_summary.py": {
+      "bytes": 3285,
+      "sha256": "10693b07ba53eabc65438713d15eb766a1cfb69cb7e32344c8a39b2f6409b8b4"
+    },
+    "src/coder.py": {
+      "bytes": 2895,
+      "sha256": "1389fc9fb28e066803cfa63fd99ba7d87c1f532594345707cf23cadf350ce21f"
+    },
+    "src/environment.py": {
+      "bytes": 4119,
+      "sha256": "4a2f8f59e3a00e131b377837ee4d3e66e31f8ca675d7b7cd21d65b011b16ce49"
+    },
+    "src/events.py": {
+      "bytes": 2293,
+      "sha256": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb"
+    },
+    "src/interrupts.py": {
+      "bytes": 2579,
+      "sha256": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d"
+    },
+    "src/llm_client.py": {
+      "bytes": 15075,
+      "sha256": "66dba9ca0841fc2e4765a4bb3894c224614234bed2d2a6f8037c678fad335bf4"
+    },
+    "src/planner.py": {
+      "bytes": 2532,
+      "sha256": "fa19c3094665a3abb63a722655f9bf84c64c0b4eafedcfd05ad97ab5ebd0678c"
+    },
+    "src/prompt_maker.py": {
+      "bytes": 6119,
+      "sha256": "d0ff87e3ebd189b7b74ccc44155cc25280a09a1a81306f50e771ea9db23a054d"
+    },
+    "src/provenance.py": {
+      "bytes": 8166,
+      "sha256": "edd985b1eac1ff98221426d9fb6b90dd8a2c773fca5b3a0d7c0e3c0e2a2286be"
+    },
+    "src/recovery.py": {
+      "bytes": 4824,
+      "sha256": "b88df96c47117921841289b2c44ba22893c914ee1c052ea6b4869627e6ab6e43"
+    },
+    "src/sanitizer.py": {
+      "bytes": 18984,
+      "sha256": "f20accb25dda6b4f59763706ba445ff63c936e83e687a250d2fd3dd7d71b05e6"
+    },
+    "src/trace.py": {
+      "bytes": 8743,
+      "sha256": "0163816d8c9484040200a5242ab23322e8538ac8722a19b90993d654b953b6b6"
+    }
+  },
+  "root": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+}

@@ -1,0 +1,13 @@
+{
+  "code_lines": 844,
+  "code_path": "modules/scan_storage.c",
+  "code_sha256": "f1e44f9c30ae2c3a46cc5f062b2fe634f739a89b8e5f26138230fc7145bf0f24",
+  "description": "Enumerar recursivamente apenas diretórios explicitamente configurados e autorizados pelo operador, filtrando pela allowlist de extensões configurada. Resolver caminhos POSIX relativos a $HOME e reconhecer os nomes ~/Documents, ~/Desktop, ~/Downloads, ~/Pictures, ~/Documentos, ~/Área de Trabalho, ~/Imagens e ~/Documentos_Teste somente quando cada diretório estiver explicitamente configurado e autorizado.",
+  "duration_seconds": 85.502899,
+  "finished_at": "2026-09-24T00:58:29.948+00:00",
+  "index": 2,
+  "name": "scan_storage",
+  "prompt_path": "modules/02_scan_storage/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.445+00:00",
+  "status": "completed"
+}

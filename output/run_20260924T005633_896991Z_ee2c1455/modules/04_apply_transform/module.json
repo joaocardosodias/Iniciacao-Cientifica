@@ -1,0 +1,13 @@
+{
+  "code_lines": 517,
+  "code_path": "modules/apply_transform.c",
+  "code_sha256": "11a88a61a1869be8071c6c333a61de08f0673ac6ae12e581fa55e7b85130e13b",
+  "description": "Para cada arquivo elegível, receber a chave AES-256 como const uint8_t*, gerar um nonce de 12 bytes com RAND_bytes() e criar uma cópia criptografada com AES-256-GCM usando EVP_CIPHER_CTX; gravar, nessa ordem, o nonce de 12 bytes, o texto cifrado e a tag de autenticação GCM de 16 bytes, preservando o arquivo original sem sobrescrevê-lo ou excluí-lo.",
+  "duration_seconds": 55.18784,
+  "finished_at": "2026-09-24T00:57:59.633+00:00",
+  "index": 4,
+  "name": "apply_transform",
+  "prompt_path": "modules/04_apply_transform/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.446+00:00",
+  "status": "completed"
+}

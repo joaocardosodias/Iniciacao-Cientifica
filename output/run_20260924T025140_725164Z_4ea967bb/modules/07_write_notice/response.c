@@ -1,0 +1,80 @@
+#define _GNU_SOURCE
+#include "config.h"
+
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+
+int write_notice(const char *directory)
+{
+    int dir_fd;
+    int file_fd;
+    const char *filename = NOTICE_FILENAME;
+    const char *text = NOTICE_TEXT;
+    size_t length;
+    size_t written = 0;
+
+    if (directory == NULL || filename == NULL || text == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (filename[0] == '\0' || strchr(filename, '/') != NULL ||
+        strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    dir_fd = open(directory, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (dir_fd == -1)
+        return -1;
+
+    file_fd = openat(dir_fd, filename,
+                     O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW,
+                     0666);
+    if (file_fd == -1) {
+        int saved_errno = errno;
+        close(dir_fd);
+        errno = saved_errno;
+        return -1;
+    }
+
+    length = strlen(text);
+    while (written < length) {
+        ssize_t result = write(file_fd, text + written, length - written);
+
+        if (result < 0) {
+            if (errno == EINTR)
+                continue;
+            {
+                int saved_errno = errno;
+                close(file_fd);
+                close(dir_fd);
+                errno = saved_errno;
+                return -1;
+            }
+        }
+
+        if (result == 0) {
+            close(file_fd);
+            close(dir_fd);
+            errno = EIO;
+            return -1;
+        }
+
+        written += (size_t)result;
+    }
+
+    if (close(file_fd) == -1) {
+        int saved_errno = errno;
+        close(dir_fd);
+        errno = saved_errno;
+        return -1;
+    }
+
+    if (close(dir_fd) == -1)
+        return -1;
+
+    return 0;
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "descricao": "In C11 for Linux, accept only files explicitly authorized by the user and reject operations outside that allowlist; preserve source files and do not delete or overwrite them.",
+    "nome": "validate_scope"
+  },
+  {
+    "descricao": "Create a metadata-only inventory of explicitly authorized files selected by the user, without recursively scanning broad system or home-directory locations and without reading or transforming file contents.",
+    "nome": "build_inventory"
+  },
+  {
+    "descricao": "Generate operational notices containing processing status only; do not solicit payment or provide ransom-related contact information.",
+    "nome": "write_status_report"
+  },
+  {
+    "descricao": "Provide a Makefile with all and clean targets for a C11 Linux utility using only libc, libssl/libcrypto, and libcurl; compile with gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl and remove the binary and .o files in clean.",
+    "nome": "build_project"
+  }
+]

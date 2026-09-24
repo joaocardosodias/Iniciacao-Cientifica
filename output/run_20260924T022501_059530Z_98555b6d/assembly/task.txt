@@ -1,0 +1,62 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+- module_06.c
+
+These files define functions with the following signatures (names are aliases — do not rename them):
+
+#define _GNU_SOURCE
+#include <ctype.h>
+#include <curl/curl.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <json-c/json.h>
+#include <limits.h>
+#include <openssl/crypto.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <pthread.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+typedef struct { char *buffer; size_t capacity; size_t length; int errors; int overflow; int simulation; } eat_context;
+struct response_buffer { char *data; size_t length; };
+
+int f01(void);
+int f02(uint8_t chave[SESSION_KEY_SIZE]);
+int f03(const char *dedicated_temp_area, const char *test_directory, int simulation, char *report_buffer, size_t report_capacity);
+int f04(const char *const *arquivos_transformados, size_t quantidade);
+int f05(void);
+int f06(const char *caminho_binario);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) calling all functions in sequence: f01, f02, f03, ... (in numeric order)
+   - Passes return values between calls as needed
+   - Passes argv[0] to any function that accepts a char* path parameter
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c module_06.c \
+       -lssl -lcrypto -lcurl
+3. If errors occur, fix main.c only using str_replace. Do NOT modify the module files.
+4. Repeat up to 5 times until 'output' binary exists.

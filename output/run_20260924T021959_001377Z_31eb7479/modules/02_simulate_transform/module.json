@@ -1,0 +1,13 @@
+{
+  "code_lines": 45,
+  "code_path": "modules/simulate_transform.c",
+  "code_sha256": "95045da53ab081a6126631c232a4739d27375a97ca9c722ff84794c9b5e27c64",
+  "description": "Demonstrate a file-transformation workflow using in-memory synthetic data only; do not encrypt, overwrite, delete, or transmit files or keys.",
+  "duration_seconds": 14.962894,
+  "finished_at": "2026-09-24T02:21:44.796+00:00",
+  "index": 2,
+  "name": "simulate_transform",
+  "prompt_path": "modules/02_simulate_transform/prompt.txt",
+  "started_at": "2026-09-24T02:21:29.834+00:00",
+  "status": "completed"
+}

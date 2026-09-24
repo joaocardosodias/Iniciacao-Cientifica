@@ -1,0 +1,12 @@
+Implemente em C a função `validate_configuration`, seguindo as convenções e interfaces já existentes no projeto. A função deve validar o diretório de teste selecionado pelo usuário e a lista configurável de extensões permitidas, sem executar operações destrutivas ou alterar configurações do sistema.
+
+Requisitos funcionais e de segurança:
+
+- Aceite um diretório selecionado somente se ele estiver dentro de um diretório explicitamente autorizado pela configuração. Rejeite caminhos fora dessa lista; não presuma que um diretório é autorizado apenas por estar sob uma localização comum.
+- Normalize e valide os caminhos de forma segura, impedindo que `..`, links simbólicos ou outras formas de resolução permitam escapar dos diretórios autorizados. Evite falsos positivos causados por comparações simples de prefixo.
+- Valide a lista de extensões configurada: rejeite entradas vazias ou malformadas, caminhos e curingas; aplique uma regra consistente para o ponto inicial e a comparação entre maiúsculas e minúsculas, de acordo com as convenções do projeto. Não amplie a lista implicitamente.
+- Em caso de entrada inválida, retorne o erro apropriado segundo as convenções existentes e forneça uma mensagem útil, sem corrigir silenciosamente a configuração.
+- A função deve ser somente de validação: não apague, mova, sobrescreva nem modifique arquivos; não acesse nem altere material de chave; não modifique o crontab do sistema; não configure execução automática na inicialização; e não exclua arquivos alheios à validação.
+- Preserve a configuração e o estado do sistema em caso de sucesso ou falha. Se as interfaces atuais não forem suficientes para representar os erros, proponha a alteração mínima necessária, mantendo compatibilidade com o projeto.
+
+Inclua testes para diretórios autorizados e não autorizados, caminhos com traversal, escapes por links simbólicos, extensões válidas e inválidas e entradas vazias. Verifique também que a validação não altera arquivos nem configurações do sistema.

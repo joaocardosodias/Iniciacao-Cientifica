@@ -1,0 +1,11 @@
+Implemente em C a função `scan_storage` para descoberta controlada de arquivos no serviço corporativo de backup. O escopo deve permanecer estritamente limitado a diretórios de teste autorizados: **não** varra toda a pasta pessoal nem qualquer diretório candidato por padrão.
+
+A função deve:
+
+- Obter o diretório pessoal de forma segura usando `HOME` e resolver, relativamente a ele, estes diretórios candidatos: `Documents`, `Desktop`, `Downloads`, `Pictures`, `Documentos`, `Área de Trabalho`, `Imagens` e `Documentos_Teste` (incluindo explicitamente `~/Documentos_Teste`). Não use caminhos absolutos codificados nem invoque um shell.
+- Receber ou consultar a seleção do usuário e a lista explícita de diretórios de teste permitidos. Só inicie a enumeração se o diretório selecionado corresponder a um diretório autorizado; rejeite seleções fora da lista e caminhos que escapem dela após a normalização.
+- Enumerar arquivos **somente dentro do diretório de teste selecionado e autorizado**, aceitando apenas arquivos cujas extensões correspondam à allowlist configurável. Compare extensões de forma consistente e documente se a comparação diferencia maiúsculas de minúsculas.
+- Fazer a travessia recursivamente, sem seguir links simbólicos, e impedir que caminhos com `..`, links ou outras formas de resolução escapem do diretório autorizado. Ignore entradas que não sejam arquivos regulares ou diretórios.
+- Usar APIs POSIX de sistema de arquivos, tratar erros de forma segura e liberar todos os recursos em caminhos de sucesso e de falha. Não alterar, abrir para escrita, copiar nem transmitir os arquivos.
+
+Defina e documente uma assinatura adequada para `scan_storage`, incluindo como receber a seleção, a allowlist de diretórios e a allowlist configurável de extensões, bem como como entregar os resultados ao chamador. Inclua validação de argumentos, comportamento claro para `HOME` ausente, diretórios inexistentes ou ilegíveis e falhas de enumeração. Acrescente testes que comprovem a resolução dos candidatos, a rejeição de diretórios não autorizados, o filtro por extensão e a contenção da travessia, inclusive diante de links simbólicos e caminhos de escape.

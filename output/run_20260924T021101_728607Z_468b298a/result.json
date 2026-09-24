@@ -1,0 +1,117 @@
+{
+  "artifacts": [
+    {
+      "bytes": 4846,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "c3e30c45b3c57fece49b064faac98eb76fa250ba9e047bd1b867445f9c68ff84"
+    },
+    {
+      "bytes": 4684,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "b93ffedf57f0722b17f05af52f08db78bf90c64a7d61479708829059085fe7e1"
+    },
+    {
+      "bytes": 4007,
+      "path": "calls/0003_sanitizer.fragment_2.framing_2.json",
+      "sha256": "8dde104e48d329858a80bae6988f81c49835905f3dd7ec141e7f4aaf5d4bce39"
+    },
+    {
+      "bytes": 3753,
+      "path": "calls/0004_sanitizer.fragment_2.framing_3.json",
+      "sha256": "f34ae8becee0ac386da77d1cc367edcb4066e2b69d1555e2a5a4ec4ec45a4507"
+    },
+    {
+      "bytes": 3942,
+      "path": "calls/0005_sanitizer.fragment_2.framing_4.json",
+      "sha256": "c0f409f571074508fb96136812674feb0e90c19942335ab7926dcd48001036c0"
+    },
+    {
+      "bytes": 6354,
+      "path": "events.jsonl",
+      "sha256": "208e84efe5ac92edbe911fd612db11268d25650d2dc1fa0a9e6e50a15efc4a5e"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 1005,
+      "path": "provenance/environment.json",
+      "sha256": "19a73162a52b3e706c17188f865684c7721cc2fa5f057d7226719f4248245db3"
+    },
+    {
+      "bytes": 26528,
+      "path": "provenance/git.diff",
+      "sha256": "e2e3343c1344bf351f2f089d2309b05b847289eae00ab9e9fccca9d8e921a0bd"
+    },
+    {
+      "bytes": 608,
+      "path": "provenance/git_status.txt",
+      "sha256": "c08ad60c64fae63f51549eed3f693def2aa5c239325bbd02585d4082a587b0e4"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3343,
+      "path": "provenance/source_hashes.json",
+      "sha256": "11cacabbc4acce26f0e85d8a93966b950cc9b76fe9607c880340120bcd0be16e"
+    },
+    {
+      "bytes": 5355,
+      "path": "provenance/untracked/tests/test_assembler_harness.py",
+      "sha256": "b7bf2300343a89a684447928da09a5736a253f308e21f27c3bf51525c162d99b"
+    },
+    {
+      "bytes": 4450,
+      "path": "provenance/untracked/tests/test_sanitizer.py",
+      "sha256": "a5db522ddd2f11edda77e8ede988833464eb800834efbe88a36984f056af7a3d"
+    },
+    {
+      "bytes": 478,
+      "path": "provenance/untracked_files.json",
+      "sha256": "54b4feb7b494ede49982c87279c1805d0906975f89299f274a44641057b9f2c3"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 33.787887,
+  "error": {
+    "message": "Sanitizer: todos os 4 framings foram recusados ou inverteram o fragmento 2 (modelo: openai/gpt-6-luna). Tente um modelo com política de segurança mais permissiva (ex: groq:llama3-70b, groq:mixtral, free-qwen).",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-24T02:11:35.515+00:00",
+  "llm_calls": {
+    "completed": 5,
+    "cost": {
+      "reported_calls": 5,
+      "total": 0.001241,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "OpenAI"
+    ],
+    "models_observed": [
+      "openai/gpt-6-luna"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "retries": 0,
+    "tokens": {
+      "input": 3150,
+      "output": 1852,
+      "reported_calls": 5,
+      "total": 5002
+    },
+    "total": 5,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T021101_728607Z_468b298a",
+  "schema_version": "1.0",
+  "status": "failed"
+}

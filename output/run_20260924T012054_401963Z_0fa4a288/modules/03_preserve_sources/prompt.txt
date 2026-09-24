@@ -1,0 +1,7 @@
+Implemente em C a função `preserve_sources` para a ferramenta de migração documental, integrando-a às APIs e convenções já existentes no projeto. A ferramenta deve preservar integralmente os arquivos de origem: nunca os criptografe, sobrescreva, exclua, renomeie nem altere seu conteúdo. Qualquer transformação ou gravação necessária à migração deve ocorrer somente em arquivos de destino separados.
+
+Defina uma assinatura compatível com o código existente e documente seus parâmetros, valor de retorno e tratamento de erros. A função deve abrir as origens apenas para leitura, validar os caminhos de origem e destino e impedir que um destino corresponda à mesma localização ou ao mesmo arquivo da origem — inclusive quando isso puder ser identificado por caminhos equivalentes, links simbólicos ou identidade de arquivo. Não sobrescreva arquivos de destino existentes; em caso de conflito, falha de validação ou dúvida sobre a segurança da operação, interrompa a migração sem modificar a origem.
+
+Não use operações que alterem ou removam origens, como abertura para escrita, truncamento, renomeação, exclusão, alteração de permissões ou criptografia. Preserve também os metadados de origem sempre que possível e trate erros de leitura e gravação sem comprometer os arquivos originais.
+
+Inclua testes que comprovem que, em caso de sucesso e de falha, o conteúdo das origens permanece inalterado e nenhum arquivo de origem é removido ou sobrescrito. Cubra também conflitos entre origem e destino e destinos já existentes.

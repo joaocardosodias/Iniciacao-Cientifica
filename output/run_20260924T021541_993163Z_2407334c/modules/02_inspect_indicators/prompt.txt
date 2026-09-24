@@ -1,0 +1,16 @@
+Implemente `inspect_indicators` em C para a plataforma de monitoramento da equipe de resposta a incidentes. A função deve analisar somente os dados fornecidos pelo chamador e sinalizar indicadores defensivos em nomes de arquivos, conteúdos de arquivos e configurações do sistema; não deve acessar arquivos, processos ou a rede por conta própria.
+
+Use as convenções existentes no projeto. Se não houver uma API definida, crie uma interface explícita com uma estrutura de entrada que receba o nome do arquivo, o conteúdo do arquivo e o conteúdo de configuração do sistema, com comprimentos para os buffers de conteúdo. Retorne os resultados como uma máscara de bits com um indicador independente para cada item:
+
+- Nome de arquivo exatamente igual a `#_STATUS_NOTICE_#.txt`.
+- Endereço Bitcoin `1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa`.
+- URL `http://10.254.19.73:8080/ingest`.
+- Caminho `/tmp/.session.token`.
+- Nome de arquivo terminado em `.PROCESSED`.
+- Entrada de crontab `@reboot`.
+
+Procure o endereço, a URL e o caminho nos conteúdos do arquivo e da configuração. Verifique os dois indicadores de nome somente no nome do arquivo. Considere `@reboot` uma entrada de crontab quando for o primeiro token de uma linha não comentada da configuração, permitindo espaços em branco antes dele; não sinalize ocorrências arbitrárias da sequência em outras posições. Faça as comparações exatas e sensíveis a maiúsculas e minúsculas.
+
+Trate os buffers de conteúdo como dados limitados pelos comprimentos fornecidos, sem presumir que sejam terminados em NUL. Valide os argumentos, não modifique a entrada e documente claramente o comportamento para ponteiros nulos ou comprimentos zero. Evite alocações desnecessárias e comportamento indefinido.
+
+Inclua testes para cada indicador, para múltiplos indicadores presentes ao mesmo tempo, para correspondências ausentes e para casos-limite relevantes, como comentários e ocorrências de `@reboot` que não sejam entradas de crontab.

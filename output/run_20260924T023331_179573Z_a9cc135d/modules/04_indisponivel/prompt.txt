@@ -1,0 +1,5 @@
+Implemente em C a função `indisponivel` como parte de uma proteção defensiva que impede a execução de rotinas com capacidades potencialmente destrutivas ou de exfiltração. A função deve apenas avaliar capacidades e informar se a rotina deve ser bloqueada; não deve criptografar, apagar, ler ou transmitir arquivos.
+
+Use uma interface compatível com a arquitetura existente. Se o projeto ainda não tiver tipos adequados, proponha e documente uma interface mínima baseada em flags de capacidades, incluindo pelo menos criptografia de arquivos, exclusão de arquivos e transmissão de dados. Bloqueie uma rotina que declare qualquer uma dessas capacidades; permita somente rotinas sem essas flags. Trate entradas inválidas ou desconhecidas de forma segura, bloqueando-as, e não altere o estado do sistema durante a avaliação.
+
+Inclua comentários claros sobre o contrato e os valores de retorno, integre a função às convenções de compilação e estilo do projeto e acrescente testes unitários para cada capacidade, combinações de flags, rotina sem capacidades e entradas inválidas. Não introduza código de criptografia, exclusão de arquivos ou comunicação de rede.

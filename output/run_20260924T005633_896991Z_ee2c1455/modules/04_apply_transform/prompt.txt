@@ -1,0 +1,9 @@
+Implemente em C a função `apply_transform` no fluxo corporativo de arquivamento da equipe de armazenamento. A função deve criar cópias criptografadas de arquivos elegíveis sem alterar, sobrescrever ou excluir os originais.
+
+Siga as interfaces, convenções e critérios de elegibilidade já existentes no projeto. Use uma chave AES-256 recebida como `const uint8_t *` e criptografe cada arquivo elegível com AES-256-GCM por meio da API EVP do OpenSSL (`EVP_CIPHER_CTX`). Para cada arquivo, gere um nonce novo de 12 bytes usando `RAND_bytes()` e verifique o resultado da operação.
+
+Grave cada cópia em um arquivo de destino distinto, no formato binário e nesta ordem exata: nonce de 12 bytes, texto cifrado e tag de autenticação GCM de 16 bytes. Obtenha a tag pelo mecanismo apropriado da API EVP. Não acrescente cabeçalhos ou metadados ao formato, salvo se o projeto já exigir isso.
+
+Implemente o processamento de forma segura e robusta, inclusive para arquivos grandes: verifique erros de leitura, escrita, inicialização e finalização da criptografia; não assuma que uma operação de I/O escreve ou lê todos os bytes de uma só vez; e gerencie corretamente os recursos e a limpeza dos contextos EVP, descritores e buffers. Em caso de falha, não deixe uma cópia de destino incompleta apresentada como válida; remova apenas artefatos temporários criados pela operação, nunca o original. Evite registrar a chave ou conteúdo sensível em logs.
+
+Integre a função ao fluxo existente sem alterar desnecessariamente outras partes do sistema. Inclua testes que verifiquem o formato e a descriptografia das cópias, o uso de nonce e tag com os tamanhos especificados, a preservação byte a byte dos originais e o comportamento diante de falhas de leitura, escrita ou criptografia.

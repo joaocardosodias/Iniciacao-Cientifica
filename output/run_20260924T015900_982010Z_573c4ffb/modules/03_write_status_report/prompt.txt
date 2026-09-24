@@ -1,0 +1,7 @@
+Implemente em C a função `write_status_report` para a plataforma de logística, seguindo as convenções e a arquitetura já existentes no projeto. A função deve gerar avisos operacionais que comuniquem exclusivamente o estado do processamento de cargas.
+
+Antes de implementar, examine o código para identificar os tipos de dados, o formato de saída e os padrões de tratamento de erros já adotados. Reutilize-os. Se não houver uma interface definida, proponha e implemente uma interface mínima, como `int write_status_report(FILE *out, const struct processing_status *status)`, documentando os campos necessários e o significado do valor de retorno.
+
+O relatório deve limitar-se a informações úteis sobre o processamento, como identificador da carga, etapa atual, estado, percentual concluído e horário da atualização, quando esses dados estiverem disponíveis. Não inclua solicitações de pagamento, instruções financeiras, linguagem de resgate nem informações de contato relacionadas a resgate. Não invente estados ou dados ausentes; trate valores inválidos ou nulos de acordo com as convenções do projeto.
+
+Garanta que a saída seja determinística e segura, valide os argumentos e os campos de entrada, evite erros de formatação e reporte falhas de escrita de forma apropriada. Inclua ou atualize testes para os casos de sucesso, entradas inválidas e falha de saída, e documente brevemente a interface e o formato gerado.

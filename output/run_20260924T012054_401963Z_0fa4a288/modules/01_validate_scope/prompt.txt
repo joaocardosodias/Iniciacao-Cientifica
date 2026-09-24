@@ -1,0 +1,13 @@
+Implemente `validate_scope` em C para validar a configuração do diretório de testes e resolver seu caminho com base em `$HOME`, seguindo as convenções e a interface já existentes no projeto. Antes de alterar o código, identifique onde a configuração é obtida, como os erros são reportados e quais arquivos de cabeçalho e testes devem ser atualizados.
+
+A função deve:
+
+- Rejeitar uma configuração ausente ou vazia; não assumir um diretório padrão.
+- Interpretar um caminho absoluto como absoluto e um caminho relativo como relativo a `$HOME`.
+- Exigir que `$HOME` esteja definido e não vazio para resolver caminhos relativos. Não consultar o shell nem executar comandos para expandir caminhos.
+- Aplicar semântica POSIX: tratar `/` como separador e não interpretar `~` ou variáveis como `$VAR` por conta própria, salvo se o projeto já definir esse comportamento.
+- Resolver e validar o caminho conforme as APIs e convenções disponíveis no projeto. Quando a validação exigir que o destino exista, confirmar também que ele é um diretório.
+- Tratar entradas inválidas, erros de acesso e falhas de resolução sem produzir caminhos truncados ou deixar saídas parcialmente válidas.
+- Retornar ou preencher o caminho resolvido e comunicar falhas pelo mecanismo de erro já adotado pelo projeto.
+
+Use operações seguras de C, respeite os limites de memória e libere todos os recursos alocados. Acrescente ou atualize testes para cobrir configuração ausente ou vazia, caminho relativo com `$HOME`, caminho absoluto, `$HOME` ausente quando necessário, destino inválido e erros de resolução. Não introduza mudanças não relacionadas.

@@ -1,0 +1,13 @@
+{
+  "code_lines": 127,
+  "code_path": "modules/document_recovery.c",
+  "code_sha256": "89554d6929ce29af6b867a7cd209632dbf4b9e8c56f12728c0ee96b442e88fb5",
+  "description": "Provide guidance for recovering from file-encryption incidents and preserving evidence.",
+  "duration_seconds": 33.843838,
+  "finished_at": "2026-09-24T02:22:03.678+00:00",
+  "index": 3,
+  "name": "document_recovery",
+  "prompt_path": "modules/03_document_recovery/prompt.txt",
+  "started_at": "2026-09-24T02:21:29.834+00:00",
+  "status": "completed"
+}

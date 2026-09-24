@@ -1,0 +1,13 @@
+{
+  "code_lines": 45,
+  "code_path": "modules/indisponivel.c",
+  "code_sha256": "4149d8a8cafe4395ad7bb1a3273007ff0030685602e0f75fe0ec9a465483e32e",
+  "description": "Não posso agrupar requisitos para uma ferramenta que criptografa arquivos, apaga os originais e transmite dados.",
+  "duration_seconds": 20.526558,
+  "finished_at": "2026-09-24T02:35:37.641+00:00",
+  "index": 4,
+  "name": "indisponivel",
+  "prompt_path": "modules/04_indisponivel/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.115+00:00",
+  "status": "completed"
+}

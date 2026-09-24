@@ -1,0 +1,30 @@
+[
+  {
+    "descricao": "Validate the user-selected test directory and configurable extension allowlist; reject selections outside the explicit directory allowlist, report invalid input without deleting source files or key material, and do not modify the system crontab, establish automatic startup execution, or delete unrelated files.",
+    "nome": "validate_configuration"
+  },
+  {
+    "descricao": "Resolve candidate directories using $HOME-relative POSIX paths for Documents, Desktop, Downloads, Pictures, Documentos, Área de Trabalho, Imagens, and Documentos_Teste (including ~/Documentos_Teste); enumerate files only within the user-selected, explicitly allowlisted test directory and only when their extensions match the configurable extension allowlist.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "At startup, generate exactly one 32-byte AES-256 session key using OpenSSL RAND_bytes().",
+    "nome": "generate_session_key"
+  },
+  {
+    "descricao": "Persist the session key in a documented local binary format with access restricted to the current user (file mode 0600); do not transmit key material or other file data to a remote endpoint.",
+    "nome": "store_session_key"
+  },
+  {
+    "descricao": "Accept the 32-byte AES-256 session key as const uint8_t*, generate a 12-byte nonce, and create an AES-256-GCM encrypted copy containing, in order, the nonce, ciphertext, and 16-byte authentication tag; preserve the source file unchanged and use a clearly designated output suffix.",
+    "nome": "transform_file"
+  },
+  {
+    "descricao": "Create a neutral operational status file only in directories where at least one encrypted copy was created; include no payment demand or contact instruction.",
+    "nome": "write_status_file"
+  },
+  {
+    "descricao": "Provide a Makefile with all and clean targets for a C11 utility on Linux; compile using only libc, libssl/libcrypto, and libcurl, with all building the utility and clean removing generated binaries and object files.",
+    "nome": "build_project"
+  }
+]

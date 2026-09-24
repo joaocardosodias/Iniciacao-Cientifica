@@ -1,0 +1,13 @@
+{
+  "code_lines": 557,
+  "code_path": "modules/transform_file.c",
+  "code_sha256": "2573b12b07229044afeeaadddaa73f3fe9c6d13fcb6e4dfda9f775a0a10bf87f",
+  "description": "Accept the 32-byte AES-256 session key as const uint8_t*, generate a 12-byte nonce, and create an AES-256-GCM encrypted copy containing, in order, the nonce, ciphertext, and 16-byte authentication tag; preserve the source file unchanged and use a clearly designated output suffix.",
+  "duration_seconds": 73.394007,
+  "finished_at": "2026-09-24T01:19:16.090+00:00",
+  "index": 5,
+  "name": "transform_file",
+  "prompt_path": "modules/05_transform_file/prompt.txt",
+  "started_at": "2026-09-24T01:18:02.696+00:00",
+  "status": "completed"
+}

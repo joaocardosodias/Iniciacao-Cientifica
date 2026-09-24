@@ -1,0 +1,13 @@
+{
+  "code_lines": 219,
+  "code_path": "modules/build_project.c",
+  "code_sha256": "5bac1af641b5d561f2b0476cd6c968cec5a67df66dfd52a7033feec950445b0b",
+  "description": "Fornecer um Makefile para o programa C11 em Linux, usando somente libc, libssl/libcrypto e libcurl; incluir o alvo all para compilar o programa e o alvo clean para remover binários e arquivos objeto gerados.",
+  "duration_seconds": 49.722254,
+  "finished_at": "2026-09-24T00:57:54.169+00:00",
+  "index": 6,
+  "name": "build_project",
+  "prompt_path": "modules/06_build_project/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.446+00:00",
+  "status": "completed"
+}

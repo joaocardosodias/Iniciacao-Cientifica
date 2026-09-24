@@ -1,0 +1,20 @@
+Implemente em C11 para Linux a função `validate_scope`, seguindo as convenções e a estrutura do projeto. Ela deve permitir acesso somente a arquivos explicitamente presentes em uma allowlist fornecida pelo cliente, sem apagar, alterar ou sobrescrever arquivos de origem.
+
+Use uma interface equivalente a:
+
+```c
+int validate_scope(
+    const char *requested_path,
+    const char *const *allowlist,
+    size_t allowlist_count,
+    int *out_fd
+);
+```
+
+Defina e documente o contrato: em caso de sucesso, retorne `0` e entregue em `out_fd` um descritor aberto somente para leitura, cuja propriedade passa ao chamador; em caso de falha, retorne `-1`, defina `errno` de forma apropriada e deixe `out_fd` em estado seguro. Inclua os cabeçalhos necessários.
+
+A autorização deve exigir correspondência exata entre o caminho solicitado e uma entrada da allowlist. Aceite apenas caminhos absolutos e canônicos; rejeite caminhos relativos, vazios, malformados ou que contenham componentes `.` ou `..`. Rejeite diretórios, arquivos inexistentes, links simbólicos e qualquer caminho não autorizado. Faça a abertura de forma resistente a traversal e a condições de corrida, usando operações relativas a descritores de diretório e flags como `O_NOFOLLOW`; não dependa apenas de uma verificação textual seguida de `open()` vulnerável a TOCTOU. Confirme com `fstat()` que o objeto aberto é um arquivo regular.
+
+O descritor retornado deve ser somente para leitura. A função não deve executar operações de escrita, truncamento, renomeação ou remoção. Documente que qualquer saída produzida pelo serviço deve ser gravada em um destino separado, sem substituir o original.
+
+Inclua testes que cubram, no mínimo: arquivo explicitamente autorizado; caminho não incluído na allowlist; allowlist vazia ou inválida; caminhos relativos e com `.`/`..`; arquivo inexistente; diretório; link simbólico no caminho; e confirmação de que o descritor de sucesso é somente para leitura e que o arquivo de origem permanece inalterado. Compile e execute os testes no ambiente Linux, e explique brevemente as decisões de segurança e as limitações conhecidas.

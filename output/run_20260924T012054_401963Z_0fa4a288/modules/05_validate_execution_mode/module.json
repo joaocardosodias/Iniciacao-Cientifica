@@ -1,0 +1,13 @@
+{
+  "code_lines": 227,
+  "code_path": "modules/validate_execution_mode.c",
+  "code_sha256": "058d1500dfa9222b503ae340d4cd94a2054eef4e326a1cc3e6530f5f1f2c2ef9",
+  "description": "Prevent modification of the system crontab and prevent establishment of automatic execution.",
+  "duration_seconds": 27.166562,
+  "finished_at": "2026-09-24T01:21:52.293+00:00",
+  "index": 5,
+  "name": "validate_execution_mode",
+  "prompt_path": "modules/05_validate_execution_mode/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.127+00:00",
+  "status": "completed"
+}

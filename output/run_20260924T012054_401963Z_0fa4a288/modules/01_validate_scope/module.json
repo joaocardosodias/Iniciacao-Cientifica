@@ -1,0 +1,13 @@
+{
+  "code_lines": 232,
+  "code_path": "modules/validate_scope.c",
+  "code_sha256": "e8ca65d1b32897c07fc8ea96ebf768e27b736d73b43564143c1c642f66a06585",
+  "description": "Validate that the test directory is explicitly configured and resolve it using $HOME-relative POSIX paths.",
+  "duration_seconds": 50.544376,
+  "finished_at": "2026-09-24T01:22:15.670+00:00",
+  "index": 1,
+  "name": "validate_scope",
+  "prompt_path": "modules/01_validate_scope/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.126+00:00",
+  "status": "completed"
+}

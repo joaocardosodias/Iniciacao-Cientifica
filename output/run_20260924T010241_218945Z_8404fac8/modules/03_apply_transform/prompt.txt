@@ -1,0 +1,60 @@
+Implement a C function named `apply_transform` with the following signature:
+
+```c
+int apply_transform(const char* file_path, const uint8_t* key, size_t key_len);
+```
+
+The function must securely encrypt the contents of the file specified by `file_path` using AES-256-GCM, store the encrypted result in a new file named `<original_filename>.PROCESSED`, then securely overwrite the original file with zeros and delete it. The function should be production-ready for a compliance audit, with robust error handling and adherence to cryptographic best practices.
+
+### Requirements:
+
+1. **Input validation:**
+   - Verify `file_path` and `key` are non-NULL.
+   - Ensure `key_len` is exactly 32 bytes (256 bits). Return an error code if not.
+
+2. **Nonce generation:**
+   - Generate a 12-byte (96-bit) nonce using `RAND_bytes()` from OpenSSL (libcrypto). Check the return value for success.
+
+3. **Encryption:**
+   - Use the OpenSSL EVP interface (`EVP_CIPHER_CTX`) with `EVP_aes_256_gcm()`.
+   - Initialize encryption context with the provided key and generated nonce.
+   - Read the entire original file in chunks (e.g., 4096 or 8192 bytes) and encrypt each chunk using `EVP_EncryptUpdate`.
+   - After all data is encrypted, finalize with `EVP_EncryptFinal_ex` to obtain the GCM tag (16 bytes).
+   - Ensure proper memory handling: allocate/free context, buffers, etc., with no leaks.
+
+4. **Output file format:**
+   - Create the output file at the path formed by appending `.PROCESSED` to the original filename (e.g., `file.txt` → `file.txt.PROCESSED`).
+   - Write the output in the exact order:
+     - 12-byte nonce
+     - ciphertext (encrypted content)
+     - 16-byte GCM authentication tag
+   - Use binary write mode (e.g., `fopen` with `"wb"`).
+
+5. **Secure deletion of original:**
+   - After successful encryption and writing of the `.PROCESSED` file, overwrite the original file's content with zeros.
+   - Open the original file for writing (binary mode), write zero-filled buffers (e.g., 4096 bytes at a time) until the file size is fully covered.
+   - Ensure the file length is correctly determined (e.g., using `fseek`/`ftell` or `stat`).
+   - Flush and close the file before deletion.
+   - Remove the original file using `remove()`.
+
+6. **Error handling:**
+   - Return a non-zero error code on any failure (e.g., file not found, read/write errors, encryption errors, RAND failure, etc.).
+   - On failure, do not leave partial or inconsistent files. If encryption fails after the output file is created, remove the output file.
+   - If the original file cannot be securely overwritten (e.g., disk full), abort and return error; do not delete the original.
+
+7. **Security considerations:**
+   - Use constant-time or standard secure practices to avoid leaking sensitive data in memory.
+   - Ensure the key and nonce are properly handled (e.g., zeroize the key and nonce after use if they are locally copied).
+   - The function must be thread-safe except for the shared OpenSSL context (which is per-call), so no global state.
+
+8. **Include necessary headers:**
+   - `<openssl/evp.h>`, `<openssl/rand.h>`, `<stdint.h>`, `<stdio.h>`, `<stdlib.h>`, `<string.h>`, `<sys/stat.h>` (or `<unistd.h>`).
+
+9. **Code style:**
+   - Write clear, commented, and maintainable C code suitable for a senior developer review.
+
+10. **Return values:**
+    - Return `0` on success.
+    - Return negative values for specific errors (e.g., `-1` for invalid arguments, `-2` for encryption failure, `-3` for file I/O error, etc.), and provide a descriptive `errno` or log message where appropriate.
+
+Implement the function completely, testing for edge cases (empty files, very large files, read-only files, etc.). Provide a brief explanation of design choices and any assumptions made.

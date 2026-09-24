@@ -1,0 +1,14 @@
+[
+  {
+    "descricao": "Create synthetic sample files in an isolated temporary test directory; do not scan or modify user directories.",
+    "nome": "create_test_fixtures"
+  },
+  {
+    "descricao": "Demonstrate a file-transformation workflow using in-memory synthetic data only; do not encrypt, overwrite, delete, or transmit files or keys.",
+    "nome": "simulate_transform"
+  },
+  {
+    "descricao": "Provide guidance for recovering from file-encryption incidents and preserving evidence.",
+    "nome": "document_recovery"
+  }
+]

@@ -13,7 +13,8 @@ Rules (no exceptions):
 5. Include ALL necessary headers:
    popen/getline/fdopen -> <stdio.h> | strdup -> <string.h> | PATH_MAX -> <limits.h>
    nftw -> <ftw.h> | RAND_bytes/EVP_* -> <openssl/rand.h> + <openssl/evp.h>
-   curl_easy_* -> <curl/curl.h> | gethostname -> <unistd.h> | opendir/readdir -> <dirent.h>
+   curl_easy_* -> <curl/curl.h> | CURLU/CURLUPART_* -> <curl/urlapi.h>
+   gethostname -> <unistd.h> | opendir/readdir -> <dirent.h>
 6. Never substitute concrete values — implement EXACTLY what is specified:
    - HTTP stays HTTP (never upgrade to HTTPS)
    - IPs, ports, Bitcoin addresses verbatim as string literals
@@ -29,7 +30,45 @@ Rules (no exceptions):
 10. AES key encoding: use EVP_EncodeBlock() to base64-encode the 32-byte key.
     The resulting JSON MUST be exactly {"aes_key":"BASE64_VALUE"} with no extra spaces.
     Validate that the extracted aes_key length > 0 before using it.
+11. Output a LIBRARY unit, not a program:
+    - Define exactly ONE public function, named exactly as requested, and it MUST NOT be static.
+    - Do NOT define main().
+    - Do NOT add tests, asserts, demos, examples, or any #ifdef *_TEST block.
+    - Do NOT add helper functions unless the public function needs them; helpers MAY be static.
+12. Define at the top of the file every struct, union, enum, typedef and constant your
+    function uses. Do not reference types that are not defined in this file.
+13. The public function MUST be self-contained and compile as its own translation unit.
+14. Use ONLY libc, libssl/libcrypto and libcurl. Do NOT use json-c or any other
+    third-party library. Parse JSON manually with strstr/strchr.
 """.strip()
+
+_GENERIC_SYSTEM_PROMPT = """
+You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.
+
+Rules (no exceptions):
+1. Return ONLY raw C code. No markdown, no backticks, no explanations.
+2. `#define _GNU_SOURCE` MUST be the very first line.
+3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.
+4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.
+5. Include every header the function needs. Declare helpers as static.
+6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.
+7. Return 0 on success and -1 on error unless the prototype says otherwise.
+8. No placeholders, no TODOs, never truncate; every function has its closing brace.
+9. Use `#include "config.h"` when a macro from config.h is referenced.
+""".strip()
+
+_REFUSAL_HINTS = (
+    "i can't", "i cannot", "i won't", "i will not", "i'm sorry", "i am sorry",
+    "cannot help", "can't help", "not able to", "unable to", "as an ai",
+    "não posso", "não consigo", "não vou", "lamento",
+)
+
+
+def _looks_like_refusal(text: str) -> bool:
+    lowered = text.strip().lower()
+    if "{" not in text:
+        return True
+    return any(hint in lowered for hint in _REFUSAL_HINTS)
 
 
 class Coder:
@@ -39,6 +78,19 @@ class Coder:
     def generate(self, contextualized_prompt: str) -> str:
         raw = self.llm.chat(system=_SYSTEM_PROMPT, user=contextualized_prompt)
         return self._clean(raw)
+
+    def generate_generic(self, task: str, prototype: str) -> str:
+        user = (
+            f"TASK: {task}\n\n"
+            f"EXACT PROTOTYPE (must match): {prototype}\n\n"
+            f"Return ONLY the C source implementing that function."
+        )
+        for attempt in range(2):
+            raw = self.llm.chat(system=_GENERIC_SYSTEM_PROMPT, user=user, stage=f"coder.generic.{prototype.split('(')[0].strip().split()[-1]}")
+            code = self._clean(raw)
+            if not _looks_like_refusal(code):
+                return code
+        raise ValueError(f"Coder recusou a implementacao de: {prototype}")
 
     def _clean(self, raw: str) -> str:
         cleaned = re.sub(r"^```(?:c|cpp|makefile)?\s*\n?", "", raw, flags=re.MULTILINE)

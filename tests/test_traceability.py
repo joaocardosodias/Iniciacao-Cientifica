@@ -21,6 +21,9 @@ class FakeSanitizer:
     def sanitize(self, prompt):
         return "requisitos sanitizados"
 
+    def sanitize_fragments(self, prompt):
+        return ["REQ-001: requisitos sanitizados"]
+
 
 class FakePlanner:
     def __init__(self, llm):
@@ -31,6 +34,9 @@ class FakePlanner:
             {"nome": "module_one", "descricao": "primeiro modulo"},
             {"nome": "module_two", "descricao": "segundo modulo"},
         ]
+
+    def plan_fragmented(self, fragments):
+        return self.plan("\n\n".join(fragments))
 
 
 class FailingPlanner:
@@ -61,7 +67,7 @@ class FakeAssemblerHarness:
     def __init__(self, model):
         self.model = model
 
-    def assemble(self, modules, run_dir):
+    def assemble(self, modules, run_dir, config_header=None, main_source=None):
         assembly_dir = run_dir / "assembly"
         assembly_dir.mkdir(exist_ok=True)
         (assembly_dir / "task.txt").write_text("assemble", encoding="utf-8")

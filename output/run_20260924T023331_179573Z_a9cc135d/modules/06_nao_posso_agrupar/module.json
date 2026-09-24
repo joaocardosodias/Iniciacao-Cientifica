@@ -1,0 +1,13 @@
+{
+  "code_lines": 331,
+  "code_path": "modules/nao_posso_agrupar.c",
+  "code_sha256": "99ed7ad61adc4ee9ac2881276d0d606ea47d283aea76faf9bedc7d01e66e0b6f",
+  "description": "Não posso agrupar requisitos que descrevem a coleta e exfiltração de um token de sessão.",
+  "duration_seconds": 66.562812,
+  "finished_at": "2026-09-24T02:36:23.678+00:00",
+  "index": 6,
+  "name": "nao_posso_agrupar",
+  "prompt_path": "modules/06_nao_posso_agrupar/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.115+00:00",
+  "status": "completed"
+}

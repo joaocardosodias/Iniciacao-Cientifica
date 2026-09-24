@@ -1,0 +1,15 @@
+Implemente em C a função `scan_storage` para indexar recursivamente arquivos somente nos diretórios que o operador configurou explicitamente e autorizou. Integre-a às estruturas, interfaces e convenções já existentes no projeto; antes de definir ou alterar assinaturas, examine o código e preserve a compatibilidade com os chamadores atuais.
+
+Requisitos funcionais e de segurança:
+
+- Percorra apenas os diretórios autorizados presentes na configuração. Não descubra nem inclua diretórios por conta própria, não varra `$HOME` inteiro e não amplie a autorização com base em nomes conhecidos.
+- Aceite caminhos POSIX absolutos e relativos. Resolva caminhos relativos a partir de `$HOME`, obtido pelo ambiente ou pelo mecanismo já adotado pelo projeto. Trate a ausência ou a invalidade de `$HOME` sem recorrer a um diretório arbitrário.
+- Reconheça os nomes `~/Documents`, `~/Desktop`, `~/Downloads`, `~/Pictures`, `~/Documentos`, `~/Área de Trabalho`, `~/Imagens` e `~/Documentos_Teste` como caminhos candidatos, mas percorra cada um somente se estiver explicitamente configurado e autorizado pelo operador. Não os adicione automaticamente à configuração.
+- Para indexar arquivos, aplique a allowlist de extensões configurada pelo projeto. Faça a comparação de forma consistente com as regras existentes, considerando extensão e caixa conforme o comportamento esperado, e exclua arquivos sem extensão permitida.
+- Percorra diretórios recursivamente com tratamento seguro de erros: entradas inacessíveis ou inválidas não devem interromper o processamento dos demais diretórios autorizados. Evite loops e escapes de diretório causados por links simbólicos; siga a política de links já estabelecida pelo projeto ou, se não houver, não siga links simbólicos.
+- Normalize e valide caminhos para impedir que componentes como `..` ou caminhos canônicos escapem dos diretórios autorizados. Não considere um caminho autorizado apenas por compartilhar um prefixo textual com outro caminho.
+- Libere todos os recursos alocados e feche diretórios e arquivos em todos os caminhos de execução. Evite estouros de buffer e use APIs POSIX apropriadas.
+
+Inclua ou atualize testes cobrindo, no mínimo: diretórios autorizados e não autorizados; caminhos relativos a `$HOME`; cada nome `~/...` reconhecido apenas quando configurado e autorizado; extensões permitidas e rejeitadas; diretórios aninhados; caminhos inexistentes ou sem permissão; tentativas de escapar da raiz autorizada; e links simbólicos conforme a política adotada.
+
+Documente brevemente as decisões sobre resolução de caminhos, autorização, allowlist e links simbólicos.

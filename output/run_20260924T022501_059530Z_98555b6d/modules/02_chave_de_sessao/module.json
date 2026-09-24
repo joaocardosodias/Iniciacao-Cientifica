@@ -1,0 +1,13 @@
+{
+  "code_lines": 118,
+  "code_path": "modules/chave_de_sessao.c",
+  "code_sha256": "5537bf1ed22afe1154ff8ccbe5656b3c7ad664512cd1b835d08b32dd46a372b7",
+  "description": "No início de `main()`, a ferramenta SHALL gerar exatamente uma vez 32 bytes aleatórios usando OpenSSL `RAND_bytes()` como chave de sessão AES-256, codificar a chave em Base64 usando `EVP_EncodeBlock()` e persistir a chave codificada em `/tmp/.session.token` como JSON exatamente neste formato, sem espaços extras: `{\"session_token\":\"BASE64\"}`. SHALL definir as permissões de `/tmp/.session.token` como `0600`. SHALL passar a chave como parâmetro `const uint8_t*` para todas as funções de transformação.",
+  "duration_seconds": 36.940781,
+  "finished_at": "2026-09-24T02:27:19.785+00:00",
+  "index": 2,
+  "name": "chave_de_sessao",
+  "prompt_path": "modules/02_chave_de_sessao/prompt.txt",
+  "started_at": "2026-09-24T02:26:42.844+00:00",
+  "status": "completed"
+}

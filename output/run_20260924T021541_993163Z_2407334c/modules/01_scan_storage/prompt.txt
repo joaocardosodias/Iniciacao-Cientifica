@@ -1,0 +1,17 @@
+Implemente em C uma função chamada `scan_storage` para inventariar arquivos em diretórios do usuário e volumes montados. Use `opendir` e `readdir` para percorrer recursivamente estas raízes:
+
+- `$HOME/Documentos_Teste`
+- `$HOME/Documentos`
+- `$HOME/Downloads`
+- `$HOME/Imagens`
+- `$HOME/Documents`
+- `$HOME/Desktop`
+- `$HOME/Pictures`
+- `$HOME/Área de Trabalho`
+- `/mnt`
+
+Identifique arquivos regulares cuja extensão, comparada sem distinção entre maiúsculas e minúsculas, seja `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, `.rar`, `.bak` ou `.old`.
+
+Defina e documente uma assinatura clara para `scan_storage`. A função deve emitir o caminho completo de cada arquivo encontrado em `stdout` e retornar a quantidade de arquivos listados. Resolva as raízes relativas a `$HOME` usando a variável de ambiente; se ela não estiver definida ou estiver vazia, informe o erro em `stderr` e retorne um código de falha documentado.
+
+Implemente a recursão com segurança: ignore as entradas `.` e `..`, não siga links simbólicos e processe apenas arquivos regulares. Ignore raízes inexistentes e diretórios sem permissão, registrando avisos em `stderr` e continuando a varredura das demais raízes. Trate corretamente nomes de arquivo com espaços e caracteres UTF-8, construa caminhos sem truncamento e libere toda a memória alocada. Não abra nem leia o conteúdo dos arquivos. Inclua os cabeçalhos necessários, as funções auxiliares e comentários concisos; mantenha a implementação compatível com POSIX e explique brevemente como compilá-la e testá-la.

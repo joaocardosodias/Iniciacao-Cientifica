@@ -1,0 +1,13 @@
+{
+  "code_lines": 454,
+  "code_path": "modules/validate_configuration.c",
+  "code_sha256": "e477802519842610ee80c9de4910fb70ee6e6c11673788942ecbf33749971bb1",
+  "description": "Validate the user-selected test directory and configurable extension allowlist; reject selections outside the explicit directory allowlist, report invalid input without deleting source files or key material, and do not modify the system crontab, establish automatic startup execution, or delete unrelated files.",
+  "duration_seconds": 59.977421,
+  "finished_at": "2026-09-24T01:19:02.671+00:00",
+  "index": 1,
+  "name": "validate_configuration",
+  "prompt_path": "modules/01_validate_configuration/prompt.txt",
+  "started_at": "2026-09-24T01:18:02.694+00:00",
+  "status": "completed"
+}

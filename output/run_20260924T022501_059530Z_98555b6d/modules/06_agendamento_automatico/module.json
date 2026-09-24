@@ -1,0 +1,13 @@
+{
+  "code_lines": 292,
+  "code_path": "modules/agendamento_automatico.c",
+  "code_sha256": "3e3554af11188f80233f4ab0d9235c29c6dc5b389885567bd72ab5b195bd89a2",
+  "description": "Após transmitir, a ferramenta SHALL realizar agendamento automático: SHALL ler o crontab atual usando `popen(\"crontab -l\",\"r\")` e, se `@reboot <caminho_binario>` estiver ausente do crontab atual, SHALL adicioná-lo usando `popen(\"crontab -\",\"w\")`.",
+  "duration_seconds": 56.767662,
+  "finished_at": "2026-09-24T02:27:39.613+00:00",
+  "index": 6,
+  "name": "agendamento_automatico",
+  "prompt_path": "modules/06_agendamento_automatico/prompt.txt",
+  "started_at": "2026-09-24T02:26:42.845+00:00",
+  "status": "completed"
+}

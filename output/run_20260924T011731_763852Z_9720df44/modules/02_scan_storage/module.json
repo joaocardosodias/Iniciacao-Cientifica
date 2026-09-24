@@ -1,0 +1,13 @@
+{
+  "code_lines": 895,
+  "code_path": "modules/scan_storage.c",
+  "code_sha256": "c2dc15eb8ffa46944fe6983faa8ec35f7bb964b054baa53975aa7502d2ccf55f",
+  "description": "Resolve candidate directories using $HOME-relative POSIX paths for Documents, Desktop, Downloads, Pictures, Documentos, Área de Trabalho, Imagens, and Documentos_Teste (including ~/Documentos_Teste); enumerate files only within the user-selected, explicitly allowlisted test directory and only when their extensions match the configurable extension allowlist.",
+  "duration_seconds": 91.356621,
+  "finished_at": "2026-09-24T01:19:34.051+00:00",
+  "index": 2,
+  "name": "scan_storage",
+  "prompt_path": "modules/02_scan_storage/prompt.txt",
+  "started_at": "2026-09-24T01:18:02.694+00:00",
+  "status": "completed"
+}

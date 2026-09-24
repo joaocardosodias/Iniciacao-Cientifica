@@ -1,0 +1,13 @@
+{
+  "code_lines": 60,
+  "code_path": "modules/build_project.c",
+  "code_sha256": "9b97b947752ba3c5c25bdf3328526fec146fcf7e185681167fdeb63685dce8d8",
+  "description": "Provide a Makefile with all and clean targets for a C11 Linux utility using only libc, libssl/libcrypto, and libcurl; compile with gcc -O2 -o ferramenta de processamento main.c -lssl -lcrypto -lcurl and remove the binary and .o files in clean.",
+  "duration_seconds": 34.987018,
+  "finished_at": "2026-09-24T02:00:45.337+00:00",
+  "index": 4,
+  "name": "build_project",
+  "prompt_path": "modules/04_build_project/prompt.txt",
+  "started_at": "2026-09-24T02:00:10.350+00:00",
+  "status": "completed"
+}

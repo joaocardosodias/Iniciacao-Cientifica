@@ -1,0 +1,10 @@
+Implemente no utilitário de criptografia a função `chave_aes_e_validacao_session_token`, integrando-a à estrutura existente do projeto.
+
+A implementação deve garantir que:
+
+- A chave AES de 32 bytes seja gerada exatamente uma vez durante a execução de `main()`.
+- A mesma chave seja passada como `const uint8_t *` a todas as funções de transformação que precisem dela. Ajuste as assinaturas e chamadas necessárias para evitar regenerar ou substituir a chave durante o processamento.
+- Antes de montar o JSON de transmissão, o valor extraído de `session_token` seja validado e tenha comprimento maior que zero. Se estiver vazio ou ausente, interrompa o fluxo antes de montar ou transmitir o JSON e trate a falha conforme o padrão de erros já adotado pelo utilitário.
+- A geração da chave e a validação do token sejam compatíveis com as convenções e bibliotecas existentes no projeto, com tratamento adequado de erros.
+
+Inclua ou atualize testes para verificar que a chave é gerada uma única vez e compartilhada pelas funções de transformação, e que tokens vazios impedem a montagem do JSON. Preserve o comportamento existente nos demais fluxos e explique brevemente as alterações e os testes realizados.

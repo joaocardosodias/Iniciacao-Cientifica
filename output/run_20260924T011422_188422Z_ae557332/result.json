@@ -1,0 +1,92 @@
+{
+  "artifacts": [
+    {
+      "bytes": 6960,
+      "path": "calls/0001_sanitizer.framing_1.json",
+      "sha256": "0144ba46c1bf4d78b1b07b3ff3020607b4ee6ceeba148598edb0881b6dfdde03"
+    },
+    {
+      "bytes": 5819,
+      "path": "calls/0002_sanitizer.framing_2.json",
+      "sha256": "675fa926f3e0e36ff5495f849777e157a24121d50595e9faa7aadbaee8c34035"
+    },
+    {
+      "bytes": 2926,
+      "path": "events.jsonl",
+      "sha256": "6f5ae63ef05f61bb9de5be0a8f06bcbaa37c57467eee743e1fb574e62acda8a9"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 999,
+      "path": "provenance/environment.json",
+      "sha256": "9cfb0fa466426897ae89833f4d74b6379d4130403064bd1e007ca8c880c635a6"
+    },
+    {
+      "bytes": 0,
+      "path": "provenance/git.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 118,
+      "path": "provenance/git_status.txt",
+      "sha256": "77ec84d8307c32a636da704bf1762cf9f3de50de6f195cc5d0b0769dc8a26c50"
+    },
+    {
+      "bytes": 2107,
+      "path": "provenance/python_packages.json",
+      "sha256": "5d84e3c8aacd68b42f53c3d1417c93a1b982478e800d06ce0e9efcf5ec436423"
+    },
+    {
+      "bytes": 3342,
+      "path": "provenance/source_hashes.json",
+      "sha256": "a7d422979d8b7988bb2a30ca6d1eec469b58fb111069340c8e6a35c50a067913"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 17.678905,
+  "error": {
+    "message": "Connection error.",
+    "type": "APIConnectionError"
+  },
+  "finished_at": "2026-09-24T01:14:39.866+00:00",
+  "llm_calls": {
+    "completed": 1,
+    "cost": {
+      "reported_calls": 1,
+      "total": 0.00021222,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 1,
+    "inference_providers_observed": [
+      "OpenAI"
+    ],
+    "models_observed": [
+      "openai/gpt-6-luna"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "retries": 0,
+    "tokens": {
+      "input": 1345,
+      "output": 397,
+      "reported_calls": 1,
+      "total": 1742
+    },
+    "total": 2,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T011422_188422Z_ae557332",
+  "schema_version": "1.0",
+  "status": "failed"
+}

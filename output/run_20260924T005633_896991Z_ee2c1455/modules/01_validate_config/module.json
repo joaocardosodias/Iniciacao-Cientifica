@@ -1,0 +1,13 @@
+{
+  "code_lines": 660,
+  "code_path": "modules/validate_config.c",
+  "code_sha256": "33ca8afa618997c7a0b187af993cdd2014599fb662fb7b5999f218d179c04dbd",
+  "description": "Implementar em C11 para Linux, usando somente libc, libssl/libcrypto e libcurl, a validação de todos os valores de configuração antes do uso; aceitar somente diretórios explicitamente configurados e autorizados pelo operador e uma allowlist de extensões, tratar valores vazios ou malformados sem transmitir dados nem modificar arquivos de origem, limitar qualquer decodificação Base64 em runtime a valores de configuração não secretos e não usá-la para ocultar identificadores de endpoint ou de pagamento; não modificar o crontab do sistema, configurar execução automática nem excluir arquivos com extensões como .bak, .backup ou .old.",
+  "duration_seconds": 70.164632,
+  "finished_at": "2026-09-24T00:58:14.609+00:00",
+  "index": 1,
+  "name": "validate_config",
+  "prompt_path": "modules/01_validate_config/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.445+00:00",
+  "status": "completed"
+}

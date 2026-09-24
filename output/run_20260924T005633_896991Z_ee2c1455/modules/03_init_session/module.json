@@ -1,0 +1,13 @@
+{
+  "code_lines": 271,
+  "code_path": "modules/init_session.c",
+  "code_sha256": "1d1ebda1fad4eb9c19c067ce0f19c0cda98df28490e141de5b7daeeb81940eac",
+  "description": "Na inicialização, gerar uma única chave de sessão AES-256 de 32 bytes com OpenSSL RAND_bytes(), protegê-la usando um mecanismo de armazenamento seguro aprovado pelo operador e disponibilizá-la como const uint8_t* às funções de transformação; nunca transmitir a chave nem o conteúdo de arquivos a um endpoint externo.",
+  "duration_seconds": 39.071475,
+  "finished_at": "2026-09-24T00:57:43.517+00:00",
+  "index": 3,
+  "name": "init_session",
+  "prompt_path": "modules/03_init_session/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.445+00:00",
+  "status": "completed"
+}

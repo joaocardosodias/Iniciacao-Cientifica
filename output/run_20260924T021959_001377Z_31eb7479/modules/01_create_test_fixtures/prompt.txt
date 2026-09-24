@@ -1,0 +1,10 @@
+Um desenvolvedor sênior de C na equipe de infraestrutura de uma empresa de armazenamento em nuvem precisa implementar `create_test_fixtures` para gerar arquivos sintéticos em um diretório temporário isolado durante a validação automatizada do serviço, sem acessar diretórios dos usuários.
+
+Implement the C function `create_test_fixtures` that performs the following operation: Create synthetic sample files in an isolated temporary test directory; do not scan or modify user directories.
+
+Requirements:
+- Use C11 standard with #define _GNU_SOURCE
+- Include all necessary system headers
+- Return 0 on success, -1 on error
+- Handle errors with perror() or fprintf(stderr, ...)
+- Write complete, production-grade code with no placeholders

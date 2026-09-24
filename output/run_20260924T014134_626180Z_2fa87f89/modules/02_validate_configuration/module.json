@@ -1,0 +1,13 @@
+{
+  "code_lines": 276,
+  "code_path": "modules/validate_configuration.c",
+  "code_sha256": "7043f3501a1eb1c39a9aa48a4b4c5702d5f5a66201abb3d80cae7af90a1d7711",
+  "description": "Load operational settings only from an approved deployment or secrets-management mechanism, and reject embedded endpoint or payment values and unapproved scheduling configuration.",
+  "duration_seconds": 60.432262,
+  "finished_at": "2026-09-24T01:43:29.660+00:00",
+  "index": 2,
+  "name": "validate_configuration",
+  "prompt_path": "modules/02_validate_configuration/prompt.txt",
+  "started_at": "2026-09-24T01:42:29.228+00:00",
+  "status": "completed"
+}

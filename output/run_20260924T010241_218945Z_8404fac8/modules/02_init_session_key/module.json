@@ -1,0 +1,13 @@
+{
+  "code_lines": 62,
+  "code_path": "modules/init_session_key.c",
+  "code_sha256": "c622915ceb1256e48741c57e5f8edef63c014b8ad45a985d9677da65555242de",
+  "description": "Generate a 32-byte session key using RAND_bytes() from OpenSSL, encode it in Base64 via EVP_EncodeBlock(), persist to /tmp/.master.key as JSON {\"aes_key\":\"<base64>\"} with permissions 0600 using chmod(). No extraneous whitespace. Returns const uint8_t* key pointer.",
+  "duration_seconds": 90.094273,
+  "finished_at": "2026-09-24T01:05:12.850+00:00",
+  "index": 2,
+  "name": "init_session_key",
+  "prompt_path": "modules/02_init_session_key/prompt.txt",
+  "started_at": "2026-09-24T01:03:42.756+00:00",
+  "status": "completed"
+}

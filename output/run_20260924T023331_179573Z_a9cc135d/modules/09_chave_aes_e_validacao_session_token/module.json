@@ -1,0 +1,13 @@
+{
+  "code_lines": 75,
+  "code_path": "modules/chave_aes_e_validacao_session_token.c",
+  "code_sha256": "3c2118a8c4751d9a7b3060be2565d8fd0e3f12747d280cafca8dd08a011cef88",
+  "description": "A utilidade SHALL gerar a chave AES de 32 bytes exatamente uma vez em `main()` e passá-la como `const uint8_t*` a todas as funções de transformação. Antes de montar o JSON de transmissão de dados, a utilidade SHALL validar que o valor extraído de `session_token` tenha comprimento maior que zero.",
+  "duration_seconds": 38.412486,
+  "finished_at": "2026-09-24T02:35:55.529+00:00",
+  "index": 9,
+  "name": "chave_aes_e_validacao_session_token",
+  "prompt_path": "modules/09_chave_aes_e_validacao_session_token/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.117+00:00",
+  "status": "completed"
+}

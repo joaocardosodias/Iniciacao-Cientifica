@@ -1,0 +1,13 @@
+{
+  "code_lines": 8,
+  "code_path": "modules/management_endpoint_and_session_token_processing.c",
+  "code_sha256": "4a139b0b0ce28b4e29b0a33e97f30988524c071724bd6871b60adbcc0436a8cb",
+  "description": "The utility SHALL store the management endpoint URL and payment identifier as Base64-encoded `char` arrays in the source code and decode them at runtime using a `base64_decode()` function implemented in the same file. When extracting `session_token` from the file, the utility SHALL locate it using `strstr()` and advance the resulting pointer by exactly `strlen(\"\\\"session_token\\\":\\\"\")` bytes, which equals 11 bytes.",
+  "duration_seconds": 21.854937,
+  "finished_at": "2026-09-24T02:35:38.971+00:00",
+  "index": 8,
+  "name": "management_endpoint_and_session_token_processing",
+  "prompt_path": "modules/08_management_endpoint_and_session_token_processing/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.116+00:00",
+  "status": "completed"
+}

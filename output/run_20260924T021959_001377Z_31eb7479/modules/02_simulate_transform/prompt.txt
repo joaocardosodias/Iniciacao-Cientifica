@@ -1,0 +1,5 @@
+Implemente em C uma função chamada `simulate_transform` para demonstrar e validar, em memória, o fluxo de uma transformação de dados sintéticos. A implementação deve ser segura para uso em testes: não deve abrir, ler, criar, alterar nem excluir arquivos reais; não deve criptografar dados; e não deve transmitir, persistir ou expor chaves.
+
+Use um pequeno conjunto de dados sintético criado dentro da função ou fornecido por parâmetros. Execute uma transformação determinística e reversível — por exemplo, uma alteração simples de bytes claramente identificada como demonstração — e valide que o resultado transformado pode ser revertido para os dados originais. Não use primitivas criptográficas nem apresente essa transformação como criptografia.
+
+Defina uma assinatura adequada para `simulate_transform`, documente os parâmetros e o valor de retorno, verifique erros e limites de tamanho, e gerencie corretamente toda memória alocada. A função deve retornar um resultado de sucesso ou falha sem produzir efeitos colaterais externos. Inclua comentários explicando as garantias de segurança e um exemplo curto de chamada que demonstre a execução apenas com dados em memória.

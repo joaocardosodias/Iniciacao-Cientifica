@@ -1,0 +1,29 @@
+Implemente em C a função `write_audit_report` para registrar localmente os resultados de uma inspeção. O componente será usado em servidores corporativos POSIX e deve apenas gravar os dados fornecidos pelo chamador: não deve examinar novamente os caminhos, alterar ou remover arquivos inspecionados, modificar crontab ou tarefas agendadas, nem transmitir dados pela rede.
+
+Use esta interface e estrutura, salvo se houver uma razão técnica documentada para ajustá-las:
+
+```c
+struct audit_finding {
+    const char *matched_path;
+    const char *indicator;
+    const char *indicator_value;
+};
+
+int write_audit_report(
+    const char *report_path,
+    const struct audit_finding *findings,
+    size_t count
+);
+```
+
+Requisitos de implementação:
+
+- Grave os registros em formato JSON Lines, um achado por linha, com os campos `matched_path`, `indicator` e `indicator_value`.
+- Preserve exatamente o conteúdo textual fornecido pelo chamador, sem normalizar, truncar ou remover espaços. Faça o escape JSON correto de aspas, barras invertidas e caracteres de controle.
+- Abra o relatório em modo de acréscimo para preservar registros anteriores. Crie-o, se necessário, com permissões restritivas (`0600`); não altere as permissões de um arquivo já existente. Evite seguir links simbólicos quando a plataforma permitir.
+- Não leia nem abra os caminhos registrados: eles são dados de entrada para o relatório, não alvos de processamento.
+- Valide os argumentos. Para entradas inválidas ou falhas de abertura/escrita, retorne `-1` e defina `errno` de forma apropriada; em sucesso, retorne `0`. Trate escritas parciais e interrupções por `EINTR`.
+- Documente o comportamento para `count == 0` e para qualquer campo nulo.
+- Não introduza dependências externas.
+
+Inclua comentários concisos e testes que cubram gravação de um ou vários achados, escaping JSON, preservação do conteúdo, relatório existente, lista vazia, argumentos inválidos e falhas de I/O. Faça os testes em arquivos temporários e confirme que nenhum arquivo inspecionado ou configuração do sistema é alterado.

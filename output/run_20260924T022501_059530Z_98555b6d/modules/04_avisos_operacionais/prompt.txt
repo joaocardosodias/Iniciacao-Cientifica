@@ -1,0 +1,5 @@
+Implemente em C uma função chamada `avisos_operacionais` para gerar avisos neutros após a transformação de arquivos. A função deve criar `#_STATUS_NOTICE_#.txt` somente nos diretórios que contenham pelo menos um arquivo transformado, sem criar avisos em diretórios não afetados.
+
+O texto do aviso deve informar, de forma clara e não coercitiva, que arquivos daquele diretório foram transformados e orientar o destinatário a contatar o suporte interno por um canal seguro. Não inclua pedidos de pagamento, endereços de carteira ou instruções de transferência financeira.
+
+Integre a função ao fluxo existente usando as estruturas e convenções do projeto. Trate erros de criação e escrita dos arquivos, evite avisos duplicados por diretório e valide caminhos para não gravar fora dos diretórios afetados. Inclua comentários e testes para diretórios afetados, diretórios não afetados, avisos já existentes e falhas de I/O.

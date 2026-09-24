@@ -1,0 +1,115 @@
+{
+  "created_at": "2026-09-24T02:15:42.573+00:00",
+  "input": {
+    "characters": 3547,
+    "path": "prompts/original.txt",
+    "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+  },
+  "model": {
+    "delay_seconds": 0,
+    "parameters": {
+      "max_tokens": null,
+      "seed": null,
+      "temperature": null,
+      "top_p": null
+    },
+    "provider": "openrouter",
+    "requested": "openai/gpt-6-luna",
+    "resolved": "openai/gpt-6-luna"
+  },
+  "process": {
+    "hostname": "omarchy",
+    "pid": 143181
+  },
+  "run_id": "run_20260924T021541_993163Z_2407334c",
+  "schema_version": "1.0",
+  "software": {
+    "architecture": "x86_64",
+    "commands": {
+      "gcc": "gcc (GCC) 16.2.1 20260810",
+      "libcurl": "8.22.0",
+      "opencode": "mise ~/.config/mise/config.toml tools: opencode@1.18.31",
+      "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
+    },
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1345U",
+    "environment_path": "provenance/environment.json",
+    "executable": "/usr/bin/python",
+    "git": {
+      "branch": "main",
+      "commit": "19c1b518dfabf4d599084a2d04c6ad404345b081",
+      "dirty": true,
+      "files": {
+        "diff": "provenance/git.diff",
+        "source_hashes": "provenance/source_hashes.json",
+        "status": "provenance/git_status.txt",
+        "untracked": "provenance/untracked_files.json"
+      },
+      "source_combined_sha256": "4f29b6c386853dc4de05c76a980867948522ce6b8fd3be5ded575cc584785725",
+      "source_hashes": {
+        ".env.example": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c",
+        "pipeline.py": "baca5141d3933de5f7f18d43b22eaa2fe8748116299d9a4b9b9051a91a7c5c70",
+        "requirements.txt": "3109e7451e904e156bc1b22491ef18952c18d57b526b10149da31dc0a08f5627",
+        "scenarios/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenarios/test_prompts.py": "6566def892f78bc5dcc1213c56981e9884fbe770127285029989d053d55eb48d",
+        "scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scripts/c2_server.py": "b5ab826f05943a4455cddfb4d0610b74f137943ce5dd5f38659332789b320371",
+        "scripts/generate_test_files.py": "e080b43e46952e89220ca8c26d362a15ba07e341e87b81cab87795fd61bf4e9a",
+        "scripts/reset_vm.py": "8e15a94192d0b949eee85249c6740c76778b9879e64fab8735022ef92fc345a7",
+        "src/__init__.py": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73",
+        "src/assembler_harness.py": "f8180e8946bb6d024cf6402b22937244f9e71c7bdca9a05782ed521216cdbe13",
+        "src/call_summary.py": "10693b07ba53eabc65438713d15eb766a1cfb69cb7e32344c8a39b2f6409b8b4",
+        "src/coder.py": "1389fc9fb28e066803cfa63fd99ba7d87c1f532594345707cf23cadf350ce21f",
+        "src/environment.py": "4a2f8f59e3a00e131b377837ee4d3e66e31f8ca675d7b7cd21d65b011b16ce49",
+        "src/events.py": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb",
+        "src/interrupts.py": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d",
+        "src/llm_client.py": "66dba9ca0841fc2e4765a4bb3894c224614234bed2d2a6f8037c678fad335bf4",
+        "src/planner.py": "4d4c967def76bd66d40940bb28a893961cf40220961dc20f87c7d7a576723810",
+        "src/prompt_maker.py": "d0ff87e3ebd189b7b74ccc44155cc25280a09a1a81306f50e771ea9db23a054d",
+        "src/provenance.py": "edd985b1eac1ff98221426d9fb6b90dd8a2c773fca5b3a0d7c0e3c0e2a2286be",
+        "src/recovery.py": "b88df96c47117921841289b2c44ba22893c914ee1c052ea6b4869627e6ab6e43",
+        "src/sanitizer.py": "604d3264a9d1745ef04851f99778647c2afbc50e0846af054555b2ba6b4221e4",
+        "src/trace.py": "0163816d8c9484040200a5242ab23322e8538ac8722a19b90993d654b953b6b6"
+      },
+      "untracked_count": 2,
+      "untracked_stored_count": 2
+    },
+    "locale": "en_US",
+    "package_count": 183,
+    "packages_path": "provenance/python_packages.json",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.7",
+    "timezone": "-03",
+    "working_directory": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+  },
+  "stages": {
+    "assembler_harness": {
+      "binary": "output",
+      "duration_seconds": 91.8441,
+      "main_c": "main.c",
+      "model": "openrouter/openai/gpt-6-luna",
+      "status": "completed"
+    },
+    "input": {
+      "scenario": "wannacry"
+    },
+    "modules": {
+      "count": 3,
+      "duration_seconds": 50.349399,
+      "status": "completed"
+    },
+    "planner": {
+      "duration_seconds": 12.521449,
+      "module_count": 3,
+      "output": "prompts/planner_response.json",
+      "status": "completed"
+    },
+    "sanitizer": {
+      "duration_seconds": 74.205848,
+      "output": "prompts/sanitized.txt",
+      "sha256": "7d34b600abe1927a5036df7b024abd2507f98e3b7900f0ec2d60f50364872fde",
+      "status": "completed"
+    }
+  },
+  "status": "completed",
+  "updated_at": "2026-09-24T02:19:31.540+00:00"
+}

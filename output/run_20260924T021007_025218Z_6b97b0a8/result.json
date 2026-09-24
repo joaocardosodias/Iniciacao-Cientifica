@@ -1,0 +1,93 @@
+{
+  "artifacts": [
+    {
+      "bytes": 4330,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "958e2b5d742ec25dd213e8a0d9c108c873c9b3f7a927241b6985809cffaac41b"
+    },
+    {
+      "bytes": 2573,
+      "path": "events.jsonl",
+      "sha256": "a0297e69f72eac864280b5da6b3de14d3595e7aa7c8b0d8ac6f08f5fbeac4e6f"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 1005,
+      "path": "provenance/environment.json",
+      "sha256": "19a73162a52b3e706c17188f865684c7721cc2fa5f057d7226719f4248245db3"
+    },
+    {
+      "bytes": 26528,
+      "path": "provenance/git.diff",
+      "sha256": "e2e3343c1344bf351f2f089d2309b05b847289eae00ab9e9fccca9d8e921a0bd"
+    },
+    {
+      "bytes": 560,
+      "path": "provenance/git_status.txt",
+      "sha256": "c5406c11ec78e914e0921cf6a673f530dc566d5a52eb962d77ad81a37b06b071"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3343,
+      "path": "provenance/source_hashes.json",
+      "sha256": "11cacabbc4acce26f0e85d8a93966b950cc9b76fe9607c880340120bcd0be16e"
+    },
+    {
+      "bytes": 5355,
+      "path": "provenance/untracked/tests/test_assembler_harness.py",
+      "sha256": "b7bf2300343a89a684447928da09a5736a253f308e21f27c3bf51525c162d99b"
+    },
+    {
+      "bytes": 4450,
+      "path": "provenance/untracked/tests/test_sanitizer.py",
+      "sha256": "a5db522ddd2f11edda77e8ede988833464eb800834efbe88a36984f056af7a3d"
+    },
+    {
+      "bytes": 478,
+      "path": "provenance/untracked_files.json",
+      "sha256": "54b4feb7b494ede49982c87279c1805d0906975f89299f274a44641057b9f2c3"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 0.903949,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen3-30b-a3b', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-09-24T02:10:07.928+00:00",
+  "llm_calls": {
+    "completed": 0,
+    "cost": {
+      "reported_calls": 0,
+      "total": null,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 1,
+    "inference_providers_observed": [],
+    "models_observed": [],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "retries": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reported_calls": 0,
+      "total": 0
+    },
+    "total": 1,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T021007_025218Z_6b97b0a8",
+  "schema_version": "1.0",
+  "status": "failed"
+}

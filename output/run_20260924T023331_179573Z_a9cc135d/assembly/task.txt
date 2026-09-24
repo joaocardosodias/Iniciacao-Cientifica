@@ -1,0 +1,75 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+- module_06.c
+- module_07.c
+- module_08.c
+- module_09.c
+
+These files define functions with the following signatures (names are aliases — do not rename them):
+
+#define _GNU_SOURCE
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <openssl/crypto.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <syslog.h>
+#include <time.h>
+#include <unistd.h>
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+enum file_processing_status { FILE_PROCESSING_SUCCESS = 0, FILE_PROCESSING_INVALID_ARGUMENT = 1, FILE_PROCESSING_INPUT_ERROR = 2, FILE_PROCESSING_OUTPUT_ERROR = 3, FILE_PROCESSING_CRYPTO_ERROR = 4, FILE_PROCESSING_MEMORY_ERROR = 5 };
+typedef int (*consentimento_backup_fn)(void *contexto, const char *escopo);
+typedef int (*auditoria_backup_fn)(void *contexto, const char *evento, const char *caminho, const char *detalhe);
+typedef struct { const char *destino; consentimento_backup_fn consentimento; auditoria_backup_fn auditoria; void *contexto; } configuracao_backup;
+typedef struct { dev_t dispositivo; ino_t inode; } identidade_diretorio;
+typedef struct { identidade_diretorio *itens; size_t quantidade; size_t capacidade; } conjunto_diretorios;
+typedef struct { const char *rotulo; const char *caminho; } raiz_backup;
+struct indisponivel_rotina { uint32_t capacidades; };
+typedef struct { const char *path; int altered; } altered_file;
+enum notice_action_result { NOTICE_ACTION_FAILURE = -1, NOTICE_ACTION_SUCCESS = 0, NOTICE_ACTION_PARTIAL = 1 };
+enum { CHAVE_AES_VALIDACAO_OK = 0, CHAVE_AES_VALIDACAO_ARGUMENTO_INVALIDO = -1, CHAVE_AES_VALIDACAO_TOKEN_INVALIDO = -2, CHAVE_AES_VALIDACAO_BUFFER_INSUFICIENTE = -3, CHAVE_AES_VALIDACAO_ERRO_CRIPTOGRAFICO = -4 };
+
+int f01(const char *input_path, const char *output_path, const unsigned char key[32]);
+int f02(const configuracao_backup *configuracao);
+int f03(const uint8_t **session_key_out, const char **management_endpoint_out);
+int f04(const struct indisponivel_rotina *rotina);
+int f05(const altered_file *files, size_t file_count);
+int f06(const char *requisito_a, const char *requisito_b);
+int f07(const char *binary_path, const char *const *directories, size_t directory_count);
+int f08(const char *json_entrada, const uint8_t *chave_aes, char *json_transmissao, size_t capacidade_json);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) calling all functions in sequence: f01, f02, f03, ... (in numeric order)
+   - Passes return values between calls as needed
+   - Passes argv[0] to any function that accepts a char* path parameter
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c module_06.c module_07.c module_08.c module_09.c \
+       -lssl -lcrypto -lcurl
+3. If an error is in main.c, fix main.c with str_replace.
+   If an error is inside a module file (missing include, undeclared constant
+   or missing prototype), apply the MINIMAL fix to that module, keeping its
+   logic unchanged. Do not rewrite module logic.
+4. Repeat up to 5 times until 'output' binary exists.

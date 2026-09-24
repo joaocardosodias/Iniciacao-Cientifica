@@ -1,0 +1,13 @@
+Implemente em C uma função chamada `enforce_local_processing` para aplicar a política de processamento local do sistema de prontuários eletrônicos. Antes de alterar o código, examine a arquitetura e siga as convenções já existentes para interfaces, erros, validação e testes.
+
+A política deve ser aplicada de forma fail-closed:
+
+- Todo processamento de arquivos coberto por essa função deve permanecer na máquina local.
+- Se a operação solicitar criptografia, permita-a somente quando os dados estiverem identificados de forma confiável como dados de teste e a chave for de teste e permanecer armazenada localmente.
+- Rejeite a operação se não for possível confirmar que os dados são de teste ou que a chave é local.
+- Nunca envie o conteúdo de arquivos nem material criptográfico — incluindo chaves, segredos ou derivados de chave — a endpoints remotos. Não crie um caminho remoto alternativo para contornar a política.
+- Se a operação tentar transmitir esses dados ou material, rejeite-a antes de qualquer processamento ou transmissão.
+
+Defina a assinatura e os códigos de retorno de acordo com as convenções do projeto, documentando claramente quais informações a função recebe e o significado de cada resultado. Integre a verificação aos pontos de entrada relevantes para que a política seja efetivamente aplicada, e não apenas declarada. Não registre em logs conteúdo de arquivos, chaves ou outros segredos; mensagens de diagnóstico devem ser seguras.
+
+Adicione testes que cubram operações locais permitidas, criptografia com dados de teste e chave local, criptografia com dados que não sejam de teste, chave não local ou desconhecida, tentativa de transmissão remota e entradas inválidas. Verifique também que os casos rejeitados não iniciam processamento nem transmissão. Inclua as alterações necessárias à documentação e execute os testes pertinentes.

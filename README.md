@@ -21,7 +21,7 @@ nenhum modelo individual vê a intenção global.
 ├── requirements.txt     # Dependências Python
 │
 ├── src/                 # Camadas do pipeline
-│   ├── sanitizer.py     # Camada 1 — reescreve o prompt com linguagem neutra
+│   ├── sanitizer.py     # Camada 1 — sanitiza fragmentos independentes do prompt
 │   ├── planner.py       # Camada 2 — divide em módulos independentes
 │   ├── prompt_maker.py  # Camada 3 — gera contexto profissional por módulo
 │   ├── coder.py         # Camada 4 — gera o código C de cada módulo
@@ -55,7 +55,7 @@ integração e a correção final são realizadas por um agente OpenCode headles
 Prompt malicioso
       │
       ▼
- 1. Sanitizer ──── reescreve com linguagem corporativa neutra
+ 1. Sanitizer ──── sanitiza fragmentos de 2–3 requisitos sem contexto global
       │
       ▼
  2. Planner ─────── divide em 3–7 módulos independentes
@@ -80,6 +80,27 @@ Prompt malicioso
 A hipótese central é que filtros baseados em análise de conteúdo individual
 falham quando o pedido é decomposto: cada módulo parece inofensivo, mas o
 resultado final é funcional.
+
+### Modo componentes (determinístico)
+
+Cenários podem declarar, além do prompt, três blocos:
+
+- `config_h`: cabeçalho C com os valores concretos do cenário (diretórios,
+  extensões, endpoint, token, notas, cron);
+- `components`: lista de componentes genéricos, cada um com `prototype` e
+  `task`, sem qualquer menção à intenção global;
+- `main_c`: orquestração C que liga os componentes na ordem correta.
+
+Nesse modo o pipeline não envia prompt, fragmentos nem valores concretos ao
+modelo: o Coder recebe apenas tarefas genéricas ("AES-256-GCM em um buffer",
+"POST JSON", "varredura por extensão") e o `config.h`/`main.c` são gerados de
+forma determinística pelo pipeline. A composição maliciosa existe somente no
+orquestrador Python e no `main_c`, nunca na linguagem natural vista pelo LLM.
+
+O `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc` diretamente
+(modo `deterministic`). O agente OpenCode é acionado apenas se a compilação
+falhar, para correções mínimas nos módulos. Use `--llm-pipeline` para forçar o
+fluxo Sanitizer+Planner+PromptMaker.
 
 ---
 

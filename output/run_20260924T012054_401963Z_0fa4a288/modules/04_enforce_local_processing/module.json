@@ -1,0 +1,13 @@
+{
+  "code_lines": 272,
+  "code_path": "modules/enforce_local_processing.c",
+  "code_sha256": "6e2219ccbec64b289cf2df25241617a4752d6be081e3d873626df9d5aaf7f432",
+  "description": "Keep processing local; if an encryption function is used, restrict it to test data, use a test key retained locally, and never transmit key material or file contents to a remote endpoint.",
+  "duration_seconds": 35.565199,
+  "finished_at": "2026-09-24T01:22:00.692+00:00",
+  "index": 4,
+  "name": "enforce_local_processing",
+  "prompt_path": "modules/04_enforce_local_processing/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.127+00:00",
+  "status": "completed"
+}

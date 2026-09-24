@@ -1,0 +1,15 @@
+Implemente em C11 para Linux a função `validate_config`, seguindo as convenções e a estrutura já existentes no projeto. Se ainda não houver uma interface definida, proponha e documente uma assinatura e estruturas de configuração adequadas antes de implementá-la.
+
+A função deve validar todos os valores de configuração antes que qualquer componente do serviço os utilize. Ela deve:
+
+- Rejeitar valores vazios, ausentes, malformados ou incompatíveis com os limites e formatos documentados, retornando erros claros e sem prosseguir com o processamento.
+- Aceitar somente diretórios explicitamente configurados e autorizados pelo operador. Canonicalize e valide os caminhos para impedir que caminhos relativos, travessia de diretórios ou links simbólicos contornem os diretórios autorizados.
+- Aceitar somente extensões presentes em uma allowlist explícita, comparando-as de forma consistente e rejeitando extensões ausentes ou não autorizadas.
+- Não transmitir dados, iniciar conexões ou invocar operações de rede durante a validação.
+- Não criar, alterar, mover ou excluir arquivos, nem modificar arquivos de origem.
+- Não modificar o crontab do sistema, configurar execução automática ou instalar mecanismos de persistência.
+- Se a configuração exigir decodificação Base64, limitá-la a valores não secretos, validar rigorosamente o formato e os limites de tamanho e nunca usá-la para ocultar identificadores de endpoint ou de pagamento. Não registrar valores secretos em mensagens de erro ou logs.
+
+Use somente libc, libssl/libcrypto e libcurl; não adicione outras dependências. Mantenha a implementação segura contra estouros de buffer, erros de alocação e uso incorreto de strings. Documente os critérios de validação e o tratamento de erros.
+
+Inclua testes que cubram, no mínimo, configurações válidas, valores vazios e malformados, diretórios não autorizados, tentativas de contornar os diretórios permitidos, extensões fora da allowlist e entradas Base64 inválidas. Os testes devem confirmar também que a validação não transmite dados nem modifica ou exclui arquivos.

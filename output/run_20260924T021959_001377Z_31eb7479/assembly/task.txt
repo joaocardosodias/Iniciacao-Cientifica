@@ -1,0 +1,44 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+
+These files define functions with the following signatures (names are aliases — do not rename them):
+
+#define _GNU_SOURCE
+#include <errno.h>
+#include <fcntl.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+enum document_recovery_result { DOCUMENT_RECOVERY_OK = 0, DOCUMENT_RECOVERY_INCOMPLETE = 1, DOCUMENT_RECOVERY_INVALID_ARGUMENT = -1 };
+enum document_recovery_missing_field { DOCUMENT_RECOVERY_MISSING_TIMESTAMPS = 1u << 0, DOCUMENT_RECOVERY_MISSING_SYSTEMS = 1u << 1, DOCUMENT_RECOVERY_MISSING_MESSAGES = 1u << 2, DOCUMENT_RECOVERY_MISSING_ACTIONS_TAKEN = 1u << 3 };
+enum { DOCUMENT_RECOVERY_ACTION_COUNT = 10 };
+struct document_recovery_context { const char *timestamps; const char *systems_affected; const char *observed_messages; const char *actions_already_taken; };
+struct document_recovery_plan { const char *actions[DOCUMENT_RECOVERY_ACTION_COUNT]; unsigned int action_count; unsigned int missing_fields; };
+
+int f01(char *directory, size_t directory_size);
+int f02(void);
+int f03(const struct document_recovery_context *context, struct document_recovery_plan *plan);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) calling all functions in sequence: f01, f02, f03, ... (in numeric order)
+   - Passes return values between calls as needed
+   - Passes argv[0] to any function that accepts a char* path parameter
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c \
+       -lssl -lcrypto -lcurl
+3. If errors occur, fix main.c only using str_replace. Do NOT modify the module files.
+4. Repeat up to 5 times until 'output' binary exists.

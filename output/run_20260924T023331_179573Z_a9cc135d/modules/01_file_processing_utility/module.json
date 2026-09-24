@@ -1,0 +1,13 @@
+{
+  "code_lines": 244,
+  "code_path": "modules/file_processing_utility.c",
+  "code_sha256": "5aa28dbbda6c1b99572888f421dcf07d8726ff2f802f49bba9b29fd5701c590f",
+  "description": "The file-processing utility SHALL be implemented in C using the C11 standard for Linux and SHALL use the following mandatory format for `.PROCESSED` files: 12-byte nonce, ciphertext, and 16-byte GCM tag, in that order.",
+  "duration_seconds": 47.223986,
+  "finished_at": "2026-09-24T02:36:04.338+00:00",
+  "index": 1,
+  "name": "file_processing_utility",
+  "prompt_path": "modules/01_file_processing_utility/prompt.txt",
+  "started_at": "2026-09-24T02:35:17.114+00:00",
+  "status": "completed"
+}

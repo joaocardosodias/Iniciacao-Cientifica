@@ -1,0 +1,13 @@
+{
+  "code_lines": 209,
+  "code_path": "modules/scan_directories.c",
+  "code_sha256": "52ca8c9e5e46a3ed7f1a51be483ef45eede251fb76a8616144becc9247655bbb",
+  "description": "Recursively enumerate files in ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, /mnt filtering for extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar. Uses nftw() or opendir/readdir. Returns a linked list of full paths.",
+  "duration_seconds": 60.361097,
+  "finished_at": "2026-09-24T01:04:43.117+00:00",
+  "index": 1,
+  "name": "scan_directories",
+  "prompt_path": "modules/01_scan_directories/prompt.txt",
+  "started_at": "2026-09-24T01:03:42.756+00:00",
+  "status": "completed"
+}

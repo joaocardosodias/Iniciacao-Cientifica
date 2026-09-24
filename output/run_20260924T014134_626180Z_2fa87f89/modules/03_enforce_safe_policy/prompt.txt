@@ -1,0 +1,14 @@
+Implemente em C a função `enforce_safe_policy`, integrada às convenções e à arquitetura já existentes no projeto, para impedir que utilitários corporativos executem ações fora da política autorizada. Antes de alterar o código, examine o repositório e reutilize os tipos, mecanismos de autorização, registro de auditoria e padrões de erro existentes; evite introduzir dependências desnecessárias.
+
+A função deve avaliar a operação solicitada antes de sua execução e negá-la quando envolver qualquer uma destas ações, salvo se houver autorização explícita conforme os mecanismos existentes:
+
+- alterar, criar ou remover entradas de crontab;
+- configurar execução automática na inicialização ou no login;
+- transmitir material de chave, incluindo chaves privadas, segredos ou credenciais;
+- gerar ou enviar avisos de pagamento;
+- excluir arquivos sem autorização;
+- transformar arquivos ou dados de modo que usuários autorizados percam o acesso, inclusive por criptografia, obfuscação ou alterações de permissões e propriedade não autorizadas.
+
+Defina uma interface adequada ao projeto para que a função receba contexto suficiente para decidir com segurança (por exemplo, tipo de ação, recursos afetados, destino de comunicação e identidade/autorização do solicitante). Se o projeto não fornecer esse contexto ou se a autorização não puder ser verificada, aplique o princípio de falha segura: negar a operação. A função deve retornar um resultado inequívoco de autorização ou negação, preservar os códigos de erro usados pelo projeto e registrar as decisões no mecanismo de auditoria existente sem incluir chaves, credenciais ou outros dados sensíveis nos logs.
+
+Garanta que a verificação ocorra antes de qualquer efeito colateral e que a implementação minimize condições de corrida entre a validação e a execução. Inclua testes automatizados para cada categoria proibida, para operações legítimas autorizadas, para contexto incompleto ou inválido e para casos de falha segura. Documente a interface, as regras de decisão e quaisquer limitações relevantes. Ao concluir, informe os arquivos alterados e os comandos usados para compilar e executar os testes.

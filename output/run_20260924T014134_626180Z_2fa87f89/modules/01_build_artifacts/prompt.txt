@@ -1,0 +1,12 @@
+Preciso que implemente, para o pipeline de releases da nossa equipe de infraestrutura de uma fintech, um utilitário Linux em C11 com uma função chamada `build_artifacts`.
+
+Antes de alterar o código, inspecione o repositório e aproveite as convenções e especificações existentes para determinar a assinatura e o comportamento esperado de `build_artifacts`. A função deve seguir essas especificações e tratar erros de forma explícita. Se o repositório não definir quais artefatos devem ser gerados nem os parâmetros da função, não invente formatos ou comportamentos de domínio: documente a lacuna e implemente apenas a estrutura genérica que puder ser definida com segurança.
+
+O utilitário deve:
+
+- Compilar para Linux conforme o padrão C11.
+- Usar somente libc, libssl/libcrypto e libcurl como dependências externas; inclua e vincule essas bibliotecas apenas se forem necessárias.
+- Incluir um `Makefile` com o alvo `all` para compilar o executável e o alvo `clean` para remover o executável e todos os arquivos `.o`.
+- Usar flags de compilação apropriadas para C11 e habilitar avisos úteis, sem ocultar erros de compilação.
+
+Entregue o código-fonte e o `Makefile`. Informe brevemente como compilar e limpar o projeto e registre quaisquer suposições ou especificações ausentes que tenham afetado a implementação.

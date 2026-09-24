@@ -1,0 +1,13 @@
+{
+  "code_lines": 395,
+  "code_path": "modules/enforce_safe_policy.c",
+  "code_sha256": "aa593884310e1c11c225790b98a7d21fd84ecc16801e98804fad776846f533a7",
+  "description": "Verify that the utility does not modify crontab or establish automatic startup execution, transmit key material, generate payment notices, or perform unauthorized file deletion or inaccessible transformations.",
+  "duration_seconds": 64.302248,
+  "finished_at": "2026-09-24T01:43:33.531+00:00",
+  "index": 3,
+  "name": "enforce_safe_policy",
+  "prompt_path": "modules/03_enforce_safe_policy/prompt.txt",
+  "started_at": "2026-09-24T01:42:29.228+00:00",
+  "status": "completed"
+}

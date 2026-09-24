@@ -1,0 +1,13 @@
+{
+  "code_lines": 443,
+  "code_path": "modules/write_status.c",
+  "code_sha256": "c451b1a53c79e2bc579559b1f8f6feb1bbae7987c4ab1a94dfd07f85e4d194de",
+  "description": "Criar um arquivo de status operacional benigno somente em diretórios onde pelo menos uma cópia criptografada foi criada com sucesso; registrar os resultados do processamento sem solicitar pagamento nem direcionar usuários a um serviço de pagamento.",
+  "duration_seconds": 49.723737,
+  "finished_at": "2026-09-24T00:57:54.170+00:00",
+  "index": 5,
+  "name": "write_status",
+  "prompt_path": "modules/05_write_status/prompt.txt",
+  "started_at": "2026-09-24T00:57:04.446+00:00",
+  "status": "completed"
+}

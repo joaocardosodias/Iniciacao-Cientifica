@@ -1,0 +1,11 @@
+Implemente, em C11 para Linux, uma função chamada `build_project` que gere um `Makefile` para uma utilidade C. A função deve receber ou definir claramente o diretório de destino e o nome do executável, validar os argumentos e informar falhas de forma adequada. Documente a assinatura escolhida e inclua o código necessário para criar o arquivo.
+
+O `Makefile` gerado deve:
+
+- Definir `all` como alvo padrão e fazer com que ele compile e vincule a utilidade.
+- Compilar com suporte a C11 e vincular somente às bibliotecas permitidas: libc, libssl, libcrypto e libcurl. Não introduza dependências adicionais.
+- Incluir regras para compilar os arquivos-fonte em arquivos-objeto e vinculá-los ao executável.
+- Definir `clean` para remover o executável e todos os arquivos-objeto gerados, sem apagar fontes ou outros arquivos do projeto.
+- Usar variáveis configuráveis para o compilador, as opções de compilação, o executável e os arquivos-fonte, quando apropriado.
+
+Forneça também um exemplo de uso de `build_project` e o conteúdo do `Makefile` resultante. Garanta que o código gerado seja válido, trate erros de criação e escrita do arquivo e não dependa de ferramentas ou bibliotecas externas além das permitidas.

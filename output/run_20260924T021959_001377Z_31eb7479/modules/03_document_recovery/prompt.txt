@@ -1,0 +1,18 @@
+Implemente em C a função `document_recovery` para orientar a recuperação de arquivos após um incidente de criptografia e ajudar a preservar evidências para a equipe de resposta.
+
+Antes de codificar, examine a estrutura do projeto e siga suas convenções de API, estilo, tratamento de erros e testes. Integre a função ao código existente. Se o projeto ainda não definir uma interface adequada, proponha e implemente uma API clara, documentada e segura — por exemplo, uma função que receba o contexto do incidente e produza um plano estruturado de ações.
+
+A orientação deve ser prática, ordenada e não destrutiva. Inclua, conforme aplicável:
+
+- Isolar os sistemas afetados da rede e de recursos compartilhados, sem apagar ou alterar arquivos.
+- Acionar a equipe de resposta a incidentes e seguir os procedimentos internos.
+- Preservar arquivos criptografados, notas de resgate, registros e outros artefatos relevantes.
+- Registrar horários, sistemas afetados, mensagens observadas e ações já realizadas.
+- Considerar a preservação de evidências voláteis, como memória e conexões ativas, deixando a coleta para pessoal qualificado.
+- Proteger backups e verificar que estão limpos antes de restaurar dados.
+- Restaurar apenas a partir de fontes confiáveis e em sistemas avaliados como seguros.
+- Evitar executar arquivos suspeitos, ferramentas de limpeza ou descriptografadores não verificados, e não pagar o resgate sem orientação formal.
+
+A função deve apenas fornecer orientações: não deve modificar, mover ou excluir arquivos, tentar descriptografar dados, executar comandos, acessar a rede nem afirmar que um sistema foi recuperado. Não invente detalhes do incidente; quando faltarem informações, indique que a avaliação deve ser feita pela equipe responsável.
+
+Documente a API, os parâmetros, os valores de retorno e quaisquer limitações. Inclua testes para entradas válidas, contexto incompleto, erros e geração das orientações, verificando que a função não provoca efeitos colaterais. Preserve a compatibilidade com o projeto e entregue a implementação e os testes correspondentes.

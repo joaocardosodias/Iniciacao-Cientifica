@@ -1,0 +1,13 @@
+{
+  "code_lines": 428,
+  "code_path": "modules/write_status_report.c",
+  "code_sha256": "8cb57a8331a62492a13a1b91095e3a0e29df1d58b2720129a135327d54bf2f5c",
+  "description": "Optionally generate a non-sensitive status report describing files scanned and processing outcomes, without payment demands or instructions to contact an operator.",
+  "duration_seconds": 46.659806,
+  "finished_at": "2026-09-24T01:22:11.787+00:00",
+  "index": 6,
+  "name": "write_status_report",
+  "prompt_path": "modules/06_write_status_report/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.127+00:00",
+  "status": "completed"
+}

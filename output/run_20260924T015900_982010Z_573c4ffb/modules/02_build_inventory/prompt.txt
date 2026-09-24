@@ -1,0 +1,12 @@
+Implemente em C a função `build_inventory` para criar um inventário de metadados somente dos arquivos que o usuário selecionou e autorizou explicitamente. Antes de codificar, examine o projeto e siga as convenções, estruturas de dados, assinatura e mecanismos de erro já existentes; se a assinatura ainda não estiver definida, proponha uma que se integre ao código atual.
+
+A função deve:
+
+- Receber a lista explícita de caminhos autorizados e processar apenas esses caminhos, sem enumerar diretórios, percorrer subdiretórios ou pesquisar locais amplos do sistema ou do diretório pessoal.
+- Registrar somente metadados disponíveis no projeto, como caminho, tamanho, tipo, permissões e datas relevantes. Não abrir para leitura, decodificar, analisar, copiar, transformar nem armazenar o conteúdo dos arquivos.
+- Não tratar diretórios como arquivos autorizados e não seguir links simbólicos para outros destinos. Rejeite-os com um erro apropriado, salvo se o projeto já definir uma política compatível e segura.
+- Validar entradas, tratar caminhos ausentes ou inacessíveis e lidar corretamente com erros e recursos, sem deixar resultados parciais inconsistentes.
+- Preservar os limites da autorização: não inferir permissões a partir de um diretório pai nem acrescentar arquivos que não estejam na lista fornecida.
+- Usar as APIs e os padrões portáveis adequados ao projeto para obter metadados, reduzindo riscos de condições de corrida quando possível.
+
+Inclua ou atualize testes para verificar que somente os caminhos explicitamente informados entram no inventário, que diretórios e links simbólicos são tratados conforme a política definida, que falhas são reportadas corretamente e que nenhum conteúdo de arquivo é lido. Ao concluir, descreva brevemente as alterações e os testes executados.

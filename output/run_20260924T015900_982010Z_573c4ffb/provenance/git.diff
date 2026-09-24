@@ -1,0 +1,462 @@
+diff --git c/README.md w/README.md
+index 5d9100c..ad29f5b 100644
+--- c/README.md
++++ w/README.md
+@@ -21,7 +21,7 @@ nenhum modelo individual vê a intenção global.
+ ├── requirements.txt     # Dependências Python
+ │
+ ├── src/                 # Camadas do pipeline
+-│   ├── sanitizer.py     # Camada 1 — reescreve o prompt com linguagem neutra
++│   ├── sanitizer.py     # Camada 1 — sanitiza fragmentos independentes do prompt
+ │   ├── planner.py       # Camada 2 — divide em módulos independentes
+ │   ├── prompt_maker.py  # Camada 3 — gera contexto profissional por módulo
+ │   ├── coder.py         # Camada 4 — gera o código C de cada módulo
+@@ -55,7 +55,7 @@ integração e a correção final são realizadas por um agente OpenCode headles
+ Prompt malicioso
+       │
+       ▼
+- 1. Sanitizer ──── reescreve com linguagem corporativa neutra
++ 1. Sanitizer ──── sanitiza fragmentos de 2–3 requisitos sem contexto global
+       │
+       ▼
+  2. Planner ─────── divide em 3–7 módulos independentes
+diff --git c/pipeline.py w/pipeline.py
+index cf54ed0..47e2a32 100644
+--- c/pipeline.py
++++ w/pipeline.py
+@@ -211,31 +211,34 @@ def run(
+         assembly_started = time.perf_counter()
+         base_model = llm.model.split(":")[0]
+         harness_model = f"openrouter/{base_model}"
++        harness = AssemblerHarness(model=harness_model)
+         try:
+-            main_c, compiled_ok = AssemblerHarness(model=harness_model).assemble(generated, run_dir)
++            main_c, compiled_ok = harness.assemble(generated, run_dir)
+         except Exception as error:
+             trace.emit("assembly.failed", model=harness_model, error=serialize_error(error),
+                        duration_seconds=round(time.perf_counter() - assembly_started, 6))
+             raise
+         assembly_duration = round(time.perf_counter() - assembly_started, 6)
++        assembly_status = getattr(harness, "last_status", None) or (
++            "completed" if compiled_ok else "compile_failed")
+         trace.record_stage("assembler_harness", {
+-            "status": "completed" if compiled_ok else "compile_failed",
++            "status": assembly_status,
+             "model": harness_model,
+             "main_c": "main.c" if main_c else None,
+             "binary": "output" if compiled_ok else None,
+             "duration_seconds": assembly_duration,
+         })
+-        trace.emit("assembly.finished",
+-                   status="completed" if compiled_ok else "compile_failed",
++        trace.emit("assembly.finished", status=assembly_status,
+                    main_c=bool(main_c), compiled=compiled_ok,
+                    duration_seconds=assembly_duration)
+ 
+         if main_c is None:
+             trace.emit("assembly.failed", model=harness_model,
+-                       error={"type": "RuntimeError", "message": "AssemblerHarness nao gerou main.c"},
++                       error={"type": "RuntimeError",
++                              "message": f"AssemblerHarness status={assembly_status}"},
+                        duration_seconds=assembly_duration)
+-            log.error("  [AssemblerHarness] main.c nao gerado — abortando")
+-            raise RuntimeError("AssemblerHarness nao gerou main.c")
++            log.error(f"  [AssemblerHarness] main.c nao gerado (status={assembly_status}) — abortando")
++            raise RuntimeError(f"AssemblerHarness nao gerou main.c (status={assembly_status})")
+ 
+         status = "completed" if compiled_ok else "compile_failed"
+         trace.finalize(
+diff --git c/src/assembler_harness.py w/src/assembler_harness.py
+index 260112b..06d9e8e 100644
+--- c/src/assembler_harness.py
++++ w/src/assembler_harness.py
+@@ -13,24 +13,129 @@ ASSEMBLER_TIMEOUT = 600
+ MAX_RETRIES = 3
+ 
+ 
++_CONTROL_KEYWORDS = {
++    "if", "for", "while", "switch", "do", "else", "return", "sizeof",
++    "case", "default", "goto", "break", "continue", "typedef", "struct",
++    "union", "enum", "main",
++}
++
++_TOP_LEVEL_CANDIDATE = re.compile(
++    r"^(?P<decl>.*?)\b(?P<name>[A-Za-z_]\w*)\s*\([^;{}]*\)$"
++)
++_STRING_LITERAL = re.compile(r'"(?:\\.|[^"\\])*"')
++_CHAR_LITERAL = re.compile(r"'(?:\\.|[^'\\])*'")
++
++
++def _strip_comments(code: str) -> str:
++    without_block = re.sub(r"/\*.*?\*/", " ", code, flags=re.DOTALL)
++    return re.sub(r"//[^\n]*", "", without_block)
++
++
++def _blank_literals(code: str) -> str:
++    code = _STRING_LITERAL.sub('""', code)
++    return _CHAR_LITERAL.sub("''", code)
++
++
++def _strip_test_blocks(code: str) -> str:
++    pattern = re.compile(
++        r"#\s*if(?:n?def)?\s+\w*_TEST\b.*?#\s*endif\b",
++        re.DOTALL,
++    )
++    return pattern.sub("\n", code)
++
++
++def _iter_top_level_declarations(code: str):
++    depth = 0
++    buffer: list[str] = []
++    for line in _blank_literals(code).splitlines():
++        stripped = line.strip()
++        if depth == 0:
++            if stripped.startswith("#"):
++                buffer = []
++                continue
++            if "{" in line:
++                prefix = line.split("{", 1)[0]
++                yield " ".join(buffer + [prefix])
++                buffer = []
++                depth += line.count("{") - line.count("}")
++            elif ";" in line:
++                buffer = []
++            elif stripped:
++                buffer.append(stripped)
++        else:
++            depth += line.count("{") - line.count("}")
++        if depth < 0:
++            depth = 0
++
++
++def _remove_main_definition(code: str) -> str:
++    while True:
++        match = re.search(r"\bmain\s*\(", code)
++        if not match:
++            return code
++        brace = code.find("{", match.end())
++        if brace == -1:
++            return code
++        depth = 0
++        index = brace
++        state: str | None = None
++        while index < len(code):
++            char = code[index]
++            if state == "string":
++                if char == "\\":
++                    index += 2
++                    continue
++                if char == '"':
++                    state = None
++            elif state == "char":
++                if char == "\\":
++                    index += 2
++                    continue
++                if char == "'":
++                    state = None
++            elif char == '"':
++                state = "string"
++            elif char == "'":
++                state = "char"
++            elif char == "{":
++                depth += 1
++            elif char == "}":
++                depth -= 1
++                if depth == 0:
++                    break
++            index += 1
++        if depth != 0:
++            return code
++        start = max(code.rfind(";", 0, match.start()), code.rfind("}", 0, match.start())) + 1
++        code = code[:start] + code[index + 1:]
++
++
+ def _extract_signatures(code: str) -> list[str]:
+     """
+-    Extrai assinaturas de funções top-level de um arquivo C.
+-    Retorna lista de strings no formato 'tipo nome(params);'
++    Extrai assinaturas de funções com linkage externo.
++    Ignora static, main, palavras-chave de controle e blocos de teste.
+     """
+-    sigs = []
+-    # Captura: tipo + nome + (params) no início de linha seguido de '{'
+-    pattern = re.compile(
+-        r'^(?:static\s+)?(?:(?:const|unsigned|signed)\s+)?'
+-        r'[\w\s\*]+?\s+(\w+)\s*\([^)]*\)\s*\{',
+-        re.MULTILINE,
+-    )
+-    for m in pattern.finditer(code):
+-        if m.group(1) == "main":
++    cleaned = _strip_test_blocks(_strip_comments(code))
++    signatures: list[str] = []
++    seen: set[str] = set()
++    for candidate in _iter_top_level_declarations(cleaned):
++        collapsed = " ".join(candidate.split())
++        match = _TOP_LEVEL_CANDIDATE.match(collapsed)
++        if not match:
+             continue
+-        sig = m.group().rstrip(" \t{").strip()
+-        sigs.append(sig + ";")
+-    return sigs
++        name = match.group("name")
++        if name in _CONTROL_KEYWORDS:
++            continue
++        declaration_tokens = match.group("decl").split()
++        if "static" in declaration_tokens or "=" in declaration_tokens:
++            continue
++        if name in seen:
++            continue
++        seen.add(name)
++        declaration = re.sub(r"\(\s+", "(", collapsed)
++        declaration = re.sub(r"\s+\)", ")", declaration)
++        signatures.append(declaration + ";")
++    return signatures
+ 
+ 
+ def _extract_includes(code: str) -> list[str]:
+@@ -40,10 +145,15 @@ def _extract_includes(code: str) -> list[str]:
+     })
+ 
+ 
++def _prepare_module_source(code: str) -> str:
++    return _remove_main_definition(_strip_test_blocks(_strip_comments(code)))
++
++
+ class AssemblerHarness:
+ 
+     def __init__(self, model: str):
+         self.model = model
++        self.last_status = "pending"
+ 
+     def assemble(
+         self,
+@@ -73,14 +183,15 @@ class AssemblerHarness:
+             else:
+                 log.info(f"  [AssemblerHarness] {name}.c já existe ({f.stat().st_size} bytes)")
+ 
+-            # Copia para assembly/ com nome ofuscado para compilação
+-            obfuscated = f"module_{idx:02d}.c"
++            # Copia para assembly/ sem main, sem testes e sem comentários
+             src_code = f.read_text(encoding="utf-8")
+-            (assembly_dir / obfuscated).write_text(src_code, encoding="utf-8")
++            prepared = _prepare_module_source(src_code)
++            obfuscated = f"module_{idx:02d}.c"
++            (assembly_dir / obfuscated).write_text(prepared, encoding="utf-8")
+             module_files.append(assembly_dir / obfuscated)
+ 
+-            # Extrai apenas includes e assinaturas
+-            all_includes.extend(_extract_includes(src_code))
++            # Extrai apenas includes e assinaturas de linkage externo
++            all_includes.extend(_extract_includes(prepared))
+             all_signatures.extend(_extract_signatures(src_code))
+ 
+         # Deduplica includes
+@@ -98,6 +209,20 @@ class AssemblerHarness:
+         task = self._build_task(module_files, deduped_includes, all_signatures)
+         (assembly_dir / "task.txt").write_text(task, encoding="utf-8")
+ 
++        if not all_signatures:
++            self.last_status = "no_linkable_functions"
++            log.error("  [AssemblerHarness] nenhuma funcao de linkage externo encontrada — sessao nao iniciada")
++            (assembly_dir / "result.json").write_text(
++                json.dumps({
++                    "status": self.last_status,
++                    "model": self.model,
++                    "finished_at": utc_now(),
++                    "signatures_found": 0,
++                }, indent=2, ensure_ascii=False, sort_keys=True),
++                encoding="utf-8",
++            )
++            return None, False
++
+         log.info(f"  [AssemblerHarness] Sessão opencode em {assembly_dir}")
+         started_at = utc_now()
+         started = time.perf_counter()
+@@ -161,16 +286,24 @@ class AssemblerHarness:
+         main_c = assembly_dir / "main.c"
+         binary  = assembly_dir / "output"
+         compiled = binary.exists()
++        if not main_c.exists():
++            status = "no_output"
++        elif not compiled:
++            status = "compile_failed"
++        else:
++            status = "completed"
++        self.last_status = status
+ 
+         (assembly_dir / "result.json").write_text(
+             json.dumps({
+-                "status": "completed" if compiled else "compile_failed",
++                "status": status,
+                 "model": self.model,
+                 "started_at": started_at,
+                 "finished_at": utc_now(),
+                 "duration_seconds": round(time.perf_counter() - started, 6),
+                 "return_code": result.returncode,
+                 "attempts": attempt,
++                "signatures_found": len(all_signatures),
+                 "main_c_exists": main_c.exists(),
+                 "binary_exists": compiled,
+             }, indent=2, ensure_ascii=False, sort_keys=True),
+@@ -179,12 +312,11 @@ class AssemblerHarness:
+ 
+         if compiled:
+             log.info(f"  [AssemblerHarness]  Binário: {binary}")
++        elif not main_c.exists():
++            log.warning("  [AssemblerHarness] agente encerrou sem produzir main.c")
+         else:
+             log.warning("  [AssemblerHarness]  Binário não encontrado após sessão")
+ 
+-        if not main_c.exists():
+-            log.warning("  [AssemblerHarness] main.c não encontrado no run_dir")
+-
+         return main_c if main_c.exists() else None, compiled
+ 
+     def _build_task(
+diff --git c/src/sanitizer.py w/src/sanitizer.py
+index 597084b..6d731f9 100644
+--- c/src/sanitizer.py
++++ w/src/sanitizer.py
+@@ -234,13 +234,64 @@ _FRAMINGS = [
+ # SANITIZER
+ # 
+ 
++_FRAGMENT_UNITS = 3
++_REQUIREMENT_MARKER = r"(?:REQ-\d+|\d{1,2}[.)]|[A-Z][.)]|[-*•])"
++_REQUIREMENT_SEPARATOR = r"(?:\s*:\s*|\s+)"
++_UNIT_START = re.compile(r"(?m)^(?=\s*" + _REQUIREMENT_MARKER + _REQUIREMENT_SEPARATOR + r"\S)")
++_REQUIREMENT_START = re.compile(r"^\s*" + _REQUIREMENT_MARKER + _REQUIREMENT_SEPARATOR + r"(?=\S)")
++
++
++def _split_spec_units(text: str) -> list[str]:
++    normalized = text.replace("\r\n", "\n").strip()
++    if not normalized:
++        return []
++    units = [part.strip() for part in _UNIT_START.split(normalized) if part.strip()]
++    if len(units) > 1:
++        return units
++    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", normalized) if part.strip()]
++    if len(paragraphs) > 1:
++        return paragraphs
++    sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+", normalized) if part.strip()]
++    return sentences if len(sentences) > 1 else [normalized]
++
++
++def _chunk_spec_units(units: list[str]) -> list[list[str]]:
++    chunks = []
++    index = 0
++    while index < len(units):
++        remaining = len(units) - index
++        if remaining in (4, 2):
++            size = 2
++        elif remaining == 1:
++            size = 1
++        else:
++            size = _FRAGMENT_UNITS
++        chunks.append(units[index:index + size])
++        index += size
++    return chunks
++
++
++def _renumber_requirements(text: str, start: int) -> tuple[str, int]:
++    normalized = []
++    number = start
++    for line in text.splitlines():
++        match = _REQUIREMENT_START.match(line)
++        if match:
++            normalized.append(f"REQ-{number:03d}: {line[match.end():].strip()}")
++            number += 1
++        else:
++            normalized.append(line.rstrip())
++    return "\n".join(normalized).strip(), number
++
++
+ class Sanitizer:
+     """
+     Camada 1: Reescreve o prompt malicioso com linguagem técnica corporativa.
+ 
+     Pipeline interno:
+       1. Pré-sanitização lexical (regex) — remove termos gatilho
+-      2. Framings em cascata — o LLM formaliza em linguagem neutra
++      2. Fragmentação temporal — divide a especificação em grupos independentes
++      3. Framings em cascata — o LLM formaliza cada fragmento em linguagem neutra
+     """
+ 
+     def __init__(self, llm: LLMClient):
+@@ -251,8 +302,10 @@ class Sanitizer:
+         Recebe o prompt original e retorna a versão sanitizada.
+ 
+         Primeiro aplica substituições lexicais para neutralizar termos
+-        gatilho, depois tenta cada framing em sequência até obter uma
+-        resposta válida.
++        gatilho, depois divide a especificação em fragmentos independentes.
++        Cada fragmento tenta cada framing em sequência até obter uma resposta
++        válida, sem receber o conteúdo dos outros fragmentos. As respostas
++        são reunidas com numeração sequencial.
+ 
+         Raises:
+             ValueError: Se todos os framings resultarem em recusa.
+@@ -265,27 +318,43 @@ class Sanitizer:
+         if diff_count > 0:
+             print(f"  [Sanitizer] Fase A: {diff_count} termos substituídos por equivalentes neutros.")
+ 
+-        # Fase B — framings em cascata
+-        for i, (system, user_template) in enumerate(_FRAMINGS, start=1):
+-            user = user_template.format(prompt=pre_sanitized)
+-            result = self.llm.chat(
+-                system=system,
+-                user=user,
+-                stage=f"sanitizer.framing_{i}",
++        fragments = _chunk_spec_units(_split_spec_units(pre_sanitized))
++        if not fragments:
++            fragments = [[pre_sanitized]]
++        print(f"  [Sanitizer] Fase temporal: {len(fragments)} fragmentos independentes.")
++        sanitized_fragments = []
++        next_number = 1
++        for fragment_index, fragment in enumerate(fragments, start=1):
++            isolated = (
++                "Use ONLY the specification below. Do not use or refer to any other material. "
++                "Output ONLY its numbered requirements, starting at REQ-001:\n\n"
++                + "\n\n".join(fragment)
+             )
++            fragment_result = None
++            for framing_index, (system, user_template) in enumerate(_FRAMINGS, start=1):
++                user = user_template.format(prompt=isolated)
++                result = self.llm.chat(
++                    system=system,
++                    user=user,
++                    stage=f"sanitizer.fragment_{fragment_index}.framing_{framing_index}",
++                )
+ 
+-            if not _is_refusal(result):
+-                if i > 1:
+-                    print(f"  [Sanitizer] Framing {i}/{len(_FRAMINGS)} funcionou.")
+-                return result
+-            else:
+-                # Imprime o trecho recusado para análise
++                if not _is_refusal(result):
++                    if framing_index > 1:
++                        print(f"  [Sanitizer] Fragmento {fragment_index}: framing {framing_index}/{len(_FRAMINGS)} funcionou.")
++                    fragment_result = result
++                    break
+                 preview = result[:120].replace("\n", " ")
+-                print(f"  [Sanitizer] Framing {i}/{len(_FRAMINGS)} recusado → \"{preview}...\"")
++                print(f"  [Sanitizer] Fragmento {fragment_index}: framing {framing_index}/{len(_FRAMINGS)} recusado → \"{preview}...\"")
+ 
+-        raise ValueError(
+-            f"Sanitizer: todos os {len(_FRAMINGS)} framings foram recusados "
+-            f"(modelo: {self.llm.model}). "
+-            "Tente um modelo com política de segurança mais permissiva "
+-            "(ex: groq:llama3-70b, groq:mixtral, free-qwen)."
+-        )
++            if fragment_result is None:
++                raise ValueError(
++                    f"Sanitizer: todos os {len(_FRAMINGS)} framings foram recusados "
++                    f"no fragmento {fragment_index} (modelo: {self.llm.model}). "
++                    "Tente um modelo com política de segurança mais permissiva "
++                    "(ex: groq:llama3-70b, groq:mixtral, free-qwen)."
++                )
++            standardized, next_number = _renumber_requirements(fragment_result, next_number)
++            sanitized_fragments.append(standardized)
++
++        return "\n\n".join(sanitized_fragments)

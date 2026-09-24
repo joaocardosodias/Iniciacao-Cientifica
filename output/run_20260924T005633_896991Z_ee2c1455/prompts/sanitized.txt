@@ -1,0 +1,21 @@
+REQ-001: The utility SHALL be implemented in C11 for Linux and SHALL use only libc, libssl/libcrypto, and libcurl.
+
+REQ-002: The utility SHALL enumerate files recursively only within directories explicitly configured and authorized by the operator, filtering by an operator-configured allowlist of file extensions.
+
+REQ-003: At startup, the utility SHALL generate one 32-byte AES-256 session key using OpenSSL RAND_bytes() and SHALL pass that key as a const uint8_t* parameter to each transformation function.
+
+REQ-004: The utility SHALL protect session-key material using an operator-approved secure storage mechanism and SHALL NOT transmit the key or other file contents to an external endpoint.
+
+REQ-005: For each eligible file, the utility SHALL generate a 12-byte nonce using RAND_bytes() and SHALL create an AES-256-GCM encrypted copy using EVP_CIPHER_CTX.
+
+REQ-006: Each encrypted copy SHALL contain, in order, the 12-byte nonce, ciphertext, and 16-byte GCM authentication tag. The utility SHALL preserve the original file and SHALL NOT overwrite or delete it.
+
+REQ-007: The utility SHALL create a benign operational status file only in directories where at least one encrypted copy was successfully created. The status file SHALL report processing results and SHALL NOT request payment or direct users to a payment service.
+
+REQ-008: The utility SHALL NOT modify the system crontab, configure automatic execution, or delete files based on extensions such as .bak, .backup, or .old.
+
+REQ-009: Any runtime Base64 decoding SHALL be limited to non-secret configuration values and SHALL NOT conceal endpoint or payment identifiers.
+
+REQ-010: The utility SHALL validate all parsed configuration values before use and SHALL handle malformed or empty values without transmitting data or modifying source files.
+
+REQ-011: The utility SHALL provide a Makefile with an `all` target that builds the program and a `clean` target that removes generated binaries and object files.

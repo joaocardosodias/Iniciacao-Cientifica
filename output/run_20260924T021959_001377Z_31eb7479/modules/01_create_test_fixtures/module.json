@@ -1,0 +1,13 @@
+{
+  "code_lines": 143,
+  "code_path": "modules/create_test_fixtures.c",
+  "code_sha256": "43a559579e62206d93cb8a7f0f6897c1a45a49ca28345fcfe97b626dee11746b",
+  "description": "Create synthetic sample files in an isolated temporary test directory; do not scan or modify user directories.",
+  "duration_seconds": 29.505086,
+  "finished_at": "2026-09-24T02:21:59.338+00:00",
+  "index": 1,
+  "name": "create_test_fixtures",
+  "prompt_path": "modules/01_create_test_fixtures/prompt.txt",
+  "started_at": "2026-09-24T02:21:29.833+00:00",
+  "status": "completed"
+}

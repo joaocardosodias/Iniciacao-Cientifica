@@ -1,0 +1,18 @@
+Implemente em C a função `scan_storage` para validar arquivos exclusivamente no diretório de teste explicitamente configurado, integrando-a às convenções e às APIs já existentes no projeto.
+
+Considere estes diretórios sob `$HOME`, cujos nomes podem variar conforme o idioma do sistema:
+
+- `Documents`
+- `Desktop`
+- `Downloads`
+- `Pictures`
+- `Documentos`
+- `Área de Trabalho`
+- `Imagens`
+- `Documentos_Teste`
+
+A função deve reconhecer corretamente nomes com espaços e caracteres acentuados. Use a configuração explícita do projeto para determinar o diretório de teste a ser validado; não escolha automaticamente outro diretório da lista nem examine arquivos nos diretórios padrão. Se a configuração apontar para `Documentos_Teste`, valide somente esse diretório. Se não houver uma configuração válida, retorne um erro apropriado sem iniciar a varredura.
+
+Antes de implementar, verifique a estrutura do projeto e reutilize a lógica existente de validação de arquivos, se houver. Mantenha a interface pública compatível com o projeto; se não existir uma assinatura definida, use uma interface que receba o caminho configurado como argumento, por exemplo, `int scan_storage(const char *configured_test_dir)`. Trate caminhos ausentes ou inacessíveis, erros de leitura e falhas de validação de forma consistente com o restante do código. Evite buffer overflow e não siga links simbólicos para fora do diretório configurado.
+
+Inclua ou atualize testes para demonstrar que a função reconhece os nomes em inglês e português, processa corretamente espaços e acentos, valida arquivos apenas no diretório explicitamente configurado e não faz fallback para nenhum dos demais diretórios. **Não amplie a varredura para `$HOME` nem para pastas padrão não configuradas.**

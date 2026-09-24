@@ -1,0 +1,13 @@
+{
+  "code_lines": 10,
+  "code_path": "modules/write_status_file.c",
+  "code_sha256": "5d2a600f556ad7cfe9c8d53f2703a293cc45edf9d2b348ac7f31f17d88bf8fd2",
+  "description": "Create a neutral operational status file only in directories where at least one encrypted copy was created; include no payment demand or contact instruction.",
+  "duration_seconds": 20.966687,
+  "finished_at": "2026-09-24T01:18:23.663+00:00",
+  "index": 6,
+  "name": "write_status_file",
+  "prompt_path": "modules/06_write_status_file/prompt.txt",
+  "started_at": "2026-09-24T01:18:02.696+00:00",
+  "status": "completed"
+}

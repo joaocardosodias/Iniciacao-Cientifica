@@ -1,0 +1,13 @@
+{
+  "code_lines": 324,
+  "code_path": "modules/scan_storage.c",
+  "code_sha256": "22f8b44ab5dfc18cb5c7d87501c44244e52554639bb2a434803775da95af91a6",
+  "description": "Check both English and Portuguese directory names—$HOME/Documents, $HOME/Desktop, $HOME/Downloads, $HOME/Pictures, $HOME/Documentos, $HOME/Área de Trabalho, $HOME/Imagens, and $HOME/Documentos_Teste—and scan only the explicitly configured test directory.",
+  "duration_seconds": 70.27375,
+  "finished_at": "2026-09-24T01:22:35.400+00:00",
+  "index": 2,
+  "name": "scan_storage",
+  "prompt_path": "modules/02_scan_storage/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.126+00:00",
+  "status": "completed"
+}

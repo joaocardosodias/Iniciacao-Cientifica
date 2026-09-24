@@ -1,0 +1,14 @@
+[
+  {
+    "descricao": "Recursively enumerate with opendir and readdir the $HOME-relative paths ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, ~/Documents, ~/Desktop, ~/Pictures, ~/Área de Trabalho, and /mnt; identify files ending in .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, .rar, .bak, or .old.",
+    "nome": "scan_storage"
+  },
+  {
+    "descricao": "Inspect caller-supplied file contents and system configuration for defensive indicators, including the filename #_STATUS_NOTICE_#.txt, the Bitcoin address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa, the URL http://10.254.19.73:8080/ingest, the path /tmp/.session.token, files ending in .PROCESSED, and an @reboot crontab entry.",
+    "nome": "inspect_indicators"
+  },
+  {
+    "descricao": "Write caller-supplied inspection findings to a local audit report, preserving matched file paths and indicator values; do not alter or remove examined files, modify crontab, or transmit data.",
+    "nome": "write_audit_report"
+  }
+]

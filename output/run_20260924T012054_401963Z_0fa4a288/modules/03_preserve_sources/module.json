@@ -1,0 +1,13 @@
+{
+  "code_lines": 522,
+  "code_path": "modules/preserve_sources.c",
+  "code_sha256": "687215cb39828c88087638f5747ab9537ed701cd46d7f292a47bf324f25eb39e",
+  "description": "Ensure the utility does not encrypt, overwrite, or delete user files and preserves all source files.",
+  "duration_seconds": 49.139932,
+  "finished_at": "2026-09-24T01:22:14.266+00:00",
+  "index": 3,
+  "name": "preserve_sources",
+  "prompt_path": "modules/03_preserve_sources/prompt.txt",
+  "started_at": "2026-09-24T01:21:25.126+00:00",
+  "status": "completed"
+}

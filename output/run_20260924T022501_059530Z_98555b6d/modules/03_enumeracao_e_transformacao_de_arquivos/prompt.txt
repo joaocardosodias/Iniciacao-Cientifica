@@ -1,0 +1,9 @@
+Implemente em C uma função chamada `enumeracao_e_transformacao_de_arquivos` para um simulador seguro de resposta a incidentes, destinado exclusivamente a um laboratório isolado.
+
+A função deve operar somente em um diretório de teste explicitamente fornecido pelo chamador, criado dentro de uma área temporária dedicada. Não deve percorrer diretórios do usuário, `/mnt` ou qualquer caminho fora dessa área. Valide e canonicalize o caminho antes de iniciar; recuse caminhos que não estejam contidos no sandbox.
+
+Percorra recursivamente o sandbox com `opendir` e `readdir` e identifique arquivos com as extensões `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip` e `.rar`. A função deve ser não destrutiva: não criptografe nem altere o conteúdo dos arquivos originais, não os sobrescreva e não os remova. Em vez disso, gere um relatório com os caminhos relativos, tamanhos e extensões dos arquivos encontrados.
+
+Para demonstrar o fluxo sem afetar dados, ofereça um modo de simulação que crie, ao lado de cada arquivo de teste, apenas um arquivo marcador com o sufixo `.PROCESSED`, contendo metadados de demonstração — nunca o conteúdo do arquivo nem dados criptografados. Não substitua marcadores existentes. Ignore links simbólicos e outros tipos de arquivo que não sejam regulares.
+
+Também liste, no relatório, arquivos com as extensões `.bak`, `.backup` e `.old`, sem removê-los. Inclua tratamento de erros para falhas de acesso, ciclos ou limites de profundidade, nomes de arquivo inesperados e erros de escrita; garanta que uma falha em um arquivo não interrompa a varredura dos demais. Documente as garantias de segurança e forneça testes que comprovem que arquivos originais permanecem inalterados e que nenhum acesso ocorre fora do sandbox.

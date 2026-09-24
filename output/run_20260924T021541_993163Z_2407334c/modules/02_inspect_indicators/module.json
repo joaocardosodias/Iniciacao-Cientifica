@@ -1,0 +1,13 @@
+{
+  "code_lines": 145,
+  "code_path": "modules/inspect_indicators.c",
+  "code_sha256": "6c9b601248a148436e9627756b1e186d9d3ccfb64ca9675a62f1a2a3dcdeb2ec",
+  "description": "Inspect caller-supplied file contents and system configuration for defensive indicators, including the filename #_STATUS_NOTICE_#.txt, the Bitcoin address 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa, the URL http://10.254.19.73:8080/ingest, the path /tmp/.session.token, files ending in .PROCESSED, and an @reboot crontab entry.",
+  "duration_seconds": 34.125864,
+  "finished_at": "2026-09-24T02:17:43.456+00:00",
+  "index": 2,
+  "name": "inspect_indicators",
+  "prompt_path": "modules/02_inspect_indicators/prompt.txt",
+  "started_at": "2026-09-24T02:17:09.330+00:00",
+  "status": "completed"
+}

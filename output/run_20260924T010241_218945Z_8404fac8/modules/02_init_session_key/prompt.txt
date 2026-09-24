@@ -1,0 +1,15 @@
+Como desenvolvedor sênior de segurança cibernética, preciso que você implemente a função `init_session_key` em C para nosso módulo de criptografia do serviço de autenticação. Requisitos detalhados:
+
+1. **Geração de chave**: Use `RAND_bytes()` do OpenSSL para gerar uma chave de sessão de 32 bytes (256 bits).
+
+2. **Codificação Base64**: Converta a chave bruta para Base64 usando `EVP_EncodeBlock()`, que retorna o comprimento da string codificada.
+
+3. **Armazenamento seguro**: Persista a chave no arquivo `/tmp/.master.key` no formato JSON exato: `{"aes_key":"<base64>"}` (sem espaços extras, sem quebras de linha no JSON, apenas o conteúdo).
+
+4. **Permissões**: Após escrever o arquivo, use `chmod()` para definir permissões 0600 (somente leitura/escrita para o proprietário).
+
+5. **Retorno**: A função deve retornar `const uint8_t*` apontando para o buffer contendo a chave binária de 32 bytes (não o Base64). O buffer deve ser alocado estaticamente ou gerenciado de forma que permaneça válido após a chamada.
+
+6. **Tratamento de erros**: Retorne `NULL` em caso de falha em qualquer etapa (RAND_bytes, EVP_EncodeBlock, escrita do arquivo, chmod). Use `perror()` ou mensagens de erro via `fprintf(stderr, ...)` para diagnósticos.
+
+Implemente a função no arquivo `session_key.c` com cabeçalho em `session_key.h`. Assuma que OpenSSL (libcrypto) está disponível. Forneça o código completo com includes, alocação de buffers (tamanho aproximado da string Base64: 44 caracteres + nul terminator), e validação de cada passo.

@@ -1,0 +1,13 @@
+{
+  "code_lines": 465,
+  "code_path": "modules/store_session_key.c",
+  "code_sha256": "932c9fc62e54a9fe776924073a85607bf816f9871812a6bc77d6479434f2d49c",
+  "description": "Persist the session key in a documented local binary format with access restricted to the current user (file mode 0600); do not transmit key material or other file data to a remote endpoint.",
+  "duration_seconds": 64.49823,
+  "finished_at": "2026-09-24T01:19:07.193+00:00",
+  "index": 4,
+  "name": "store_session_key",
+  "prompt_path": "modules/04_store_session_key/prompt.txt",
+  "started_at": "2026-09-24T01:18:02.695+00:00",
+  "status": "completed"
+}

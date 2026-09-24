@@ -1,0 +1,9 @@
+Implemente em C a geração e persistência da chave de sessão da ferramenta. No início de `main()`, gere a chave exatamente uma vez por execução, usando OpenSSL `RAND_bytes()` para obter 32 bytes aleatórios destinados a uma chave AES-256.
+
+Crie a função `chave_de_sessao` para realizar essa operação. Defina uma assinatura apropriada que permita retornar a chave binária ao chamador como 32 bytes (`uint8_t`) e sinalizar falhas. Codifique-a em Base64 com `EVP_EncodeBlock()` e grave em `/tmp/.session.token` um único objeto JSON, sem espaços extras, exatamente neste formato: `{"session_token":"BASE64"}`. Não grave a chave binária em claro.
+
+Garanta que o arquivo tenha permissões `0600`, inclusive se já existir. Trate adequadamente erros de geração, codificação, abertura, escrita, fechamento e configuração de permissões; em caso de falha, informe o erro ao chamador e impeça que a ferramenta continue sem uma chave válida e persistida. Evite deixar dados sensíveis em buffers desnecessariamente e limpe a chave da memória ao encerrar, quando apropriado.
+
+Depois de gerada, passe a mesma chave como parâmetro `const uint8_t *` a todas as funções de transformação de dados, atualizando suas assinaturas e chamadas conforme necessário. Não gere uma chave adicional em nenhuma dessas funções.
+
+Inclua as alterações necessárias em `main()` e nas funções afetadas, além de testes ou instruções de validação que confirmem a geração única, o formato exato do JSON, o tamanho da chave, as permissões `0600` e o tratamento de falhas.

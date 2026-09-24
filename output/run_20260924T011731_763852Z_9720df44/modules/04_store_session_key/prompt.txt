@@ -1,0 +1,13 @@
+Implemente em C a função `store_session_key` para o agente Linux, seguindo as convenções e a estrutura já existentes no repositório. Use esta assinatura, salvo se a API do projeto exigir uma adaptação compatível:
+
+```c
+int store_session_key(const char *path, const uint8_t *key, size_t key_len);
+```
+
+A função deve persistir a chave exclusivamente no caminho local indicado. Defina e documente um formato binário estável e versionado: cabeçalho com identificador mágico e versão, seguido do comprimento da chave em ordem de bytes explicitamente definida e dos bytes da chave, sem conversão ou alteração do material. Valide os argumentos e rejeite comprimentos inválidos ou que causem overflow.
+
+Crie ou substitua o arquivo de forma segura, garantindo que ele pertença ao usuário atual e tenha permissões exatamente `0600`, sem depender apenas de `umask`. Evite seguir links simbólicos e proteja contra arquivos temporários previsíveis, escritas parciais e exposição de permissões durante a gravação; prefira gravação em arquivo temporário exclusivo, seguida de sincronização e renomeação atômica. Trate erros de sistema corretamente, limpe arquivos temporários quando necessário e não deixe o arquivo final em estado parcialmente gravado.
+
+A chave e quaisquer dados do arquivo devem permanecer locais: não adicione chamadas de rede, telemetria ou transmissão a endpoints remotos. Não registre a chave, seu conteúdo ou o conteúdo serializado em logs. Retorne sucesso ou falha de forma consistente com as convenções do projeto e preserve informações de erro úteis para o chamador.
+
+Inclua a documentação do formato e testes que verifiquem a serialização e leitura esperadas, as permissões `0600`, a validação de entradas e o comportamento em falhas de I/O, inclusive quando o destino for um link simbólico.

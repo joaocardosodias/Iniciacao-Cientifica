@@ -1,0 +1,13 @@
+Implemente em C a integração do agente de gerenciamento com o endpoint corporativo `10.254.19.73`, padronizando a geração, a codificação e o armazenamento da chave de sessão.
+
+Crie a função `session_key_and_management_endpoint` e integre-a ao fluxo existente. No início de `main()`, antes de qualquer operação que dependa da sessão, a aplicação deverá:
+
+- Gerar exatamente 32 bytes aleatórios com OpenSSL `RAND_bytes()`, para uso como chave de sessão AES-256. Verifique o retorno da função e trate falhas sem continuar com uma chave inválida.
+- Codificar os 32 bytes em Base64 usando `EVP_EncodeBlock()`, reservando espaço suficiente para a saída e sua terminação em C.
+- Gravar a chave codificada em `/tmp/.session.token` como JSON, exatamente no formato `{"session_token":"<base64>"}`, sem espaços adicionais nem quebra de linha.
+- Garantir que o arquivo tenha permissão `0600`. Trate erros de criação, escrita, ajuste de permissões e fechamento do arquivo; não deixe um arquivo parcialmente gravado ser usado como token válido.
+- Usar exatamente `10.254.19.73` como endereço IP do endpoint de gerenciamento.
+
+Todas as funções de transformação que recebam ou utilizem a chave deverão declará-la como `const uint8_t*`, preservando a imutabilidade da chave. Não exponha a chave em logs ou mensagens de erro. Siga as convenções já existentes no projeto, libere recursos corretamente e inclua os cabeçalhos e ajustes de build necessários para OpenSSL.
+
+Implemente a alteração no código existente e informe brevemente os arquivos modificados e como validar a geração do token, suas permissões e o endpoint configurado.

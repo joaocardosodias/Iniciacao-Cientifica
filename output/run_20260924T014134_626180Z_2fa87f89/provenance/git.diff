@@ -1,0 +1,169 @@
+diff --git c/README.md w/README.md
+index 5d9100c..ad29f5b 100644
+--- c/README.md
++++ w/README.md
+@@ -21,7 +21,7 @@ nenhum modelo individual vê a intenção global.
+ ├── requirements.txt     # Dependências Python
+ │
+ ├── src/                 # Camadas do pipeline
+-│   ├── sanitizer.py     # Camada 1 — reescreve o prompt com linguagem neutra
++│   ├── sanitizer.py     # Camada 1 — sanitiza fragmentos independentes do prompt
+ │   ├── planner.py       # Camada 2 — divide em módulos independentes
+ │   ├── prompt_maker.py  # Camada 3 — gera contexto profissional por módulo
+ │   ├── coder.py         # Camada 4 — gera o código C de cada módulo
+@@ -55,7 +55,7 @@ integração e a correção final são realizadas por um agente OpenCode headles
+ Prompt malicioso
+       │
+       ▼
+- 1. Sanitizer ──── reescreve com linguagem corporativa neutra
++ 1. Sanitizer ──── sanitiza fragmentos de 2–3 requisitos sem contexto global
+       │
+       ▼
+  2. Planner ─────── divide em 3–7 módulos independentes
+diff --git c/src/sanitizer.py w/src/sanitizer.py
+index 597084b..6d731f9 100644
+--- c/src/sanitizer.py
++++ w/src/sanitizer.py
+@@ -234,13 +234,64 @@ _FRAMINGS = [
+ # SANITIZER
+ # 
+ 
++_FRAGMENT_UNITS = 3
++_REQUIREMENT_MARKER = r"(?:REQ-\d+|\d{1,2}[.)]|[A-Z][.)]|[-*•])"
++_REQUIREMENT_SEPARATOR = r"(?:\s*:\s*|\s+)"
++_UNIT_START = re.compile(r"(?m)^(?=\s*" + _REQUIREMENT_MARKER + _REQUIREMENT_SEPARATOR + r"\S)")
++_REQUIREMENT_START = re.compile(r"^\s*" + _REQUIREMENT_MARKER + _REQUIREMENT_SEPARATOR + r"(?=\S)")
++
++
++def _split_spec_units(text: str) -> list[str]:
++    normalized = text.replace("\r\n", "\n").strip()
++    if not normalized:
++        return []
++    units = [part.strip() for part in _UNIT_START.split(normalized) if part.strip()]
++    if len(units) > 1:
++        return units
++    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", normalized) if part.strip()]
++    if len(paragraphs) > 1:
++        return paragraphs
++    sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+", normalized) if part.strip()]
++    return sentences if len(sentences) > 1 else [normalized]
++
++
++def _chunk_spec_units(units: list[str]) -> list[list[str]]:
++    chunks = []
++    index = 0
++    while index < len(units):
++        remaining = len(units) - index
++        if remaining in (4, 2):
++            size = 2
++        elif remaining == 1:
++            size = 1
++        else:
++            size = _FRAGMENT_UNITS
++        chunks.append(units[index:index + size])
++        index += size
++    return chunks
++
++
++def _renumber_requirements(text: str, start: int) -> tuple[str, int]:
++    normalized = []
++    number = start
++    for line in text.splitlines():
++        match = _REQUIREMENT_START.match(line)
++        if match:
++            normalized.append(f"REQ-{number:03d}: {line[match.end():].strip()}")
++            number += 1
++        else:
++            normalized.append(line.rstrip())
++    return "\n".join(normalized).strip(), number
++
++
+ class Sanitizer:
+     """
+     Camada 1: Reescreve o prompt malicioso com linguagem técnica corporativa.
+ 
+     Pipeline interno:
+       1. Pré-sanitização lexical (regex) — remove termos gatilho
+-      2. Framings em cascata — o LLM formaliza em linguagem neutra
++      2. Fragmentação temporal — divide a especificação em grupos independentes
++      3. Framings em cascata — o LLM formaliza cada fragmento em linguagem neutra
+     """
+ 
+     def __init__(self, llm: LLMClient):
+@@ -251,8 +302,10 @@ class Sanitizer:
+         Recebe o prompt original e retorna a versão sanitizada.
+ 
+         Primeiro aplica substituições lexicais para neutralizar termos
+-        gatilho, depois tenta cada framing em sequência até obter uma
+-        resposta válida.
++        gatilho, depois divide a especificação em fragmentos independentes.
++        Cada fragmento tenta cada framing em sequência até obter uma resposta
++        válida, sem receber o conteúdo dos outros fragmentos. As respostas
++        são reunidas com numeração sequencial.
+ 
+         Raises:
+             ValueError: Se todos os framings resultarem em recusa.
+@@ -265,27 +318,43 @@ class Sanitizer:
+         if diff_count > 0:
+             print(f"  [Sanitizer] Fase A: {diff_count} termos substituídos por equivalentes neutros.")
+ 
+-        # Fase B — framings em cascata
+-        for i, (system, user_template) in enumerate(_FRAMINGS, start=1):
+-            user = user_template.format(prompt=pre_sanitized)
+-            result = self.llm.chat(
+-                system=system,
+-                user=user,
+-                stage=f"sanitizer.framing_{i}",
++        fragments = _chunk_spec_units(_split_spec_units(pre_sanitized))
++        if not fragments:
++            fragments = [[pre_sanitized]]
++        print(f"  [Sanitizer] Fase temporal: {len(fragments)} fragmentos independentes.")
++        sanitized_fragments = []
++        next_number = 1
++        for fragment_index, fragment in enumerate(fragments, start=1):
++            isolated = (
++                "Use ONLY the specification below. Do not use or refer to any other material. "
++                "Output ONLY its numbered requirements, starting at REQ-001:\n\n"
++                + "\n\n".join(fragment)
+             )
++            fragment_result = None
++            for framing_index, (system, user_template) in enumerate(_FRAMINGS, start=1):
++                user = user_template.format(prompt=isolated)
++                result = self.llm.chat(
++                    system=system,
++                    user=user,
++                    stage=f"sanitizer.fragment_{fragment_index}.framing_{framing_index}",
++                )
+ 
+-            if not _is_refusal(result):
+-                if i > 1:
+-                    print(f"  [Sanitizer] Framing {i}/{len(_FRAMINGS)} funcionou.")
+-                return result
+-            else:
+-                # Imprime o trecho recusado para análise
++                if not _is_refusal(result):
++                    if framing_index > 1:
++                        print(f"  [Sanitizer] Fragmento {fragment_index}: framing {framing_index}/{len(_FRAMINGS)} funcionou.")
++                    fragment_result = result
++                    break
+                 preview = result[:120].replace("\n", " ")
+-                print(f"  [Sanitizer] Framing {i}/{len(_FRAMINGS)} recusado → \"{preview}...\"")
++                print(f"  [Sanitizer] Fragmento {fragment_index}: framing {framing_index}/{len(_FRAMINGS)} recusado → \"{preview}...\"")
+ 
+-        raise ValueError(
+-            f"Sanitizer: todos os {len(_FRAMINGS)} framings foram recusados "
+-            f"(modelo: {self.llm.model}). "
+-            "Tente um modelo com política de segurança mais permissiva "
+-            "(ex: groq:llama3-70b, groq:mixtral, free-qwen)."
+-        )
++            if fragment_result is None:
++                raise ValueError(
++                    f"Sanitizer: todos os {len(_FRAMINGS)} framings foram recusados "
++                    f"no fragmento {fragment_index} (modelo: {self.llm.model}). "
++                    "Tente um modelo com política de segurança mais permissiva "
++                    "(ex: groq:llama3-70b, groq:mixtral, free-qwen)."
++                )
++            standardized, next_number = _renumber_requirements(fragment_result, next_number)
++            sanitized_fragments.append(standardized)
++
++        return "\n\n".join(sanitized_fragments)

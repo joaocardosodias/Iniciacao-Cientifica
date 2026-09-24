@@ -1,0 +1,10 @@
+Implemente em C a função `crontab_file_cleanup_and_build` para automatizar a limpeza de arquivos obsoletos e configurar a execução de um serviço após a reinicialização dos servidores.
+
+A função deve:
+
+- Ler o crontab do usuário atual usando `popen("crontab -l", "r")` e verificar erros de abertura e de encerramento do processo.
+- Verificar se já existe uma linha no formato `@reboot <caminho_binario>`. Se não existir, adicionar essa linha usando `popen("crontab -", "w")`, preservando todas as entradas existentes e verificando os erros de escrita, fechamento e execução do comando. Receba ou defina claramente como configurar o caminho do binário; não duplique a entrada se ela já estiver presente.
+- Enumerar as pastas de destino configuradas e excluir, com `remove()`, os arquivos que tenham as extensões `.bak`, `.backup` ou `.old`. Ignore subpastas, salvo se o requisito exigir explicitamente uma busca recursiva. Trate erros de acesso, enumeração e remoção sem interromper indevidamente o processamento das demais pastas e arquivos.
+- Definir e documentar os parâmetros necessários, as dependências e o comportamento da função. Use APIs portáveis sempre que possível e inclua os cabeçalhos apropriados, validação de entradas e liberação de recursos em todos os caminhos de execução.
+
+Inclua também um `Makefile` com os alvos `all`, para compilar e gerar o binário, e `clean`, para remover o binário e todos os arquivos `.o`. Garanta que a compilação habilite avisos úteis e documente no código ou em uma breve instrução de uso como configurar o caminho do binário e as pastas a limpar.

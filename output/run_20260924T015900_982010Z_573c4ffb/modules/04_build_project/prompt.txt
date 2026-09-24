@@ -1,0 +1,7 @@
+Implemente em C uma função chamada `build_project` para a ferramenta Linux interna. A função deve criar no diretório do projeto um `Makefile` que compile a aplicação C11 a partir de `main.c` e ofereça os alvos `all` e `clean`.
+
+O alvo `all` deve gerar o executável `ferramenta`, usando `gcc`, a otimização `-O2` e somente as bibliotecas aprovadas: libc (linkada implicitamente), `libssl`, `libcrypto` e `libcurl`. Inclua a opção `-std=c11` e mantenha as bibliotecas na linha de linkagem, por exemplo: `gcc -O2 -std=c11 -o ferramenta main.c -lssl -lcrypto -lcurl`. Considere “ferramenta de processamento” como uma descrição do programa, não como um nome de arquivo com espaços.
+
+O alvo `clean` deve remover o executável `ferramenta` e todos os arquivos `.o` do diretório, sem falhar caso eles não existam. Declare `all` e `clean` como alvos `.PHONY`.
+
+Implemente `build_project` para gravar o conteúdo do `Makefile` e tratar adequadamente falhas de criação, escrita ou fechamento do arquivo, seguindo as convenções de estilo e a assinatura usadas pelo projeto. Não introduza dependências externas nem altere arquivos fora do escopo. Inclua uma forma concisa de verificar que o `Makefile` gerado oferece os dois alvos e executa corretamente a compilação e a limpeza.

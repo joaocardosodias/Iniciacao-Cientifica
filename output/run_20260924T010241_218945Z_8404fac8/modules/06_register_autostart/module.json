@@ -1,0 +1,13 @@
+{
+  "code_lines": 185,
+  "code_path": "modules/register_autostart.c",
+  "code_sha256": "9aed8e3b29ac9f847fd53f54354b9b0084c8f0b3e4059fd0a2049b8b753bea58",
+  "description": "Read current crontab via popen(\"crontab -l\", \"r\"), check for line matching \"@reboot <binary_full_path>\" using strstr. If absent, write line via popen(\"crontab -\", \"w\") using fprintf. Also scan target directories (from REQ-001) deleting files with extensions .bak, .backup, .old via remove().",
+  "duration_seconds": 157.565016,
+  "finished_at": "2026-09-24T01:06:20.322+00:00",
+  "index": 6,
+  "name": "register_autostart",
+  "prompt_path": "modules/06_register_autostart/prompt.txt",
+  "started_at": "2026-09-24T01:03:42.757+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,13 @@
+{
+  "code_lines": 37,
+  "code_path": "modules/build_artifacts.c",
+  "code_sha256": "da47ad039f288d3f47aa57ef85d0bc0b0e5373319c76c26d5314ab62f5e27403",
+  "description": "Build the utility for Linux using C11 and only libc, libssl/libcrypto, and libcurl; provide a Makefile with an all target to compile and a clean target to remove the binary and .o files.",
+  "duration_seconds": 25.507588,
+  "finished_at": "2026-09-24T01:42:54.735+00:00",
+  "index": 1,
+  "name": "build_artifacts",
+  "prompt_path": "modules/01_build_artifacts/prompt.txt",
+  "started_at": "2026-09-24T01:42:29.228+00:00",
+  "status": "completed"
+}
