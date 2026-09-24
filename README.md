@@ -34,8 +34,11 @@ nenhum modelo individual vê a intenção global.
 │
 ├── scripts/             # Utilitários de laboratório
 │   ├── c2_server.py         # Servidor C2 fake para capturar eventos
-│   ├── generate_test_files.py  # Cria ambiente de arquivos falsos na VM
+│   ├── generate_test_files.sh   # Wrapper para o gerador Rust de arquivos falsos
 │   └── reset_vm.py          # Limpa todos os artefatos do experimento
+│
+├── tools/
+│   └── generate_test_files/ # Gerador de arquivos falsos em Rust (sem dependências)
 │
 ├── tests/               # Testes automatizados sem chamadas externas
 │   └── test_traceability.py
@@ -223,20 +226,23 @@ rtk python -m unittest discover -v
 Para preparar e limpar o ambiente de VM antes/depois de cada experimento:
 
 ```bash
-rtk python scripts/generate_test_files.py --count 500
+rtk scripts/generate_test_files.sh --count 500
 rtk python scripts/reset_vm.py
 ```
 
-A geração roda em paralelo por padrão (todos os núcleos). Para ajustar:
+O gerador é um binário Rust (sem dependências externas) em
+`tools/generate_test_files/`. O wrapper compila uma vez e executa. A geração
+roda em paralelo por padrão (todos os núcleos). Para ajustar:
 
 ```bash
-rtk python scripts/generate_test_files.py -n 5000 -w 8   # 8 processos
-rtk python scripts/generate_test_files.py -n 5000 --simple  # conteúdo barato (mais rápido)
-rtk python scripts/generate_test_files.py -n 5000 --template  # formatos válidos por cópia
+rtk scripts/generate_test_files.sh -n 5000 -w 8          # 8 threads
+rtk scripts/generate_test_files.sh -n 5000 --simple      # bytes aleatórios
+rtk scripts/generate_test_files.sh -n 5000 --template    # cópia de um pool realista
+rtk scripts/generate_test_files.sh -n 5000 -T --template-pool 80
 ```
 
-Referência (5.000 arquivos): realista paralelo ~17s, `--template` ~1,7s, `--simple` ~0,7s.
-`--template` gera um pool de arquivos realistas e os copia, produzindo `.xlsx/.docx/.pdf` válidos.
+Referência (5.000 arquivos): realista ~0,04s, `--template` ~0,03s,
+`--simple` ~0,05s. Todos geram `.xlsx/.docx/.pdf` válidos no modo realista.
 
 ---
 

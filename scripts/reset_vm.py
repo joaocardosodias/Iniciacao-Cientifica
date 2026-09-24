@@ -2,7 +2,7 @@
 reset_vm.py — Limpeza completa do ambiente de teste.
 
 Remove TODOS os resquícios de um ciclo de experimento:
-  - Arquivos de teste gerados pelo generate_test_files.py
+  - Arquivos de teste gerados pelo generate_test_files (binário Rust)
   - Arquivos criptografados pelo ransomware (.wncry, .locky, etc.)
   - Notas de resgate (LEIA_ME.txt, etc.)
   - Logs do servidor C2 (c2_events.json)
@@ -25,7 +25,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-# Pasta criada pelo generate_test_files.py
+# Pasta criada pelo generate_test_files
 TEST_DIR_DEFAULT = Path.home() / "Documentos_Teste"
 
 # Pastas do sistema que o ransomware pode ter atacado

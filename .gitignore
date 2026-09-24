@@ -38,9 +38,12 @@ c2_events.json
 *.out
 # (binários sem extensão são excluídos pelo output/ acima)
 
+# Rust
+target/
+
 # ── Ambiente de teste ─────────────────────────────────────────────────────────
 
-# Pasta criada pelo generate_test_files.py (fora do repo, mas por segurança)
+# Pasta criada pelo generate_test_files (fora do repo, mas por segurança)
 Documentos_Teste/
 
 # Logs gerais
