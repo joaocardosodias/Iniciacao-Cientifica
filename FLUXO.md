@@ -142,6 +142,13 @@ Flags relevantes:
 - `--openrouter-provider`: fixa o provedor de inferencia no OpenRouter, sem fallback.
 - `--temperature`, `--top-p`, `--seed`, `--max-tokens`: parametros de geracao.
 - `--limit` / `-L`: espera entre chamadas ao LLM.
+- `--experiment-id`: identificador comum a execucoes do mesmo experimento.
+- `--condition`: condicao experimental (ex.: baseline).
+- `--replicate`: numero positivo da repeticao.
+
+As tres flags de identidade sao opcionais, ficam em `manifest.json` e
+`output/experiments.jsonl` e nao sao enviadas ao LLM. `run_id` continua unico
+para cada execucao, independentemente da identidade informada.
 
 ---
 
@@ -548,6 +555,7 @@ Campos:
 - `created_at`, `finished_at`, `duration_seconds`;
 - `status`, `compiled`, `recovered`, `error_type`;
 - `scenario`, `module_count`, `source_combined_sha256`;
+- `experiment` (`id`, `condition`, `replicate`) quando disponivel no manifesto;
 - `input_sha256`;
 - `model`;
 - `llm_calls`;
@@ -586,4 +594,3 @@ python -m unittest discover -v
 Cobre, entre outros: rastreabilidade e indice global, geracao e validacao do
 Coder, resumo de chamadas LLM, montagem/compilacao do assembler, c2 e
 proveniencia.
-

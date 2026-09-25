@@ -37,9 +37,22 @@ def run(
     scenario_components: list[dict] | None = None,
     scenario_main_c: str | None = None,
     openrouter_provider: str | None = None,
+    experiment_id: str | None = None,
+    condition: str | None = None,
+    replicate: int | None = None,
 ) -> Path:
     if not scenario_components:
         raise ValueError("O modo componentes exige 'components' definido no cenario.")
+    if experiment_id is not None:
+        experiment_id = experiment_id.strip()
+        if not experiment_id:
+            raise ValueError("--experiment-id nao pode ser vazio.")
+    if condition is not None:
+        condition = condition.strip()
+        if not condition:
+            raise ValueError("--condition nao pode ser vazio.")
+    if replicate is not None and replicate < 1:
+        raise ValueError("--replicate deve ser maior que zero.")
     parameters = {
         "temperature": temperature,
         "top_p": top_p,
@@ -56,6 +69,11 @@ def run(
         routing_parameters={
             "openrouter_provider": openrouter_provider,
             "allow_fallbacks": False if openrouter_provider else None,
+        },
+        experiment={
+            "id": experiment_id,
+            "condition": condition,
+            "replicate": replicate,
         },
     )
     if scenario:
@@ -285,6 +303,12 @@ def main():
         help="Limite de tokens de saída por chamada.")
     parser.add_argument("--openrouter-provider", default=None,
         help="Provider de inferência fixo no OpenRouter, sem fallback (ex: deepinfra).")
+    parser.add_argument("--experiment-id", default=None,
+        help="Identificador do experimento para agrupar execucoes.")
+    parser.add_argument("--condition", default=None,
+        help="Condicao experimental desta execucao.")
+    parser.add_argument("--replicate", type=int, default=None,
+        help="Numero da repeticao (inteiro positivo).")
     args = parser.parse_args()
 
     if args.list:
@@ -338,6 +362,9 @@ def main():
             scenario_config_h=scenario_config_h,
             scenario_components=scenario_components,
             scenario_main_c=scenario_main_c,
+            experiment_id=args.experiment_id,
+            condition=args.condition,
+            replicate=args.replicate,
         )
     except Exception as e:
         log.error(f"Falha no pipeline: {e}")

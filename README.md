@@ -135,6 +135,7 @@ python pipeline.py --scenario wannacry --model gpt-4o-mini
 python pipeline.py --scenario wannacry --limit 2
 python pipeline.py --scenario wannacry --temperature 0 --seed 42 --max-tokens 8192
 python pipeline.py --scenario wannacry --model deepseek-v3 --openrouter-provider deepinfra
+python pipeline.py --scenario wannacry --experiment-id estudo-01 --condition baseline --replicate 1
 ```
 
 Parâmetros ausentes de geração são registrados como `null`, indicando que o
@@ -145,6 +146,12 @@ roteados pelo OpenRouter e desativa fallback para outros providers. O provider
 precisa oferecer o modelo selecionado; caso contrário, a chamada falha. A opção
 não pode ser combinada com modelos `groq:` ou `nim:`.
 
+`--experiment-id` agrupa execuções do mesmo experimento, `--condition` indica
+a condição comparada e `--replicate` identifica a repetição (inteiro positivo).
+São metadados opcionais, gravados em `manifest.json` e no índice global, sem
+serem enviados ao modelo. Cada execução continua com seu `run_id` único;
+execuções antigas sem esses campos permanecem consultáveis.
+
 ## Rastreabilidade
 
 Cada execução recebe um identificador único baseado em horário UTC, precisão de
@@ -154,8 +161,9 @@ uma pasta existente.
 `output/experiments.jsonl` mantém um índice global, com uma linha JSON por
 execução finalizada ou recuperada. Cada registro aponta para o `result.json`
 correspondente por caminhos relativos a `output/` e resume status, cenário,
-quantidade de módulos, hash combinado das fontes, modelo, duração e chamadas
-ao LLM, sem copiar o prompt. Escritas concorrentes são protegidas por lock.
+identidade experimental, quantidade de módulos, hash combinado das fontes,
+modelo, duração e chamadas ao LLM, sem copiar o prompt. Escritas concorrentes
+são protegidas por lock.
 Se os dados resumidos no índice mudarem, uma nova linha com `revision` maior é
 adicionada; a última linha de cada `run_id` é a vigente. Quando ausente no
 `result.json`, a quantidade de módulos vem do estágio `planner` ou `components`

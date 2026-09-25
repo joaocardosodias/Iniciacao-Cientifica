@@ -88,6 +88,7 @@ class RunTrace:
         output_root: Path = Path("output"),
         generation_parameters: dict[str, Any] | None = None,
         routing_parameters: dict[str, Any] | None = None,
+        experiment: dict[str, Any] | None = None,
     ):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
         self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}"
@@ -137,6 +138,7 @@ class RunTrace:
                 "parameters": generation_parameters or {},
                 "routing": routing_parameters or {},
             },
+            "experiment": experiment or {"id": None, "condition": None, "replicate": None},
             "software": software,
             "stages": {},
         }

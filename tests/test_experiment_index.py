@@ -30,6 +30,13 @@ class ExperimentIndexTests(unittest.TestCase):
             self.assertEqual(entries[-1]["module_count"], 2)
             self.assertEqual(entries[-1]["source_combined_sha256"], "abc")
             self.assertEqual(entries[-1]["llm_calls"], result["llm_calls"])
+            self.assertIsNone(entries[-1]["experiment"])
+
+            manifest["experiment"] = {"id": "study", "condition": "control", "replicate": 1}
+            self.assertTrue(append_experiment(run_dir, manifest, result))
+            entries = [json.loads(line) for line in (run_dir.parent / "experiments.jsonl").read_text().splitlines()]
+            self.assertEqual(entries[-1]["revision"], 3)
+            self.assertEqual(entries[-1]["experiment"], manifest["experiment"])
 
     def test_index_failure_does_not_change_terminal_status(self):
         with tempfile.TemporaryDirectory() as temporary:

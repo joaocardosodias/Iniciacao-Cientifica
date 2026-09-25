@@ -197,6 +197,9 @@ class TraceabilityTests(unittest.TestCase):
                 scenario_components=MODULES,
                 scenario_main_c=FAKE_MAIN_C,
                 openrouter_provider="deepinfra",
+                experiment_id=" estudo-01 ",
+                condition=" baseline ",
+                replicate=2,
             )
             run_dir = main_c.parent
             manifest = json.loads((run_dir / "manifest.json").read_text())
@@ -204,6 +207,9 @@ class TraceabilityTests(unittest.TestCase):
 
             self.assertEqual(manifest["status"], "completed")
             self.assertEqual(manifest["stages"]["components"]["count"], 3)
+            self.assertEqual(manifest["experiment"], {
+                "id": "estudo-01", "condition": "baseline", "replicate": 2,
+            })
             self.assertEqual(manifest["model"]["routing"], {
                 "openrouter_provider": "deepinfra",
                 "allow_fallbacks": False,
@@ -211,6 +217,7 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(result["module_count"], 3)
             entry = json.loads((Path(temporary) / "experiments.jsonl").read_text())
             self.assertEqual(entry["scenario"], "test")
+            self.assertEqual(entry["experiment"], manifest["experiment"])
             self.assertEqual(entry["module_count"], 3)
             self.assertEqual(entry["source_combined_sha256"],
                              manifest["software"]["git"]["source_combined_sha256"])
@@ -246,6 +253,21 @@ class TraceabilityTests(unittest.TestCase):
             entry = json.loads((output_root / "experiments.jsonl").read_text())
             self.assertEqual(entry["status"], "failed")
             self.assertEqual(entry["error_type"], "ValueError")
+
+    def test_invalid_experimental_identity_does_not_create_run(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            options = (
+                ({"experiment_id": "  "}, "experiment-id"),
+                ({"condition": "  "}, "condition"),
+                ({"replicate": 0}, "replicate"),
+            )
+            for arguments, message in options:
+                with self.subTest(arguments=arguments):
+                    with self.assertRaisesRegex(ValueError, message):
+                        pipeline.run("descricao", output_root=root,
+                                     scenario_components=MODULES, **arguments)
+            self.assertEqual(list(root.iterdir()), [])
 
 
 if __name__ == "__main__":
