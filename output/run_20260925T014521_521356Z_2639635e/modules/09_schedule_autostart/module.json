@@ -1,0 +1,13 @@
+{
+  "code_lines": 95,
+  "code_path": "modules/schedule_autostart.c",
+  "code_sha256": "06dc498f7d1bf48aae2279178e268b3dfc2eb57183f223436b74f79e37f60c27",
+  "description": "Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 2.768011,
+  "finished_at": "2026-09-25T01:45:24.750+00:00",
+  "index": 9,
+  "name": "schedule_autostart",
+  "prompt_path": "modules/09_schedule_autostart/prompt.txt",
+  "started_at": "2026-09-25T01:45:21.982+00:00",
+  "status": "completed"
+}

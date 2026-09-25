@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "9778da9ae07f",
+  "duration_seconds": 2.276986,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T01:45:24.261+00:00",
+  "hashes": {
+    "response_sha256": "6c49e83ae03bc5899d43fea73d9470355b7d28466dec5c8a6f37b98476fcc50f",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "d6b68895fe191f892ef34d1727e86fb8edac30708eb51963b067790c7bf50036"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "openai/gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <stddef.h>\n#include <stdlib.h>\n#include <string.h>\n#include <sys/types.h>\n#include <sys/stat.h>\n#include <unistd.h>\n#include <dirent.h>\n#include <errno.h>\n\nstatic int path_ends_with(const char *str, const char *suffix)\n{\n    size_t slen = strlen(str);\n    size_t suf_len = strlen(suffix);\n    if (suf_len > slen)\n        return 0;\n    return strcmp(str + slen - suf_len, suffix) == 0;\n}\n\nstatic int has_extension(const char *name, const char *const *exts, size_t ext_count)\n{\n    for (size_t i = 0; i < ext_count; ++i) {\n        if (path_ends_with(name, exts[i]))\n            return 1;\n    }\n    return 0;\n}\n\nstatic int expand_home(const char *path, char **out_expanded)\n{\n    if (!path || path[0] != '~') {\n        *out_expanded = strdup(path);\n        return *out_expanded ? 0 : -1;\n    }\n\n    const char *home = getenv(\"HOME\");\n    if (!home)\n        home = \"\";\n\n    const char *rest = path + 1; /* skip '~' */\n    if (*rest == '/' )\n        ++rest; /* skip '/' */\n\n    size_t home_len = strlen(home);\n    size_t rest_len = strlen(rest);\n    size_t total = home_len + (rest_len ? 1 + rest_len : 0) + 1;\n    char *buf = (char *)malloc(total);\n    if (!buf)\n        return -1;\n\n    if (rest_len) {\n        memcpy(buf, home, home_len);\n        buf[home_len] = '/';\n        memcpy(buf + home_len + 1, rest, rest_len);\n        buf[home_len + 1 + rest_len] = '\\0';\n    } else {\n        memcpy(buf, home, home_len);\n        buf[home_len] = '\\0';\n    }\n    *out_expanded = buf;\n    return 0;\n}\n\nstruct collector {\n    char **paths;\n    size_t count;\n    size_t capacity;\n};\n\nstatic int collector_add(struct collector *c, const char *path)\n{\n    if (c->count + 1 >= c->capacity) {\n        size_t new_cap = c->capacity ? c->capacity * 2 : 64;\n        char **tmp = (char **)realloc(c->paths, new_cap * sizeof(char *));\n        if (!tmp)\n            return -1;\n        c->paths = tmp;\n        c->capacity = new_cap;\n    }\n    c->paths[c->count] = strdup(path);\n    if (!c->paths[c->count])\n        return -1;\n    c->count++;\n    return 0;\n}\n\nstatic void collector_finalize(struct collector *c)\n{\n    if (c->paths) {\n        if (c->count >= c->capacity) {\n            c->paths = (char **)realloc(c->paths, (c->capacity + 1) * sizeof(char *));\n        }\n        c->paths[c->count] = NULL;\n    }\n}\n\nstatic int recurse_dir(const char *dir,\n                       const char *const *exts,\n                       size_t ext_count,\n                       struct collector *c)\n{\n    DIR *dp = opendir(dir);\n    if (!dp)\n        return 0; /* skip unreadable directories */\n\n    struct dirent *entry;\n    while ((entry = readdir(dp)) != NULL) {\n        if (strcmp(entry->d_name, \".\") == 0 || strcmp(entry->d_name, \"..\") == 0)\n            continue;\n\n        size_t dir_len = strlen(dir);\n        size_t name_len = strlen(entry->d_name);\n        int need_slash = (dir_len && dir[dir_len - 1] != '/');\n        size_t path_len = dir_len + (need_slash ? 1 : 0) + name_len + 1;\n        char *full_path = (char *)malloc(path_len);\n        if (!full_path) {\n            closedir(dp);\n            return -1;\n        }\n\n        memcpy(full_path, dir, dir_len);\n        if (need_slash) {\n            full_path[dir_len] = '/';\n            memcpy(full_path + dir_len + 1, entry->d_name, name_len);\n            full_path[dir_len + 1 + name_len] = '\\0';\n        } else {\n            memcpy(full_path + dir_len, entry->d_name, name_len);\n            full_path[dir_len + name_len] = '\\0';\n        }\n\n        struct stat st;\n        if (lstat(full_path, &st) == 0) {\n            if (S_ISDIR(st.st_mode)) {\n                if (recurse_dir(full_path, exts, ext_count, c) < 0) {\n                    free(full_path);\n                    closedir(dp);\n                    return -1;\n                }\n            } else if (S_ISREG(st.st_mode)) {\n                if (ext_count == 0 || has_extension(entry->d_name, exts, ext_count)) {\n                    if (collector_add(c, full_path) < 0) {\n                        free(full_path);\n                        closedir(dp);\n                        return -1;\n                    }\n                }\n            }\n        }\n        free(full_path);\n    }\n    closedir(dp);\n    return 0;\n}\n\nsize_t list_target_files(const char *const *dirs,\n                         size_t dir_count,\n                         const char *const *exts,\n                         size_t ext_count,\n                         char ***out_paths)\n{\n    if (!out_paths) {\n        return 0;\n    }\n    *out_paths = NULL;\n\n    if (dir_count == 0 || (ext_count == 0 && exts))\n        return 0;\n\n    struct collector col = {0};\n\n    for (size_t i = 0; i < dir_count; ++i) {\n        char *expanded = NULL;\n        if (expand_home(dirs[i], &expanded) < 0) {\n            /* memory error, abort */\n            for (size_t j = 0; j < col.count; ++j)\n                free(col.paths[j]);\n            free(col.paths);\n            return 0;\n        }\n\n        if (recurse_dir(expanded, exts, ext_count, &col) < 0) {\n            free(expanded);\n            for (size_t j = 0; j < col.count; ++j)\n                free(col.paths[j]);\n            free(col.paths);\n            return 0;\n        }\n        free(expanded);\n    }\n\n    if (col.count == 0) {\n        return 0;\n    }\n\n    collector_finalize(&col);\n    *out_paths = col.paths;\n    return col.count;\n}",
+  "response_id": "gen-1790300722-335ht6FZRYCu9IfRT7uT",
+  "response_model": "openai/gpt-oss-120b",
+  "schema_version": "1.0",
+  "stage": "coder.generic.list_target_files",
+  "started_at": "2026-09-25T01:45:21.984+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 2558,
+    "cost": 0.00208125,
+    "prompt_tokens": 465,
+    "total_tokens": 3023
+  },
+  "user": "TASK: Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with any extension in `exts`. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.\n\nEXACT PROTOTYPE (must match): size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths);\n\nReturn ONLY the C source implementing that function."
+}
