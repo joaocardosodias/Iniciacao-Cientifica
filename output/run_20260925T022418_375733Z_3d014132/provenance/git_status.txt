@@ -1,0 +1,10 @@
+## main...origin/main
+ M README.md
+ M output/experiments.jsonl
+ M output/run_20260925T021722_098905Z_b13550e3/events.jsonl
+ M output/run_20260925T021722_098905Z_b13550e3/manifest.json
+?? output/run_20260925T021722_098905Z_b13550e3/assembly/main.c
+?? output/run_20260925T021722_098905Z_b13550e3/assembly/opencode_events.jsonl
+?? output/run_20260925T021722_098905Z_b13550e3/assembly/output
+?? output/run_20260925T021722_098905Z_b13550e3/assembly/result.json
+?? output/run_20260925T021722_098905Z_b13550e3/result.json

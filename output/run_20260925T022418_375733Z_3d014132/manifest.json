@@ -1,9 +1,9 @@
 {
-  "created_at": "2026-09-25T02:17:22.765+00:00",
+  "created_at": "2026-09-25T02:24:18.856+00:00",
   "input": {
-    "characters": 520,
+    "characters": 3547,
     "path": "prompts/original.txt",
-    "sha256": "83961d19c5df12497ae9e8759b83064e7dbfba45a7a047fa477b46c1c247a42e"
+    "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
   },
   "model": {
     "delay_seconds": 0,
@@ -14,33 +14,33 @@
       "top_p": null
     },
     "provider": "openrouter",
-    "requested": "openai/gpt-oss-120b",
-    "resolved": "openai/gpt-oss-120b",
+    "requested": "openai/gpt-6-luna",
+    "resolved": "openai/gpt-6-luna",
     "routing": {
-      "allow_fallbacks": false,
-      "openrouter_provider": "cerebras/fp16"
+      "allow_fallbacks": null,
+      "openrouter_provider": null
     }
   },
   "process": {
     "hostname": "omarchy",
-    "pid": 55669
+    "pid": 63238
   },
-  "run_id": "run_20260925T021722_098905Z_b13550e3",
+  "run_id": "run_20260925T022418_375733Z_3d014132",
   "schema_version": "1.0",
   "software": {
     "architecture": "x86_64",
     "commands": {
       "gcc": "gcc (GCC) 16.2.1 20260810",
       "libcurl": "8.22.0",
-      "opencode": "mise ~/.config/mise/config.toml tools: opencode@1.18.31",
+      "opencode": "1.17.11",
       "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
     },
     "cpu": "13th Gen Intel(R) Core(TM) i5-1345U",
     "environment_path": "provenance/environment.json",
-    "executable": "/usr/bin/python",
+    "executable": "/home/cardoso/GitHub/Iniciacao-Cientifica/venv/bin/python",
     "git": {
       "branch": "main",
-      "commit": "c3a06eea1d5f372303d74caab00c32794253e719",
+      "commit": "580c02be5f23b7cf5d8934726e9df801bccb7151",
       "dirty": true,
       "files": {
         "diff": "provenance/git.diff",
@@ -73,11 +73,11 @@
         "src/sanitizer.py": "718b0747124026ed14aa631cfb8b9e3d224980dc59c40540d397dd68258aba3c",
         "src/trace.py": "f3eb61b6a40b095273c9fcae9234938ff6925f2886952d224891925ff0d3dcb6"
       },
-      "untracked_count": 1,
-      "untracked_stored_count": 1
+      "untracked_count": 0,
+      "untracked_stored_count": 0
     },
-    "locale": "C",
-    "package_count": 183,
+    "locale": "en_US",
+    "package_count": 37,
     "packages_path": "provenance/python_packages.json",
     "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
     "python": "3.14.7",
@@ -87,57 +87,57 @@
   "stages": {
     "assembler_harness": {
       "agent_usage": {
-        "cost": 0.02225385,
-        "events": 37,
+        "cost": 0.005757785,
+        "events": 32,
         "sessions": [
-          "ses_f29a3b59fffe2yWQMuS6bM8kVN",
-          "ses_f29a4db4affemaR97I4PfizxvH",
-          "ses_f29a57f69ffeeBsYrO5qgORkeL"
+          "ses_f299b502bffeLrq0vP4jCk5Okx",
+          "ses_f299bafc2ffeQM4RL7emjh2gCy"
         ],
-        "steps": 13,
+        "steps": 8,
         "tokens": {
-          "input": 130103,
-          "output": 1583,
-          "reasoning": 2221,
-          "total": 139987
+          "input": 24,
+          "output": 1735,
+          "reasoning": 2970,
+          "total": 87314
         },
         "tool_calls": {
-          "bash": 2,
-          "glob": 2,
-          "read": 5,
-          "write": 1
+          "apply_patch": 1,
+          "bash": 5,
+          "glob": 1,
+          "read": 4,
+          "todowrite": 1
         },
-        "unreadable_lines": 5
+        "unreadable_lines": 1
       },
       "binary": "output",
-      "duration_seconds": 156.628074,
+      "duration_seconds": 67.198999,
       "main_c": "main.c",
       "mode": "opencode",
-      "model": "openrouter/openai/gpt-oss-120b",
+      "model": "openrouter/openai/gpt-6-luna",
       "status": "completed"
     },
     "input": {
-      "scenario": "benign_full_pipeline"
+      "scenario": "wannacry"
     },
     "modules": {
-      "count": 3,
-      "duration_seconds": 3.654783,
+      "count": 6,
+      "duration_seconds": 150.48726,
       "status": "completed"
     },
     "planner": {
-      "duration_seconds": 0.95583,
-      "module_count": 3,
+      "duration_seconds": 18.421677,
+      "module_count": 6,
       "output": "prompts/planner_response.json",
       "status": "completed"
     },
     "sanitizer": {
-      "duration_seconds": 1.951984,
-      "fragment_count": 2,
+      "duration_seconds": 64.793131,
+      "fragment_count": 9,
       "output": "prompts/sanitized.txt",
-      "sha256": "65a5bd217ae914d5d9d0502001a0f9369bd58eca6043955a007c20717333971c",
+      "sha256": "8e4e153cea2d5933e00bd4d0fa0e228942654e3d60a4373875d35a436bcb8ade",
       "status": "completed"
     }
   },
   "status": "completed",
-  "updated_at": "2026-09-25T02:20:05.996+00:00"
+  "updated_at": "2026-09-25T02:29:19.809+00:00"
 }

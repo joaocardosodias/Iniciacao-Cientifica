@@ -1,0 +1,86 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+- module_06.c
+
+The working directory is /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T022418_375733Z_3d014132/assembly.
+These files define functions with the following exact signatures. Do not rename them or edit module function names:
+
+#define _GNU_SOURCE
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <curl/curl.h>
+#include <curl/urlapi.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <limits.h>
+#include <math.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <syslog.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+struct visited_directory { char *path; struct visited_directory *next; };
+struct scan_context { struct visited_directory *visited; int had_error; };
+struct notificacao_resultado { const char *diretorio; const char *raiz_autorizada; size_t arquivos_transformados; };
+typedef struct { const char *data; size_t length; size_t position; } token_json_parser;
+typedef struct { char *data; size_t length; size_t capacity; } token_response_buffer;
+
+int plataforma_e_compilacao(void);
+int chave_e_transformacao_de_arquivos(void);
+int enumeracao_e_limpeza_de_arquivos(void);
+int notificacoes_operacionais(const struct notificacao_resultado *resultados, size_t quantidade);
+int token_e_transmissao_http(void);
+int orquestracao_e_execucao_automatica(void);
+
+TASK:
+0. Do not read the module source files. The signatures and type definitions below are the complete interface needed by main.c.
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) and calls every function declared above using its exact name
+   - Validates argc before reading command-line arguments
+   - Uses argv[1] for the first input path requested by a function
+   - Supplies type-correct arguments and handles return values
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c module_06.c \
+       -lssl -lcrypto -lcurl -lm -lpthread
+3. If an error is in main.c, fix main.c with the edit tool.
+   If an error is inside a module file (missing include, undeclared constant
+   or missing prototype), apply the MINIMAL fix to that module, keeping its
+   logic unchanged. Do not rewrite module logic.
+4. Repeat up to 5 times until 'output' binary exists.

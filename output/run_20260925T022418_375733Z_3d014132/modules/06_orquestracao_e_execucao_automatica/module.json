@@ -1,0 +1,13 @@
+{
+  "code_lines": 11,
+  "code_path": "modules/orquestracao_e_execucao_automatica.c",
+  "code_sha256": "b4ac998d8bf807cecf5522af55cbf63f86db2f8201bfdb524907794f4296f241",
+  "description": "In `main()`, the utility SHALL perform the following steps in order: generate and save the key, scan, transform, generate operational notifications only in affected folders, transmit, and schedule automatic execution. The utility SHALL read the current crontab using `popen(\"crontab -l\",\"r\")`. If the crontab does not contain `@reboot <caminho_binario>`, the utility SHALL add that entry using `popen(\"crontab -\",\"w\")`.",
+  "duration_seconds": 20.835261,
+  "finished_at": "2026-09-25T02:26:02.947+00:00",
+  "index": 6,
+  "name": "orquestracao_e_execucao_automatica",
+  "prompt_path": "modules/06_orquestracao_e_execucao_automatica/prompt.txt",
+  "started_at": "2026-09-25T02:25:42.112+00:00",
+  "status": "completed"
+}

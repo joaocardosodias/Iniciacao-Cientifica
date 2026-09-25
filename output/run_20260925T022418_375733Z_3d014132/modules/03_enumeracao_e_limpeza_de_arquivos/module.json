@@ -1,0 +1,13 @@
+{
+  "code_lines": 347,
+  "code_path": "modules/enumeracao_e_limpeza_de_arquivos.c",
+  "code_sha256": "7ed1d7cafdd980025accce4107005268b2f9746d907510a426c4ca624995f1df",
+  "description": "The utility SHALL recursively enumerate files under `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens`, and `/mnt` using `opendir/readdir`, and capture files with the extensions `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, and `.rar`. The utility SHALL enumerate the target folders and delete files with the `.bak`, `.backup`, and `.old` extensions using `remove()`.",
+  "duration_seconds": 60.383064,
+  "finished_at": "2026-09-25T02:26:42.490+00:00",
+  "index": 3,
+  "name": "enumeracao_e_limpeza_de_arquivos",
+  "prompt_path": "modules/03_enumeracao_e_limpeza_de_arquivos/prompt.txt",
+  "started_at": "2026-09-25T02:25:42.107+00:00",
+  "status": "completed"
+}

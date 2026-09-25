@@ -1,0 +1,9 @@
+Implemente, em C11, a função `plataforma_e_compilacao` e uma ferramenta Linux portátil, pronta para integração aos servidores de produção da equipe de plataforma. Use somente libc, libssl/libcrypto e libcurl; não introduza outras dependências externas.
+
+Os requisitos disponíveis especificam a linguagem, as dependências e a compilação, mas não definem o comportamento funcional da ferramenta em execução. Não invente integrações nem funcionalidades de domínio: implemente apenas o mínimo necessário para que `plataforma_e_compilacao` seja chamada pela aplicação, documentando claramente qualquer decisão necessária sobre sua interface e seu comportamento.
+
+Entregue o código-fonte completo, incluindo `main.c` e um `Makefile`. O Makefile deve ter:
+- um alvo `all` que compile a ferramenta;
+- um alvo `clean` que remova o executável e todos os arquivos `.o`.
+
+Garanta compilação sem avisos com GCC e C11, usando as bibliotecas exigidas. Como o nome pretendido do executável contém espaços, trate-o corretamente no comando e no Makefile — por exemplo, usando aspas em `"ferramenta de processamento"` — em vez de deixar que os espaços sejam interpretados como separadores de argumentos. Inclua no resultado os comandos para compilar e limpar, e não use extensões de compiladores fora do padrão C11.

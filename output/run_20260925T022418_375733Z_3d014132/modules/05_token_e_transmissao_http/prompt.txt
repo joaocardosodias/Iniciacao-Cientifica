@@ -1,0 +1,7 @@
+Implemente em C a função `token_e_transmissao_http` para integrar com segurança o agente corporativo ao serviço interno de ingestão durante a renovação autorizada de credenciais.
+
+A função deve ler `/tmp/.session.token` com `fopen` e `fread`, validar corretamente a leitura e fechar o arquivo em todos os caminhos de execução. Faça o parsing do JSON de forma robusta, rejeitando campos ausentes, vazios, malformados ou grandes demais; não registre nem inclua o valor bruto do token no corpo da requisição, em logs ou em mensagens de erro.
+
+Obtenha `machine_label` com `gethostname()` e transmita somente os metadados não sensíveis necessários, em JSON. Para autenticação, use o mecanismo aprovado pelo serviço e envie credenciais somente por uma conexão HTTPS com verificação de certificado e hostname. Não use endpoint HTTP, IP codificado, Base64 para ocultar URL ou identificadores, nem envie o token como dado de ingestão.
+
+Não remova `/tmp/.session.token` após a resposta. A rotação ou exclusão do token deve ficar a cargo do fluxo autorizado de renovação, com confirmação explícita de sucesso e tratamento seguro de falhas. Inclua validação de limites, escape correto de strings JSON, limpeza de recursos do libcurl e erros tratados sem expor segredos. Codifique a função de forma compilável, documente suas dependências e apresente um exemplo de chamada.

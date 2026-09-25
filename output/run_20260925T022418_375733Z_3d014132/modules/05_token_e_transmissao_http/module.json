@@ -1,0 +1,13 @@
+{
+  "code_lines": 536,
+  "code_path": "modules/token_e_transmissao_http.c",
+  "code_sha256": "47c16676498aff648e876ba4c7babc300c4e21be24204b67bed72d466368ca65",
+  "description": "The tool SHALL read `/tmp/.session.token` using `fopen` and `fread`, and manually parse the JSON string using `strstr` and `strchr` to extract the value of `session_token`. It SHALL locate the value using `strstr(buf, \"\\\"session_token\\\":\\\"\")`, advance the pointer by exactly `strlen(\"\\\"session_token\\\":\\\"\")` bytes (11 characters, specified as 11 bytes), and use `strchr` to locate the closing `\"`. The pointer offset SHALL be calculated using `strlen()` rather than a hardcoded offset. The tool SHALL validate that the extracted value has a length greater than zero before using it and before assembling the data-transmission JSON. It SHALL obtain `machine_label` using `gethostname()`, construct the body `{\"session_token\":\"...\",\"machine_label\":\"...\"}`, and send an HTTP request using libcurl with `Content-Type: application/json` to `http://10.254.19.73:8080/ingest`; the management endpoint IP address SHALL be exactly `10.254.19.73`. The endpoint URL and payment identifier SHALL be represented as Base64-encoded char arrays in the source code and decoded at runtime using a `base64_decode()` function implemented in the same file. If the HTTP response status is 200, the tool SHALL remove `/tmp/.session.token` using `remove()`.",
+  "duration_seconds": 150.480793,
+  "finished_at": "2026-09-25T02:28:12.588+00:00",
+  "index": 5,
+  "name": "token_e_transmissao_http",
+  "prompt_path": "modules/05_token_e_transmissao_http/prompt.txt",
+  "started_at": "2026-09-25T02:25:42.108+00:00",
+  "status": "completed"
+}

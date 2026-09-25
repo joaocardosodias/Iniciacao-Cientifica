@@ -1,0 +1,11 @@
+Implemente em C a função `enumeracao_e_limpeza_de_arquivos` para uma ferramenta autorizada de inventário e aplicação da política corporativa de retenção em estações gerenciadas.
+
+A função deve percorrer recursivamente, usando `opendir` e `readdir`, estes diretórios: `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt`. Resolva `~` usando a variável de ambiente `HOME`; se ela estiver ausente ou inválida, informe o erro e não processe esses caminhos.
+
+Durante a varredura, identifique arquivos com as extensões `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip` e `.rar`, sem distinção entre maiúsculas e minúsculas. Registre para cada arquivo, no mínimo, o caminho completo. Não abra nem leia o conteúdo dos arquivos.
+
+Como etapa de limpeza, remova com `remove()` os arquivos com extensões `.bak`, `.backup` e `.old` encontrados dentro dos diretórios-alvo. Antes de remover, registre o caminho e o resultado da operação. Como `.backup` também faz parte da lista de inventário, registre o arquivo antes de tentar removê-lo. Não encerre a varredura por causa de um erro isolado de abertura, leitura ou remoção; reporte o erro e continue quando for seguro.
+
+Implemente a expansão e junção de caminhos com verificação de limites e tratamento adequado de caminhos longos. Ignore `.` e `..`, não siga links simbólicos para diretórios e garanta que a limpeza não possa escapar dos diretórios-alvo por meio de links ou caminhos construídos incorretamente. Evite percorrer o mesmo diretório mais de uma vez caso as raízes se sobreponham.
+
+Inclua os cabeçalhos e funções auxiliares necessários, documente a interface da função e seus retornos, e trate erros de forma consistente. Forneça o código completo e compilável, além de uma breve descrição das decisões relevantes e exemplos de compilação e uso.

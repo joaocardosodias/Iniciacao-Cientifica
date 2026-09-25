@@ -198,18 +198,21 @@ output/run_<id>/
 │   ├── sanitized.txt
 │   └── planner_response.json
 ├── modules/
+│   ├── <nome>.c
 │   └── <indice>_<nome>/
 │       ├── module.json
 │       ├── prompt.txt
 │       └── response.c
 ├── assembly/
 │   ├── task.txt
+│   ├── opencode_events.jsonl
+│   ├── opencode_stderr.log
 │   ├── stdout.log
 │   ├── stderr.log
-│   └── result.json
-├── <nome_do_modulo>.c
-├── main.c
-└── output
+│   ├── result.json
+│   ├── main.c
+│   └── output
+└── events.jsonl
 ```
 
 O `manifest.json` registra o modelo solicitado e resolvido, provedor,
@@ -230,6 +233,12 @@ de inferência, quando informado pela API, aparece em `inference_providers_obser
 O custo usa `unit: provider_reported`, sem presumir moeda; sem custo informado,
 o total fica `null`. Execuções interrompidas e abandonadas também produzem
 `result.json` com os registros de chamadas disponíveis.
+
+As chamadas diretas do pipeline aparecem em `llm_calls`. A atividade do agente
+OpenCode fica separada em `assembly.agent_usage`, com sessões, passos, chamadas
+de ferramentas, tokens e custo extraídos de `assembly/opencode_events.jsonl`.
+`agent_return_code` representa o processo OpenCode e `compile_return_code`
+representa a verificação final independente do GCC.
 
 ## Testes
 
