@@ -95,6 +95,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
         result = {
             "schema_version": manifest.get("schema_version", "1.0"),
             "run_id": run_id,
+            "run_purpose": manifest.get("run_purpose", "development"),
             "status": terminal,
             "compiled": False,
             "finished_at": now,

@@ -150,6 +150,39 @@ As tres flags de identidade sao opcionais, ficam em `manifest.json` e
 `output/experiments.jsonl` e nao sao enviadas ao LLM. `run_id` continua unico
 para cada execucao, independentemente da identidade informada.
 
+### 3.1 Execucoes de desenvolvimento e campanhas oficiais
+
+Sem `--official`, `run_purpose` e `development` e a run fica em `output/`.
+Essas execucoes servem para desenvolvimento e nao entram automaticamente nos
+resultados do artigo.
+
+Com `--official`, `-n` ou `--runs` define quantas repeticoes sequenciais serao
+criadas:
+
+```bash
+python pipeline.py --scenario wannacry --model openai/gpt-oss-120b \
+  --openrouter-provider cerebras/fp16 --official \
+  --experiment-id estudo-01 --condition fragmented -n 50
+```
+
+A campanha fica em
+`results/<modelo>__<provider>/<experimento>/<condicao>/`. Cada run fica em
+`outputs/`, recebe `run_purpose: official`, `replicate` automatico e referencia
+ao `campaign.json`. Falhas individuais sao registradas e o lote continua.
+
+Uma combinacao existente nao e sobrescrita. `--resume` le o manifesto da
+campanha, preserva as runs existentes e executa somente as replicas ausentes.
+
+### 3.2 Avaliacao manual e resultados derivados
+
+`tools/record_evaluation.py` grava a avaliacao em
+`outputs/<run>/evaluation/manual.json`, preserva revisoes anteriores e mantem
+`evaluations.jsonl` append-only. O `result.json` automatico permanece imutavel.
+
+`tools/build_results.py` combina campanha, manifestos, resultados e avaliacoes
+para regenerar `runs.csv`, `summary.csv`, `summary.json`, `exclusions.csv` e
+`provenance.json`.
+
 ---
 
 ## 4. Inicializacao e rastreabilidade

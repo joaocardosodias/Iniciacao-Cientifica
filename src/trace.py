@@ -89,9 +89,15 @@ class RunTrace:
         generation_parameters: dict[str, Any] | None = None,
         routing_parameters: dict[str, Any] | None = None,
         experiment: dict[str, Any] | None = None,
+        run_purpose: str = "development",
+        campaign: dict[str, Any] | None = None,
+        provenance_exclude_dirs: list[Path] | None = None,
     ):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
-        self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}"
+        replicate = (experiment or {}).get("replicate")
+        suffix = f"_replicate_{replicate:03d}" if run_purpose == "official" and type(replicate) is int else ""
+        self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}{suffix}"
+        self.run_purpose = run_purpose
         self.run_dir = output_root / self.run_id
         self.calls_dir = self.run_dir / "calls"
         self.prompts_dir = self.run_dir / "prompts"
@@ -110,8 +116,20 @@ class RunTrace:
         self.assembly_dir.mkdir()
         self.provenance_dir.mkdir()
         repo = find_repo_root(Path.cwd())
+        exclude_dirs = _output_exclude(output_root, repo)
+        if repo is not None:
+            requested_exclusions = [Path("output"), Path("results")]
+            requested_exclusions.extend(provenance_exclude_dirs or [])
+            for directory in requested_exclusions:
+                candidate = (Path.cwd() / directory).resolve()
+                try:
+                    candidate.relative_to(repo.resolve())
+                except ValueError:
+                    continue
+                if candidate not in exclude_dirs:
+                    exclude_dirs.append(candidate)
         git = collect_provenance(repo, self.provenance_dir,
-                                 exclude_dirs=_output_exclude(output_root, repo))
+                                 exclude_dirs=exclude_dirs)
         software = {"git": git, **collect_environment(self.provenance_dir)}
         self.events = EventLog(self.events_path, self.run_id)
         self.write_text("prompts/original.txt", prompt)
@@ -119,6 +137,7 @@ class RunTrace:
             "schema_version": self.schema_version,
             "run_id": self.run_id,
             "status": "running",
+            "run_purpose": run_purpose,
             "created_at": utc_now(),
             "updated_at": utc_now(),
             "process": {
@@ -139,6 +158,7 @@ class RunTrace:
                 "routing": routing_parameters or {},
             },
             "experiment": experiment or {"id": None, "condition": None, "replicate": None},
+            "campaign": campaign,
             "software": software,
             "stages": {},
         }
@@ -148,6 +168,8 @@ class RunTrace:
             model=requested_model,
             delay_seconds=delay,
             output_root=str(output_root),
+            run_purpose=run_purpose,
+            campaign_id=(campaign or {}).get("id"),
         )
 
     def emit(self, event: str, **data: Any) -> None:
@@ -229,6 +251,7 @@ class RunTrace:
             result = {
                 "schema_version": self.schema_version,
                 "run_id": self.run_id,
+                "run_purpose": self.run_purpose,
                 "status": status,
                 "compiled": compiled,
                 "finished_at": finished_at,

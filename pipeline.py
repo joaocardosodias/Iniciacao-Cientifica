@@ -8,9 +8,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.llm_client import LLMClient, MODELS
+from src.llm_client import DEFAULT_MODEL, LLMClient, MODELS, _resolve
 from src.coder import Coder
 from src.assembler_harness import AssemblerHarness
+from src.campaign import Campaign
 from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
 from src.recovery import recover_stale_runs
@@ -40,6 +41,9 @@ def run(
     experiment_id: str | None = None,
     condition: str | None = None,
     replicate: int | None = None,
+    run_purpose: str = "development",
+    campaign: dict | None = None,
+    provenance_exclude_dirs: list[Path] | None = None,
 ) -> Path:
     if not scenario_components:
         raise ValueError("O modo componentes exige 'components' definido no cenario.")
@@ -51,8 +55,12 @@ def run(
         condition = condition.strip()
         if not condition:
             raise ValueError("--condition nao pode ser vazio.")
-    if replicate is not None and replicate < 1:
+    if replicate is not None and (
+        isinstance(replicate, bool) or not isinstance(replicate, int) or replicate < 1
+    ):
         raise ValueError("--replicate deve ser maior que zero.")
+    if run_purpose not in {"development", "official"}:
+        raise ValueError("run_purpose deve ser development ou official.")
     parameters = {
         "temperature": temperature,
         "top_p": top_p,
@@ -75,6 +83,9 @@ def run(
             "condition": condition,
             "replicate": replicate,
         },
+        run_purpose=run_purpose,
+        campaign=campaign,
+        provenance_exclude_dirs=provenance_exclude_dirs,
     )
     if scenario:
         trace.record_stage("input", {"scenario": scenario})
@@ -279,6 +290,132 @@ def run(
         guard.restore()
 
 
+def run_official_campaign(
+    prompt: str,
+    scenario: str,
+    scenario_config_h: str,
+    scenario_components: list[dict],
+    scenario_main_c: str,
+    model: str,
+    openrouter_provider: str | None,
+    experiment_id: str,
+    condition: str,
+    planned_replicates: int | None,
+    delay: int = 0,
+    temperature: float | None = None,
+    top_p: float | None = None,
+    seed: int | None = None,
+    max_tokens: int | None = None,
+    results_root: Path = Path("results"),
+    resume: bool = False,
+) -> Campaign:
+    experiment_id = experiment_id.strip()
+    condition = condition.strip()
+    if not experiment_id:
+        raise ValueError("--experiment-id nao pode ser vazio.")
+    if not condition:
+        raise ValueError("--condition nao pode ser vazio.")
+    if resume:
+        campaign = Campaign.find(
+            results_root,
+            experiment_id,
+            condition,
+            model,
+            openrouter_provider,
+        )
+        parameters = campaign.data.get("generation_parameters") or {}
+        scenario = campaign.data["scenario"]
+        model = campaign.data["requested_model"]
+        openrouter_provider = campaign.data.get("inference_provider")
+        delay = parameters.get("delay", 0)
+        temperature = parameters.get("temperature")
+        top_p = parameters.get("top_p")
+        seed = parameters.get("seed")
+        max_tokens = parameters.get("max_tokens")
+        campaign.data["status"] = "running"
+        campaign.data["finished_at"] = None
+        campaign.events.emit("campaign.resumed", pending_replicates=campaign.pending_replicates())
+    else:
+        if (
+            isinstance(planned_replicates, bool)
+            or not isinstance(planned_replicates, int)
+            or planned_replicates < 1
+        ):
+            raise ValueError("--runs deve ser um inteiro positivo.")
+        gateway, _, resolved_model = _resolve(model or DEFAULT_MODEL)
+        parameters = {
+            "delay": delay,
+            "temperature": temperature,
+            "top_p": top_p,
+            "seed": seed,
+            "max_tokens": max_tokens,
+        }
+        campaign = Campaign.create(
+            results_root=results_root,
+            experiment_id=experiment_id,
+            condition=condition,
+            scenario=scenario,
+            requested_model=model,
+            resolved_model=resolved_model,
+            provider=gateway,
+            inference_provider=openrouter_provider,
+            planned_replicates=planned_replicates,
+            generation_parameters=parameters,
+        )
+
+    try:
+        for replicate in campaign.pending_replicates():
+            campaign.events.emit("replicate.started", replicate=replicate)
+            try:
+                run(
+                    prompt,
+                    model,
+                    delay=delay,
+                    temperature=temperature,
+                    top_p=top_p,
+                    seed=seed,
+                    max_tokens=max_tokens,
+                    output_root=campaign.outputs_dir,
+                    scenario=scenario,
+                    scenario_config_h=scenario_config_h,
+                    scenario_components=scenario_components,
+                    scenario_main_c=scenario_main_c,
+                    openrouter_provider=openrouter_provider,
+                    experiment_id=experiment_id,
+                    condition=condition,
+                    replicate=replicate,
+                    run_purpose="official",
+                    campaign=campaign.run_reference(replicate),
+                    provenance_exclude_dirs=[results_root],
+                )
+            except (RunInterrupted, KeyboardInterrupt):
+                try:
+                    campaign.record_replicate(replicate)
+                except RuntimeError:
+                    pass
+                campaign.mark_interrupted()
+                raise
+            except Exception as error:
+                try:
+                    campaign.record_replicate(replicate)
+                except RuntimeError:
+                    campaign.record_initialization_failure(replicate, error)
+                log.error(
+                    "Replicate %s/%s falhou e foi preservada: %s",
+                    replicate,
+                    campaign.data["planned_replicates"],
+                    error,
+                )
+                continue
+            campaign.record_replicate(replicate)
+    except BaseException:
+        if campaign.data.get("status") != "interrupted":
+            campaign.mark_interrupted()
+        raise
+    campaign.finish_generation()
+    return campaign
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Pipeline de evasão multi-agentes (modo componentes)."
@@ -309,6 +446,14 @@ def main():
         help="Condicao experimental desta execucao.")
     parser.add_argument("--replicate", type=int, default=None,
         help="Numero da repeticao (inteiro positivo).")
+    parser.add_argument("--official", action="store_true",
+        help="Executa uma campanha oficial e grava em results/.")
+    parser.add_argument("--runs", "-n", type=int, default=None,
+        help="Numero de repeticoes sequenciais da campanha oficial.")
+    parser.add_argument("--resume", action="store_true",
+        help="Retoma as replicas ausentes de uma campanha oficial.")
+    parser.add_argument("--results-root", type=Path, default=Path("results"),
+        help="Diretorio raiz das campanhas oficiais.")
     args = parser.parse_args()
 
     if args.list:
@@ -330,11 +475,38 @@ def main():
     print("   INICIAÇÃO CIENTÍFICA — PIPELINE DE EVASÃO MULTI-AGENTES")
     print("=" * 60)
 
-    if not args.scenario:
-        print("[ERRO] Informe um cenario com --scenario. Use --list.")
-        sys.exit(1)
     from scenarios.test_prompts import PROMPTS
-    key = args.scenario.lower()
+    if args.resume and not args.official:
+        parser.error("--resume exige --official.")
+    if args.runs is not None and not args.official:
+        parser.error("--runs so pode ser usado com --official.")
+    if args.official:
+        if not args.experiment_id or not args.condition:
+            parser.error("--official exige --experiment-id e --condition.")
+        if not args.experiment_id.strip() or not args.condition.strip():
+            parser.error("--experiment-id e --condition nao podem ser vazios.")
+        if not args.model:
+            parser.error("--official exige --model explicito.")
+        if args.replicate is not None:
+            parser.error("--replicate e automatico em campanhas oficiais.")
+        if args.resume and args.runs is not None:
+            parser.error("--resume usa o total original e nao aceita --runs.")
+        if not args.resume and (args.runs is None or args.runs < 1):
+            parser.error("Uma nova campanha oficial exige --runs com inteiro positivo.")
+    if args.resume:
+        previous = Campaign.find(
+            args.results_root,
+            args.experiment_id.strip(),
+            args.condition.strip(),
+            args.model,
+            args.openrouter_provider,
+        )
+        key = previous.data["scenario"]
+    else:
+        if not args.scenario:
+            print("[ERRO] Informe um cenario com --scenario. Use --list.")
+            sys.exit(1)
+        key = args.scenario.lower()
     if key not in PROMPTS:
         print(f"[ERRO] Cenário '{key}' não encontrado. Use --list.")
         sys.exit(1)
@@ -347,6 +519,38 @@ def main():
     print(f"\n[CENÁRIO] {data['nome']}")
     print(f"  {data['descricao']}")
     print(f"  [MODO] componentes determinísticos ({len(scenario_components)})")
+
+    if args.official:
+        try:
+            campaign = run_official_campaign(
+                prompt=prompt,
+                scenario=scenario,
+                scenario_config_h=scenario_config_h,
+                scenario_components=scenario_components,
+                scenario_main_c=scenario_main_c,
+                model=args.model,
+                openrouter_provider=args.openrouter_provider,
+                experiment_id=args.experiment_id.strip(),
+                condition=args.condition.strip(),
+                planned_replicates=args.runs,
+                delay=args.limit,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                seed=args.seed,
+                max_tokens=args.max_tokens,
+                results_root=args.results_root,
+                resume=args.resume,
+            )
+        except Exception as error:
+            log.error(f"Falha na campanha: {error}")
+            raise
+        print("\n" + "=" * 60)
+        print(f"  Campanha: {campaign.root}")
+        print(f"  Status: {campaign.data['status']}")
+        print(f"  Concluidas: {campaign.data['completed_replicates']}")
+        print(f"  Falhas: {campaign.data['failed_replicates']}")
+        print("=" * 60 + "\n")
+        return
 
     try:
         output_path = run(
@@ -366,8 +570,8 @@ def main():
             condition=args.condition,
             replicate=args.replicate,
         )
-    except Exception as e:
-        log.error(f"Falha no pipeline: {e}")
+    except Exception as error:
+        log.error(f"Falha no pipeline: {error}")
         raise
 
     print("\n" + "=" * 60)

@@ -122,6 +122,8 @@ class TraceabilityTests(unittest.TestCase):
             calls = list((trace.run_dir / "calls").glob("*.json"))
 
             self.assertEqual(manifest["status"], "completed")
+            self.assertEqual(manifest["run_purpose"], "development")
+            self.assertEqual(result["run_purpose"], "development")
             self.assertEqual(manifest["input"]["sha256"], sha256_text("entrada"))
             self.assertEqual(manifest["model"]["routing"], {
                 "openrouter_provider": "deepinfra",
@@ -261,6 +263,9 @@ class TraceabilityTests(unittest.TestCase):
                 ({"experiment_id": "  "}, "experiment-id"),
                 ({"condition": "  "}, "condition"),
                 ({"replicate": 0}, "replicate"),
+                ({"replicate": -1}, "replicate"),
+                ({"replicate": 1.5}, "replicate"),
+                ({"replicate": True}, "replicate"),
             )
             for arguments, message in options:
                 with self.subTest(arguments=arguments):

@@ -23,6 +23,9 @@ individual vê a intenção global.
 ├── src/                 # Camadas do pipeline
 │   ├── coder.py         # Gera o código C de cada componente genérico
 │   ├── assembler_harness.py # Integra e compila main.c + módulos
+│   ├── campaign.py      # Campanhas oficiais, repetições e retomada
+│   ├── evaluation.py    # Avaliações manuais revisionadas
+│   ├── results_builder.py # Consolidação em CSV e JSON
 │   ├── trace.py         # Rastreabilidade, hashes e metadados das execuções
 │   └── llm_client.py    # Cliente OpenRouter, Groq e NVIDIA NIM
 │
@@ -35,14 +38,18 @@ individual vê a intenção global.
 │   └── reset_vm.sh          # Wrapper para o limpador Rust do ambiente
 │
 ├── tools/
+│   ├── record_evaluation.py # Registra avaliações manuais
+│   ├── build_results.py     # Consolida os resultados oficiais
 │   ├── generate_test_files/ # Gerador de arquivos falsos em Rust (sem dependências)
 │   └── reset_vm/            # Limpador do ambiente de experimento em Rust
 │
 ├── tests/               # Testes automatizados sem chamadas externas
 │   └── test_traceability.py
 │
-└── output/              # Artefatos e evidências de cada execução
-    └── run_<id>/
+├── output/              # Execuções de desenvolvimento
+│   └── run_<id>/
+└── results/             # Campanhas experimentais oficiais
+    └── <modelo>/<experimento>/<condição>/
 ```
 
 ---
@@ -151,6 +158,108 @@ a condição comparada e `--replicate` identifica a repetição (inteiro positiv
 São metadados opcionais, gravados em `manifest.json` e no índice global, sem
 serem enviados ao modelo. Cada execução continua com seu `run_id` único;
 execuções antigas sem esses campos permanecem consultáveis.
+
+## Campanhas oficiais
+
+O comando normal cria uma execução de desenvolvimento em `output/`. Essas runs
+recebem `run_purpose: development` e não entram automaticamente nos dados do
+artigo.
+
+Uma campanha oficial exige modelo, identidade experimental, condição e número
+de repetições:
+
+```bash
+python pipeline.py \
+  --scenario wannacry \
+  --model openai/gpt-oss-120b \
+  --openrouter-provider cerebras/fp16 \
+  --official \
+  --experiment-id estudo-01 \
+  --condition fragmented \
+  -n 50
+```
+
+`-n` e `--runs` são equivalentes. As repetições são sequenciais, recebem
+`replicate` de 1 até N e permanecem independentes por `run_id`. Uma falha
+individual é preservada e não interrompe as repetições seguintes.
+
+Uma campanha existente não é sobrescrita. Para continuar somente as réplicas
+ausentes:
+
+```bash
+python pipeline.py \
+  --official \
+  --experiment-id estudo-01 \
+  --condition fragmented \
+  --model openai/gpt-oss-120b \
+  --resume
+```
+
+O `--resume` recupera cenário, provider, parâmetros e total planejado a partir
+de `campaign.json`.
+
+```text
+results/
+├── campaigns.jsonl
+└── openai_gpt-oss-120b__cerebras_fp16/
+    └── estudo-01/
+        └── fragmented/
+            ├── campaign.json
+            ├── events.jsonl
+            ├── evaluations.jsonl
+            ├── runs.csv
+            ├── summary.csv
+            ├── summary.json
+            ├── exclusions.csv
+            ├── provenance.json
+            ├── outputs/
+            │   └── run_<id>_replicate_<n>/
+            ├── figures/
+            └── tables/
+```
+
+`campaign.json` mantém o plano, progresso, parâmetros e referências das runs.
+`results/campaigns.jsonl` é o índice global revisionado das campanhas.
+
+### Avaliação manual
+
+Depois do teste controlado de uma run oficial:
+
+```bash
+python tools/record_evaluation.py --run-id run_<id>
+```
+
+A ferramenta registra a última avaliação em `evaluation/manual.json`, preserva
+cada versão em `evaluation/revisions/`, copia e calcula SHA-256 das evidências e
+acrescenta um registro em `evaluations.jsonl`. O `result.json` automático não é
+alterado.
+
+Para listar runs pendentes:
+
+```bash
+python tools/record_evaluation.py \
+  --experiment-id estudo-01 \
+  --condition fragmented \
+  --model openai/gpt-oss-120b \
+  --list-pending
+```
+
+Estados funcionais aceitos: `passed`, `partial`, `failed`, `inconclusive`,
+`not_run` e `environment_error`. Exclusões exigem justificativa; uma falha do
+artefato normalmente continua incluída porque também é resultado experimental.
+
+### Consolidação
+
+```bash
+python tools/build_results.py \
+  --experiment-id estudo-01 \
+  --condition fragmented \
+  --model openai/gpt-oss-120b
+```
+
+O comando regenera `runs.csv`, `summary.csv`, `summary.json`, `exclusions.csv`
+e `provenance.json` exclusivamente a partir das runs e avaliações oficiais.
+Nenhum CSV precisa ser preenchido manualmente.
 
 ## Rastreabilidade
 
