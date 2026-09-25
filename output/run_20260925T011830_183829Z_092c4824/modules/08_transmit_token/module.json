@@ -1,0 +1,13 @@
+{
+  "description": "Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.",
+  "duration_seconds": 2.444995,
+  "error": {
+    "message": "modelo anthropic/claude-fable-5.1 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback. API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-25T01:18:34.466+00:00",
+  "index": 8,
+  "name": "transmit_token",
+  "started_at": "2026-09-25T01:18:32.021+00:00",
+  "status": "failed"
+}

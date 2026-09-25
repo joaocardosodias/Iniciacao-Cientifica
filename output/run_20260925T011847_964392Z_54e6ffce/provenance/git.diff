@@ -1,0 +1,255 @@
+diff --git c/README.md w/README.md
+index 1b322b7..8436e3d 100644
+--- c/README.md
++++ w/README.md
+@@ -160,6 +160,18 @@ Cada execução recebe um identificador único baseado em horário UTC, precisã
+ microssegundos e sufixo aleatório. Uma execução não reutiliza nem sobrescreve
+ uma pasta existente.
+ 
++`output/experiments.jsonl` mantém um índice global, com uma linha JSON por
++execução finalizada ou recuperada. Cada registro aponta para o `result.json`
++correspondente por caminhos relativos a `output/` e resume status, cenário,
++quantidade de módulos, hash combinado das fontes, modelo, duração e chamadas
++ao LLM, sem copiar o prompt. Escritas concorrentes são protegidas por lock.
++Se o resultado de uma execução mudar, uma nova linha com `revision` maior é
++adicionada; a última linha de cada `run_id` é a vigente. Falha ao escrever o
++índice gera aviso, sem alterar o status da execução. Na próxima inicialização,
++execuções antigas com `manifest.json` e `result.json` também entram no índice;
++esse preenchimento pode aumentar o tempo de inicialização quando houver muitas
++execuções.
++
+ ```text
+ output/run_<id>/
+ ├── manifest.json
+diff --git c/src/recovery.py w/src/recovery.py
+index e4efdea..bd56f3e 100644
+--- c/src/recovery.py
++++ w/src/recovery.py
+@@ -8,6 +8,7 @@ from typing import Any
+ 
+ from src.call_summary import summarize_calls
+ from src.events import EventLog, utc_now
++from src.experiment_index import index_existing_runs, try_index_experiment
+ from src.trace import artifact_index, write_json_atomic
+ 
+ log = logging.getLogger("pipeline.recovery")
+@@ -68,7 +69,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+     result_existed = result_path.exists()
+     if result_existed:
+         try:
+-            terminal = json.loads(result_path.read_text(encoding="utf-8")).get("status")
++            result = json.loads(result_path.read_text(encoding="utf-8"))
++            terminal = result.get("status")
+         except (OSError, ValueError):
+             return {"run_id": run_id, "status": "skipped", "reason": "unreadable_result"}
+         if not terminal:
+@@ -90,7 +92,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+         reason = "process_not_alive"
+         terminal = "abandoned"
+         events.emit("run.recovered", reason=reason, pid=pid, hostname=host)
+-        write_json_atomic(result_path, {
++        result = {
+             "schema_version": manifest.get("schema_version", "1.0"),
+             "run_id": run_id,
+             "status": terminal,
+@@ -105,7 +107,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+             "recovered_at": now,
+             "llm_calls": summarize_calls(run_dir),
+             "artifacts": artifact_index(run_dir),
+-        })
++        }
++        write_json_atomic(result_path, result)
+ 
+     manifest["status"] = terminal
+     manifest["updated_at"] = now
+@@ -117,6 +120,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+         "result_existed": result_existed,
+     }
+     write_json_atomic(manifest_path, manifest)
++    try_index_experiment(run_dir, manifest, result)
+ 
+     return {"run_id": run_id, "status": "recovered", "terminal_status": terminal,
+             "reason": reason, "pid": pid}
+@@ -140,4 +144,5 @@ def recover_stale_runs(output_root: Path) -> list[dict[str, Any]]:
+         if outcome.get("status") == "recovered":
+             recovered.append(outcome)
+             log.warning(f"Execucao abandonada recuperada: {outcome['run_id']} (pid {outcome['pid']})")
++    index_existing_runs(output_root)
+     return recovered
+diff --git c/src/trace.py w/src/trace.py
+index 0a28a92..8a2054d 100644
+--- c/src/trace.py
++++ w/src/trace.py
+@@ -13,6 +13,7 @@ from typing import Any
+ from src.call_summary import summarize_calls
+ from src.events import EventLog, utc_now
+ from src.environment import collect as collect_environment
++from src.experiment_index import try_index_experiment
+ from src.provenance import collect as collect_provenance
+ from src.provenance import find_repo_root
+ 
+@@ -238,6 +239,7 @@ class RunTrace:
+             self.manifest["updated_at"] = finished_at
+             self._write_json_atomic(self.run_dir / "result.json", result)
+             self._save_manifest()
++            try_index_experiment(self.run_dir, self.manifest, result)
+             self._finalized = True
+             return self.run_dir / "result.json"
+ 
+diff --git c/tests/test_call_summary.py w/tests/test_call_summary.py
+index 4b1de97..995774b 100644
+--- c/tests/test_call_summary.py
++++ w/tests/test_call_summary.py
+@@ -83,6 +83,26 @@ class CallSummaryTests(unittest.TestCase):
+             result = json.loads((trace.run_dir / "result.json").read_text())
+             self.assertEqual(result["llm_calls"]["total"], 1)
+             self.assertEqual(result["llm_calls"]["tokens"]["total"], 8)
++            index_path = Path(temporary) / "experiments.jsonl"
++            entry = json.loads(index_path.read_text())
++            self.assertEqual(entry["status"], "abandoned")
++            self.assertTrue(entry["recovered"])
++            self.assertEqual(entry["llm_calls"]["total"], 1)
++            with patch("src.recovery.process_alive", return_value=False):
++                recover_run(trace.run_dir)
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++    def test_recovery_succeeds_when_index_is_unwritable(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
++            trace.manifest["process"] = {"pid": 999999999, "hostname": socket.gethostname()}
++            trace._save_manifest()
++            with patch("src.recovery.process_alive", return_value=False), \
++                 patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
++                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
++                    outcome = recover_run(trace.run_dir)
++            self.assertEqual(outcome["terminal_status"], "abandoned")
++            self.assertEqual(json.loads((trace.run_dir / "result.json").read_text())["status"], "abandoned")
+ 
+     def test_client_persists_provider_and_cost_from_api_response(self):
+         with tempfile.TemporaryDirectory() as temporary:
+diff --git c/tests/test_traceability.py w/tests/test_traceability.py
+index 5103a11..f164b13 100644
+--- c/tests/test_traceability.py
++++ w/tests/test_traceability.py
+@@ -1,10 +1,13 @@
+ import json
+ import tempfile
+ import unittest
++from concurrent.futures import ThreadPoolExecutor
+ from pathlib import Path
+ from unittest.mock import patch
+ 
+ import pipeline
++from src.experiment_index import append_experiment
++from src.recovery import recover_stale_runs
+ from src.trace import RunTrace, sha256_text
+ 
+ 
+@@ -78,6 +81,24 @@ class FakeAssemblerHarness:
+ 
+ 
+ class TraceabilityTests(unittest.TestCase):
++    def test_global_index_handles_concurrent_writes_without_duplicates(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            manifest = {"created_at": "2026-01-01T00:00:00+00:00", "model": {}}
++
++            def register(index):
++                run_id = f"run_{index}"
++                return append_experiment(root / run_id, manifest, {
++                    "run_id": run_id, "status": "completed", "compiled": False,
++                })
++
++            with ThreadPoolExecutor(max_workers=8) as executor:
++                list(executor.map(register, [0, 1, 2, 3] * 3))
++
++            entries = [json.loads(line) for line in (root / "experiments.jsonl").read_text().splitlines()]
++            self.assertEqual({entry["run_id"] for entry in entries}, {f"run_{i}" for i in range(4)})
++            self.assertEqual(len(entries), 4)
++
+     def test_run_trace_records_calls_and_hashes(self):
+         with tempfile.TemporaryDirectory() as temporary:
+             trace = RunTrace(
+@@ -107,6 +128,58 @@ class TraceabilityTests(unittest.TestCase):
+             self.assertTrue(result["compiled"])
+             self.assertIn("main.c", {item["path"] for item in result["artifacts"]})
+ 
++            index_path = Path(temporary) / "experiments.jsonl"
++            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
++            self.assertEqual(len(entries), 1)
++            self.assertEqual(entries[0]["run_id"], trace.run_id)
++            self.assertEqual(entries[0]["status"], "completed")
++            self.assertEqual(entries[0]["run_dir"], trace.run_id)
++            self.assertEqual(entries[0]["result_path"], f"{trace.run_id}/result.json")
++            self.assertEqual(entries[0]["revision"], 1)
++            self.assertEqual(entries[0]["llm_calls"]["total"], 1)
++            self.assertNotIn("entrada", index_path.read_text())
++            self.assertFalse(append_experiment(trace.run_dir, manifest, result))
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++    def test_index_failure_preserves_terminal_result(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
++            with patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
++                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
++                    trace.finalize("completed", compiled=True)
++
++            result = json.loads((trace.run_dir / "result.json").read_text())
++            manifest = json.loads((trace.run_dir / "manifest.json").read_text())
++            self.assertEqual(result["status"], "completed")
++            self.assertEqual(manifest["status"], "completed")
++            self.assertTrue(result["compiled"])
++
++    def test_existing_runs_are_indexed_on_recovery_scan(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            trace = RunTrace("entrada", "modelo", 0, output_root=root)
++            trace.finalize("completed")
++            index_path = root / "experiments.jsonl"
++            index_path.unlink()
++
++            self.assertEqual(recover_stale_runs(root), [])
++            entry = json.loads(index_path.read_text())
++            self.assertEqual(entry["run_id"], trace.run_id)
++            self.assertEqual(entry["status"], "completed")
++            self.assertEqual(recover_stale_runs(root), [])
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++            result_path = trace.run_dir / "result.json"
++            result = json.loads(result_path.read_text())
++            result["llm_calls"]["total"] = 2
++            result_path.write_text(json.dumps(result), encoding="utf-8")
++            self.assertEqual(recover_stale_runs(root), [])
++            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
++            self.assertEqual([item["revision"] for item in entries], [1, 2])
++            self.assertEqual(entries[-1]["llm_calls"], result["llm_calls"])
++            self.assertEqual(recover_stale_runs(root), [])
++            self.assertEqual(len(index_path.read_text().splitlines()), 2)
++
+     @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
+     @patch.object(pipeline, "Coder", FakeCoder)
+     @patch.object(pipeline, "PromptMaker", FakePromptMaker)
+@@ -128,6 +201,13 @@ class TraceabilityTests(unittest.TestCase):
+             self.assertEqual(manifest["status"], "completed")
+             self.assertEqual(manifest["stages"]["planner"]["module_count"], 2)
+             self.assertEqual(result["module_count"], 2)
++            entry = json.loads((Path(temporary) / "experiments.jsonl").read_text())
++            self.assertEqual(entry["scenario"], "test")
++            self.assertEqual(entry["module_count"], 2)
++            self.assertEqual(entry["source_combined_sha256"],
++                             manifest["software"]["git"]["source_combined_sha256"])
++            self.assertEqual(entry["run_dir"], run_dir.name)
++            self.assertEqual(entry["result_path"], f"{run_dir.name}/result.json")
+             self.assertTrue((run_dir / "modules/module_one.c").exists())
+             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
+             self.assertTrue((run_dir / "assembly/task.txt").exists())
+@@ -148,6 +228,9 @@ class TraceabilityTests(unittest.TestCase):
+             self.assertEqual(result["status"], "failed")
+             self.assertEqual(result["error"]["type"], "ValueError")
+             self.assertTrue((run_dirs[0] / "prompts/sanitized.txt").exists())
++            entry = json.loads((output_root / "experiments.jsonl").read_text())
++            self.assertEqual(entry["status"], "failed")
++            self.assertEqual(entry["error_type"], "ValueError")
+ 
+ 
+ if __name__ == "__main__":

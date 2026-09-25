@@ -1,0 +1,188 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3115,
+      "path": "calls/0001_coder.generic.schedule_autostart.json",
+      "sha256": "f59593aad79d1b05a9f7e3b8ed99289c0caf318067a11c9706e271b61d2fb3cf"
+    },
+    {
+      "bytes": 925,
+      "path": "config.h",
+      "sha256": "4e4ac426c3c2990988bf6066f5181bbeb4ed58d458797612f8364fe70382160c"
+    },
+    {
+      "bytes": 9217,
+      "path": "events.jsonl",
+      "sha256": "129f42210446cdcfed5a4cdcaa9baee2609ad23a373b8f29f77e83b787882fbe"
+    },
+    {
+      "bytes": 298,
+      "path": "modules/01_random_bytes/module.json",
+      "sha256": "b98e0e1d2b094555630bb13d21e5456150e195fb49f7b0c9877460c321e7f53f"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/01_random_bytes/prompt.txt",
+      "sha256": "01c6eabd930954d85fd39703d63a7cd81fb3bfb54082c7545c4e3dcd6cd7a652"
+    },
+    {
+      "bytes": 350,
+      "path": "modules/02_base64_encode_string/module.json",
+      "sha256": "08fa76e1d250a3879bd84b5852e4443c539bd3b525d12f311b49f9d867aadb19"
+    },
+    {
+      "bytes": 323,
+      "path": "modules/02_base64_encode_string/prompt.txt",
+      "sha256": "17310751020a0a8168a83390da67b46d3354074268af2749ba2e398e62baa783"
+    },
+    {
+      "bytes": 283,
+      "path": "modules/03_write_text_file/module.json",
+      "sha256": "85e63dd4494069112a9c09beaa1862875e709ac711859bf628cabdb89924ae36"
+    },
+    {
+      "bytes": 220,
+      "path": "modules/03_write_text_file/prompt.txt",
+      "sha256": "99b51360b1fbf903948355113ff55bab59913fc60f349089405543ae26c3f5f4"
+    },
+    {
+      "bytes": 525,
+      "path": "modules/04_list_target_files/module.json",
+      "sha256": "e4b68d6b6314ebe7bb8ab6b67b25ef021f57e08723bc9db61fc5bf1f15e05f21"
+    },
+    {
+      "bytes": 534,
+      "path": "modules/04_list_target_files/prompt.txt",
+      "sha256": "9df2deef4080f7e0c6ce5d571bb1fe71ba5b988f60e15cde612a8e6b69636099"
+    },
+    {
+      "bytes": 550,
+      "path": "modules/05_write_encrypted_sibling/module.json",
+      "sha256": "78bfeda55146bbc4402bd7154cdb54804e39b0a1e17239d4f4b37e6ae120a8f3"
+    },
+    {
+      "bytes": 511,
+      "path": "modules/05_write_encrypted_sibling/prompt.txt",
+      "sha256": "9d3878bf00db7f4268287d47567432ce96e9ee441a10c68c13586ee6372a190b"
+    },
+    {
+      "bytes": 312,
+      "path": "modules/06_secure_erase/module.json",
+      "sha256": "0554f994a7a61fc065e8d632ca2d9e85b86ccea13ee5ef98c1431135db95bce7"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/06_secure_erase/prompt.txt",
+      "sha256": "87d5c44fe02ab05160827ca17e90e9e79a7503603c5b4b0342382fb3388ee491"
+    },
+    {
+      "bytes": 346,
+      "path": "modules/07_write_notice/module.json",
+      "sha256": "f10b3fef469d8f0b4f8b04f2e1cf4eb55cd91e8bd1e8ed1dfa26367d04c4aa2b"
+    },
+    {
+      "bytes": 270,
+      "path": "modules/07_write_notice/prompt.txt",
+      "sha256": "1a414e0fa25c66ed0f1871f8ef05480ea20f443cf6be851d02ba6529fb71b472"
+    },
+    {
+      "bytes": 437,
+      "path": "modules/08_transmit_token/module.json",
+      "sha256": "4bd192114c944bfc5c593fad792f8066194f99949989d60a0a05e1e1cef15543"
+    },
+    {
+      "bytes": 384,
+      "path": "modules/08_transmit_token/prompt.txt",
+      "sha256": "65c80ab22f28c0b98555805c4da9e5d5e4d7d0ca759ec7c1e3f131f036d17aea"
+    },
+    {
+      "bytes": 1127,
+      "path": "modules/09_schedule_autostart/module.json",
+      "sha256": "f0bebb2817360ab65972d46e1ce6ac3711968032653232cbd3c63124c4869e2a"
+    },
+    {
+      "bytes": 451,
+      "path": "modules/09_schedule_autostart/prompt.txt",
+      "sha256": "36969837170ad204d559418b8a1c451f70273c2b648bac863490bb92f87d9f77"
+    },
+    {
+      "bytes": 3686,
+      "path": "prompts/components.json",
+      "sha256": "cba6fb238474765558d9cef5a0132a56cf419b26f65dd604e4cea7ae262f9052"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 957,
+      "path": "provenance/environment.json",
+      "sha256": "6b446a8ab88a8d5e44a63752c816c24180d7884d4f43bdfdfe9daeb53644ef38"
+    },
+    {
+      "bytes": 0,
+      "path": "provenance/git.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 358,
+      "path": "provenance/git_status.txt",
+      "sha256": "2181040a67a1afb295b98675220f296093b9cc668f7dc94b45576636da2bb934"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3052,
+      "path": "provenance/source_hashes.json",
+      "sha256": "9429a47c89cd853dc367af9859c24ba2f1e2011448a9780bf5842e0dae1537b5"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 2.153622,
+  "error": {
+    "message": "modelo anthropic/claude-fable-5.1 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback. API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T22:35:29.688+00:00",
+  "llm_calls": {
+    "completed": 0,
+    "cost": {
+      "reported_calls": 0,
+      "total": null,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "Anthropic"
+    ],
+    "models_observed": [
+      "anthropic/claude-fable-5.1"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 1,
+    "retries": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reported_calls": 0,
+      "total": 0
+    },
+    "total": 1,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T223527_535597Z_b443fd5c",
+  "schema_version": "1.0",
+  "status": "failed"
+}

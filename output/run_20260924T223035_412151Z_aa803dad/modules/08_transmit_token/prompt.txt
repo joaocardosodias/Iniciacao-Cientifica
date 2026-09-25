@@ -1,0 +1,3 @@
+Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.
+
+EXACT PROTOTYPE: int transmit_token(const char *endpoint, const char *token_path);

@@ -1,0 +1,3 @@
+Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write the NUL-terminated contents of the macro `NOTICE_TEXT` (both from `config.h`). Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE: int write_notice(const char *directory);

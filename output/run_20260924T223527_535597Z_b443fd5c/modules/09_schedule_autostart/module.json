@@ -1,0 +1,13 @@
+{
+  "description": "Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 1.672568,
+  "error": {
+    "message": "modelo anthropic/claude-fable-5.1 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback. API integrators: you can reduce refusals for your users by configuring a fallback model — see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T22:35:29.686+00:00",
+  "index": 9,
+  "name": "schedule_autostart",
+  "started_at": "2026-09-24T22:35:28.014+00:00",
+  "status": "failed"
+}

@@ -1,10 +1,13 @@
 import json
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
 import pipeline
+from src.experiment_index import append_experiment
+from src.recovery import recover_stale_runs
 from src.trace import RunTrace, sha256_text
 
 
@@ -78,6 +81,40 @@ class FakeAssemblerHarness:
 
 
 class TraceabilityTests(unittest.TestCase):
+    def test_index_uses_stage_module_count_when_result_lacks_it(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cases = (
+                {"planner": {"module_count": 7}},
+                {"components": {"count": 9}},
+                {"planner": {"module_count": 7}, "components": {"count": 9}},
+            )
+            for index, stages in enumerate(cases):
+                run_id = f"run_{index}"
+                manifest = {"stages": stages}
+                result = {"run_id": run_id, "status": "failed"}
+                append_experiment(root / run_id, manifest, result)
+            entries = [json.loads(line) for line in (root / "experiments.jsonl").read_text().splitlines()]
+            self.assertEqual([entry["module_count"] for entry in entries], [7, 9, 7])
+
+    def test_global_index_handles_concurrent_writes_without_duplicates(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = {"created_at": "2026-01-01T00:00:00+00:00", "model": {}}
+
+            def register(index):
+                run_id = f"run_{index}"
+                return append_experiment(root / run_id, manifest, {
+                    "run_id": run_id, "status": "completed", "compiled": False,
+                })
+
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                list(executor.map(register, [0, 1, 2, 3] * 3))
+
+            entries = [json.loads(line) for line in (root / "experiments.jsonl").read_text().splitlines()]
+            self.assertEqual({entry["run_id"] for entry in entries}, {f"run_{i}" for i in range(4)})
+            self.assertEqual(len(entries), 4)
+
     def test_run_trace_records_calls_and_hashes(self):
         with tempfile.TemporaryDirectory() as temporary:
             trace = RunTrace(
@@ -85,6 +122,10 @@ class TraceabilityTests(unittest.TestCase):
                 requested_model="modelo",
                 delay=0,
                 output_root=Path(temporary),
+                routing_parameters={
+                    "openrouter_provider": "deepinfra",
+                    "allow_fallbacks": False,
+                },
             )
             trace.configure_model("provedor/modelo", "provedor")
             trace.record_llm_call(
@@ -103,9 +144,65 @@ class TraceabilityTests(unittest.TestCase):
 
             self.assertEqual(manifest["status"], "completed")
             self.assertEqual(manifest["input"]["sha256"], sha256_text("entrada"))
+            self.assertEqual(manifest["model"]["routing"], {
+                "openrouter_provider": "deepinfra",
+                "allow_fallbacks": False,
+            })
             self.assertEqual(len(calls), 1)
             self.assertTrue(result["compiled"])
             self.assertIn("main.c", {item["path"] for item in result["artifacts"]})
+
+            index_path = Path(temporary) / "experiments.jsonl"
+            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
+            self.assertEqual(len(entries), 1)
+            self.assertEqual(entries[0]["run_id"], trace.run_id)
+            self.assertEqual(entries[0]["status"], "completed")
+            self.assertEqual(entries[0]["run_dir"], trace.run_id)
+            self.assertEqual(entries[0]["result_path"], f"{trace.run_id}/result.json")
+            self.assertEqual(entries[0]["revision"], 1)
+            self.assertEqual(entries[0]["llm_calls"]["total"], 1)
+            self.assertNotIn("entrada", index_path.read_text())
+            self.assertFalse(append_experiment(trace.run_dir, manifest, result))
+            self.assertEqual(len(index_path.read_text().splitlines()), 1)
+
+    def test_index_failure_preserves_terminal_result(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
+            with patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
+                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
+                    trace.finalize("completed", compiled=True)
+
+            result = json.loads((trace.run_dir / "result.json").read_text())
+            manifest = json.loads((trace.run_dir / "manifest.json").read_text())
+            self.assertEqual(result["status"], "completed")
+            self.assertEqual(manifest["status"], "completed")
+            self.assertTrue(result["compiled"])
+
+    def test_existing_runs_are_indexed_on_recovery_scan(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            trace = RunTrace("entrada", "modelo", 0, output_root=root)
+            trace.finalize("completed")
+            index_path = root / "experiments.jsonl"
+            index_path.unlink()
+
+            self.assertEqual(recover_stale_runs(root), [])
+            entry = json.loads(index_path.read_text())
+            self.assertEqual(entry["run_id"], trace.run_id)
+            self.assertEqual(entry["status"], "completed")
+            self.assertEqual(recover_stale_runs(root), [])
+            self.assertEqual(len(index_path.read_text().splitlines()), 1)
+
+            result_path = trace.run_dir / "result.json"
+            result = json.loads(result_path.read_text())
+            result["llm_calls"]["total"] = 2
+            result_path.write_text(json.dumps(result), encoding="utf-8")
+            self.assertEqual(recover_stale_runs(root), [])
+            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
+            self.assertEqual([item["revision"] for item in entries], [1, 2])
+            self.assertEqual(entries[-1]["llm_calls"], result["llm_calls"])
+            self.assertEqual(recover_stale_runs(root), [])
+            self.assertEqual(len(index_path.read_text().splitlines()), 2)
 
     @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
     @patch.object(pipeline, "Coder", FakeCoder)
@@ -120,6 +217,7 @@ class TraceabilityTests(unittest.TestCase):
                 model="fake/model",
                 output_root=Path(temporary),
                 scenario="test",
+                openrouter_provider="deepinfra",
             )
             run_dir = main_c.parent
             manifest = json.loads((run_dir / "manifest.json").read_text())
@@ -127,7 +225,18 @@ class TraceabilityTests(unittest.TestCase):
 
             self.assertEqual(manifest["status"], "completed")
             self.assertEqual(manifest["stages"]["planner"]["module_count"], 2)
+            self.assertEqual(manifest["model"]["routing"], {
+                "openrouter_provider": "deepinfra",
+                "allow_fallbacks": False,
+            })
             self.assertEqual(result["module_count"], 2)
+            entry = json.loads((Path(temporary) / "experiments.jsonl").read_text())
+            self.assertEqual(entry["scenario"], "test")
+            self.assertEqual(entry["module_count"], 2)
+            self.assertEqual(entry["source_combined_sha256"],
+                             manifest["software"]["git"]["source_combined_sha256"])
+            self.assertEqual(entry["run_dir"], run_dir.name)
+            self.assertEqual(entry["result_path"], f"{run_dir.name}/result.json")
             self.assertTrue((run_dir / "modules/module_one.c").exists())
             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
             self.assertTrue((run_dir / "assembly/task.txt").exists())
@@ -148,6 +257,9 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(result["status"], "failed")
             self.assertEqual(result["error"]["type"], "ValueError")
             self.assertTrue((run_dirs[0] / "prompts/sanitized.txt").exists())
+            entry = json.loads((output_root / "experiments.jsonl").read_text())
+            self.assertEqual(entry["status"], "failed")
+            self.assertEqual(entry["error_type"], "ValueError")
 
 
 if __name__ == "__main__":

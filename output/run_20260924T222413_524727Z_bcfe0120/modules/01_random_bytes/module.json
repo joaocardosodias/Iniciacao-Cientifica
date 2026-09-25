@@ -1,0 +1,13 @@
+{
+  "description": "Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using OpenSSL `RAND_bytes`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 2.062412,
+  "error": {
+    "message": "modelo anthropic/claude-opus-5 recusou o conteudo no provedor: This request triggered restrictions on violative cyber content and was blocked under Anthropic's Usage Policy. To learn more, see https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback.",
+    "type": "ModelRefusalError"
+  },
+  "finished_at": "2026-09-24T22:24:16.135+00:00",
+  "index": 1,
+  "name": "random_bytes",
+  "started_at": "2026-09-24T22:24:14.073+00:00",
+  "status": "failed"
+}

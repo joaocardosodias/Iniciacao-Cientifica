@@ -1,0 +1,489 @@
+diff --git c/README.md w/README.md
+index 1b322b7..dd34c01 100644
+--- c/README.md
++++ w/README.md
+@@ -149,17 +149,37 @@ rtk python pipeline.py --models
+ rtk python pipeline.py --scenario wannacry --model gpt-4o-mini
+ rtk python pipeline.py --scenario wannacry --limit 2
+ rtk python pipeline.py --scenario wannacry --temperature 0 --seed 42 --max-tokens 8192
++rtk python pipeline.py --scenario wannacry --model deepseek-v3 --openrouter-provider deepinfra
+ ```
+ 
+ Parâmetros ausentes de geração são registrados como `null`, indicando que o
+ padrão do provedor foi utilizado.
+ 
++`--openrouter-provider` fixa o slug do provider de inferência para modelos
++roteados pelo OpenRouter e desativa fallback para outros providers. O provider
++precisa oferecer o modelo selecionado; caso contrário, a chamada falha. A opção
++não pode ser combinada com modelos `groq:` ou `nim:`.
++
+ ## Rastreabilidade
+ 
+ Cada execução recebe um identificador único baseado em horário UTC, precisão de
+ microssegundos e sufixo aleatório. Uma execução não reutiliza nem sobrescreve
+ uma pasta existente.
+ 
++`output/experiments.jsonl` mantém um índice global, com uma linha JSON por
++execução finalizada ou recuperada. Cada registro aponta para o `result.json`
++correspondente por caminhos relativos a `output/` e resume status, cenário,
++quantidade de módulos, hash combinado das fontes, modelo, duração e chamadas
++ao LLM, sem copiar o prompt. Escritas concorrentes são protegidas por lock.
++Se os dados resumidos no índice mudarem, uma nova linha com `revision` maior é
++adicionada; a última linha de cada `run_id` é a vigente. Quando ausente no
++`result.json`, a quantidade de módulos vem do estágio `planner` ou `components`
++do manifesto. Falha ao escrever o índice gera aviso, sem alterar o status da
++execução. Na próxima inicialização,
++execuções antigas com `manifest.json` e `result.json` também entram no índice;
++esse preenchimento pode aumentar o tempo de inicialização quando houver muitas
++execuções.
++
+ ```text
+ output/run_<id>/
+ ├── manifest.json
+diff --git c/pipeline.py w/pipeline.py
+index 6176f56..4f8f115 100644
+--- c/pipeline.py
++++ w/pipeline.py
+@@ -37,6 +37,7 @@ def run(
+     scenario_config_h: str | None = None,
+     scenario_components: list[dict] | None = None,
+     scenario_main_c: str | None = None,
++    openrouter_provider: str | None = None,
+ ) -> Path:
+     parameters = {
+         "temperature": temperature,
+@@ -51,6 +52,10 @@ def run(
+         delay=delay,
+         output_root=output_root,
+         generation_parameters=parameters,
++        routing_parameters={
++            "openrouter_provider": openrouter_provider,
++            "allow_fallbacks": False if openrouter_provider else None,
++        },
+     )
+     if scenario:
+         trace.record_stage("input", {"scenario": scenario})
+@@ -67,6 +72,7 @@ def run(
+             top_p=top_p,
+             seed=seed,
+             max_tokens=max_tokens,
++            openrouter_provider=openrouter_provider,
+         )
+         trace.configure_model(llm.model, llm.provider)
+         log.info(f"Modelo: {llm.model}")
+@@ -329,6 +335,8 @@ def main():
+         help="Seed enviada ao provedor quando suportada.")
+     parser.add_argument("--max-tokens", type=int, default=None,
+         help="Limite de tokens de saída por chamada.")
++    parser.add_argument("--openrouter-provider", default=None,
++        help="Provider de inferência fixo no OpenRouter, sem fallback (ex: deepinfra).")
+     args = parser.parse_args()
+ 
+     if args.list:
+@@ -391,6 +399,7 @@ def main():
+             top_p=args.top_p,
+             seed=args.seed,
+             max_tokens=args.max_tokens,
++            openrouter_provider=args.openrouter_provider,
+             scenario=scenario,
+             scenario_config_h=scenario_config_h,
+             scenario_components=scenario_components,
+diff --git c/src/llm_client.py w/src/llm_client.py
+index e5105ad..01fab9f 100644
+--- c/src/llm_client.py
++++ w/src/llm_client.py
+@@ -128,10 +128,18 @@ class LLMClient:
+         top_p: float | None = None,
+         seed: int | None = None,
+         max_tokens: int | None = None,
++        openrouter_provider: str | None = None,
+     ):
+         raw = model or DEFAULT_MODEL
+         provider, base_url, self.model = _resolve(raw)
+         self.provider = provider
++        self.openrouter_provider = openrouter_provider.strip() if openrouter_provider else None
++        if openrouter_provider is not None and not self.openrouter_provider:
++            raise ValueError("O provider do OpenRouter nao pode ser vazio.")
++        if self.openrouter_provider and self.provider != "openrouter":
++            raise ValueError(
++                "--openrouter-provider so pode ser usado com modelos roteados pelo OpenRouter."
++            )
+         self.delay = delay
+         self.trace = trace
+         self.generation_parameters = {
+@@ -186,6 +194,9 @@ class LLMClient:
+         if self.trace is not None:
+             self.trace.emit("llm.call.started", call_id=call_id, stage=stage,
+                             model=self.model, provider=self.provider,
++                            requested_inference_provider=getattr(
++                                self, "openrouter_provider", None
++                            ),
+                             delay_seconds=self.delay)
+ 
+         if self.delay > 0:
+@@ -210,6 +221,14 @@ class LLMClient:
+                 })
+                 if max_tokens is not None:
+                     request["max_tokens"] = max_tokens
++                openrouter_provider = getattr(self, "openrouter_provider", None)
++                if openrouter_provider:
++                    request["extra_body"] = {
++                        "provider": {
++                            "order": [openrouter_provider],
++                            "allow_fallbacks": False,
++                        }
++                    }
+                 response = self._client.chat.completions.create(
+                     **request,
+                 )
+@@ -415,6 +434,7 @@ class LLMClient:
+             "finished_at": utc_now(),
+             "duration_seconds": round(time.perf_counter() - started, 6),
+             "provider": self.provider,
++            "requested_inference_provider": getattr(self, "openrouter_provider", None),
+             "inference_provider": inference_provider,
+             "requested_model": self.model,
+             "response_model": getattr(response, "model", None),
+@@ -436,6 +456,7 @@ class LLMClient:
+             stage=stage,
+             status=status,
+             provider=self.provider,
++            requested_inference_provider=getattr(self, "openrouter_provider", None),
+             inference_provider=inference_provider,
+             model=self.model,
+             response_model=metadata["response_model"],
+diff --git c/src/recovery.py w/src/recovery.py
+index e4efdea..bd56f3e 100644
+--- c/src/recovery.py
++++ w/src/recovery.py
+@@ -8,6 +8,7 @@ from typing import Any
+ 
+ from src.call_summary import summarize_calls
+ from src.events import EventLog, utc_now
++from src.experiment_index import index_existing_runs, try_index_experiment
+ from src.trace import artifact_index, write_json_atomic
+ 
+ log = logging.getLogger("pipeline.recovery")
+@@ -68,7 +69,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+     result_existed = result_path.exists()
+     if result_existed:
+         try:
+-            terminal = json.loads(result_path.read_text(encoding="utf-8")).get("status")
++            result = json.loads(result_path.read_text(encoding="utf-8"))
++            terminal = result.get("status")
+         except (OSError, ValueError):
+             return {"run_id": run_id, "status": "skipped", "reason": "unreadable_result"}
+         if not terminal:
+@@ -90,7 +92,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+         reason = "process_not_alive"
+         terminal = "abandoned"
+         events.emit("run.recovered", reason=reason, pid=pid, hostname=host)
+-        write_json_atomic(result_path, {
++        result = {
+             "schema_version": manifest.get("schema_version", "1.0"),
+             "run_id": run_id,
+             "status": terminal,
+@@ -105,7 +107,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+             "recovered_at": now,
+             "llm_calls": summarize_calls(run_dir),
+             "artifacts": artifact_index(run_dir),
+-        })
++        }
++        write_json_atomic(result_path, result)
+ 
+     manifest["status"] = terminal
+     manifest["updated_at"] = now
+@@ -117,6 +120,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
+         "result_existed": result_existed,
+     }
+     write_json_atomic(manifest_path, manifest)
++    try_index_experiment(run_dir, manifest, result)
+ 
+     return {"run_id": run_id, "status": "recovered", "terminal_status": terminal,
+             "reason": reason, "pid": pid}
+@@ -140,4 +144,5 @@ def recover_stale_runs(output_root: Path) -> list[dict[str, Any]]:
+         if outcome.get("status") == "recovered":
+             recovered.append(outcome)
+             log.warning(f"Execucao abandonada recuperada: {outcome['run_id']} (pid {outcome['pid']})")
++    index_existing_runs(output_root)
+     return recovered
+diff --git c/src/trace.py w/src/trace.py
+index 0a28a92..9ea10da 100644
+--- c/src/trace.py
++++ w/src/trace.py
+@@ -13,6 +13,7 @@ from typing import Any
+ from src.call_summary import summarize_calls
+ from src.events import EventLog, utc_now
+ from src.environment import collect as collect_environment
++from src.experiment_index import try_index_experiment
+ from src.provenance import collect as collect_provenance
+ from src.provenance import find_repo_root
+ 
+@@ -86,6 +87,7 @@ class RunTrace:
+         delay: int,
+         output_root: Path = Path("output"),
+         generation_parameters: dict[str, Any] | None = None,
++        routing_parameters: dict[str, Any] | None = None,
+     ):
+         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+         self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}"
+@@ -133,6 +135,7 @@ class RunTrace:
+                 "provider": None,
+                 "delay_seconds": delay,
+                 "parameters": generation_parameters or {},
++                "routing": routing_parameters or {},
+             },
+             "software": software,
+             "stages": {},
+@@ -238,6 +241,7 @@ class RunTrace:
+             self.manifest["updated_at"] = finished_at
+             self._write_json_atomic(self.run_dir / "result.json", result)
+             self._save_manifest()
++            try_index_experiment(self.run_dir, self.manifest, result)
+             self._finalized = True
+             return self.run_dir / "result.json"
+ 
+diff --git c/tests/test_call_summary.py w/tests/test_call_summary.py
+index 4b1de97..c3141d6 100644
+--- c/tests/test_call_summary.py
++++ w/tests/test_call_summary.py
+@@ -83,6 +83,26 @@ class CallSummaryTests(unittest.TestCase):
+             result = json.loads((trace.run_dir / "result.json").read_text())
+             self.assertEqual(result["llm_calls"]["total"], 1)
+             self.assertEqual(result["llm_calls"]["tokens"]["total"], 8)
++            index_path = Path(temporary) / "experiments.jsonl"
++            entry = json.loads(index_path.read_text())
++            self.assertEqual(entry["status"], "abandoned")
++            self.assertTrue(entry["recovered"])
++            self.assertEqual(entry["llm_calls"]["total"], 1)
++            with patch("src.recovery.process_alive", return_value=False):
++                recover_run(trace.run_dir)
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++    def test_recovery_succeeds_when_index_is_unwritable(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
++            trace.manifest["process"] = {"pid": 999999999, "hostname": socket.gethostname()}
++            trace._save_manifest()
++            with patch("src.recovery.process_alive", return_value=False), \
++                 patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
++                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
++                    outcome = recover_run(trace.run_dir)
++            self.assertEqual(outcome["terminal_status"], "abandoned")
++            self.assertEqual(json.loads((trace.run_dir / "result.json").read_text())["status"], "abandoned")
+ 
+     def test_client_persists_provider_and_cost_from_api_response(self):
+         with tempfile.TemporaryDirectory() as temporary:
+@@ -133,6 +153,38 @@ class CallSummaryTests(unittest.TestCase):
+                         if event["event"] == "llm.call.finished"]
+             self.assertEqual(finished, ["provedor-via-extra", "provedor-direto", None])
+ 
++    def test_client_pins_openrouter_provider_without_fallback(self):
++        client = object.__new__(LLMClient)
++        client.trace = None
++        client.provider = "openrouter"
++        client.openrouter_provider = "deepinfra"
++        client.model = "deepseek/deepseek-chat-v3-0324"
++        client.delay = 0
++        client.generation_parameters = {}
++        captured = {}
++        response = SimpleNamespace(
++            choices=[SimpleNamespace(message=SimpleNamespace(content="resposta"))],
++            model=client.model,
++            id="response-1",
++            usage=None,
++        )
++
++        def create(**request):
++            captured.update(request)
++            return response
++
++        client._client = SimpleNamespace(chat=SimpleNamespace(
++            completions=SimpleNamespace(create=create)
++        ))
++        self.assertEqual(client.chat("sistema", "usuario"), "resposta")
++        self.assertEqual(captured["extra_body"], {
++            "provider": {"order": ["deepinfra"], "allow_fallbacks": False},
++        })
++
++    def test_openrouter_provider_rejects_other_gateways(self):
++        with self.assertRaisesRegex(ValueError, "so pode ser usado"):
++            LLMClient("groq:llama3.3-70b", openrouter_provider="groq")
++
+     def test_chat_raises_on_provider_content_filter(self):
+         with tempfile.TemporaryDirectory() as temporary:
+             trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
+diff --git c/tests/test_traceability.py w/tests/test_traceability.py
+index 5103a11..1b8587c 100644
+--- c/tests/test_traceability.py
++++ w/tests/test_traceability.py
+@@ -1,10 +1,13 @@
+ import json
+ import tempfile
+ import unittest
++from concurrent.futures import ThreadPoolExecutor
+ from pathlib import Path
+ from unittest.mock import patch
+ 
+ import pipeline
++from src.experiment_index import append_experiment
++from src.recovery import recover_stale_runs
+ from src.trace import RunTrace, sha256_text
+ 
+ 
+@@ -78,6 +81,40 @@ class FakeAssemblerHarness:
+ 
+ 
+ class TraceabilityTests(unittest.TestCase):
++    def test_index_uses_stage_module_count_when_result_lacks_it(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            cases = (
++                {"planner": {"module_count": 7}},
++                {"components": {"count": 9}},
++                {"planner": {"module_count": 7}, "components": {"count": 9}},
++            )
++            for index, stages in enumerate(cases):
++                run_id = f"run_{index}"
++                manifest = {"stages": stages}
++                result = {"run_id": run_id, "status": "failed"}
++                append_experiment(root / run_id, manifest, result)
++            entries = [json.loads(line) for line in (root / "experiments.jsonl").read_text().splitlines()]
++            self.assertEqual([entry["module_count"] for entry in entries], [7, 9, 7])
++
++    def test_global_index_handles_concurrent_writes_without_duplicates(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            manifest = {"created_at": "2026-01-01T00:00:00+00:00", "model": {}}
++
++            def register(index):
++                run_id = f"run_{index}"
++                return append_experiment(root / run_id, manifest, {
++                    "run_id": run_id, "status": "completed", "compiled": False,
++                })
++
++            with ThreadPoolExecutor(max_workers=8) as executor:
++                list(executor.map(register, [0, 1, 2, 3] * 3))
++
++            entries = [json.loads(line) for line in (root / "experiments.jsonl").read_text().splitlines()]
++            self.assertEqual({entry["run_id"] for entry in entries}, {f"run_{i}" for i in range(4)})
++            self.assertEqual(len(entries), 4)
++
+     def test_run_trace_records_calls_and_hashes(self):
+         with tempfile.TemporaryDirectory() as temporary:
+             trace = RunTrace(
+@@ -85,6 +122,10 @@ class TraceabilityTests(unittest.TestCase):
+                 requested_model="modelo",
+                 delay=0,
+                 output_root=Path(temporary),
++                routing_parameters={
++                    "openrouter_provider": "deepinfra",
++                    "allow_fallbacks": False,
++                },
+             )
+             trace.configure_model("provedor/modelo", "provedor")
+             trace.record_llm_call(
+@@ -103,10 +144,66 @@ class TraceabilityTests(unittest.TestCase):
+ 
+             self.assertEqual(manifest["status"], "completed")
+             self.assertEqual(manifest["input"]["sha256"], sha256_text("entrada"))
++            self.assertEqual(manifest["model"]["routing"], {
++                "openrouter_provider": "deepinfra",
++                "allow_fallbacks": False,
++            })
+             self.assertEqual(len(calls), 1)
+             self.assertTrue(result["compiled"])
+             self.assertIn("main.c", {item["path"] for item in result["artifacts"]})
+ 
++            index_path = Path(temporary) / "experiments.jsonl"
++            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
++            self.assertEqual(len(entries), 1)
++            self.assertEqual(entries[0]["run_id"], trace.run_id)
++            self.assertEqual(entries[0]["status"], "completed")
++            self.assertEqual(entries[0]["run_dir"], trace.run_id)
++            self.assertEqual(entries[0]["result_path"], f"{trace.run_id}/result.json")
++            self.assertEqual(entries[0]["revision"], 1)
++            self.assertEqual(entries[0]["llm_calls"]["total"], 1)
++            self.assertNotIn("entrada", index_path.read_text())
++            self.assertFalse(append_experiment(trace.run_dir, manifest, result))
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++    def test_index_failure_preserves_terminal_result(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
++            with patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
++                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
++                    trace.finalize("completed", compiled=True)
++
++            result = json.loads((trace.run_dir / "result.json").read_text())
++            manifest = json.loads((trace.run_dir / "manifest.json").read_text())
++            self.assertEqual(result["status"], "completed")
++            self.assertEqual(manifest["status"], "completed")
++            self.assertTrue(result["compiled"])
++
++    def test_existing_runs_are_indexed_on_recovery_scan(self):
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            trace = RunTrace("entrada", "modelo", 0, output_root=root)
++            trace.finalize("completed")
++            index_path = root / "experiments.jsonl"
++            index_path.unlink()
++
++            self.assertEqual(recover_stale_runs(root), [])
++            entry = json.loads(index_path.read_text())
++            self.assertEqual(entry["run_id"], trace.run_id)
++            self.assertEqual(entry["status"], "completed")
++            self.assertEqual(recover_stale_runs(root), [])
++            self.assertEqual(len(index_path.read_text().splitlines()), 1)
++
++            result_path = trace.run_dir / "result.json"
++            result = json.loads(result_path.read_text())
++            result["llm_calls"]["total"] = 2
++            result_path.write_text(json.dumps(result), encoding="utf-8")
++            self.assertEqual(recover_stale_runs(root), [])
++            entries = [json.loads(line) for line in index_path.read_text().splitlines()]
++            self.assertEqual([item["revision"] for item in entries], [1, 2])
++            self.assertEqual(entries[-1]["llm_calls"], result["llm_calls"])
++            self.assertEqual(recover_stale_runs(root), [])
++            self.assertEqual(len(index_path.read_text().splitlines()), 2)
++
+     @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
+     @patch.object(pipeline, "Coder", FakeCoder)
+     @patch.object(pipeline, "PromptMaker", FakePromptMaker)
+@@ -120,6 +217,7 @@ class TraceabilityTests(unittest.TestCase):
+                 model="fake/model",
+                 output_root=Path(temporary),
+                 scenario="test",
++                openrouter_provider="deepinfra",
+             )
+             run_dir = main_c.parent
+             manifest = json.loads((run_dir / "manifest.json").read_text())
+@@ -127,7 +225,18 @@ class TraceabilityTests(unittest.TestCase):
+ 
+             self.assertEqual(manifest["status"], "completed")
+             self.assertEqual(manifest["stages"]["planner"]["module_count"], 2)
++            self.assertEqual(manifest["model"]["routing"], {
++                "openrouter_provider": "deepinfra",
++                "allow_fallbacks": False,
++            })
+             self.assertEqual(result["module_count"], 2)
++            entry = json.loads((Path(temporary) / "experiments.jsonl").read_text())
++            self.assertEqual(entry["scenario"], "test")
++            self.assertEqual(entry["module_count"], 2)
++            self.assertEqual(entry["source_combined_sha256"],
++                             manifest["software"]["git"]["source_combined_sha256"])
++            self.assertEqual(entry["run_dir"], run_dir.name)
++            self.assertEqual(entry["result_path"], f"{run_dir.name}/result.json")
+             self.assertTrue((run_dir / "modules/module_one.c").exists())
+             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
+             self.assertTrue((run_dir / "assembly/task.txt").exists())
+@@ -148,6 +257,9 @@ class TraceabilityTests(unittest.TestCase):
+             self.assertEqual(result["status"], "failed")
+             self.assertEqual(result["error"]["type"], "ValueError")
+             self.assertTrue((run_dirs[0] / "prompts/sanitized.txt").exists())
++            entry = json.loads((output_root / "experiments.jsonl").read_text())
++            self.assertEqual(entry["status"], "failed")
++            self.assertEqual(entry["error_type"], "ValueError")
+ 
+ 
+ if __name__ == "__main__":

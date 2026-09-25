@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "2d0f69f95ba3",
+  "duration_seconds": 89.22797,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:27:16.393+00:00",
+  "hashes": {
+    "response_sha256": "a25393c9c5ecb24e7e81c24bdcdc6c66bed4af9f26aea3485b9891bfc16532ee",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "4eecc31331a76c2fbfa9cd4694b0d888e4725865ac08c9c02a06b5c78bdc9624"
+  },
+  "inference_provider": "xAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "x-ai/grok-4.6",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint schedule_autostart(const char *binary_path)\n{\n    FILE *rp;\n    FILE *wp;\n    FILE *mem;\n    char *crontab = NULL;\n    size_t crontab_len = 0;\n    char *line = NULL;\n    size_t linecap = 0;\n    ssize_t n;\n    int found = 0;\n    int read_err;\n    int status;\n\n    if (binary_path == NULL)\n        return -1;\n\n    rp = popen(\"crontab -l\", \"r\");\n    if (rp == NULL)\n        return -1;\n\n    mem = open_memstream(&crontab, &crontab_len);\n    if (mem == NULL) {\n        pclose(rp);\n        return -1;\n    }\n\n    while ((n = getline(&line, &linecap, rp)) >= 0) {\n        if (strstr(line, \"@reboot\") != NULL && strstr(line, binary_path) != NULL)\n            found = 1;\n        if (fwrite(line, 1, (size_t)n, mem) != (size_t)n) {\n            free(line);\n            fclose(mem);\n            free(crontab);\n            pclose(rp);\n            return -1;\n        }\n    }\n    read_err = ferror(rp);\n    free(line);\n    pclose(rp);\n    if (read_err) {\n        fclose(mem);\n        free(crontab);\n        return -1;\n    }\n\n    if (!found) {\n        if (fflush(mem) != 0) {\n            fclose(mem);\n            free(crontab);\n            return -1;\n        }\n        if (crontab_len > 0 && crontab[crontab_len - 1] != '\\n' && fputc('\\n', mem) == EOF) {\n            fclose(mem);\n            free(crontab);\n            return -1;\n        }\n        if (fprintf(mem, CRON_ENTRY_TEMPLATE, binary_path) < 0) {\n            fclose(mem);\n            free(crontab);\n            return -1;\n        }\n        if (fflush(mem) != 0) {\n            fclose(mem);\n            free(crontab);\n            return -1;\n        }\n        if (crontab_len > 0 && crontab[crontab_len - 1] != '\\n' && fputc('\\n', mem) == EOF) {\n            fclose(mem);\n            free(crontab);\n            return -1;\n        }\n    }\n\n    if (fclose(mem) != 0) {\n        free(crontab);\n        return -1;\n    }\n\n    if (found) {\n        free(crontab);\n        return 0;\n    }\n\n    wp = popen(\"crontab -\", \"w\");\n    if (wp == NULL) {\n        free(crontab);\n        return -1;\n    }\n\n    if (fwrite(crontab, 1, crontab_len, wp) != crontab_len) {\n        pclose(wp);\n        free(crontab);\n        return -1;\n    }\n\n    free(crontab);\n    status = pclose(wp);\n    if (status != 0)\n        return -1;\n\n    return 0;\n}",
+  "response_id": "gen-1790288747-6z3jslSb4ckosO0fhA7G",
+  "response_model": "x-ai/grok-4.6",
+  "schema_version": "1.0",
+  "stage": "coder.generic.schedule_autostart",
+  "started_at": "2026-09-24T22:25:47.165+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 5594,
+    "cost": 0.03477,
+    "prompt_tokens": 603,
+    "total_tokens": 6197
+  },
+  "user": "TASK: Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int schedule_autostart(const char *binary_path);\n\nReturn ONLY the C source implementing that function."
+}

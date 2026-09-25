@@ -1,0 +1,13 @@
+{
+  "description": "Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.",
+  "duration_seconds": 0.256284,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'anthropic/claude-fable-5.1:batch cannot be used with the chat/completions endpoint (adapter AnthropicBatchAdapter).', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-09-24T22:29:48.272+00:00",
+  "index": 3,
+  "name": "write_text_file",
+  "started_at": "2026-09-24T22:29:48.015+00:00",
+  "status": "failed"
+}

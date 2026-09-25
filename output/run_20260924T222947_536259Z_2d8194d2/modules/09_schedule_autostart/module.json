@@ -1,0 +1,13 @@
+{
+  "description": "Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 0.27611,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'anthropic/claude-fable-5.1:batch cannot be used with the chat/completions endpoint (adapter AnthropicBatchAdapter).', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-09-24T22:29:48.294+00:00",
+  "index": 9,
+  "name": "schedule_autostart",
+  "started_at": "2026-09-24T22:29:48.018+00:00",
+  "status": "failed"
+}

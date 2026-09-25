@@ -149,10 +149,16 @@ rtk python pipeline.py --models
 rtk python pipeline.py --scenario wannacry --model gpt-4o-mini
 rtk python pipeline.py --scenario wannacry --limit 2
 rtk python pipeline.py --scenario wannacry --temperature 0 --seed 42 --max-tokens 8192
+rtk python pipeline.py --scenario wannacry --model deepseek-v3 --openrouter-provider deepinfra
 ```
 
 Parâmetros ausentes de geração são registrados como `null`, indicando que o
 padrão do provedor foi utilizado.
+
+`--openrouter-provider` fixa o slug do provider de inferência para modelos
+roteados pelo OpenRouter e desativa fallback para outros providers. O provider
+precisa oferecer o modelo selecionado; caso contrário, a chamada falha. A opção
+não pode ser combinada com modelos `groq:` ou `nim:`.
 
 ## Rastreabilidade
 

@@ -1,0 +1,13 @@
+{
+  "description": "Implement `secure_erase`: overwrite the file at `path` with zero bytes using its current length, close it, then remove it with `remove()`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 0.275578,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'anthropic/claude-fable-5.1:batch cannot be used with the chat/completions endpoint (adapter AnthropicBatchAdapter).', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-09-24T22:29:48.292+00:00",
+  "index": 6,
+  "name": "secure_erase",
+  "started_at": "2026-09-24T22:29:48.017+00:00",
+  "status": "failed"
+}

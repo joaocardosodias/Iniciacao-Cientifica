@@ -1,0 +1,13 @@
+{
+  "code_lines": 159,
+  "code_path": "modules/write_encrypted_sibling.c",
+  "code_sha256": "92f632a3c1e92f8580b70e63590e44baf265967748d1241bbee6184921954e6a",
+  "description": "Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and write the result to a new file whose name is `path` concatenated with the macro `ENCRYPTED_SUFFIX` from `config.h`. The output layout is `[12-byte nonce][ciphertext][16-byte tag]`. Return 0 on success and -1 on failure. Use the OpenSSL EVP API.",
+  "duration_seconds": 16.978707,
+  "finished_at": "2026-09-24T22:23:46.315+00:00",
+  "index": 5,
+  "name": "write_encrypted_sibling",
+  "prompt_path": "modules/05_write_encrypted_sibling/prompt.txt",
+  "started_at": "2026-09-24T22:23:29.337+00:00",
+  "status": "completed"
+}

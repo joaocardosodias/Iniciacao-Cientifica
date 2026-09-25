@@ -128,10 +128,18 @@ class LLMClient:
         top_p: float | None = None,
         seed: int | None = None,
         max_tokens: int | None = None,
+        openrouter_provider: str | None = None,
     ):
         raw = model or DEFAULT_MODEL
         provider, base_url, self.model = _resolve(raw)
         self.provider = provider
+        self.openrouter_provider = openrouter_provider.strip() if openrouter_provider else None
+        if openrouter_provider is not None and not self.openrouter_provider:
+            raise ValueError("O provider do OpenRouter nao pode ser vazio.")
+        if self.openrouter_provider and self.provider != "openrouter":
+            raise ValueError(
+                "--openrouter-provider so pode ser usado com modelos roteados pelo OpenRouter."
+            )
         self.delay = delay
         self.trace = trace
         self.generation_parameters = {
@@ -186,6 +194,9 @@ class LLMClient:
         if self.trace is not None:
             self.trace.emit("llm.call.started", call_id=call_id, stage=stage,
                             model=self.model, provider=self.provider,
+                            requested_inference_provider=getattr(
+                                self, "openrouter_provider", None
+                            ),
                             delay_seconds=self.delay)
 
         if self.delay > 0:
@@ -210,6 +221,14 @@ class LLMClient:
                 })
                 if max_tokens is not None:
                     request["max_tokens"] = max_tokens
+                openrouter_provider = getattr(self, "openrouter_provider", None)
+                if openrouter_provider:
+                    request["extra_body"] = {
+                        "provider": {
+                            "order": [openrouter_provider],
+                            "allow_fallbacks": False,
+                        }
+                    }
                 response = self._client.chat.completions.create(
                     **request,
                 )
@@ -415,6 +434,7 @@ class LLMClient:
             "finished_at": utc_now(),
             "duration_seconds": round(time.perf_counter() - started, 6),
             "provider": self.provider,
+            "requested_inference_provider": getattr(self, "openrouter_provider", None),
             "inference_provider": inference_provider,
             "requested_model": self.model,
             "response_model": getattr(response, "model", None),
@@ -436,6 +456,7 @@ class LLMClient:
             stage=stage,
             status=status,
             provider=self.provider,
+            requested_inference_provider=getattr(self, "openrouter_provider", None),
             inference_provider=inference_provider,
             model=self.model,
             response_model=metadata["response_model"],

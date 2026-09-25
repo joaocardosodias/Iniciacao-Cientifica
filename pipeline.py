@@ -37,6 +37,7 @@ def run(
     scenario_config_h: str | None = None,
     scenario_components: list[dict] | None = None,
     scenario_main_c: str | None = None,
+    openrouter_provider: str | None = None,
 ) -> Path:
     parameters = {
         "temperature": temperature,
@@ -51,6 +52,10 @@ def run(
         delay=delay,
         output_root=output_root,
         generation_parameters=parameters,
+        routing_parameters={
+            "openrouter_provider": openrouter_provider,
+            "allow_fallbacks": False if openrouter_provider else None,
+        },
     )
     if scenario:
         trace.record_stage("input", {"scenario": scenario})
@@ -67,6 +72,7 @@ def run(
             top_p=top_p,
             seed=seed,
             max_tokens=max_tokens,
+            openrouter_provider=openrouter_provider,
         )
         trace.configure_model(llm.model, llm.provider)
         log.info(f"Modelo: {llm.model}")
@@ -329,6 +335,8 @@ def main():
         help="Seed enviada ao provedor quando suportada.")
     parser.add_argument("--max-tokens", type=int, default=None,
         help="Limite de tokens de saída por chamada.")
+    parser.add_argument("--openrouter-provider", default=None,
+        help="Provider de inferência fixo no OpenRouter, sem fallback (ex: deepinfra).")
     args = parser.parse_args()
 
     if args.list:
@@ -391,6 +399,7 @@ def main():
             top_p=args.top_p,
             seed=args.seed,
             max_tokens=args.max_tokens,
+            openrouter_provider=args.openrouter_provider,
             scenario=scenario,
             scenario_config_h=scenario_config_h,
             scenario_components=scenario_components,

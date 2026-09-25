@@ -1,0 +1,93 @@
+{
+  "created_at": "2026-09-24T22:30:35.869+00:00",
+  "input": {
+    "characters": 3547,
+    "path": "prompts/original.txt",
+    "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+  },
+  "model": {
+    "delay_seconds": 0,
+    "parameters": {
+      "max_tokens": null,
+      "seed": null,
+      "temperature": null,
+      "top_p": null
+    },
+    "provider": "openrouter",
+    "requested": "anthropic/claude-fable-5.1",
+    "resolved": "anthropic/claude-fable-5.1"
+  },
+  "process": {
+    "hostname": "omarchy",
+    "pid": 36521
+  },
+  "run_id": "run_20260924T223035_412151Z_aa803dad",
+  "schema_version": "1.0",
+  "software": {
+    "architecture": "x86_64",
+    "commands": {
+      "gcc": "gcc (GCC) 16.2.1 20260810",
+      "libcurl": "8.22.0",
+      "opencode": "1.17.11",
+      "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
+    },
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1345U",
+    "environment_path": "provenance/environment.json",
+    "executable": "/usr/bin/python",
+    "git": {
+      "branch": "main",
+      "commit": "bdffb093ecacc39f73f79b56f743e164c8311b1e",
+      "dirty": true,
+      "files": {
+        "diff": "provenance/git.diff",
+        "source_hashes": "provenance/source_hashes.json",
+        "status": "provenance/git_status.txt",
+        "untracked": "provenance/untracked_files.json"
+      },
+      "source_combined_sha256": "66cfaf2426923f550588a0b7afa6addff2fa6c43097b53c8bd3929cc0ef19c77",
+      "source_hashes": {
+        ".env.example": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c",
+        "pipeline.py": "dd90dcf73fa65d8e661650c241cf7fe97b7069931f672d1b179b43324df5d70f",
+        "requirements.txt": "3f9da88bad73d190d3cf13bf2a97edddf1129d42d8edc6526a5d2024d674ebc2",
+        "scenarios/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenarios/test_prompts.py": "f122814ac7cf1e9c9484cf0bed4bd8b2ed9301c8e848ef8d3369c3351d811bb2",
+        "scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scripts/c2_server.py": "5dd7b64fce0f975c8ce2bc6a83c1b67f19ceda4650128a72e38d009df38252f0",
+        "src/__init__.py": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73",
+        "src/assembler_harness.py": "0bc7fc7d79f1b47038c03dc812baa62d7b153462568f0b1a5ee68e96d247a9dc",
+        "src/call_summary.py": "f9ec901bfc0264add8d7ef3c4ab6a7d4059699fce07f5c26bac6e3a9628b16e3",
+        "src/coder.py": "8e8a8897c38ee28a4fdb14fe083a9c1219f8163761176ac0a952fa0ab13178d5",
+        "src/environment.py": "4a2f8f59e3a00e131b377837ee4d3e66e31f8ca675d7b7cd21d65b011b16ce49",
+        "src/events.py": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb",
+        "src/interrupts.py": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d",
+        "src/llm_client.py": "55d809611c3243766c021d01f1b3be128f04ba7672d85bcd82a1e214a2d5b9ba",
+        "src/planner.py": "49cfa8ae503fcf47f658c2357474c448cdedc1057e85e627111fdd64a8bf7e3d",
+        "src/prompt_maker.py": "d0ff87e3ebd189b7b74ccc44155cc25280a09a1a81306f50e771ea9db23a054d",
+        "src/provenance.py": "edd985b1eac1ff98221426d9fb6b90dd8a2c773fca5b3a0d7c0e3c0e2a2286be",
+        "src/recovery.py": "b88df96c47117921841289b2c44ba22893c914ee1c052ea6b4869627e6ab6e43",
+        "src/sanitizer.py": "718b0747124026ed14aa631cfb8b9e3d224980dc59c40540d397dd68258aba3c",
+        "src/trace.py": "0163816d8c9484040200a5242ab23322e8538ac8722a19b90993d654b953b6b6"
+      },
+      "untracked_count": 0,
+      "untracked_stored_count": 0
+    },
+    "locale": "en_US",
+    "package_count": 183,
+    "packages_path": "provenance/python_packages.json",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.7",
+    "timezone": "-03",
+    "working_directory": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+  },
+  "stages": {
+    "components": {
+      "count": 9,
+      "source": "scenario"
+    },
+    "input": {
+      "scenario": "wannacry"
+    }
+  },
+  "status": "failed",
+  "updated_at": "2026-09-24T22:30:36.191+00:00"
+}

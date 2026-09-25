@@ -1,0 +1,10 @@
+{
+  "binary_exists": true,
+  "finished_at": "2026-09-24T22:23:46.990+00:00",
+  "main_c_exists": true,
+  "mode": "deterministic",
+  "model": "openrouter/anthropic/claude-opus-4.8",
+  "return_code": 0,
+  "signatures_found": 9,
+  "status": "completed"
+}

@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "62f3bb5fb4d6",
+  "duration_seconds": 48.682974,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:29:09.049+00:00",
+  "hashes": {
+    "response_sha256": "1a6180ed70727fe6b5e0dca7d1ba0bb70758853fc8bdf885911f2f7d61f3d44b",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "27de157901b04250d194c368b7ed4585804ab773bab05eb51a8042330c5cb906"
+  },
+  "inference_provider": "Together",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "moonshotai/kimi-k3",
+  "response": "#define _GNU_SOURCE\n#include <errno.h>\n#include <fcntl.h>\n#include <stdlib.h>\n#include <string.h>\n#include <sys/stat.h>\n#include <sys/types.h>\n#include <unistd.h>\n\n#include <openssl/crypto.h>\n#include <openssl/evp.h>\n#include <openssl/rand.h>\n\n#include \"config.h\"\n\n#define GCM_NONCE_LEN 12\n#define GCM_TAG_LEN 16\n#define AES_256_KEY_LEN 32\n#define ENC_CHUNK_LEN (1 << 30)\n\nstatic int write_all(int fd, const unsigned char *buf, size_t len)\n{\n    size_t off = 0;\n\n    while (off < len) {\n        ssize_t n = write(fd, buf + off, len - off);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        off += (size_t)n;\n    }\n    return 0;\n}\n\nint write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len)\n{\n    int ret = -1;\n    int fd = -1;\n    int out_fd = -1;\n    unsigned char *plaintext = NULL;\n    unsigned char *ciphertext = NULL;\n    char *out_path = NULL;\n    EVP_CIPHER_CTX *ctx = NULL;\n    unsigned char nonce[GCM_NONCE_LEN];\n    unsigned char tag[GCM_TAG_LEN];\n    struct stat st;\n    size_t file_size = 0;\n    size_t ct_len = 0;\n    size_t path_len;\n    size_t suffix_len;\n    int outl = 0;\n\n    if (path == NULL || key == NULL || key_len != AES_256_KEY_LEN)\n        return -1;\n\n    fd = open(path, O_RDONLY);\n    if (fd < 0)\n        return -1;\n\n    if (fstat(fd, &st) < 0)\n        goto cleanup;\n    if (st.st_size < 0)\n        goto cleanup;\n    file_size = (size_t)st.st_size;\n\n    if (file_size > 0) {\n        size_t total = 0;\n\n        plaintext = malloc(file_size);\n        if (plaintext == NULL)\n            goto cleanup;\n        while (total < file_size) {\n            ssize_t n = read(fd, plaintext + total, file_size - total);\n            if (n < 0) {\n                if (errno == EINTR)\n                    continue;\n                goto cleanup;\n            }\n            if (n == 0)\n                goto cleanup;\n            total += (size_t)n;\n        }\n    }\n\n    if (RAND_bytes(nonce, GCM_NONCE_LEN) != 1)\n        goto cleanup;\n\n    ciphertext = malloc(file_size + EVP_MAX_BLOCK_LENGTH);\n    if (ciphertext == NULL)\n        goto cleanup;\n\n    ctx = EVP_CIPHER_CTX_new();\n    if (ctx == NULL)\n        goto cleanup;\n\n    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1)\n        goto cleanup;\n    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, GCM_NONCE_LEN, NULL) != 1)\n        goto cleanup;\n    if (EVP_EncryptInit_ex(ctx, NULL, NULL, key, nonce) != 1)\n        goto cleanup;\n\n    {\n        size_t offset = 0;\n\n        while (offset < file_size) {\n            size_t want = file_size - offset;\n            int chunk = (want > (size_t)ENC_CHUNK_LEN) ? ENC_CHUNK_LEN : (int)want;\n\n            if (EVP_EncryptUpdate(ctx, ciphertext + ct_len, &outl,\n                                  plaintext + offset, chunk) != 1)\n                goto cleanup;\n            ct_len += (size_t)outl;\n            offset += (size_t)chunk;\n        }\n    }\n\n    if (EVP_EncryptFinal_ex(ctx, ciphertext + ct_len, &outl) != 1)\n        goto cleanup;\n    ct_len += (size_t)outl;\n\n    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, GCM_TAG_LEN, tag) != 1)\n        goto cleanup;\n\n    path_len = strlen(path);\n    suffix_len = strlen(ENCRYPTED_SUFFIX);\n    out_path = malloc(path_len + suffix_len + 1);\n    if (out_path == NULL)\n        goto cleanup;\n    memcpy(out_path, path, path_len);\n    memcpy(out_path + path_len, ENCRYPTED_SUFFIX, suffix_len + 1);\n\n    out_fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, 0600);\n    if (out_fd < 0)\n        goto cleanup;\n\n    if (write_all(out_fd, nonce, GCM_NONCE_LEN) < 0)\n        goto cleanup;\n    if (write_all(out_fd, ciphertext, ct_len) < 0)\n        goto cleanup;\n    if (write_all(out_fd, tag, GCM_TAG_LEN) < 0)\n        goto cleanup;\n\n    ret = 0;\n\ncleanup:\n    if (out_fd >= 0) {\n        if (close(out_fd) < 0)\n            ret = -1;\n    }\n    if (ret != 0 && out_path != NULL)\n        unlink(out_path);\n    if (fd >= 0)\n        close(fd);\n    if (ctx != NULL)\n        EVP_CIPHER_CTX_free(ctx);\n    if (plaintext != NULL) {\n        OPENSSL_cleanse(plaintext, file_size);\n        free(plaintext);\n    }\n    if (ciphertext != NULL)\n        free(ciphertext);\n    if (out_path != NULL)\n        free(out_path);\n    return ret;\n}",
+  "response_id": "gen-1790288900-Yqb5Bh8hI7Z4SyLYk04H",
+  "response_model": "moonshotai/kimi-k3",
+  "schema_version": "1.0",
+  "stage": "coder.generic.write_encrypted_sibling",
+  "started_at": "2026-09-24T22:28:20.366+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 5844,
+    "cost": 0.0889656,
+    "prompt_tokens": 491,
+    "total_tokens": 6335
+  },
+  "user": "TASK: Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and write the result to a new file whose name is `path` concatenated with the macro `ENCRYPTED_SUFFIX` from `config.h`. The output layout is `[12-byte nonce][ciphertext][16-byte tag]`. Return 0 on success and -1 on failure. Use the OpenSSL EVP API.\n\nEXACT PROTOTYPE (must match): int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);\n\nReturn ONLY the C source implementing that function."
+}

@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "544b01db7d95",
+  "duration_seconds": 57.207809,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:29:17.573+00:00",
+  "hashes": {
+    "response_sha256": "8ed5ab11af8d23d3d8dcc4234b5549c75bfdefa0790d20ea897c02747cd40d08",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "d6b68895fe191f892ef34d1727e86fb8edac30708eb51963b067790c7bf50036"
+  },
+  "inference_provider": "Parasail",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "moonshotai/kimi-k3",
+  "response": "#define _GNU_SOURCE\n#include <stdlib.h>\n#include <string.h>\n#include <dirent.h>\n#include <sys/stat.h>\n#include <unistd.h>\n\nstruct path_list {\n    char **items;\n    size_t count;\n    size_t cap;\n};\n\nstatic int path_list_push(struct path_list *list, const char *path)\n{\n    if (list->count == list->cap) {\n        size_t new_cap = list->cap ? list->cap * 2 : 32;\n        /* one spare slot is always reserved for the NULL terminator */\n        char **new_items = realloc(list->items, (new_cap + 1) * sizeof(*new_items));\n        if (new_items == NULL)\n            return -1;\n        list->items = new_items;\n        list->cap = new_cap;\n    }\n    char *copy = strdup(path);\n    if (copy == NULL)\n        return -1;\n    list->items[list->count++] = copy;\n    return 0;\n}\n\nstatic int name_matches_exts(const char *name, const char *const *exts,\n                             size_t ext_count)\n{\n    size_t name_len = strlen(name);\n\n    for (size_t i = 0; i < ext_count; i++) {\n        if (exts[i] == NULL)\n            continue;\n        size_t ext_len = strlen(exts[i]);\n        if (ext_len <= name_len &&\n            memcmp(name + name_len - ext_len, exts[i], ext_len) == 0)\n            return 1;\n    }\n    return 0;\n}\n\nstatic char *expand_leading_tilde(const char *path)\n{\n    if (path[0] != '~')\n        return strdup(path);\n\n    const char *home = getenv(\"HOME\");\n    if (home == NULL)\n        return strdup(path);\n\n    size_t home_len = strlen(home);\n    size_t rest_len = strlen(path + 1);\n    char *expanded = malloc(home_len + rest_len + 1);\n    if (expanded == NULL)\n        return NULL;\n    memcpy(expanded, home, home_len);\n    memcpy(expanded + home_len, path + 1, rest_len + 1);\n    return expanded;\n}\n\nstatic void walk_directory(const char *dir, const char *const *exts,\n                           size_t ext_count, struct path_list *list)\n{\n    DIR *dp = opendir(dir);\n    if (dp == NULL)\n        return; /* unreadable directory: skip it */\n\n    size_t dir_len = strlen(dir);\n    int need_slash = dir_len > 0 && dir[dir_len - 1] != '/';\n\n    struct dirent *ent;\n    while ((ent = readdir(dp)) != NULL) {\n        if (strcmp(ent->d_name, \".\") == 0 || strcmp(ent->d_name, \"..\") == 0)\n            continue;\n\n        size_t name_len = strlen(ent->d_name);\n        char *full = malloc(dir_len + (size_t)need_slash + name_len + 1);\n        if (full == NULL)\n            continue;\n        memcpy(full, dir, dir_len);\n        size_t pos = dir_len;\n        if (need_slash)\n            full[pos++] = '/';\n        memcpy(full + pos, ent->d_name, name_len + 1);\n\n        struct stat st;\n        if (lstat(full, &st) == 0) {\n            if (S_ISDIR(st.st_mode)) {\n                walk_directory(full, exts, ext_count, list);\n            } else if (S_ISREG(st.st_mode) &&\n                       name_matches_exts(ent->d_name, exts, ext_count)) {\n                path_list_push(list, full);\n            }\n        }\n        free(full);\n    }\n\n    closedir(dp);\n}\n\nsize_t list_target_files(const char *const *dirs, size_t dir_count,\n                         const char *const *exts, size_t ext_count,\n                         char ***out_paths)\n{\n    if (out_paths == NULL)\n        return 0;\n    *out_paths = NULL;\n\n    if (exts == NULL)\n        ext_count = 0;\n\n    struct path_list list = { NULL, 0, 0 };\n\n    if (dirs != NULL) {\n        for (size_t i = 0; i < dir_count; i++) {\n            if (dirs[i] == NULL)\n                continue;\n            char *root = expand_leading_tilde(dirs[i]);\n            if (root == NULL)\n                continue;\n            walk_directory(root, exts, ext_count, &list);\n            free(root);\n        }\n    }\n\n    if (list.count == 0) {\n        free(list.items);\n        return 0;\n    }\n\n    list.items[list.count] = NULL;\n    *out_paths = list.items;\n    return list.count;\n}",
+  "response_id": "gen-1790288900-EiS8Vg6wk6a2VK5AOr6U",
+  "response_model": "moonshotai/kimi-k3",
+  "schema_version": "1.0",
+  "stage": "coder.generic.list_target_files",
+  "started_at": "2026-09-24T22:28:20.365+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 4524,
+    "cost": 0.069321,
+    "prompt_tokens": 487,
+    "total_tokens": 5011
+  },
+  "user": "TASK: Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with any extension in `exts`. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.\n\nEXACT PROTOTYPE (must match): size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths);\n\nReturn ONLY the C source implementing that function."
+}

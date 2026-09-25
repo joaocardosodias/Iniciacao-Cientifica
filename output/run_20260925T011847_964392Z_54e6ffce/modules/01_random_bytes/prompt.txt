@@ -1,0 +1,3 @@
+Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using OpenSSL `RAND_bytes`. Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE: int random_bytes(unsigned char *out, size_t len);

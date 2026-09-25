@@ -1,0 +1,43 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "94b9bc399ed5",
+  "duration_seconds": 56.301259,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-24T22:26:43.463+00:00",
+  "hashes": {
+    "response_sha256": "2c646b74310c32291757cfd6d7df5f62990873c42d469596b75f0bbc81fc49df",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "1d6b2d0f470ac94fde09f59566dcdd277ca8a7d21c42c19106578d392eaecae5"
+  },
+  "inference_provider": "xAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_model": "x-ai/grok-4.6",
+  "response": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <stdlib.h>\n#include <curl/curl.h>\n\nstatic size_t discard_write(char *ptr, size_t size, size_t nmemb, void *userdata)\n{\n    (void)ptr;\n    (void)userdata;\n    return size * nmemb;\n}\n\nint transmit_token(const char *endpoint, const char *token_path)\n{\n    FILE *fp;\n    long sz;\n    size_t nread;\n    char *body;\n    CURL *curl;\n    struct curl_slist *headers;\n    CURLcode rc;\n    long http_code;\n    int ret;\n\n    if (!endpoint || !token_path)\n        return -1;\n\n    fp = fopen(token_path, \"rb\");\n    if (!fp)\n        return -1;\n\n    if (fseek(fp, 0, SEEK_END) != 0) {\n        fclose(fp);\n        return -1;\n    }\n    sz = ftell(fp);\n    if (sz < 0) {\n        fclose(fp);\n        return -1;\n    }\n    if (fseek(fp, 0, SEEK_SET) != 0) {\n        fclose(fp);\n        return -1;\n    }\n\n    body = malloc((size_t)sz + 1);\n    if (!body) {\n        fclose(fp);\n        return -1;\n    }\n    nread = fread(body, 1, (size_t)sz, fp);\n    if (ferror(fp)) {\n        fclose(fp);\n        free(body);\n        return -1;\n    }\n    body[nread] = '\\0';\n    fclose(fp);\n\n    if (curl_global_init(CURL_GLOBAL_DEFAULT) != 0) {\n        free(body);\n        return -1;\n    }\n\n    curl = curl_easy_init();\n    if (!curl) {\n        free(body);\n        return -1;\n    }\n\n    headers = curl_slist_append(NULL, \"Content-Type: application/json\");\n    if (!headers) {\n        curl_easy_cleanup(curl);\n        free(body);\n        return -1;\n    }\n\n    curl_easy_setopt(curl, CURLOPT_URL, endpoint);\n    curl_easy_setopt(curl, CURLOPT_POST, 1L);\n    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);\n    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)nread);\n    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);\n    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_write);\n\n    ret = -1;\n    rc = curl_easy_perform(curl);\n    if (rc == CURLE_OK) {\n        http_code = 0;\n        rc = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);\n        if (rc == CURLE_OK && http_code == 200)\n            ret = 0;\n    }\n\n    curl_slist_free_all(headers);\n    curl_easy_cleanup(curl);\n    free(body);\n    return ret;\n}",
+  "response_id": "gen-1790288747-4OjdNsOY669sk9HQ42na",
+  "response_model": "x-ai/grok-4.6",
+  "schema_version": "1.0",
+  "stage": "coder.generic.transmit_token",
+  "started_at": "2026-09-24T22:25:47.162+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 3497,
+    "cost": 0.021946,
+    "prompt_tokens": 578,
+    "total_tokens": 4075
+  },
+  "user": "TASK: Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.\n\nEXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_path);\n\nReturn ONLY the C source implementing that function."
+}

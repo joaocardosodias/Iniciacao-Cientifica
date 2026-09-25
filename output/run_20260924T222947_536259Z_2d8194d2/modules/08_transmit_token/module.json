@@ -1,0 +1,13 @@
+{
+  "description": "Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.",
+  "duration_seconds": 0.25501,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'anthropic/claude-fable-5.1:batch cannot be used with the chat/completions endpoint (adapter AnthropicBatchAdapter).', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-09-24T22:29:48.272+00:00",
+  "index": 8,
+  "name": "transmit_token",
+  "started_at": "2026-09-24T22:29:48.017+00:00",
+  "status": "failed"
+}

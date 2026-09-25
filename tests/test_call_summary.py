@@ -83,6 +83,26 @@ class CallSummaryTests(unittest.TestCase):
             result = json.loads((trace.run_dir / "result.json").read_text())
             self.assertEqual(result["llm_calls"]["total"], 1)
             self.assertEqual(result["llm_calls"]["tokens"]["total"], 8)
+            index_path = Path(temporary) / "experiments.jsonl"
+            entry = json.loads(index_path.read_text())
+            self.assertEqual(entry["status"], "abandoned")
+            self.assertTrue(entry["recovered"])
+            self.assertEqual(entry["llm_calls"]["total"], 1)
+            with patch("src.recovery.process_alive", return_value=False):
+                recover_run(trace.run_dir)
+            self.assertEqual(len(index_path.read_text().splitlines()), 1)
+
+    def test_recovery_succeeds_when_index_is_unwritable(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            trace = RunTrace("entrada", "modelo", 0, output_root=Path(temporary))
+            trace.manifest["process"] = {"pid": 999999999, "hostname": socket.gethostname()}
+            trace._save_manifest()
+            with patch("src.recovery.process_alive", return_value=False), \
+                 patch("src.experiment_index.append_experiment", side_effect=OSError("sem espaco")):
+                with self.assertLogs("pipeline.experiment_index", level="WARNING"):
+                    outcome = recover_run(trace.run_dir)
+            self.assertEqual(outcome["terminal_status"], "abandoned")
+            self.assertEqual(json.loads((trace.run_dir / "result.json").read_text())["status"], "abandoned")
 
     def test_client_persists_provider_and_cost_from_api_response(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -132,6 +152,38 @@ class CallSummaryTests(unittest.TestCase):
             finished = [event["data"]["inference_provider"] for event in events
                         if event["event"] == "llm.call.finished"]
             self.assertEqual(finished, ["provedor-via-extra", "provedor-direto", None])
+
+    def test_client_pins_openrouter_provider_without_fallback(self):
+        client = object.__new__(LLMClient)
+        client.trace = None
+        client.provider = "openrouter"
+        client.openrouter_provider = "deepinfra"
+        client.model = "deepseek/deepseek-chat-v3-0324"
+        client.delay = 0
+        client.generation_parameters = {}
+        captured = {}
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content="resposta"))],
+            model=client.model,
+            id="response-1",
+            usage=None,
+        )
+
+        def create(**request):
+            captured.update(request)
+            return response
+
+        client._client = SimpleNamespace(chat=SimpleNamespace(
+            completions=SimpleNamespace(create=create)
+        ))
+        self.assertEqual(client.chat("sistema", "usuario"), "resposta")
+        self.assertEqual(captured["extra_body"], {
+            "provider": {"order": ["deepinfra"], "allow_fallbacks": False},
+        })
+
+    def test_openrouter_provider_rejects_other_gateways(self):
+        with self.assertRaisesRegex(ValueError, "so pode ser usado"):
+            LLMClient("groq:llama3.3-70b", openrouter_provider="groq")
 
     def test_chat_raises_on_provider_content_filter(self):
         with tempfile.TemporaryDirectory() as temporary:

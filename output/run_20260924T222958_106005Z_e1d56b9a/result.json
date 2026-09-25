@@ -1,0 +1,199 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3754,
+      "path": "calls/0001_coder.generic.write_notice.json",
+      "sha256": "1fc499b22959a14adc40b2728fbb1f54f47e59eaa1c3350dc375403b2db65a2e"
+    },
+    {
+      "bytes": 3815,
+      "path": "calls/0002_coder.generic.base64_encode_string.json",
+      "sha256": "ef2469c42b8ec04e4a995691d677bcf8d630563a7fe7050ac197c3fc21697a9c"
+    },
+    {
+      "bytes": 3707,
+      "path": "calls/0003_coder.generic.write_text_file.json",
+      "sha256": "b746b6acdd0f781ba5fa1974d590d27dcba3e5b214fd64f3c4cdab6015506bc9"
+    },
+    {
+      "bytes": 3715,
+      "path": "calls/0004_coder.generic.secure_erase.json",
+      "sha256": "c197d5106c52804574cd086799d81ed40597346de38ecae9db2b811187285ffd"
+    },
+    {
+      "bytes": 925,
+      "path": "config.h",
+      "sha256": "4e4ac426c3c2990988bf6066f5181bbeb4ed58d458797612f8364fe70382160c"
+    },
+    {
+      "bytes": 16458,
+      "path": "events.jsonl",
+      "sha256": "1f1e3d02d8d2f2b256face60d71da4d6ea219200342c58e9225eedf497f08c88"
+    },
+    {
+      "bytes": 298,
+      "path": "modules/01_random_bytes/module.json",
+      "sha256": "400826a8d3640b6063f73b5d1830b23629099b3a1b99b8ce33b64bd04224e9f9"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/01_random_bytes/prompt.txt",
+      "sha256": "01c6eabd930954d85fd39703d63a7cd81fb3bfb54082c7545c4e3dcd6cd7a652"
+    },
+    {
+      "bytes": 1104,
+      "path": "modules/02_base64_encode_string/module.json",
+      "sha256": "b50306b32f2c1735030c559807e707f0583782b84c1fcba6711e01d59a0198ff"
+    },
+    {
+      "bytes": 323,
+      "path": "modules/02_base64_encode_string/prompt.txt",
+      "sha256": "17310751020a0a8168a83390da67b46d3354074268af2749ba2e398e62baa783"
+    },
+    {
+      "bytes": 1037,
+      "path": "modules/03_write_text_file/module.json",
+      "sha256": "47e213c7b967e4302a196a37f761acc1d7cf8c6467f2238c311d7203c4901072"
+    },
+    {
+      "bytes": 220,
+      "path": "modules/03_write_text_file/prompt.txt",
+      "sha256": "99b51360b1fbf903948355113ff55bab59913fc60f349089405543ae26c3f5f4"
+    },
+    {
+      "bytes": 525,
+      "path": "modules/04_list_target_files/module.json",
+      "sha256": "6f5dbfd19a401c58bb6d4fda6c2a4e5d2dbc26c57b1cebe21ed1ce043acbe6c4"
+    },
+    {
+      "bytes": 534,
+      "path": "modules/04_list_target_files/prompt.txt",
+      "sha256": "9df2deef4080f7e0c6ce5d571bb1fe71ba5b988f60e15cde612a8e6b69636099"
+    },
+    {
+      "bytes": 550,
+      "path": "modules/05_write_encrypted_sibling/module.json",
+      "sha256": "b3ff8fd3001b1f440ff76ebbdbf1414cc15b67a67dbeb03a3e94e0505f651eeb"
+    },
+    {
+      "bytes": 511,
+      "path": "modules/05_write_encrypted_sibling/prompt.txt",
+      "sha256": "9d3878bf00db7f4268287d47567432ce96e9ee441a10c68c13586ee6372a190b"
+    },
+    {
+      "bytes": 1066,
+      "path": "modules/06_secure_erase/module.json",
+      "sha256": "6df8562ac90c4faaef4bdecb5ff14681de15a2352032158ea02bb75c5282777a"
+    },
+    {
+      "bytes": 231,
+      "path": "modules/06_secure_erase/prompt.txt",
+      "sha256": "87d5c44fe02ab05160827ca17e90e9e79a7503603c5b4b0342382fb3388ee491"
+    },
+    {
+      "bytes": 1099,
+      "path": "modules/07_write_notice/module.json",
+      "sha256": "c0ce662cbdd210dd1236967be7249f6e49d295486ef5cfbab3850896ff15875a"
+    },
+    {
+      "bytes": 270,
+      "path": "modules/07_write_notice/prompt.txt",
+      "sha256": "1a414e0fa25c66ed0f1871f8ef05480ea20f443cf6be851d02ba6529fb71b472"
+    },
+    {
+      "bytes": 437,
+      "path": "modules/08_transmit_token/module.json",
+      "sha256": "f332a91e3871244ea2600441374be668168adc2c5a43e3885794f3798e274818"
+    },
+    {
+      "bytes": 384,
+      "path": "modules/08_transmit_token/prompt.txt",
+      "sha256": "65c80ab22f28c0b98555805c4da9e5d5e4d7d0ca759ec7c1e3f131f036d17aea"
+    },
+    {
+      "bytes": 533,
+      "path": "modules/09_schedule_autostart/module.json",
+      "sha256": "97ee8164fe9b4fb96093843071b68479f1959ff2b28fe543c59ad82a8aa45fa1"
+    },
+    {
+      "bytes": 451,
+      "path": "modules/09_schedule_autostart/prompt.txt",
+      "sha256": "36969837170ad204d559418b8a1c451f70273c2b648bac863490bb92f87d9f77"
+    },
+    {
+      "bytes": 3686,
+      "path": "prompts/components.json",
+      "sha256": "cba6fb238474765558d9cef5a0132a56cf419b26f65dd604e4cea7ae262f9052"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 957,
+      "path": "provenance/environment.json",
+      "sha256": "6b446a8ab88a8d5e44a63752c816c24180d7884d4f43bdfdfe9daeb53644ef38"
+    },
+    {
+      "bytes": 0,
+      "path": "provenance/git.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 262,
+      "path": "provenance/git_status.txt",
+      "sha256": "3da07784dd726673f1dbcb263e1c5d70b6dfe00f968132693dc2e6ad50094e6e"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3052,
+      "path": "provenance/source_hashes.json",
+      "sha256": "9429a47c89cd853dc367af9859c24ba2f1e2011448a9780bf5842e0dae1537b5"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 0.782202,
+  "error": {
+    "message": "Error code: 402 - {'error': {'message': 'This request would exceed your available credits given your current in-flight requests. Retry after in-flight requests settle, or add credits.', 'code': 402, 'metadata': {'reason': 'in_flight_budget_exhausted', 'limit_source': 'openrouter_in_flight_budget', 'remedy_hint': 'Retry after your in-flight requests settle (see the Retry-After header). Adding credits at https://openrouter.ai/settings/credits raises your in-flight budget, up to a capped ceiling.', 'headers': {'Retry-After': '120'}, 'provider_name': None}}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "APIStatusError"
+  },
+  "finished_at": "2026-09-24T22:29:58.884+00:00",
+  "llm_calls": {
+    "completed": 0,
+    "cost": {
+      "reported_calls": 0,
+      "total": null,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 4,
+    "inference_providers_observed": [],
+    "models_observed": [],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 0,
+    "retries": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reported_calls": 0,
+      "total": 0
+    },
+    "total": 4,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260924T222958_106005Z_e1d56b9a",
+  "schema_version": "1.0",
+  "status": "failed"
+}
