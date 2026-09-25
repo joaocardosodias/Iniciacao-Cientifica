@@ -21,6 +21,10 @@ individual vê a intenção global.
 ├── requirements.in      # Dependências Python diretas
 ├── requirements.lock    # Ambiente Python integral com hashes
 │
+├── docs/                # Arquitetura detalhada e decisões do projeto
+├── experiments/         # Protocolos, rubricas e ambientes de exemplo
+├── artigo/              # Fontes do artigo científico
+│
 ├── src/                 # Camadas do pipeline
 │   ├── coder.py         # Gera o código C de cada componente genérico
 │   ├── assembler_harness.py # Integra e compila main.c + módulos
@@ -52,6 +56,11 @@ individual vê a intenção global.
 └── results/             # Campanhas experimentais oficiais
     └── <modelo>/<experimento>/<condição>/
 ```
+
+`output/` contém runs de desenvolvimento que podem ser versionadas para
+transferência e teste nas VMs. `results/` é gerado durante campanhas oficiais
+e permanece fora do controle de versão por padrão. Os formatos e o fluxo completo estão documentados em
+[`docs/pipeline.md`](docs/pipeline.md).
 
 ---
 

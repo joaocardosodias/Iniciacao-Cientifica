@@ -7,7 +7,6 @@ from typing import Any
 SOURCE_PATTERNS = [
     "pipeline.py",
     "src/*.py",
-    "requirements.txt",
     "requirements.in",
     "requirements.lock",
     ".env.example",
@@ -17,6 +16,7 @@ SOURCE_PATTERNS = [
     "experiments/*.yaml",
     "experiments/*.json",
     "experiments/rubrics/*.yaml",
+    "docs/*.md",
     "opencode.json",
 ]
 

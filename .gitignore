@@ -28,6 +28,8 @@ Thumbs.db
 
 # ── Artefatos do pipeline ─────────────────────────────────────────────────────
 
+results/
+
 # Servidor C2 — log de eventos capturados nos experimentos
 c2_events.json
 
@@ -36,7 +38,6 @@ c2_events.json
 
 # Binários ELF compilados na raiz ou em qualquer subpasta
 *.out
-# (binários sem extensão são excluídos pelo output/ acima)
 
 # Rust
 target/
@@ -50,3 +51,12 @@ Documentos_Teste/
 logs/
 *.log
 AGENTS.md
+
+# LaTeX
+artigo/*.aux
+artigo/*.bbl
+artigo/*.blg
+artigo/*.fdb_latexmk
+artigo/*.fls
+artigo/*.out
+artigo/*.synctex.gz

@@ -1,4 +1,4 @@
-# Fluxo do modo componentes
+# Pipeline do modo componentes
 
 Este documento descreve, em detalhe, como funciona o pipeline no modo
 componentes: o que o usuario define, o que vai para o LLM, o que o LLM devolve,
@@ -507,7 +507,7 @@ servidor deve estar acessivel no IP/porta informados, com a rota `/collect`.
 
 ## 13. Pre-requisitos e instalacao
 
-- Python com as dependencias de `requirements.txt` (`python-dotenv`, `flask`,
+- Python com as dependencias de `requirements.lock` (`python-dotenv`, `flask`,
   `openai`, `cryptography`, `requests`).
 - `gcc`, OpenSSL (`libssl`/`libcrypto`), libcurl e o executavel `opencode` no
   `PATH` da VM.
@@ -519,7 +519,7 @@ servidor deve estar acessivel no IP/porta informados, com a rota `/collect`.
 Instalacao:
 
 ```bash
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.lock
 ```
 
 ---

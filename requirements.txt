@@ -1,6 +1,0 @@
-cryptography
-flask
-openai
-python-dotenv
-PyYAML
-requests
