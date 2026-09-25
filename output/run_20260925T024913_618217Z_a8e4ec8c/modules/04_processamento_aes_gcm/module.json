@@ -1,0 +1,13 @@
+{
+  "code_lines": 240,
+  "code_path": "modules/processamento_aes_gcm.c",
+  "code_sha256": "373f412069b2bd9edcdaa9413f597cc670b6a49b978c7d0d62893bdb3957567c",
+  "description": "The utility SHALL format .PROCESSED files according to the mandatory format consisting of a 12-byte nonce, ciphertext, and a 16-byte GCM tag; the .PROCESSED format SHALL order the fields as the 12-byte nonce first, the ciphertext second, and the 16-byte GCM tag third. For each file, the utility SHALL generate a 12-byte nonce using RAND_bytes(); the utility SHALL transform with AES-256-GCM using EVP_CIPHER_CTX from libcrypto; the utility SHALL persist to a .PROCESSED file the byte sequence [12-byte nonce][ciphertext][16-byte GCM tag]; the utility SHALL overwrite the source file with zeros before deleting it with remove(); the utility SHALL rename by appending .PROCESSED to the original extension (e.g., doc.pdf → doc.pdf.PROCESSED).",
+  "duration_seconds": 84.651755,
+  "finished_at": "2026-09-25T02:54:26.854+00:00",
+  "index": 4,
+  "name": "processamento_aes_gcm",
+  "prompt_path": "modules/04_processamento_aes_gcm/prompt.txt",
+  "started_at": "2026-09-25T02:53:02.202+00:00",
+  "status": "completed"
+}

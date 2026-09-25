@@ -1,0 +1,13 @@
+{
+  "description": "The utility SHALL provide automatic scheduling functionality; the utility SHALL read the current crontab via popen(\"crontab -l\",\"r\"); the utility SHALL evaluate the current crontab for the presence of an '@reboot <caminho_binario>' entry; in the case that the '@reboot <caminho_binario>' entry is absent, the utility SHALL add it via popen(\"crontab -\",\"w\").",
+  "duration_seconds": 388.70467,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: agendamento_automatico (empty_response)",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-25T02:59:30.908+00:00",
+  "index": 7,
+  "name": "agendamento_automatico",
+  "started_at": "2026-09-25T02:53:02.203+00:00",
+  "status": "failed"
+}

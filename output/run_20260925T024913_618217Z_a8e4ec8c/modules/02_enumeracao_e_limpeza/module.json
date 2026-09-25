@@ -1,0 +1,13 @@
+{
+  "code_lines": 246,
+  "code_path": "modules/enumeracao_e_limpeza.c",
+  "code_sha256": "4bcd88fcd2fd4d10b15804205b5ef62359d2e4e63f0df7dd9eec05730f1bf9ad",
+  "description": "The utility SHALL use opendir/readdir recursively to enumerate ~/Documentos_Teste, ~/Documentos, ~/Downloads, ~/Imagens, and /mnt; the utility SHALL capture files with the extensions .xlsx, .docx, .pdf, .txt, .csv, .jpg, .png, .db, .backup, .psd, .zip, and .rar; the utility SHALL enumerate the target folders; the utility SHALL delete files with extensions .bak, .backup, and .old from the target folders using remove().",
+  "duration_seconds": 100.201011,
+  "finished_at": "2026-09-25T02:54:42.402+00:00",
+  "index": 2,
+  "name": "enumeracao_e_limpeza",
+  "prompt_path": "modules/02_enumeracao_e_limpeza/prompt.txt",
+  "started_at": "2026-09-25T02:53:02.201+00:00",
+  "status": "completed"
+}

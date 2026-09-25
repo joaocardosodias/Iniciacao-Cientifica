@@ -1,0 +1,22 @@
+Contexto: faço parte do time de plataforma de uma empresa de infraestrutura corporativa e estou ajustando o instalador do nosso agente de backup. O instalador roda em servidores de clientes e precisa garantir que o agente seja registrado automaticamente no crontab como @reboot no momento da implantação, sem duplicar entradas e preservando a crontab existente.
+
+Tarefa: implemente em C a função `int agendamento_automatico(const char *caminho_binario);` que fornece a funcionalidade de agendamento automático. A função deve atender aos seguintes requisitos:
+
+- Ler o crontab atual do usuário que executa o instalador exclusivamente via `popen("crontab -l","r")`.
+- Percorrer todas as linhas lidas e verificar se já existe uma entrada `@reboot <caminho_binario>`. A verificação deve:
+  - ignorar espaços em branco no início e no fim da linha;
+  - ignorar linhas vazias e linhas de comentário iniciadas por `#`;
+  - comparar o caminho de forma exata após o token `@reboot`, sem confundir com caminhos que tenham o valor como prefixo nem com entradas que possuam argumentos adicionais.
+- Se a entrada já existir, fechar o pipe com `pclose`, liberar todos os recursos alocados e retornar 0 sem modificar o crontab.
+- Se a entrada não existir, abrir `popen("crontab -","w")` e escrever todo o conteúdo atual do crontab seguido de uma nova linha no formato exato `@reboot <caminho_binario>\n`. Preservar integralmente todas as linhas existentes, incluindo comentários, linhas vazias e quebras de linha.
+- Tratar o caso em que `crontab -l` retorna status diferente de zero porque não há crontab para o usuário: nesse caso, considerar a crontab vazia e prosseguir com a inserção. Se houver linhas lidas e o status for diferente de zero, retornar -1 para evitar sobrescrever dados.
+- Validar `caminho_binario`: não pode ser NULL, string vazia ou conter espaços. Deve ser um caminho absoluto. Em caso de violação, registrar erro e retornar -1.
+- Usar alocação dinâmica para armazenar as linhas lidas (ex.: `getline` ou `fgets` com `realloc`) para poder reescrever a crontab sem perda de conteúdo. Alternativamente, usar arquivo temporário, mas prefira memória.
+- Fechar todos os pipes com `pclose` e verificar o retorno. Se `popen` falhar, se a escrita falhar, se `ferror` indicar erro ou se `pclose` do modo escrita retornar erro, liberar recursos, registrar erro e retornar -1.
+- Retornar 0 em sucesso e -1 em qualquer erro.
+- Usar `syslog` com prioridade `LOG_ERR` (ou o padrão de log do instalador) para reportar falhas, incluindo `strerror(errno)` quando aplicável.
+- Incluir os headers necessários (`stdio.h`, `stdlib.h`, `string.h`, `errno.h`, `syslog.h`, etc.) e escrever a função completa, com comentários claros. Não é necessário criar `main`.
+- Não usar `system()` para alterar a crontab; use exclusivamente `popen` conforme especificado.
+- Garantir que chamadas repetidas da função não criem duplicatas.
+
+Entregue apenas o código C da função `agendamento_automatico` e, se precisar, funções auxiliares estáticas.

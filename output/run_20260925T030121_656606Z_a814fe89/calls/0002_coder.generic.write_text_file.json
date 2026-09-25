@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "76cb03893238",
+  "duration_seconds": 11.510017,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T03:01:33.624+00:00",
+  "hashes": {
+    "response_sha256": "c672d4888f6ff5279f966b8f6aa0d41a1c1fbae2c2cf0b5e05c150b2454c5e0c",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "1e1655b9f36b8c71f57cbb76f957a69c23982445a2ba9d90b4e0ffc6d76c7c6e"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include <errno.h>\n#include <fcntl.h>\n#include <string.h>\n#include <unistd.h>\n\nint write_text_file(const char *path, const char *text)\n{\n    if (path == NULL || text == NULL) {\n        errno = EINVAL;\n        return -1;\n    }\n\n    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0600);\n    if (fd == -1)\n        return -1;\n\n    size_t length = strlen(text);\n    size_t offset = 0;\n\n    while (offset < length) {\n        ssize_t written = write(fd, text + offset, length - offset);\n        if (written < 0) {\n            if (errno == EINTR)\n                continue;\n            int saved_errno = errno;\n            close(fd);\n            errno = saved_errno;\n            return -1;\n        }\n        if (written == 0) {\n            close(fd);\n            errno = EIO;\n            return -1;\n        }\n        offset += (size_t)written;\n    }\n\n    if (close(fd) == -1)\n        return -1;\n\n    return 0;\n}",
+  "response_id": "gen-1790305282-DQB9X90cqP7qhuTptiKm",
+  "response_model": "openai/gpt-6-luna",
+  "schema_version": "1.0",
+  "stage": "coder.generic.write_text_file",
+  "started_at": "2026-09-25T03:01:22.114+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 724,
+    "cost": 0.0003953,
+    "prompt_tokens": 333,
+    "total_tokens": 1057
+  },
+  "user": "TASK: Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int write_text_file(const char *path, const char *text);\n\nReturn ONLY the C source implementing that function."
+}

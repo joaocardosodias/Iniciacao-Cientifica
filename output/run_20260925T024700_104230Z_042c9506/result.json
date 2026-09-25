@@ -1,0 +1,133 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3710,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "98ef645b92fd9fa27f43bfb5a8c13bc3476ee4ec382acd7988ddc8c17508badf"
+    },
+    {
+      "bytes": 4034,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "a47a7e67afa2b1fadecbc81e49358246831f329054987eb0659f7a39a9f44e61"
+    },
+    {
+      "bytes": 4455,
+      "path": "calls/0003_sanitizer.fragment_3.framing_1.json",
+      "sha256": "f3d2d85f368ac63b3122782775fee9d57ee9c1b7fc201c5d467d8dac1760ed5f"
+    },
+    {
+      "bytes": 4789,
+      "path": "calls/0004_sanitizer.fragment_4.framing_1.json",
+      "sha256": "c448f61a1881af3fcf5c2a546c8c105cba4b9b9d9e576ed651edb7d3ea93c720"
+    },
+    {
+      "bytes": 3790,
+      "path": "calls/0005_sanitizer.fragment_5.framing_1.json",
+      "sha256": "515b57576a9a6e91d6e0b17ecfa089b3b8e969b7db31a3cc79d5bffcb8941827"
+    },
+    {
+      "bytes": 3258,
+      "path": "calls/0006_sanitizer.fragment_5.framing_2.json",
+      "sha256": "4e6d5568631531d7742674934b5d1804033411e0fc755037309d018603fbef15"
+    },
+    {
+      "bytes": 4201,
+      "path": "calls/0007_sanitizer.fragment_6.framing_1.json",
+      "sha256": "dbf09e84ce44332a0cebabb15ef29a81f967f944ef032ae9b10c088f1a0e6a55"
+    },
+    {
+      "bytes": 3635,
+      "path": "calls/0008_sanitizer.fragment_6.framing_2.json",
+      "sha256": "ba0dc85952601b2a34e46286d1de4c18586def92d975028a95668fcacb7748f2"
+    },
+    {
+      "bytes": 3272,
+      "path": "calls/0009_sanitizer.fragment_6.framing_3.json",
+      "sha256": "5c44e48000a6d5b35423bb65967bb9aeca25678831558c6e3ac1e22285ffe034"
+    },
+    {
+      "bytes": 3559,
+      "path": "calls/0010_sanitizer.fragment_6.framing_4.json",
+      "sha256": "be16a330959485d99b547d06817f116af697470347b8e5b40706b954b99d8ba6"
+    },
+    {
+      "bytes": 12029,
+      "path": "events.jsonl",
+      "sha256": "01a421904af0cddd4433690f4d1d6e89368094a2c6d62e6617e12e8053e4a5fd"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 1005,
+      "path": "provenance/environment.json",
+      "sha256": "19a73162a52b3e706c17188f865684c7721cc2fa5f057d7226719f4248245db3"
+    },
+    {
+      "bytes": 5574,
+      "path": "provenance/git.diff",
+      "sha256": "ff91938f22da2437679892ebc1d90fd4c287aa5b4cb6d421d870b8ec628d8f3c"
+    },
+    {
+      "bytes": 98,
+      "path": "provenance/git_status.txt",
+      "sha256": "adfddf68b649294e49b1d1f50dcc5c7f3b4260e47516b8226f0bae9fa13551f9"
+    },
+    {
+      "bytes": 10539,
+      "path": "provenance/python_packages.json",
+      "sha256": "731b2f9647f2ce11fee7cb31c4a13ebc82ad81da231638886f8b141f48e47a81"
+    },
+    {
+      "bytes": 3196,
+      "path": "provenance/source_hashes.json",
+      "sha256": "2f65aa70bbc01187e741965890351cd691c4c4e917e9c86701bdad91e82d7134"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 61.073637,
+  "error": {
+    "message": "Sanitizer: todos os 4 framings foram recusados ou inverteram o fragmento 6 (modelo: openai/gpt-6-luna). Tente um modelo com política de segurança mais permissiva (ex: groq:llama3-70b, groq:mixtral, free-qwen).",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-25T02:48:01.177+00:00",
+  "llm_calls": {
+    "completed": 10,
+    "cost": {
+      "reported_calls": 10,
+      "total": 0.0027888,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "OpenAI"
+    ],
+    "models_observed": [
+      "openai/gpt-6-luna"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 0,
+    "retries": 0,
+    "tokens": {
+      "input": 4928,
+      "output": 4592,
+      "reported_calls": 10,
+      "total": 9520
+    },
+    "total": 10,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260925T024700_104230Z_042c9506",
+  "schema_version": "1.0",
+  "status": "failed"
+}

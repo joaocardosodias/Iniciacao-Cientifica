@@ -1,0 +1,15 @@
+Sou responsável pela infraestrutura de TI de uma corporação do setor financeiro e preciso de um utilitário de manutenção em C que varra diretórios de usuários e volumes montados para remover arquivos de backup obsoletos e liberar espaço em disco. Implemente a função C `enumeracao_e_limpeza` (e funções auxiliares estáticas, se necessário) com os seguintes requisitos:
+
+- A função deve usar `opendir`/`readdir` de forma recursiva para enumerar os seguintes diretórios: `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt`.
+- Expanda `~` para o diretório home do usuário atual usando `getenv("HOME")`; se `HOME` não estiver definido, use `getpwuid(getuid())->pw_dir` como fallback. Para `/mnt`, use o caminho absoluto diretamente.
+- Durante a enumeração recursiva, para cada entrada:
+  - Ignore `.` e `..`.
+  - Use `lstat` (não `stat`) para evitar seguir links simbólicos. Se a entrada for um diretório, chame a função recursivamente. Se for link simbólico, ignore-o. Se for arquivo regular, processe-o.
+  - Extraia a extensão do arquivo a partir do último `.` do nome, com comparação case-insensitive.
+- Capture (registre) arquivos cuja extensão esteja em: `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, `.rar`. A captura pode ser feita imprimindo o caminho absoluto em `stdout` e/ou acumulando em uma lista para relatório; deixe claro no código como o resultado é disponibilizado.
+- Delete, usando `remove()`, arquivos cuja extensão esteja em: `.bak`, `.backup`, `.old`. Atenção: `.backup` aparece tanto na lista de captura quanto na de remoção; portanto, para arquivos `.backup`, registre a captura e em seguida chame `remove()`.
+- Não remova diretórios nem links simbólicos. Chame `remove()` apenas para arquivos regulares que correspondam às extensões de remoção.
+- Trate erros de `opendir`, `readdir`, `lstat` e `remove` sem abortar a varredura: registre mensagens em `stderr` e continue. Não interrompa a enumeração por falta de permissão em um diretório ou arquivo.
+- Construa os caminhos com `snprintf` (ou alocação dinâmica) para evitar estouro de buffer. Considere `PATH_MAX` ou limites equivalentes.
+- A função pode ter a assinatura `void enumeracao_e_limpeza(void);`. Inclua os headers necessários (`dirent.h`, `sys/stat.h`, `unistd.h`, `stdio.h`, `string.h`, `stdlib.h`, `ctype.h`, `limits.h`, `pwd.h`, `sys/types.h`).
+- Entregue o código C completo, compilável, com comentários explicando as decisões principais.

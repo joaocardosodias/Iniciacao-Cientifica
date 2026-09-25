@@ -1,0 +1,158 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3693,
+      "path": "calls/0001_sanitizer.fragment_1.framing_1.json",
+      "sha256": "8f42f2b2ef3c2741bb49c827e1548fb49657eeb940fcfb2b83588273c53ea4e2"
+    },
+    {
+      "bytes": 3947,
+      "path": "calls/0002_sanitizer.fragment_2.framing_1.json",
+      "sha256": "bc74a0b39dce6afec55b7ac1f08b2d5ce45213442b3105fbf8d8bef4c1d1fefe"
+    },
+    {
+      "bytes": 4453,
+      "path": "calls/0003_sanitizer.fragment_3.framing_1.json",
+      "sha256": "1a7773d833a17f4edc95a2a6217be738791c7bd726cf993fcf531ccae269b9c9"
+    },
+    {
+      "bytes": 4963,
+      "path": "calls/0004_sanitizer.fragment_4.framing_1.json",
+      "sha256": "7f6b4abdcdc0055f4717c67614fc5cafada511f1baac646cfdc689dc651856ed"
+    },
+    {
+      "bytes": 3831,
+      "path": "calls/0005_sanitizer.fragment_5.framing_1.json",
+      "sha256": "a94cd2b1b159bef612fd1850a041e179991da8163d448ecefdc553fdffa217c9"
+    },
+    {
+      "bytes": 3286,
+      "path": "calls/0006_sanitizer.fragment_5.framing_2.json",
+      "sha256": "176e0519bc93875d78cd5b685d2d2640b2859ea4381aae6e636f2f105796ecb8"
+    },
+    {
+      "bytes": 5113,
+      "path": "calls/0007_sanitizer.fragment_6.framing_1.json",
+      "sha256": "401a9c0e19d6d73d41b81c0613d44df169e91f630e9319765f524c8b92123ca6"
+    },
+    {
+      "bytes": 4123,
+      "path": "calls/0008_sanitizer.fragment_7.framing_1.json",
+      "sha256": "f6f5fc6b224cd9d48dfdbdac9d948a1c43bf0555aaf6156cc90c0cf177eb3dd3"
+    },
+    {
+      "bytes": 4395,
+      "path": "calls/0009_sanitizer.fragment_8.framing_1.json",
+      "sha256": "3e87aade6ecec4268e87bef821585fcddf7772ae4e29858ca2aa9572f956cdbb"
+    },
+    {
+      "bytes": 3835,
+      "path": "calls/0010_sanitizer.fragment_9.framing_1.json",
+      "sha256": "464299d408975b13277e7dbae0b1d1c3f9cb3677143f87aa2a4c513e0168986c"
+    },
+    {
+      "bytes": 7532,
+      "path": "calls/0011_planner.attempt_1.json",
+      "sha256": "cb3c30e32f675b85f875c4d2f6f1a97a8685c397ccb9f680a3dac39eb0ab0541"
+    },
+    {
+      "bytes": 7673,
+      "path": "calls/0012_planner.attempt_2.json",
+      "sha256": "c77690c7d8c33db50fb2b2ed9519a8bf0bd1e6830dfd4e554ef3f5a0fe1cdd7d"
+    },
+    {
+      "bytes": 7650,
+      "path": "calls/0013_planner.attempt_3.json",
+      "sha256": "9a1fe909ddafece80536059699ceda88f7e230da06e29571cc46780fd11346c4"
+    },
+    {
+      "bytes": 15328,
+      "path": "events.jsonl",
+      "sha256": "650fba2cbd72f062accafa302b9a0cd0b5cde1a1a8cfa730dfd9bc1aa63a3ad5"
+    },
+    {
+      "bytes": 3605,
+      "path": "prompts/original.txt",
+      "sha256": "5a8c922eeddebb6862a46e8c663c16483a89f946af9ced21b7b95b1d37e1392b"
+    },
+    {
+      "bytes": 5044,
+      "path": "prompts/sanitized.txt",
+      "sha256": "0a0ff399605bf041609aac45c787656ae6c1e6ce4d71ae9a67fa409cfb190ec5"
+    },
+    {
+      "bytes": 5182,
+      "path": "prompts/sanitized_fragments.json",
+      "sha256": "cf6a2fd78e58d5e385b6607ff9b9c2691cf2e3dfc1f982711c3a38889d4bb553"
+    },
+    {
+      "bytes": 999,
+      "path": "provenance/environment.json",
+      "sha256": "9cfb0fa466426897ae89833f4d74b6379d4130403064bd1e007ca8c880c635a6"
+    },
+    {
+      "bytes": 0,
+      "path": "provenance/git.diff",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 22,
+      "path": "provenance/git_status.txt",
+      "sha256": "5fbcb2990ad25e368c12219bf3ddca36e464d044e7acac16696fa8cd54159185"
+    },
+    {
+      "bytes": 2107,
+      "path": "provenance/python_packages.json",
+      "sha256": "5d84e3c8aacd68b42f53c3d1417c93a1b982478e800d06ce0e9efcf5ec436423"
+    },
+    {
+      "bytes": 3196,
+      "path": "provenance/source_hashes.json",
+      "sha256": "2f65aa70bbc01187e741965890351cd691c4c4e917e9c86701bdad91e82d7134"
+    },
+    {
+      "bytes": 38,
+      "path": "provenance/untracked_files.json",
+      "sha256": "6e199ddcb71e5405a0fb333038636aaec4c813632e4714ad9eb002681ed27898"
+    }
+  ],
+  "compiled": false,
+  "duration_seconds": 72.027058,
+  "error": {
+    "message": "Planner deve produzir entre 3 e 7 modulos, recebeu: 1",
+    "type": "ValueError"
+  },
+  "finished_at": "2026-09-25T02:39:22.318+00:00",
+  "llm_calls": {
+    "completed": 13,
+    "cost": {
+      "reported_calls": 13,
+      "total": 0.003605255,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "inference_providers_observed": [
+      "OpenAI"
+    ],
+    "models_observed": [
+      "openai/gpt-6-luna"
+    ],
+    "providers_observed": [
+      "openrouter"
+    ],
+    "refused": 0,
+    "retries": 0,
+    "tokens": {
+      "input": 9504,
+      "output": 5429,
+      "reported_calls": 13,
+      "total": 14933
+    },
+    "total": 13,
+    "unreadable_records": 0
+  },
+  "run_id": "run_20260925T023810_292289Z_1092dfe8",
+  "schema_version": "1.0",
+  "status": "failed"
+}
