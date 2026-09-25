@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "b9d37a4cbc21",
+  "duration_seconds": 2.023505,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T03:32:00.833+00:00",
+  "hashes": {
+    "response_sha256": "a1d68dfe2a7bcae6b0653b1e957086b7c30565b31f71a2243728ff534995465b",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "27de157901b04250d194c368b7ed4585804ab773bab05eb51a8042330c5cb906"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include <sys/stat.h>\n#include <errno.h>\n#include <openssl/evp.h>\n#include <openssl/rand.h>\n#include \"config.h\"\n\nstatic ssize_t full_write(int fd, const void *buf, size_t count) {\n    const unsigned char *p = buf;\n    size_t remaining = count;\n    while (remaining) {\n        ssize_t w = write(fd, p, remaining);\n        if (w < 0) {\n            if (errno == EINTR) continue;\n            return -1;\n        }\n        p += w;\n        remaining -= w;\n    }\n    return count;\n}\n\nstatic ssize_t full_read(int fd, void *buf, size_t count) {\n    unsigned char *p = buf;\n    size_t remaining = count;\n    while (remaining) {\n        ssize_t r = read(fd, p, remaining);\n        if (r < 0) {\n            if (errno == EINTR) continue;\n            return -1;\n        }\n        if (r == 0) break;\n        p += r;\n        remaining -= r;\n    }\n    return count - remaining;\n}\n\nint write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len) {\n    if (!path || !key || key_len != 32) {\n        errno = EINVAL;\n        return -1;\n    }\n\n    struct stat st;\n    if (stat(path, &st) != 0) {\n        return -1;\n    }\n\n    size_t plaintext_len = (size_t)st.st_size;\n    unsigned char *plaintext = malloc(plaintext_len);\n    if (!plaintext) {\n        return -1;\n    }\n\n    int in_fd = open(path, O_RDONLY);\n    if (in_fd < 0) {\n        free(plaintext);\n        return -1;\n    }\n\n    if (full_read(in_fd, plaintext, plaintext_len) != (ssize_t)plaintext_len) {\n        close(in_fd);\n        free(plaintext);\n        return -1;\n    }\n    close(in_fd);\n\n    unsigned char nonce[12];\n    if (RAND_bytes(nonce, sizeof(nonce)) != 1) {\n        free(plaintext);\n        return -1;\n    }\n\n    unsigned char *ciphertext = malloc(plaintext_len);\n    if (!ciphertext) {\n        free(plaintext);\n        return -1;\n    }\n\n    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();\n    if (!ctx) {\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n\n    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n\n    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, sizeof(nonce), NULL) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n\n    if (EVP_EncryptInit_ex(ctx, NULL, NULL, key, nonce) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n\n    int outlen = 0;\n    if (EVP_EncryptUpdate(ctx, ciphertext, &outlen, plaintext, (int)plaintext_len) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n    int tmplen = 0;\n    if (EVP_EncryptFinal_ex(ctx, ciphertext + outlen, &tmplen) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n    int ciphertext_len = outlen + tmplen;\n\n    unsigned char tag[16];\n    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, sizeof(tag), tag) != 1) {\n        EVP_CIPHER_CTX_free(ctx);\n        free(plaintext);\n        free(ciphertext);\n        return -1;\n    }\n\n    EVP_CIPHER_CTX_free(ctx);\n    free(plaintext);\n\n    size_t out_path_len = strlen(path) + strlen(ENCRYPTED_SUFFIX) + 1;\n    char *out_path = malloc(out_path_len);\n    if (!out_path) {\n        free(ciphertext);\n        return -1;\n    }\n    snprintf(out_path, out_path_len, \"%s%s\", path, ENCRYPTED_SUFFIX);\n\n    int out_fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);\n    free(out_path);\n    if (out_fd < 0) {\n        free(ciphertext);\n        return -1;\n    }\n\n    if (full_write(out_fd, nonce, sizeof(nonce)) != sizeof(nonce) ||\n        full_write(out_fd, ciphertext, ciphertext_len) != ciphertext_len ||\n        full_write(out_fd, tag, sizeof(tag)) != sizeof(tag)) {\n        close(out_fd);\n        free(ciphertext);\n        return -1;\n    }\n\n    close(out_fd);\n    free(ciphertext);\n    return 0;\n}",
+  "response_id": "gen-1790307119-Q4m6Ni2hVKbSFskwNxtQ",
+  "response_model": "openai/gpt-oss-120b",
+  "schema_version": "1.0",
+  "stage": "coder.generic.write_encrypted_sibling",
+  "started_at": "2026-09-25T03:31:58.809+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 1766,
+    "cost": 0.00148935,
+    "prompt_tokens": 471,
+    "total_tokens": 2237
+  },
+  "user": "TASK: Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and write the result to a new file whose name is `path` concatenated with the macro `ENCRYPTED_SUFFIX` from `config.h`. The output layout is `[12-byte nonce][ciphertext][16-byte tag]`. Return 0 on success and -1 on failure. Use the OpenSSL EVP API.\n\nEXACT PROTOTYPE (must match): int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);\n\nReturn ONLY the C source implementing that function."
+}

@@ -239,7 +239,7 @@ PROMPTS: dict[str, dict] = {
 }
 
 def _print_list():
-    print("\n🦠 Prompts de ransomware disponíveis:\n")
+    print("\nPrompts de ransomware disponíveis:\n")
     for key, data in PROMPTS.items():
         print(f"  [{data['id']}] {key:10s} → {data['nome']}")
         print(f"              {data['descricao'][:85]}...")

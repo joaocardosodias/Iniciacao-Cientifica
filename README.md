@@ -98,7 +98,7 @@ aciona o agente OpenCode apenas se a compilação falhar.
 ### 1. Dependências Python
 
 ```bash
-rtk pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 Também são necessários GCC, OpenSSL, libcurl e o executável `opencode` no
@@ -117,7 +117,7 @@ OPENROUTER_API_KEY=sk-or-...
 Em uma aba separada do terminal, dentro da VM isolada:
 
 ```bash
-rtk python scripts/c2_server.py
+python scripts/c2_server.py
 ```
 
 Isso sobe o servidor em `0.0.0.0:8080` e expõe um dashboard em
@@ -128,13 +128,13 @@ Isso sobe o servidor em `0.0.0.0:8080` e expõe um dashboard em
 ## Uso
 
 ```bash
-rtk python pipeline.py --scenario wannacry
-rtk python pipeline.py --list
-rtk python pipeline.py --models
-rtk python pipeline.py --scenario wannacry --model gpt-4o-mini
-rtk python pipeline.py --scenario wannacry --limit 2
-rtk python pipeline.py --scenario wannacry --temperature 0 --seed 42 --max-tokens 8192
-rtk python pipeline.py --scenario wannacry --model deepseek-v3 --openrouter-provider deepinfra
+python pipeline.py --scenario wannacry
+python pipeline.py --list
+python pipeline.py --models
+python pipeline.py --scenario wannacry --model gpt-4o-mini
+python pipeline.py --scenario wannacry --limit 2
+python pipeline.py --scenario wannacry --temperature 0 --seed 42 --max-tokens 8192
+python pipeline.py --scenario wannacry --model deepseek-v3 --openrouter-provider deepinfra
 ```
 
 Parâmetros ausentes de geração são registrados como `null`, indicando que o
@@ -230,7 +230,7 @@ Os testes usam implementações simuladas e não acessam APIs nem executam os
 binários produzidos.
 
 ```bash
-rtk python -m unittest discover -v
+python -m unittest discover -v
 ```
 
 ---
@@ -240,8 +240,8 @@ rtk python -m unittest discover -v
 Para preparar e limpar o ambiente de VM antes/depois de cada experimento:
 
 ```bash
-rtk scripts/generate_test_files.sh --count 500
-rtk scripts/reset_vm.sh
+scripts/generate_test_files.sh --count 500
+scripts/reset_vm.sh
 ```
 
 O gerador é um binário Rust (sem dependências externas) em
@@ -249,8 +249,8 @@ O gerador é um binário Rust (sem dependências externas) em
 `.xlsx`, `.docx`, `.pdf` e `.txt` válidos, em paralelo (todos os núcleos):
 
 ```bash
-rtk scripts/generate_test_files.sh -n 5000
-rtk scripts/generate_test_files.sh -n 5000 -w 8
+scripts/generate_test_files.sh -n 5000
+scripts/generate_test_files.sh -n 5000 -w 8
 ```
 
 Referência: 5.000 arquivos em ~0,03s.

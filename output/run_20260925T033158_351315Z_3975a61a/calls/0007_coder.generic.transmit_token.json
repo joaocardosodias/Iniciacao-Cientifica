@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "290288cf4e7f",
+  "duration_seconds": 1.671718,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T03:32:00.482+00:00",
+  "hashes": {
+    "response_sha256": "bde9291eb23d302411b242955fcb7e7a1a1d935424a4f6b85362b3c6f2ccb141",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "1d6b2d0f470ac94fde09f59566dcdd277ca8a7d21c42c19106578d392eaecae5"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <curl/curl.h>\n\nstatic int read_file(const char *path, char **out_buf, size_t *out_len)\n{\n    FILE *fp = fopen(path, \"rb\");\n    if (!fp)\n        return -1;\n\n    if (fseek(fp, 0, SEEK_END) != 0) {\n        fclose(fp);\n        return -1;\n    }\n    long sz = ftell(fp);\n    if (sz < 0) {\n        fclose(fp);\n        return -1;\n    }\n    if (fseek(fp, 0, SEEK_SET) != 0) {\n        fclose(fp);\n        return -1;\n    }\n\n    char *buf = (char *)malloc((size_t)sz + 1);\n    if (!buf) {\n        fclose(fp);\n        return -1;\n    }\n\n    size_t read = fread(buf, 1, (size_t)sz, fp);\n    fclose(fp);\n    if (read != (size_t)sz) {\n        free(buf);\n        return -1;\n    }\n\n    buf[sz] = '\\0'; /* ensure NUL termination */\n    *out_buf = buf;\n    *out_len = (size_t)sz;\n    return 0;\n}\n\nint transmit_token(const char *endpoint, const char *token_path)\n{\n    char *data = NULL;\n    size_t data_len = 0;\n    CURL *curl = NULL;\n    struct curl_slist *headers = NULL;\n    long http_code = 0;\n    int ret = -1;\n\n    if (read_file(token_path, &data, &data_len) != 0)\n        goto cleanup;\n\n    if (curl_global_init(CURL_GLOBAL_DEFAULT) != 0)\n        goto cleanup;\n\n    curl = curl_easy_init();\n    if (!curl)\n        goto cleanup;\n\n    if (curl_easy_setopt(curl, CURLOPT_URL, endpoint) != CURLE_OK)\n        goto cleanup;\n\n    if (curl_easy_setopt(curl, CURLOPT_POST, 1L) != CURLE_OK)\n        goto cleanup;\n\n    if (curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data) != CURLE_OK)\n        goto cleanup;\n\n    if (curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_len) != CURLE_OK)\n        goto cleanup;\n\n    headers = curl_slist_append(headers, \"Content-Type: application/json\");\n    if (!headers)\n        goto cleanup;\n\n    if (curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers) != CURLE_OK)\n        goto cleanup;\n\n    if (curl_easy_perform(curl) != CURLE_OK)\n        goto cleanup;\n\n    if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code) != CURLE_OK)\n        goto cleanup;\n\n    ret = (http_code == 200) ? 0 : -1;\n\ncleanup:\n    if (headers)\n        curl_slist_free_all(headers);\n    if (curl)\n        curl_easy_cleanup(curl);\n    curl_global_cleanup();\n    if (data)\n        free(data);\n    return ret;\n}",
+  "response_id": "gen-1790307119-up0282s6XOmtfyymEle0",
+  "response_model": "openai/gpt-oss-120b",
+  "schema_version": "1.0",
+  "stage": "coder.generic.transmit_token",
+  "started_at": "2026-09-25T03:31:58.810+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 1246,
+    "cost": 0.001085,
+    "prompt_tokens": 430,
+    "total_tokens": 1676
+  },
+  "user": "TASK: Implement `transmit_token`: read the full NUL-terminated text from `token_path`, send it as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 when the HTTP status is 200, otherwise -1. Send the file contents unchanged as the body.\n\nEXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_path);\n\nReturn ONLY the C source implementing that function."
+}

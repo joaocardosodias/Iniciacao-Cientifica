@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "2e22b91b8961",
+  "duration_seconds": 1.230949,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T03:32:00.041+00:00",
+  "hashes": {
+    "response_sha256": "798ff07574a658abaa0911fbc62363c5b69d720e25907a8e695fb89fa937736b",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "4f612b0a0cae3506548d25784c7b5bdb5b36c0c65a94fe141cd78e05c775ab82"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <fcntl.h>\n#include <unistd.h>\n#include <sys/stat.h>\n#include <errno.h>\n#include <string.h>\n\nstatic int write_zeros(int fd, off_t size) {\n    const size_t bufsize = 4096;\n    char buf[bufsize];\n    memset(buf, 0, bufsize);\n    while (size > 0) {\n        ssize_t chunk = size > (off_t)bufsize ? (ssize_t)bufsize : (ssize_t)size;\n        ssize_t written = 0;\n        while (written < chunk) {\n            ssize_t res = write(fd, buf + written, (size_t)(chunk - written));\n            if (res < 0) {\n                if (errno == EINTR)\n                    continue;\n                return -1;\n            }\n            written += res;\n        }\n        size -= chunk;\n    }\n    return 0;\n}\n\nint secure_erase(const char *path) {\n    int fd = open(path, O_WRONLY);\n    if (fd < 0)\n        return -1;\n\n    struct stat st;\n    if (fstat(fd, &st) < 0) {\n        close(fd);\n        return -1;\n    }\n\n    if (write_zeros(fd, st.st_size) < 0) {\n        close(fd);\n        return -1;\n    }\n\n    if (fsync(fd) < 0) {\n        close(fd);\n        return -1;\n    }\n\n    if (close(fd) < 0)\n        return -1;\n\n    if (remove(path) != 0)\n        return -1;\n\n    return 0;\n}",
+  "response_id": "gen-1790307119-IkQK9nUJYfKNjjaeSJcC",
+  "response_model": "openai/gpt-oss-120b",
+  "schema_version": "1.0",
+  "stage": "coder.generic.secure_erase",
+  "started_at": "2026-09-25T03:31:58.810+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "usage": {
+    "completion_tokens": 1198,
+    "cost": 0.00103745,
+    "prompt_tokens": 397,
+    "total_tokens": 1595
+  },
+  "user": "TASK: Implement `secure_erase`: overwrite the file at `path` with zero bytes using its current length, close it, then remove it with `remove()`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int secure_erase(const char *path);\n\nReturn ONLY the C source implementing that function."
+}
