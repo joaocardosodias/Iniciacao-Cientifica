@@ -132,6 +132,8 @@ class LLMClient:
     ):
         raw = model or DEFAULT_MODEL
         provider, base_url, self.model = _resolve(raw)
+        self.requested_model_input = raw
+        self.base_url = base_url
         self.provider = provider
         self.openrouter_provider = openrouter_provider.strip() if openrouter_provider else None
         if openrouter_provider is not None and not self.openrouter_provider:
@@ -190,6 +192,10 @@ class LLMClient:
         started = time.perf_counter()
         attempts: list[dict[str, Any]] = []
         call_id = uuid.uuid4().hex[:12]
+        effective_parameters = {
+            **{key: value for key, value in self.generation_parameters.items() if value is not None},
+            **({"max_tokens": max_tokens} if max_tokens is not None else {}),
+        }
 
         if self.trace is not None:
             self.trace.emit("llm.call.started", call_id=call_id, stage=stage,
@@ -245,6 +251,7 @@ class LLMClient:
                         attempts,
                         call_id,
                         response,
+                        effective_parameters=effective_parameters,
                     )
                     return ""
                 message = response.choices[0].message
@@ -263,6 +270,7 @@ class LLMClient:
                         attempts,
                         call_id,
                         response,
+                        effective_parameters=effective_parameters,
                     )
                     raise ModelRefusalError(self.model, refusal or "content_filter")
                 self._record_call(
@@ -276,6 +284,7 @@ class LLMClient:
                     attempts,
                     call_id,
                     response,
+                    effective_parameters=effective_parameters,
                 )
                 return output
 
@@ -332,6 +341,7 @@ class LLMClient:
                         attempts,
                         call_id,
                         error=e,
+                        effective_parameters=effective_parameters,
                     )
                     raise
             except ModelRefusalError:
@@ -354,6 +364,7 @@ class LLMClient:
                     attempts,
                     call_id,
                     error=e,
+                    effective_parameters=effective_parameters,
                 )
                 raise
 
@@ -372,6 +383,7 @@ class LLMClient:
             attempts,
             call_id,
             error=last_exc,
+            effective_parameters=effective_parameters,
         )
         raise last_exc  # type: ignore[misc]
 
@@ -403,6 +415,7 @@ class LLMClient:
         call_id: str = "",
         response: Any = None,
         error: BaseException | None = None,
+        effective_parameters: dict[str, Any] | None = None,
     ) -> None:
         if self.trace is None:
             return
@@ -436,12 +449,18 @@ class LLMClient:
             "provider": self.provider,
             "requested_inference_provider": getattr(self, "openrouter_provider", None),
             "inference_provider": inference_provider,
+            "requested_model_input": getattr(self, "requested_model_input", self.model),
             "requested_model": self.model,
             "response_model": getattr(response, "model", None),
             "response_id": getattr(response, "id", None),
+            "response_created": getattr(response, "created", None),
+            "response_object": getattr(response, "object", None),
+            "system_fingerprint": getattr(response, "system_fingerprint", None),
+            "service_tier": getattr(response, "service_tier", None),
+            "api_base_url": getattr(self, "base_url", None),
             "finish_reason": self._finish_reason(response),
             "refusal": self._refusal(response),
-            "parameters": self.generation_parameters,
+            "parameters": effective_parameters or {},
             "usage": usage_data,
             "attempts": attempts,
             "error": None if error is None else {

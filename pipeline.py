@@ -15,6 +15,8 @@ from src.campaign import Campaign
 from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
 from src.recovery import recover_stale_runs
+from src.experimental_inputs import freeze_experimental_inputs, load_frozen_inputs
+from src.preflight import run_preflight
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,8 +61,8 @@ def run(
         isinstance(replicate, bool) or not isinstance(replicate, int) or replicate < 1
     ):
         raise ValueError("--replicate deve ser maior que zero.")
-    if run_purpose not in {"development", "official"}:
-        raise ValueError("run_purpose deve ser development ou official.")
+    if run_purpose not in {"development", "official", "pilot"}:
+        raise ValueError("run_purpose deve ser development, official ou pilot.")
     parameters = {
         "temperature": temperature,
         "top_p": top_p,
@@ -308,6 +310,9 @@ def run_official_campaign(
     max_tokens: int | None = None,
     results_root: Path = Path("results"),
     resume: bool = False,
+    protocol_path: Path | None = None,
+    rubric_path: Path | None = None,
+    campaign_kind: str = "official",
 ) -> Campaign:
     experiment_id = experiment_id.strip()
     condition = condition.strip()
@@ -335,6 +340,43 @@ def run_official_campaign(
         campaign.data["status"] = "running"
         campaign.data["finished_at"] = None
         campaign.events.emit("campaign.resumed", pending_replicates=campaign.pending_replicates())
+        has_frozen_inputs = bool(campaign.data.get("stimulus_sha256"))
+        if has_frozen_inputs:
+            frozen = load_frozen_inputs(campaign.root, campaign.data)
+            scenario = frozen["scenario"]
+            scenario_config_h = frozen["scenario_config_h"]
+            scenario_components = frozen["scenario_components"]
+            scenario_main_c = frozen["scenario_main_c"]
+        else:
+            if campaign.data.get("experimental_controls_required"):
+                if protocol_path is None or rubric_path is None:
+                    raise ValueError("A retomada exige --protocol para reconstruir as entradas ausentes.")
+                try:
+                    inputs = freeze_experimental_inputs(
+                        campaign.root,
+                        scenario,
+                        scenario_config_h,
+                        scenario_components,
+                        scenario_main_c,
+                        protocol_path,
+                        rubric_path,
+                        experiment_id,
+                        condition,
+                        campaign.data["planned_replicates"],
+                        campaign.data["requested_model"],
+                        campaign.data["model"],
+                        campaign.data["provider"],
+                        campaign.data.get("inference_provider"),
+                        parameters,
+                    )
+                    campaign.attach_experimental_inputs(inputs)
+                except Exception as error:
+                    campaign.mark_preflight_failed(error)
+                    raise
+            else:
+                campaign.data["legacy_resume_without_frozen_inputs"] = True
+                campaign._save()
+        campaign_kind = campaign.data.get("campaign_kind", "official")
     else:
         if (
             isinstance(planned_replicates, bool)
@@ -342,6 +384,12 @@ def run_official_campaign(
             or planned_replicates < 1
         ):
             raise ValueError("--runs deve ser um inteiro positivo.")
+        if protocol_path is None:
+            raise ValueError("Uma nova campanha exige --protocol.")
+        if rubric_path is None:
+            raise ValueError("Uma nova campanha exige --rubric.")
+        if campaign_kind not in {"official", "pilot"}:
+            raise ValueError("campaign_kind deve ser official ou pilot.")
         gateway, _, resolved_model = _resolve(model or DEFAULT_MODEL)
         parameters = {
             "delay": delay,
@@ -361,7 +409,47 @@ def run_official_campaign(
             inference_provider=openrouter_provider,
             planned_replicates=planned_replicates,
             generation_parameters=parameters,
+            campaign_kind=campaign_kind,
         )
+        try:
+            inputs = freeze_experimental_inputs(
+                campaign.root,
+                scenario,
+                scenario_config_h,
+                scenario_components,
+                scenario_main_c,
+                protocol_path,
+                rubric_path,
+                experiment_id,
+                condition,
+                planned_replicates,
+                model,
+                resolved_model,
+                gateway,
+                openrouter_provider,
+                parameters,
+            )
+            campaign.attach_experimental_inputs(inputs)
+        except Exception as error:
+            campaign.mark_preflight_failed(error)
+            raise
+
+    if not resume or campaign.data.get("stimulus_sha256"):
+        try:
+            campaign.events.emit("campaign.preflight_started")
+            report = run_preflight(
+                campaign.root,
+                campaign.data["provider"],
+                campaign.data.get("inference_provider"),
+                campaign.data["model"],
+                scenario_components,
+                scenario_config_h,
+                scenario_main_c,
+            )
+            campaign.record_preflight(report)
+        except Exception as error:
+            campaign.mark_preflight_failed(error)
+            raise
 
     try:
         for replicate in campaign.pending_replicates():
@@ -384,7 +472,7 @@ def run_official_campaign(
                     experiment_id=experiment_id,
                     condition=condition,
                     replicate=replicate,
-                    run_purpose="official",
+                    run_purpose=campaign_kind,
                     campaign=campaign.run_reference(replicate),
                     provenance_exclude_dirs=[results_root],
                 )
@@ -452,6 +540,13 @@ def main():
         help="Numero de repeticoes sequenciais da campanha oficial.")
     parser.add_argument("--resume", action="store_true",
         help="Retoma as replicas ausentes de uma campanha oficial.")
+    parser.add_argument("--pilot", action="store_true",
+        help="Marca a campanha como piloto, separada da analise oficial.")
+    parser.add_argument("--protocol", type=Path, default=None,
+        help="Protocolo experimental YAML congelado.")
+    parser.add_argument("--rubric", type=Path,
+        default=Path("experiments/rubrics/component-evaluation-v1.yaml"),
+        help="Rubrica YAML usada na avaliacao.")
     parser.add_argument("--results-root", type=Path, default=Path("results"),
         help="Diretorio raiz das campanhas oficiais.")
     args = parser.parse_args()
@@ -480,6 +575,8 @@ def main():
         parser.error("--resume exige --official.")
     if args.runs is not None and not args.official:
         parser.error("--runs so pode ser usado com --official.")
+    if args.pilot and not args.official:
+        parser.error("--pilot exige --official.")
     if args.official:
         if not args.experiment_id or not args.condition:
             parser.error("--official exige --experiment-id e --condition.")
@@ -493,6 +590,8 @@ def main():
             parser.error("--resume usa o total original e nao aceita --runs.")
         if not args.resume and (args.runs is None or args.runs < 1):
             parser.error("Uma nova campanha oficial exige --runs com inteiro positivo.")
+        if not args.resume and args.protocol is None:
+            parser.error("Uma nova campanha oficial exige --protocol.")
     if args.resume:
         previous = Campaign.find(
             args.results_root,
@@ -540,6 +639,9 @@ def main():
                 max_tokens=args.max_tokens,
                 results_root=args.results_root,
                 resume=args.resume,
+                protocol_path=args.protocol,
+                rubric_path=args.rubric,
+                campaign_kind="pilot" if args.pilot else "official",
             )
         except Exception as error:
             log.error(f"Falha na campanha: {error}")

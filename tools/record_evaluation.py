@@ -45,6 +45,19 @@ def _parse_checks(values: list[str]) -> list[dict[str, str]]:
     return checks
 
 
+def _parse_components(values: list[str]) -> list[dict[str, str]]:
+    assessments = []
+    for value in values:
+        component, separator, classification = value.partition(":")
+        if not separator:
+            raise ValueError("Use --component nome:classificacao.")
+        assessments.append({
+            "component": component.strip(),
+            "classification": classification.strip(),
+        })
+    return assessments
+
+
 def _prompt_evidence() -> list[Path]:
     paths = []
     while True:
@@ -69,7 +82,9 @@ def main() -> None:
     parser.add_argument("--execution-vm-snapshot")
     parser.add_argument("--collector-vm-snapshot")
     parser.add_argument("--network-mode", default="internal_isolated")
+    parser.add_argument("--environment-file", type=Path)
     parser.add_argument("--check", action="append", default=[])
+    parser.add_argument("--component", action="append", default=[])
     parser.add_argument("--notes")
     parser.add_argument("--evidence", action="append", type=Path, default=[])
     inclusion = parser.add_mutually_exclusive_group()
@@ -104,11 +119,12 @@ def main() -> None:
     evaluator = (args.evaluator or input("Avaliador: ")).strip()
     functional_status = args.functional_status or _prompt_status()
     execution_snapshot = args.execution_vm_snapshot
-    if execution_snapshot is None:
-        execution_snapshot = input("Snapshot da VM de execucao: ").strip()
     collector_snapshot = args.collector_vm_snapshot
-    if collector_snapshot is None:
-        collector_snapshot = input("Snapshot da VM coletora: ").strip()
+    if args.environment_file is None:
+        if execution_snapshot is None:
+            execution_snapshot = input("Snapshot da VM de execucao: ").strip()
+        if collector_snapshot is None:
+            collector_snapshot = input("Snapshot da VM coletora: ").strip()
     checks = _parse_checks(args.check) if args.check else _prompt_checks()
     notes = args.notes if args.notes is not None else input("Observacoes: ")
     evidence = args.evidence if args.evidence else _prompt_evidence()
@@ -136,6 +152,8 @@ def main() -> None:
         evidence=evidence,
         include_in_analysis=include,
         exclusion_reason=reason,
+        environment_file=args.environment_file,
+        component_assessments=_parse_components(args.component),
     )
     print(json.dumps(manual, indent=2, ensure_ascii=False, sort_keys=True))
 

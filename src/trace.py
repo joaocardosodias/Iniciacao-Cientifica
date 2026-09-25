@@ -41,7 +41,7 @@ def write_json_atomic(path: Path, content: Any) -> None:
 
 
 def artifact_index(run_dir: Path, excluded: set[str] | None = None) -> list[dict[str, Any]]:
-    skip = {"manifest.json", "result.json"}
+    skip = {"manifest.json", "result.json", "run_seal.json", "campaign_seal.json"}
     if excluded:
         skip |= excluded
     artifacts = []
@@ -95,7 +95,7 @@ class RunTrace:
     ):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
         replicate = (experiment or {}).get("replicate")
-        suffix = f"_replicate_{replicate:03d}" if run_purpose == "official" and type(replicate) is int else ""
+        suffix = f"_replicate_{replicate:03d}" if run_purpose in {"official", "pilot"} and type(replicate) is int else ""
         self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}{suffix}"
         self.run_purpose = run_purpose
         self.run_dir = output_root / self.run_id
@@ -115,31 +115,16 @@ class RunTrace:
         self.modules_dir.mkdir()
         self.assembly_dir.mkdir()
         self.provenance_dir.mkdir()
-        repo = find_repo_root(Path.cwd())
-        exclude_dirs = _output_exclude(output_root, repo)
-        if repo is not None:
-            requested_exclusions = [Path("output"), Path("results")]
-            requested_exclusions.extend(provenance_exclude_dirs or [])
-            for directory in requested_exclusions:
-                candidate = (Path.cwd() / directory).resolve()
-                try:
-                    candidate.relative_to(repo.resolve())
-                except ValueError:
-                    continue
-                if candidate not in exclude_dirs:
-                    exclude_dirs.append(candidate)
-        git = collect_provenance(repo, self.provenance_dir,
-                                 exclude_dirs=exclude_dirs)
-        software = {"git": git, **collect_environment(self.provenance_dir)}
         self.events = EventLog(self.events_path, self.run_id)
         self.write_text("prompts/original.txt", prompt)
+        created_at = utc_now()
         self.manifest = {
             "schema_version": self.schema_version,
             "run_id": self.run_id,
-            "status": "running",
+            "status": "initializing",
             "run_purpose": run_purpose,
-            "created_at": utc_now(),
-            "updated_at": utc_now(),
+            "created_at": created_at,
+            "updated_at": created_at,
             "process": {
                 "pid": os.getpid(),
                 "hostname": socket.gethostname(),
@@ -159,10 +144,58 @@ class RunTrace:
             },
             "experiment": experiment or {"id": None, "condition": None, "replicate": None},
             "campaign": campaign,
-            "software": software,
+            "software": {},
             "stages": {},
+            "integrity": {
+                "path": "run_seal.json",
+                "algorithm": "sha256",
+                "scope": "generation_run",
+            },
         }
         self._write_json_atomic(self.run_dir / "manifest.json", self.manifest)
+        self.emit("run.initializing", model=requested_model, run_purpose=run_purpose)
+        try:
+            repo = find_repo_root(Path.cwd())
+            exclude_dirs = _output_exclude(output_root, repo)
+            if repo is not None:
+                requested_exclusions = [Path("output"), Path("results")]
+                requested_exclusions.extend(provenance_exclude_dirs or [])
+                for directory in requested_exclusions:
+                    candidate = (Path.cwd() / directory).resolve()
+                    try:
+                        candidate.relative_to(repo.resolve())
+                    except ValueError:
+                        continue
+                    if candidate not in exclude_dirs:
+                        exclude_dirs.append(candidate)
+            git = collect_provenance(repo, self.provenance_dir, exclude_dirs=exclude_dirs)
+            self.manifest["software"] = {"git": git, **collect_environment(self.provenance_dir)}
+            self.manifest["status"] = "running"
+            self._save_manifest()
+        except Exception as error:
+            finished_at = utc_now()
+            self.emit("run.initialization_failed", error=serialize_error(error))
+            result = {
+                "schema_version": self.schema_version,
+                "run_id": self.run_id,
+                "run_purpose": self.run_purpose,
+                "status": "initialization_failed",
+                "compiled": False,
+                "finished_at": finished_at,
+                "duration_seconds": round(perf_counter() - self._started, 6),
+                "error": serialize_error(error),
+                "llm_calls": summarize_calls(self.run_dir),
+                "artifacts": artifact_index(self.run_dir),
+            }
+            self.manifest["status"] = "initialization_failed"
+            self.manifest["updated_at"] = finished_at
+            self._write_json_atomic(self.run_dir / "result.json", result)
+            self._save_manifest()
+            try_index_experiment(self.run_dir, self.manifest, result)
+            from src.integrity import seal_run
+            seal_run(self.run_dir)
+            self._finalized = True
+            raise
         self.emit(
             "run.started",
             model=requested_model,
@@ -267,6 +300,8 @@ class RunTrace:
             self._write_json_atomic(self.run_dir / "result.json", result)
             self._save_manifest()
             try_index_experiment(self.run_dir, self.manifest, result)
+            from src.integrity import seal_run
+            seal_run(self.run_dir)
             self._finalized = True
             return self.run_dir / "result.json"
 

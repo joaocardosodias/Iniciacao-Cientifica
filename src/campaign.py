@@ -55,6 +55,7 @@ class Campaign:
         inference_provider: str | None,
         planned_replicates: int,
         generation_parameters: dict[str, Any],
+        campaign_kind: str = "official",
     ) -> "Campaign":
         experiment_id = experiment_id.strip()
         condition = condition.strip()
@@ -69,6 +70,8 @@ class Campaign:
         )
         if invalid_replicates:
             raise ValueError("--runs deve ser um inteiro positivo.")
+        if campaign_kind not in {"official", "pilot"}:
+            raise ValueError("campaign_kind deve ser official ou pilot.")
         provider_label = inference_provider or provider
         root = (
             results_root
@@ -109,9 +112,17 @@ class Campaign:
             "updated_at": created_at,
             "finished_at": None,
             "status": "running",
+            "campaign_kind": campaign_kind,
+            "experimental_controls_required": True,
             "generation_parameters": generation_parameters,
             "stimulus_sha256": None,
             "protocol_sha256": None,
+            "rubric_sha256": None,
+            "integrity": {
+                "path": "campaign_seal.json",
+                "algorithm": "sha256",
+                "scope": "campaign",
+            },
             "runs": [],
         }
         write_json_atomic(path, data)
@@ -124,6 +135,45 @@ class Campaign:
         )
         campaign._index()
         return campaign
+
+    def attach_experimental_inputs(self, inputs: dict[str, Any]) -> None:
+        for key in (
+            "stimulus_sha256",
+            "stimulus_path",
+            "protocol_sha256",
+            "protocol_path",
+            "protocol_version",
+            "rubric_sha256",
+            "rubric_path",
+            "rubric_version",
+        ):
+            self.data[key] = inputs.get(key)
+        self._save()
+
+    def record_preflight(self, report: dict[str, Any]) -> None:
+        self.data["preflight"] = {
+            "path": "preflight.json",
+            "status": report.get("status"),
+            "checked_at": report.get("checked_at"),
+        }
+        self._save()
+        self.events.emit(
+            "campaign.preflight_finished",
+            status=report.get("status"),
+            failed_checks=report.get("failed_checks", []),
+        )
+
+    def mark_preflight_failed(self, error: BaseException) -> None:
+        self.data["status"] = "preflight_failed"
+        self.data["preflight"] = {
+            "path": "preflight.json" if (self.root / "preflight.json").exists() else None,
+            "status": "failed",
+            "checked_at": utc_now(),
+        }
+        self.data["error"] = serialize_error(error)
+        self.data["finished_at"] = utc_now()
+        self._save()
+        self.events.emit("campaign.preflight_failed", error=serialize_error(error))
 
     @classmethod
     def load(cls, path: Path, results_root: Path | None = None) -> "Campaign":
@@ -187,8 +237,14 @@ class Campaign:
         return {
             "id": self.data["campaign_id"],
             "path": "../../campaign.json",
+            "kind": self.data.get("campaign_kind", "official"),
             "planned_replicates": self.data["planned_replicates"],
             "replicate": replicate,
+            "stimulus_sha256": self.data.get("stimulus_sha256"),
+            "protocol_sha256": self.data.get("protocol_sha256"),
+            "protocol_version": self.data.get("protocol_version"),
+            "rubric_sha256": self.data.get("rubric_sha256"),
+            "rubric_version": self.data.get("rubric_version"),
         }
 
     def pending_replicates(self) -> list[int]:
@@ -382,6 +438,12 @@ class Campaign:
             "failed_replicates": self.data.get("failed_replicates"),
             "evaluated_replicates": self.data.get("evaluated_replicates"),
             "status": self.data.get("status"),
+            "campaign_kind": self.data.get("campaign_kind", "official"),
+            "stimulus_sha256": self.data.get("stimulus_sha256"),
+            "protocol_sha256": self.data.get("protocol_sha256"),
+            "rubric_sha256": self.data.get("rubric_sha256"),
+            "protocol_version": self.data.get("protocol_version"),
+            "rubric_version": self.data.get("rubric_version"),
             "updated_at": self.data.get("updated_at"),
         }
         with path.open("a+", encoding="utf-8") as handle:

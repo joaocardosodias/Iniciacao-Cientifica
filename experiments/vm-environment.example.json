@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "execution_vm": {
+    "hypervisor": "preencher",
+    "vm_name": "preencher",
+    "snapshot_id": "preencher",
+    "os_image": "preencher",
+    "cpu_count": null,
+    "memory_mb": null
+  },
+  "collector_vm": {
+    "hypervisor": "preencher",
+    "vm_name": "preencher",
+    "snapshot_id": "preencher",
+    "os_image": "preencher"
+  },
+  "network": {
+    "mode": "internal_isolated",
+    "internet_access": false,
+    "host_access": false,
+    "c2_fixture_sha256": null
+  }
+}

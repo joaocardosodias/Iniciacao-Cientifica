@@ -18,7 +18,8 @@ individual vê a intenção global.
 ```
 .
 ├── pipeline.py          # Orquestrador principal — entry point
-├── requirements.txt     # Dependências Python
+├── requirements.in      # Dependências Python diretas
+├── requirements.lock    # Ambiente Python integral com hashes
 │
 ├── src/                 # Camadas do pipeline
 │   ├── coder.py         # Gera o código C de cada componente genérico
@@ -105,7 +106,7 @@ aciona o agente OpenCode apenas se a compilação falhar.
 ### 1. Dependências Python
 
 ```bash
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.lock
 ```
 
 Também são necessários GCC, OpenSSL, libcurl e o executável `opencode` no
@@ -165,8 +166,10 @@ O comando normal cria uma execução de desenvolvimento em `output/`. Essas runs
 recebem `run_purpose: development` e não entram automaticamente nos dados do
 artigo.
 
-Uma campanha oficial exige modelo, identidade experimental, condição e número
-de repetições:
+Antes da coleta, copie `experiments/protocol.example.yaml`, preencha hipótese,
+condições e critérios, confira o total planejado e altere `status` para
+`frozen`. Uma campanha oficial exige esse protocolo, a rubrica, modelo,
+identidade experimental, condição e número de repetições:
 
 ```bash
 python pipeline.py \
@@ -176,12 +179,23 @@ python pipeline.py \
   --official \
   --experiment-id estudo-01 \
   --condition fragmented \
+  --protocol experiments/protocol-estudo-01.yaml \
+  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --temperature 0 --seed 42 --max-tokens 8192 \
   -n 50
 ```
 
 `-n` e `--runs` são equivalentes. As repetições são sequenciais, recebem
 `replicate` de 1 até N e permanecem independentes por `run_id`. Uma falha
 individual é preservada e não interrompe as repetições seguintes.
+Antes da primeira réplica, o pipeline congela o cenário, protocolo e rubrica em
+`inputs/`, calcula seus hashes e executa `preflight.json`. Falha de credencial,
+ferramenta, biblioteca, espaço, escrita ou consistência impede o lote inteiro
+antes de consumir chamadas experimentais.
+
+Uma campanha piloto usa `--pilot` e recebe `campaign_kind: pilot`. Use uma
+condição própria, prevista no protocolo, para não ocupar a identidade da
+campanha oficial. Pilotos são excluídos da consolidação global por padrão.
 
 Uma campanha existente não é sobrescrita. Para continuar somente as réplicas
 ausentes:
@@ -229,6 +243,16 @@ Depois do teste controlado de uma run oficial:
 python tools/record_evaluation.py --run-id run_<id>
 ```
 
+Para registrar de forma reproduzível as duas VMs, copie e preencha
+`experiments/vm-environment.example.json` e informe:
+
+```bash
+python tools/record_evaluation.py \
+  --run-id run_<id> \
+  --environment-file experiments/vm-estudo-01.json \
+  --component init_session:valid_component
+```
+
 A ferramenta registra a última avaliação em `evaluation/manual.json`, preserva
 cada versão em `evaluation/revisions/`, copia e calcula SHA-256 das evidências e
 acrescenta um registro em `evaluations.jsonl`. O `result.json` automático não é
@@ -260,6 +284,26 @@ python tools/build_results.py \
 O comando regenera `runs.csv`, `summary.csv`, `summary.json`, `exclusions.csv`
 e `provenance.json` exclusivamente a partir das runs e avaliações oficiais.
 Nenhum CSV precisa ser preenchido manualmente.
+O mesmo comando cria `run_seal.json` para cada run e `campaign_seal.json` para
+a campanha. O selo da run cobre a geração e exclui apenas `evaluation/`, que é
+adicionada posteriormente; o selo da campanha cobre também avaliações e
+resultados derivados. A integridade pode ser verificada sem executar artefatos:
+
+```bash
+python tools/verify_run.py results/.../outputs/run_<id>
+python tools/verify_campaign.py results/.../<condicao>
+```
+
+Para consolidar todos os modelos e condições de um experimento:
+
+```bash
+python tools/build_aggregate.py --experiment-id estudo-01
+```
+
+O diretório `results/aggregate/estudo-01/` recebe todas as linhas, resumos por
+modelo e condição, intervalos de confiança de 95%, comparações entre condições
+e a proveniência das campanhas utilizadas. Pilotos só entram quando
+`--include-pilots` é informado explicitamente.
 
 ## Rastreabilidade
 

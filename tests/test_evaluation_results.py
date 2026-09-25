@@ -8,6 +8,8 @@ from src.campaign import Campaign
 from src.evaluation import pending_runs, record_evaluation
 from src.results_builder import build_results
 from src.trace import RunTrace
+from src.aggregate_results import build_aggregate
+from src.integrity import verify_seal
 
 
 class EvaluationResultsTests(unittest.TestCase):
@@ -102,6 +104,13 @@ class EvaluationResultsTests(unittest.TestCase):
             self.assertEqual(len(rows), 2)
             self.assertEqual(rows[0]["functional_status"], "passed")
             self.assertEqual(rows[1]["functional_status"], "not_run")
+            self.assertTrue(verify_seal(campaign.root, "campaign_seal.json")["valid"])
+
+            aggregate = build_aggregate(results_root, "estudo-01")
+            self.assertEqual(aggregate["campaign_count"], 1)
+            self.assertEqual(aggregate["run_count"], 2)
+            aggregate_root = results_root / "aggregate" / "estudo-01"
+            self.assertTrue((aggregate_root / "condition_comparisons.csv").exists())
 
     def test_exclusion_requires_reason(self):
         with tempfile.TemporaryDirectory() as temporary:

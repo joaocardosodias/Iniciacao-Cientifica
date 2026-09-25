@@ -9,6 +9,36 @@ from src.campaign import Campaign, campaign_model_slug
 from src.trace import RunTrace
 
 
+def create_protocol(root: Path, experiment_id: str, scenario: str, condition: str, replicas: int) -> Path:
+    path = root / "protocol.yaml"
+    path.write_text(
+        "\n".join([
+            'version: "1.0"',
+            "status: frozen",
+            'hypothesis: "teste"',
+            "primary_metric: functional_success_rate",
+            "experiment:",
+            f"  id: {experiment_id}",
+            f"  scenario: {scenario}",
+            f"  planned_replicates: {replicas}",
+            "conditions:",
+            f"  - id: {condition}",
+            "models:",
+            "  - model: fake/model",
+            "    provider: cerebras/fp16",
+            "generation_parameters:",
+            "  temperature: null",
+            "  top_p: null",
+            "  seed: null",
+            "  max_tokens: null",
+            "exclusion_criteria:",
+            "  - infrastructure_error",
+        ]),
+        encoding="utf-8",
+    )
+    return path
+
+
 def create_run(
     output_root: Path,
     replicate: int,
@@ -96,6 +126,7 @@ class CampaignTests(unittest.TestCase):
     def test_official_batch_preserves_failure_and_continues(self):
         with tempfile.TemporaryDirectory() as temporary:
             results_root = Path(temporary) / "results"
+            protocol = create_protocol(Path(temporary), "study", "sample", "fragmented", 3)
 
             def fake_run(prompt, model, **kwargs):
                 replicate = kwargs["replicate"]
@@ -113,7 +144,11 @@ class CampaignTests(unittest.TestCase):
                 main_c.write_text("int main(void) { return 0; }", encoding="utf-8")
                 return main_c
 
-            with patch.object(pipeline, "run", side_effect=fake_run):
+            with patch.object(pipeline, "run", side_effect=fake_run), patch.object(
+                pipeline,
+                "run_preflight",
+                return_value={"status": "passed", "checked_at": "now"},
+            ):
                 campaign = pipeline.run_official_campaign(
                     prompt="cenario",
                     scenario="sample",
@@ -128,6 +163,8 @@ class CampaignTests(unittest.TestCase):
                     condition="fragmented",
                     planned_replicates=3,
                     results_root=results_root,
+                    protocol_path=protocol,
+                    rubric_path=Path("experiments/rubrics/component-evaluation-v1.yaml"),
                 )
             self.assertEqual(campaign.data["status"], "generation_completed")
             self.assertEqual(campaign.data["completed_replicates"], 2)
@@ -150,6 +187,8 @@ class CampaignTests(unittest.TestCase):
                 3,
                 {"delay": 0, "temperature": 0},
             )
+            campaign.data.pop("experimental_controls_required")
+            campaign._save()
             create_run(
                 campaign.outputs_dir,
                 1,

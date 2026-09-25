@@ -162,13 +162,22 @@ criadas:
 ```bash
 python pipeline.py --scenario wannacry --model openai/gpt-oss-120b \
   --openrouter-provider cerebras/fp16 --official \
-  --experiment-id estudo-01 --condition fragmented -n 50
+  --experiment-id estudo-01 --condition fragmented \
+  --protocol experiments/protocol-estudo-01.yaml \
+  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --temperature 0 --seed 42 --max-tokens 8192 -n 50
 ```
 
 A campanha fica em
 `results/<modelo>__<provider>/<experimento>/<condicao>/`. Cada run fica em
 `outputs/`, recebe `run_purpose: official`, `replicate` automatico e referencia
 ao `campaign.json`. Falhas individuais sao registradas e o lote continua.
+
+Antes da geracao, o pipeline valida que o protocolo esta congelado, copia
+protocolo, rubrica e cenario para `inputs/`, registra seus hashes no manifesto
+da campanha e executa o preflight. O preflight ocorre antes da primeira chamada
+experimental. `--pilot` identifica ensaios preliminares; eles nao entram na
+consolidacao global por padrao.
 
 Uma combinacao existente nao e sobrescrita. `--resume` le o manifesto da
 campanha, preserva as runs existentes e executa somente as replicas ausentes.
@@ -181,7 +190,13 @@ campanha, preserva as runs existentes e executa somente as replicas ausentes.
 
 `tools/build_results.py` combina campanha, manifestos, resultados e avaliacoes
 para regenerar `runs.csv`, `summary.csv`, `summary.json`, `exclusions.csv` e
-`provenance.json`.
+`provenance.json`. Tambem sela cada run e a campanha com SHA-256. Os comandos
+`tools/verify_run.py` e `tools/verify_campaign.py` detectam arquivos ausentes,
+alterados ou acrescentados depois do selo.
+
+`tools/build_aggregate.py --experiment-id <id>` consolida campanhas, exclui
+pilotos por padrao e produz tabelas por modelo e condicao, intervalo de Wilson
+de 95% para sucesso funcional, custo por sucesso e diferencas de proporcao.
 
 ---
 

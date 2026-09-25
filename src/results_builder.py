@@ -10,6 +10,7 @@ from typing import Any
 from src.campaign import Campaign
 from src.events import utc_now
 from src.trace import write_json_atomic
+from src.integrity import seal_campaign, seal_run, verify_seal
 
 RUN_FIELDS = [
     "replicate",
@@ -189,6 +190,15 @@ def _summary(campaign: Campaign, rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def build_results(campaign: Campaign) -> dict[str, Any]:
     campaign.refresh_evaluations()
+    for record in campaign.data.get("runs", []):
+        relative = record.get("path")
+        if not relative:
+            continue
+        run_dir = campaign.root / relative
+        if (run_dir / "run_seal.json").exists():
+            verification = verify_seal(run_dir, "run_seal.json")
+            if not verification.get("valid"):
+                raise ValueError(f"Selo de integridade invalido: {run_dir}")
     rows = []
     sources = [campaign.path]
     evaluations_path = campaign.root / "evaluations.jsonl"
@@ -248,4 +258,9 @@ def build_results(campaign: Campaign) -> dict[str, Any]:
         evaluated=summary["counts"]["evaluated"],
         excluded=summary["counts"]["excluded"],
     )
+    for record in campaign.data.get("runs", []):
+        relative = record.get("path")
+        if relative and (campaign.root / relative).is_dir():
+            seal_run(campaign.root / relative)
+    seal_campaign(campaign.root)
     return summary

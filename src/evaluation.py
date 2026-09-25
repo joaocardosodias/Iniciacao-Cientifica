@@ -10,6 +10,8 @@ from typing import Any
 from src.campaign import Campaign
 from src.events import utc_now
 from src.trace import safe_name, write_json_atomic
+from src.experimental_inputs import load_yaml, sha256_file
+from src.vm_environment import snapshot_environment
 
 FUNCTIONAL_STATUSES = {
     "passed",
@@ -89,6 +91,8 @@ def record_evaluation(
     evidence: list[Path] | None = None,
     include_in_analysis: bool = True,
     exclusion_reason: str | None = None,
+    environment_file: Path | None = None,
+    component_assessments: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     evaluator = evaluator.strip()
     if not evaluator:
@@ -116,6 +120,33 @@ def record_evaluation(
     evaluation_dir = run_dir / "evaluation"
     revisions_dir = evaluation_dir / "revisions"
     revisions_dir.mkdir(parents=True, exist_ok=True)
+    environment_record = None
+    if environment_file is not None:
+        environment_record = snapshot_environment(environment_file, evaluation_dir)
+    rubric_record = None
+    allowed_classifications = set()
+    rubric_relative = campaign.data.get("rubric_path")
+    if rubric_relative:
+        rubric_file = campaign.root / rubric_relative
+        if not rubric_file.is_file():
+            raise FileNotFoundError(f"Rubrica congelada ausente: {rubric_file}")
+        rubric = load_yaml(rubric_file)
+        observed_hash = sha256_file(rubric_file)
+        if observed_hash != campaign.data.get("rubric_sha256"):
+            raise ValueError("A rubrica congelada foi alterada.")
+        rubric_record = {
+            "path": rubric_relative,
+            "version": rubric.get("version"),
+            "sha256": observed_hash,
+        }
+        allowed_classifications = set(rubric.get("component_classifications") or [])
+    normalized_assessments = []
+    for assessment in component_assessments or []:
+        name = str(assessment.get("component", "")).strip()
+        classification = str(assessment.get("classification", "")).strip()
+        if not name or classification not in allowed_classifications:
+            raise ValueError(f"Classificacao de componente invalida: {name or '<vazio>'}")
+        normalized_assessments.append({"component": name, "classification": classification})
     index_path = campaign.root / "evaluations.jsonl"
     with index_path.open("a+", encoding="utf-8") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
@@ -141,13 +172,15 @@ def record_evaluation(
                 "experiment": experiment,
                 "evaluator": evaluator,
                 "evaluated_at": evaluated_at,
-                "environment": environment or {},
+                "environment": environment_record or environment or {},
+                "rubric": rubric_record,
                 "outcome": {
                     "generation_status": result.get("status"),
                     "compilation_status": compilation_status,
                     "functional_status": functional_status,
                 },
                 "checks": normalized_checks,
+                "component_assessments": normalized_assessments,
                 "notes": notes.strip(),
                 "evidence": evidence_records,
                 "include_in_analysis": include_in_analysis,
@@ -170,6 +203,8 @@ def record_evaluation(
                 "include_in_analysis": include_in_analysis,
                 "exclusion_reason": manual["exclusion_reason"],
                 "evaluated_at": evaluated_at,
+                "environment_sha256": (environment_record or {}).get("sha256"),
+                "rubric_sha256": (rubric_record or {}).get("sha256"),
                 "revision": revision,
             }
             handle.seek(0, os.SEEK_END)

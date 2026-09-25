@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import socket
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,57 @@ from src.experiment_index import index_existing_runs, try_index_experiment
 from src.trace import artifact_index, write_json_atomic
 
 log = logging.getLogger("pipeline.recovery")
+
+
+def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
+    manifest_path = run_dir / "manifest.json"
+    if manifest_path.exists():
+        return {"run_id": run_dir.name, "status": "skipped", "reason": "manifest_exists"}
+    now = utc_now()
+    match = re.search(r"_replicate_(\d+)$", run_dir.name)
+    replicate = int(match.group(1)) if match else None
+    created = datetime.fromtimestamp(run_dir.stat().st_mtime, timezone.utc).isoformat()
+    purpose = "official" if replicate is not None else "development"
+    manifest = {
+        "schema_version": "1.0",
+        "run_id": run_dir.name,
+        "status": "initialization_failed",
+        "run_purpose": purpose,
+        "created_at": created,
+        "updated_at": now,
+        "process": {},
+        "input": {},
+        "model": {},
+        "experiment": {"id": None, "condition": None, "replicate": replicate},
+        "campaign": None,
+        "software": {},
+        "stages": {},
+        "integrity": {"path": "run_seal.json", "algorithm": "sha256", "scope": "generation_run"},
+        "recovery": {"recovered_at": now, "reason": "missing_manifest"},
+    }
+    events = EventLog(run_dir / "events.jsonl", run_dir.name, reset=False)
+    events.emit("run.recovered", reason="missing_manifest")
+    result = {
+        "schema_version": "1.0",
+        "run_id": run_dir.name,
+        "run_purpose": purpose,
+        "status": "initialization_failed",
+        "compiled": False,
+        "finished_at": now,
+        "duration_seconds": None,
+        "error": {"type": "InitializationFailure", "message": "diretorio criado sem manifest.json"},
+        "recovered": True,
+        "recovered_at": now,
+        "llm_calls": summarize_calls(run_dir),
+        "artifacts": artifact_index(run_dir),
+    }
+    write_json_atomic(manifest_path, manifest)
+    if not (run_dir / "result.json").exists():
+        write_json_atomic(run_dir / "result.json", result)
+    try_index_experiment(run_dir, manifest, result)
+    from src.integrity import seal_run
+    seal_run(run_dir)
+    return {"run_id": run_dir.name, "status": "recovered", "terminal_status": "initialization_failed", "reason": "missing_manifest", "pid": None}
 
 
 def process_alive(pid: int) -> bool:
@@ -120,8 +172,15 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
         "hostname": host,
         "result_existed": result_existed,
     }
+    manifest["integrity"] = {
+        "path": "run_seal.json",
+        "algorithm": "sha256",
+        "scope": "generation_run",
+    }
     write_json_atomic(manifest_path, manifest)
     try_index_experiment(run_dir, manifest, result)
+    from src.integrity import seal_run
+    seal_run(run_dir)
 
     return {"run_id": run_id, "status": "recovered", "terminal_status": terminal,
             "reason": reason, "pid": pid}
@@ -134,6 +193,9 @@ def recover_stale_runs(output_root: Path) -> list[dict[str, Any]]:
     for run_dir in sorted(output_root.glob("run_*")):
         manifest_path = run_dir / "manifest.json"
         if not manifest_path.exists():
+            outcome = recover_orphan_run(run_dir)
+            if outcome.get("status") == "recovered":
+                recovered.append(outcome)
             continue
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
