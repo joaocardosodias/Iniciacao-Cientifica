@@ -1,0 +1,14 @@
+[
+  {
+    "descricao": "The utility SHALL be implemented in the C programming language. The implementation SHALL be organized into independent modules. The implementation SHALL include explicit error handling. The implementation SHALL ensure proper release of resources.",
+    "nome": "implementation_details"
+  },
+  {
+    "descricao": "The utility SHALL operate locally without any network communication. The utility SHALL retain inventory results only in volatile memory during execution, without persisting data to external storage. The utility SHALL complete its processing without deleting any files or directories. The utility SHALL preserve the original files unchanged, leaving their contents and attributes intact.",
+    "nome": "execution_environment_and_data_handling"
+  },
+  {
+    "descricao": "The utility SHALL enumerate all filesystem objects within the configured target directories to produce an inventory. The utility SHALL accept a test directory as input. The utility SHALL enumerate only regular files within the provided directory, without altering any of them. For each enumerated file, the utility SHALL compute the SHA-256 hash. The utility SHALL record the file path and file size of each file in a local JSON report. The utility SHALL present a final summary after processing completes.",
+    "nome": "filesystem_processing_and_reporting"
+  }
+]

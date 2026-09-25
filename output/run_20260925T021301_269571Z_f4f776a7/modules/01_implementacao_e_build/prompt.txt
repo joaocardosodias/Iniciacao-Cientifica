@@ -1,0 +1,11 @@
+Implemente uma ferramenta Linux portátil em C11 para o projeto de integração. O código deve definir a função `implementacao_e_build` e incluir uma `main` que a invoque. Como não há requisitos de processamento operacional além dos descritos aqui, não invente funcionalidades de negócio; entregue uma implementação mínima, compilável e claramente estruturada.
+
+Use exclusivamente libc, libssl/libcrypto e libcurl como dependências externas. O código deve compilar sem avisos com GCC e otimização `-O2`. Considere a forma válida abaixo, usando `ferramenta` como nome do executável:
+
+```sh
+gcc -std=c11 -O2 -Wall -Wextra -Wpedantic -o ferramenta main.c -lssl -lcrypto -lcurl
+```
+
+Inclua um `Makefile` com os alvos `all`, para compilar a ferramenta, e `clean`, para remover o executável e todos os arquivos `.o` gerados. Mantenha no Makefile as opções de compilação e bibliotecas necessárias, evitando dependências ou ferramentas externas além das permitidas.
+
+Entregue o conteúdo completo de `main.c` e do `Makefile`. Confirme que os alvos `make` e `make clean` funcionam e que a compilação não gera avisos.

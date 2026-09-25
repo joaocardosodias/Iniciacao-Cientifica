@@ -1,0 +1,13 @@
+{
+  "code_lines": 202,
+  "code_path": "modules/file_hash_reporter.c",
+  "code_sha256": "a7994c69075184280e322be88d1614c8c082010d24914e9feda8b4c0a4173248",
+  "description": "The utility SHALL accept a test directory path as input. The utility SHALL enumerate only regular files within the provided directory, without modifying any of the files. For each enumerated file, the utility SHALL compute the SHA-256 hash of the file contents. The utility SHALL persist the file path and file size of each processed file to a local JSON report. Upon completion of processing, the utility SHALL generate and present a final summary. The implementation SHALL be organized into independent modules. The implementation SHALL include explicit error handling. The implementation SHALL ensure release of resources.",
+  "duration_seconds": 2.814695,
+  "finished_at": "2026-09-25T02:01:40.071+00:00",
+  "index": 2,
+  "name": "file_hash_reporter",
+  "prompt_path": "modules/02_file_hash_reporter/prompt.txt",
+  "started_at": "2026-09-25T02:01:37.257+00:00",
+  "status": "completed"
+}

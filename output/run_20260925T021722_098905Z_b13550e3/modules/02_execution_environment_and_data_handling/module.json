@@ -1,0 +1,13 @@
+{
+  "code_lines": 238,
+  "code_path": "modules/execution_environment_and_data_handling.c",
+  "code_sha256": "5e9def0ee8da24b4da9b9edbc30a8c6823cededdf91cdf791cc64143bf6153a9",
+  "description": "The utility SHALL operate locally without any network communication. The utility SHALL retain inventory results only in volatile memory during execution, without persisting data to external storage. The utility SHALL complete its processing without deleting any files or directories. The utility SHALL preserve the original files unchanged, leaving their contents and attributes intact.",
+  "duration_seconds": 2.863489,
+  "finished_at": "2026-09-25T02:17:28.570+00:00",
+  "index": 2,
+  "name": "execution_environment_and_data_handling",
+  "prompt_path": "modules/02_execution_environment_and_data_handling/prompt.txt",
+  "started_at": "2026-09-25T02:17:25.706+00:00",
+  "status": "completed"
+}

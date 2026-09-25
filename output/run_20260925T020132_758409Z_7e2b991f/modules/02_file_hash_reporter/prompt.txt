@@ -1,0 +1,35 @@
+You are a senior C engineer on the data‑compliance team at FinTech XYZ. We need you to create a new internal utility for generating file‑integrity reports. Implement a C function (and supporting code) named `file_hash_reporter` with the following specifications:
+
+1. **Input**  
+   - Accept a single argument: the path to a test directory supplied by the user (e.g., via command‑line or function parameter).  
+
+2. **File enumeration**  
+   - Open the specified directory and enumerate **only regular files** (skip sub‑directories, symlinks, device files, etc.).  
+   - Do not modify or write to any of the source files.  
+
+3. **SHA‑256 computation**  
+   - For each regular file, read its contents in a memory‑efficient way (e.g., buffered reads) and compute a SHA‑256 hash of the entire file. Use a reliable cryptographic library (e.g., OpenSSL, libsodium, or a self‑contained implementation).  
+
+4. **JSON reporting**  
+   - Create or overwrite a local JSON file named `file_hash_report.json` in the current working directory.  
+   - For each processed file, add a JSON object containing:  
+     * `"path"` – the full absolute or relative path to the file,  
+     * `"size"` – the file size in bytes,  
+     * `"sha256"` – the hex‑encoded SHA‑256 digest.  
+   - Structure the JSON as an array of such objects. Ensure the output is well‑formed and pretty‑printed.  
+
+5. **Final summary**  
+   - After processing all files, print a concise summary to stdout: total number of files processed, cumulative size in bytes, and the path to the generated JSON report.  
+
+6. **Modular design**  
+   - Organize the code into independent modules (e.g., `dir_traverse.c/.h` for directory handling, `hash_compute.c/.h` for SHA‑256, `json_writer.c/.h` for JSON serialization, and a `main.c` that ties everything together).  
+   - Provide a clear public API for each module, and keep implementation details hidden in the corresponding `.c` files.  
+
+7. **Error handling**  
+   - Detect and handle all possible error conditions (invalid directory path, permission issues, read errors, hash failures, JSON serialization errors, etc.).  
+   - Return meaningful error codes and print descriptive messages to stderr.  
+
+8. **Resource management**  
+   - Ensure all opened file descriptors, directory streams, memory allocations, and library contexts are properly closed or freed before the program exits, even in error paths.  
+
+Please deliver the full source code for all modules, a Makefile to build the utility, and brief usage documentation (command‑line invocation and expected output).

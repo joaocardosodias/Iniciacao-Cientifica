@@ -36,6 +36,7 @@ class FakePlanner:
         return [
             {"nome": "module_one", "descricao": "primeiro modulo"},
             {"nome": "module_two", "descricao": "segundo modulo"},
+            {"nome": "module_three", "descricao": "terceiro modulo"},
         ]
 
     def plan_fragmented(self, fragments):
@@ -62,13 +63,15 @@ class FakeCoder:
     def __init__(self, llm):
         self.llm = llm
 
-    def generate(self, prompt, stage="coder"):
-        return f"int {stage.replace('.', '_')}(void) {{ return 0; }}"
+    def generate(self, prompt, stage="coder", expected_function=None):
+        name = expected_function or stage.replace(".", "_")
+        return f"int {name}(void) {{ return 0; }}"
 
 
 class FakeAssemblerHarness:
     def __init__(self, model):
         self.model = model
+        self.last_mode = "fake"
 
     def assemble(self, modules, run_dir, config_header=None, main_source=None):
         assembly_dir = run_dir / "assembly"
@@ -224,15 +227,15 @@ class TraceabilityTests(unittest.TestCase):
             result = json.loads((run_dir / "result.json").read_text())
 
             self.assertEqual(manifest["status"], "completed")
-            self.assertEqual(manifest["stages"]["planner"]["module_count"], 2)
+            self.assertEqual(manifest["stages"]["planner"]["module_count"], 3)
             self.assertEqual(manifest["model"]["routing"], {
                 "openrouter_provider": "deepinfra",
                 "allow_fallbacks": False,
             })
-            self.assertEqual(result["module_count"], 2)
+            self.assertEqual(result["module_count"], 3)
             entry = json.loads((Path(temporary) / "experiments.jsonl").read_text())
             self.assertEqual(entry["scenario"], "test")
-            self.assertEqual(entry["module_count"], 2)
+            self.assertEqual(entry["module_count"], 3)
             self.assertEqual(entry["source_combined_sha256"],
                              manifest["software"]["git"]["source_combined_sha256"])
             self.assertEqual(entry["run_dir"], run_dir.name)

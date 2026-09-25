@@ -1,0 +1,13 @@
+{
+  "code_lines": 276,
+  "code_path": "modules/filesystem_processing_and_reporting.c",
+  "code_sha256": "b10bbd3b45873094fe7a353982387072341b0daba978088ec4a2d15f235edb6f",
+  "description": "The utility SHALL enumerate all filesystem objects within the configured target directories to produce an inventory. The utility SHALL accept a test directory as input. The utility SHALL enumerate only regular files within the provided directory, without altering any of them. For each enumerated file, the utility SHALL compute the SHA-256 hash. The utility SHALL record the file path and file size of each file in a local JSON report. The utility SHALL present a final summary after processing completes.",
+  "duration_seconds": 3.650547,
+  "finished_at": "2026-09-25T02:17:29.357+00:00",
+  "index": 3,
+  "name": "filesystem_processing_and_reporting",
+  "prompt_path": "modules/03_filesystem_processing_and_reporting/prompt.txt",
+  "started_at": "2026-09-25T02:17:25.706+00:00",
+  "status": "completed"
+}

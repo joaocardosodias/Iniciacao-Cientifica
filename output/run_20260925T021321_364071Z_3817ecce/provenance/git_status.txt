@@ -1,0 +1,11 @@
+## main...origin/main
+ M README.md
+ M output/experiments.jsonl
+ M pipeline.py
+ M src/assembler_harness.py
+ M src/planner.py
+ M tests/test_assembler_harness.py
+ M tests/test_traceability.py
+?? output/run_20260925T020132_758409Z_7e2b991f/
+?? output/run_20260925T021301_269571Z_f4f776a7/
+?? tests/test_planner.py

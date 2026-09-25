@@ -1,0 +1,72 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+
+These files define functions with the following signatures (names are aliases — do not rename them):
+
+#define _GNU_SOURCE
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ftw.h>
+#include <grp.h>
+#include <limits.h>
+#include <math.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <openssl/sha.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <syslog.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+typedef enum { FI_TYPE_UNKNOWN = 0, FI_TYPE_REGULAR, FI_TYPE_DIRECTORY, FI_TYPE_SYMLINK, FI_TYPE_CHARDEV, FI_TYPE_BLOCKDEV, FI_TYPE_FIFO, FI_TYPE_SOCKET, FI_TYPE_UNKNOWN_DEVICE } fi_obj_type_t;
+typedef void (*fi_report_cb_t)(const char *path, fi_obj_type_t type, const struct stat *st, const char *link_target, void *user_data);
+typedef enum { FH_SUCCESS = 0, FH_ERR_INVALID_ARG = 1, FH_ERR_OPENDIR = 2, FH_ERR_STAT = 3, FH_ERR_OPENFILE = 4, FH_ERR_READ = 5, FH_ERR_HASH = 6, FH_ERR_JSON = 7 } file_hash_error_t;
+
+void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data);
+int f02(const char *directory_path);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) calling all functions in sequence: f01, f02, f03, ... (in numeric order)
+   - Passes return values between calls as needed
+   - Passes argv[0] to any function that accepts a char* path parameter
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c \
+       -lssl -lcrypto -lcurl -lm -lpthread
+3. If an error is in main.c, fix main.c with str_replace.
+   If an error is inside a module file (missing include, undeclared constant
+   or missing prototype), apply the MINIMAL fix to that module, keeping its
+   logic unchanged. Do not rewrite module logic.
+4. Repeat up to 5 times until 'output' binary exists.

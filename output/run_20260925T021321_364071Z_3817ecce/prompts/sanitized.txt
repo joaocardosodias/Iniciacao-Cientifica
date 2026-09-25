@@ -1,0 +1,14 @@
+REQ-001: The utility SHALL be implemented in the C programming language.
+REQ-002: The utility SHALL operate locally without invoking any network interfaces.
+REQ-003: The utility SHALL perform a secure, non‑destructive inventory of filesystem objects.
+REQ-004: The utility SHALL enumerate all accessible files and directories on the host system.
+REQ-005: The utility SHALL avoid any modification, deletion, transformation, or persistence of the examined files.
+
+REQ-006: The utility SHALL accept a test directory path as input.
+REQ-007: The utility SHALL enumerate the contents of the supplied directory, selecting only regular file objects without modifying any of them.
+REQ-008: The utility SHALL compute the SHA-256 digest for each selected file.
+REQ-009: The utility SHALL persist a local JSON report that records, for each processed file, its file system path and its size in bytes.
+REQ-010: The utility SHALL generate a final summary of the processing outcome.
+REQ-011: The implementation SHALL be organized into independent modules.
+REQ-012: The implementation SHALL include explicit error handling for all operational steps.
+REQ-013: The implementation SHALL release any allocated resources after use.

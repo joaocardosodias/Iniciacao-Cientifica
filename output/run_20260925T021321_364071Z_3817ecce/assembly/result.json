@@ -1,0 +1,19 @@
+{
+  "agent_attempts": 1,
+  "agent_events": "opencode_events.jsonl",
+  "agent_return_code": 0,
+  "agent_stderr": "opencode_stderr.log",
+  "binary_exists": false,
+  "compile_return_code": null,
+  "compiler_stderr": "stderr.log",
+  "compiler_stdout": "stdout.log",
+  "duration_seconds": 66.537358,
+  "finished_at": "2026-09-25T02:14:36.564+00:00",
+  "main_c_exists": false,
+  "mode": "opencode",
+  "model": "openrouter/openai/gpt-oss-120b",
+  "return_code": null,
+  "signatures_found": 6,
+  "started_at": "2026-09-25T02:13:30.027+00:00",
+  "status": "no_output"
+}

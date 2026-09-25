@@ -1,0 +1,55 @@
+We need a C implementation for a new internal compliance utility for FinTechNova’s infrastructure team. Your task is to create a function named `filesystem_processing_and_reporting` that performs the following steps:
+
+1. **Input**: Accept a single argument – the path to a test directory (char *target_dir). Validate that the path exists and is a readable directory; return an error code if not.
+
+2. **Enumeration**: Recursively walk the directory tree rooted at `target_dir`, enumerating **only regular files** (skip directories, symbolic links, device files, etc.). Do not modify any files during processing.
+
+3. **File Information**: For each regular file found, capture:
+   - Full absolute file path.
+   - File size in bytes.
+
+4. **SHA‑256 Hash**: Compute the SHA‑256 hash of the file contents. Use a standard, thread‑safe implementation (e.g., OpenSSL’s EVP API or libcrypto). Process files in streaming mode to handle large files without loading them entirely into memory.
+
+5. **JSON Report**:
+   - Construct a JSON document in the following structure:
+     ```json
+     {
+       "processed_files": [
+         {
+           "path": "<full_path>",
+           "size": <size_in_bytes>,
+           "sha256": "<hex_string>"
+         },
+         ...
+       ],
+       "summary": {
+         "total_files": <count>,
+         "total_bytes": <sum_of_sizes>,
+         "processing_time_seconds": <elapsed_time>
+       }
+     }
+     ```
+   - Use a reliable JSON library (e.g., json-c, jansson, or cJSON) to build the JSON object.
+   - Write the JSON report to a file named `filesystem_report.json` in the current working directory. Ensure the file is atomically written (e.g., write to a temporary file then rename).
+
+6. **Summary Output**: After processing all files, print to stdout a concise summary that includes the total number of files processed, total bytes, and total processing time in seconds.
+
+7. **Error Handling**:
+   - Gracefully handle I/O errors, permission issues, and hash computation failures.
+   - Return distinct error codes for directory validation failures, enumeration failures, hash failures, and JSON serialization failures.
+   - Log errors to stderr with clear messages.
+
+8. **Performance Considerations**:
+   - Implement file enumeration using `nftw()` or `ftw()` with depth‑first traversal, or an equivalent robust method.
+   - Process files sequentially; optional multithreading is allowed but must preserve JSON order or correctly merge results.
+   - Use buffered I/O (e.g., `fread` with a reasonable buffer size) for hash calculation.
+
+9. **Testing**:
+   - Provide a simple `main` function that parses the target directory from command‑line arguments and calls `filesystem_processing_and_reporting`.
+   - Include basic unit tests for:
+     - Empty directory handling.
+     - Directory with mixed file types (ensuring only regular files are processed).
+     - Verification of correct SHA‑256 output on a known file.
+     - Valid JSON generation.
+
+Please deliver clean, well‑commented C code that complies with the C99 standard, includes necessary headers, links against required libraries (e.g., `-lcrypto -ljson-c`), and provides a Makefile target for building the utility.

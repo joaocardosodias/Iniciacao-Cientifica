@@ -1,0 +1,25 @@
+You are a senior C developer on the XYZ middleware integration team, tasked with building the resource‑management module for our new high‑availability message gateway. Please implement a C function named `implementation_structure_and_resource_management` that meets the following requirements:
+
+1. **Modular organization** – Split the implementation into separate, self‑contained modules (e.g., header and source files) for initialization, resource allocation, operation, error handling, and cleanup. Each module should expose a clean public API and keep internal details private.
+
+2. **Explicit error handling** – Every operation (memory allocation, file/handle opening, system calls, etc.) must be checked for failure. Return a defined error code (`int` or an enum) from the function and propagate errors up the call chain. Use descriptive logging (e.g., `fprintf(stderr, ...)` or a logging framework) to report the cause of each failure.
+
+3. **Resource management** – All resources allocated within the function (memory, file descriptors, sockets, threads, etc.) must be released before returning, even when an error occurs. Implement a unified cleanup path (e.g., a `goto cleanup` label or a dedicated `cleanup()` helper) that frees memory, closes handles, and restores any modified state.
+
+4. **Function signature** – Provide the prototype in a header file:
+   ```c
+   /**
+    * @brief Executes the core resource‑management logic for the gateway.
+    *
+    * @param config   Pointer to a configuration structure (defined by you).
+    * @param out_res  Pointer to a result structure that will be filled on success.
+    * @return 0 on success, non‑zero error code on failure.
+    */
+   int implementation_structure_and_resource_management(const config_t *config, result_t *out_res);
+   ```
+
+5. **Documentation** – Include inline comments and a brief module‑level description explaining the purpose of each file, the error‑handling strategy, and the cleanup sequence.
+
+6. **Build compliance** – Ensure the code compiles cleanly with `-Wall -Wextra -pedantic` and follows the project’s coding guidelines (use of `static` for private functions, naming conventions, etc.).
+
+Deliver the full set of source (`.c`) and header (`.h`) files needed to compile and test this function, along with a simple test harness that demonstrates successful execution and proper error handling when a failure is injected.

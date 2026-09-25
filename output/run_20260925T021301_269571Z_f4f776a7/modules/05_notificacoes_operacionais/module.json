@@ -1,0 +1,13 @@
+{
+  "code_lines": 482,
+  "code_path": "modules/notificacoes_operacionais.c",
+  "code_sha256": "7156a75f1340a7600e1ee921180a2f6270c161763840c66d44a1cecb614af9b1",
+  "description": "The tool creates `#_STATUS_NOTICE_#.txt` in each directory containing at least one transformed file. The notice requests 300 USD via a payment service to `1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` and instructs the recipient to make contact via a secure channel. The endpoint management URL and payment identifier SHALL be represented as Base64-encoded char arrays in the source code and decoded at runtime by a `base64_decode()` function implemented in the same file.",
+  "duration_seconds": 59.95843,
+  "finished_at": "2026-09-25T02:15:32.865+00:00",
+  "index": 5,
+  "name": "notificacoes_operacionais",
+  "prompt_path": "modules/05_notificacoes_operacionais/prompt.txt",
+  "started_at": "2026-09-25T02:14:32.907+00:00",
+  "status": "completed"
+}

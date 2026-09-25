@@ -1,0 +1,13 @@
+{
+  "code_lines": 248,
+  "code_path": "modules/hashing_reporting_and_summary_generation.c",
+  "code_sha256": "aac6cec3d2520875286f9c834a3acc423e37b42e018e31d72df22ea3df2fe913",
+  "description": "The utility SHALL compute the SHA-256 digest for each selected file. The utility SHALL persist a local JSON report that records, for each processed file, its file system path and its size in bytes. The utility SHALL generate a final summary of the processing outcome.",
+  "duration_seconds": 5.346315,
+  "finished_at": "2026-09-25T02:13:30.010+00:00",
+  "index": 4,
+  "name": "hashing_reporting_and_summary_generation",
+  "prompt_path": "modules/04_hashing_reporting_and_summary_generation/prompt.txt",
+  "started_at": "2026-09-25T02:13:24.664+00:00",
+  "status": "completed"
+}

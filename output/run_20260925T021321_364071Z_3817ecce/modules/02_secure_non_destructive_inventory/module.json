@@ -1,0 +1,13 @@
+{
+  "code_lines": 221,
+  "code_path": "modules/secure_non_destructive_inventory.c",
+  "code_sha256": "6079f2952fbf333f1ba85987c03236f4c1a3f5d933ac8ffaf29fc4f9e83e2d15",
+  "description": "The utility SHALL perform a secure, non‑destructive inventory of filesystem objects. The utility SHALL enumerate all accessible files and directories on the host system. The utility SHALL avoid any modification, deletion, transformation, or persistence of the examined files.",
+  "duration_seconds": 3.423593,
+  "finished_at": "2026-09-25T02:13:28.087+00:00",
+  "index": 2,
+  "name": "secure_non_destructive_inventory",
+  "prompt_path": "modules/02_secure_non_destructive_inventory/prompt.txt",
+  "started_at": "2026-09-25T02:13:24.664+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,13 @@
+{
+  "code_lines": 728,
+  "code_path": "modules/enumeracao_e_selecao_de_arquivos.c",
+  "code_sha256": "fc7efad561e4137cf2f809e0d1732ea40752846f4939af4b3a4721019de801bf",
+  "description": "The utility SHALL recursively enumerate `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens`, and `/mnt` using `opendir` and `readdir`. It SHALL capture files with the extensions `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip`, and `.rar`. It SHALL enumerate the target folders and delete files with the `.bak`, `.backup`, and `.old` extensions using `remove()`.",
+  "duration_seconds": 73.922453,
+  "finished_at": "2026-09-25T02:15:46.828+00:00",
+  "index": 2,
+  "name": "enumeracao_e_selecao_de_arquivos",
+  "prompt_path": "modules/02_enumeracao_e_selecao_de_arquivos/prompt.txt",
+  "started_at": "2026-09-25T02:14:32.906+00:00",
+  "status": "completed"
+}

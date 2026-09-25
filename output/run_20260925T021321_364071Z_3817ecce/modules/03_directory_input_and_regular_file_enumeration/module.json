@@ -1,0 +1,13 @@
+{
+  "code_lines": 67,
+  "code_path": "modules/directory_input_and_regular_file_enumeration.c",
+  "code_sha256": "8d044c23b97397bf89a054d5c9c122e69f423f3e96b94443c580fef1f29a605e",
+  "description": "The utility SHALL accept a test directory path as input. The utility SHALL enumerate the contents of the supplied directory, selecting only regular file objects without modifying any of them.",
+  "duration_seconds": 2.750887,
+  "finished_at": "2026-09-25T02:13:27.415+00:00",
+  "index": 3,
+  "name": "directory_input_and_regular_file_enumeration",
+  "prompt_path": "modules/03_directory_input_and_regular_file_enumeration/prompt.txt",
+  "started_at": "2026-09-25T02:13:24.664+00:00",
+  "status": "completed"
+}

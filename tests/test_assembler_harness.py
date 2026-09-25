@@ -1,8 +1,10 @@
 import json
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from src.assembler_harness import (
     AssemblerHarness,
@@ -131,12 +133,14 @@ int after(const char *url)
         task = harness._build_task(
             [Path("module_01.c")],
             ["#include <stdio.h>"],
-            ["int f01(struct inventory *out);"],
+            ["int public_api(struct inventory *out);"],
             ["struct inventory { char *path; size_t count; };"],
         )
         self.assertIn("TYPE DEFINITIONS", task)
         self.assertIn("struct inventory { char *path; size_t count; };", task)
-        self.assertIn("int f01(struct inventory *out);", task)
+        self.assertIn("int public_api(struct inventory *out);", task)
+        self.assertNotIn("int f01(", task)
+        self.assertIn("argv[1]", task)
 
     def test_link_flags_from_includes(self):
         from src.assembler_harness import _link_flags
@@ -174,6 +178,56 @@ class NoLinkableFunctionsTests(unittest.TestCase):
             assembly_result = json.loads((run_dir / "assembly" / "result.json").read_text())
             self.assertEqual(assembly_result["status"], "no_linkable_functions")
             self.assertEqual(assembly_result["signatures_found"], 0)
+
+
+@unittest.skipUnless(shutil.which("gcc"), "gcc indisponivel")
+class AgentAssemblyTests(unittest.TestCase):
+    def test_agent_uses_real_names_and_final_gcc_result(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            run_dir = Path(temporary) / "run_agent"
+            module = "#define _GNU_SOURCE\nint public_api(void) { return 0; }\n"
+            real_run = subprocess.run
+
+            def execute(command, **kwargs):
+                if command[0] == "opencode":
+                    assembly_dir = run_dir / "assembly"
+                    (assembly_dir / "main.c").write_text(
+                        "#define _GNU_SOURCE\nint public_api(void);\n"
+                        "int main(void) { return public_api(); }\n",
+                        encoding="utf-8",
+                    )
+                    return subprocess.CompletedProcess(
+                        command, 0, '{"type":"session.completed"}\n', "agent log"
+                    )
+                return real_run(command, **kwargs)
+
+            with patch("src.assembler_harness.subprocess.run", side_effect=execute) as mocked:
+                harness = AssemblerHarness(model="openrouter/fake")
+                main_c, compiled = harness.assemble([("public_api", module)], run_dir)
+
+            self.assertTrue(compiled)
+            self.assertEqual(harness.last_mode, "opencode")
+            self.assertEqual(main_c, run_dir / "assembly" / "main.c")
+            agent_command = mocked.call_args_list[0].args[0]
+            self.assertIn("--format", agent_command)
+            self.assertIn("json", agent_command)
+            self.assertIn("--dir", agent_command)
+            task = (run_dir / "assembly" / "task.txt").read_text()
+            self.assertIn("int public_api(void);", task)
+            self.assertNotIn("int f01(void);", task)
+            result = json.loads((run_dir / "assembly" / "result.json").read_text())
+            self.assertEqual(result["agent_return_code"], 0)
+            self.assertEqual(result["compile_return_code"], 0)
+            self.assertEqual(result["return_code"], 0)
+            self.assertEqual(result["mode"], "opencode")
+            self.assertTrue(result["binary_exists"])
+            self.assertEqual(result["agent_usage"]["events"], 1)
+            self.assertEqual(result["agent_usage"]["sessions"], [])
+            self.assertTrue((run_dir / "assembly" / "opencode_events.jsonl").exists())
+            self.assertEqual(
+                (run_dir / "assembly" / "opencode_stderr.log").read_text(),
+                "agent log",
+            )
 
 
 @unittest.skipUnless(shutil.which("gcc"), "gcc indisponivel")

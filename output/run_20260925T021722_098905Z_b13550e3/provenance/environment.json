@@ -1,0 +1,38 @@
+{
+  "cpu": {
+    "logical_count": 12,
+    "model": "13th Gen Intel(R) Core(TM) i5-1345U"
+  },
+  "locale": {
+    "encoding": "UTF-8",
+    "language": "C",
+    "preferred_encoding": "UTF-8"
+  },
+  "os": {
+    "architecture": "x86_64",
+    "name": "Linux",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "release": "7.2.5-3-omarchy",
+    "version": "#1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000"
+  },
+  "python": {
+    "executable": "/usr/bin/python",
+    "implementation": "cpython",
+    "version": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]"
+  },
+  "scope": "pipeline_host",
+  "timezone": {
+    "name": "-03",
+    "standard_and_daylight_names": [
+      "-03",
+      "-03"
+    ],
+    "utc_offset_seconds": -10800
+  },
+  "tools": {
+    "gcc": "gcc (GCC) 16.2.1 20260810",
+    "libcurl": "8.22.0",
+    "opencode": "mise ~/.config/mise/config.toml tools: opencode@1.18.31",
+    "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
+  }
+}

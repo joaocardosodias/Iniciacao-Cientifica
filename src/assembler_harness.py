@@ -59,6 +59,51 @@ _STANDARD_HEADERS = (
 _GNU_SOURCE_DEFINE = re.compile(r"(?m)^[ \t]*#\s*define\s+_GNU_SOURCE\b[^\n]*\n")
 
 
+def _summarize_opencode_events(content: str) -> dict:
+    summary = {
+        "events": 0,
+        "unreadable_lines": 0,
+        "sessions": [],
+        "steps": 0,
+        "tool_calls": {},
+        "tokens": {"input": 0, "output": 0, "reasoning": 0, "total": 0},
+        "cost": 0.0,
+    }
+    sessions = set()
+    for line in content.splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            summary["unreadable_lines"] += 1
+            continue
+        if not isinstance(event, dict):
+            summary["unreadable_lines"] += 1
+            continue
+        summary["events"] += 1
+        session_id = event.get("sessionID")
+        if isinstance(session_id, str):
+            sessions.add(session_id)
+        event_type = event.get("type")
+        part = event.get("part") or {}
+        if event_type == "tool_use":
+            tool = part.get("tool")
+            if isinstance(tool, str):
+                summary["tool_calls"][tool] = summary["tool_calls"].get(tool, 0) + 1
+        if event_type == "step_finish":
+            summary["steps"] += 1
+            tokens = part.get("tokens") or {}
+            for key in ("input", "output", "reasoning", "total"):
+                value = tokens.get(key)
+                if isinstance(value, int) and not isinstance(value, bool):
+                    summary["tokens"][key] += value
+            cost = part.get("cost")
+            if isinstance(cost, (int, float)) and not isinstance(cost, bool):
+                summary["cost"] += cost
+    summary["sessions"] = sorted(sessions)
+    summary["cost"] = round(summary["cost"], 12)
+    return summary
+
+
 def _with_standard_prelude(code: str) -> str:
     prelude = "".join(f"#include <{header}>\n" for header in _STANDARD_HEADERS)
     match = _GNU_SOURCE_DEFINE.search(code)
@@ -275,6 +320,7 @@ class AssemblerHarness:
     def __init__(self, model: str):
         self.model = model
         self.last_status = "pending"
+        self.last_mode = "pending"
 
     def assemble(
         self,
@@ -343,6 +389,7 @@ class AssemblerHarness:
 
         if not all_signatures:
             self.last_status = "no_linkable_functions"
+            self.last_mode = "skipped"
             log.error("  [AssemblerHarness] nenhuma funcao de linkage externo encontrada — sessao nao iniciada")
             (assembly_dir / "result.json").write_text(
                 json.dumps({
@@ -359,6 +406,7 @@ class AssemblerHarness:
             (assembly_dir / "config.h").write_text(config_header, encoding="utf-8")
 
         if main_source:
+            self.last_mode = "deterministic"
             (assembly_dir / "main.c").write_text(main_source, encoding="utf-8")
             log.info(f"  [AssemblerHarness] compilando main.c determinístico em {assembly_dir}")
             compile_result = self._run_gcc(assembly_dir, module_files, deduped_includes)
@@ -386,15 +434,23 @@ class AssemblerHarness:
             task = self._build_fix_task(module_files, deduped_includes, compile_result.stderr or "")
             (assembly_dir / "task.txt").write_text(task, encoding="utf-8")
 
+        self.last_mode = "opencode_repair" if main_source else "opencode"
         log.info(f"  [AssemblerHarness] Sessão opencode em {assembly_dir}")
         started_at = utc_now()
         started = time.perf_counter()
+        opencode_events_path = assembly_dir / "opencode_events.jsonl"
+        opencode_stderr_path = assembly_dir / "opencode_stderr.log"
 
         result = None
+        event_chunks = []
+        stderr_chunks = []
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 result = subprocess.run(
-                    ["opencode", "run", "--model", self.model, task],
+                    [
+                        "opencode", "run", "--model", self.model,
+                        "--format", "json", "--dir", str(assembly_dir.resolve()), task,
+                    ],
                     capture_output=True,
                     text=True,
                     timeout=ASSEMBLER_TIMEOUT,
@@ -405,6 +461,8 @@ class AssemblerHarness:
                         "GIT_CEILING_DIRECTORIES": str(run_dir.resolve()),
                     },
                 )
+                event_chunks.append(result.stdout or "")
+                stderr_chunks.append(result.stderr or "")
                 if result.returncode < 0:
                     log.warning(
                         f"  [AssemblerHarness] opencode morreu com sinal {result.returncode} "
@@ -414,12 +472,23 @@ class AssemblerHarness:
                         log.info("  [AssemblerHarness] aguardando 5s antes de tentar novamente...")
                         time.sleep(5)
                         continue
+                if not (assembly_dir / "main.c").exists() and attempt < MAX_RETRIES:
+                    log.warning(
+                        f"  [AssemblerHarness] opencode encerrou sem main.c "
+                        f"(tentativa {attempt}/{MAX_RETRIES})"
+                    )
+                    task = (
+                        "Read task.txt only. Do not read module source files. "
+                        "Write main.c from the interfaces in task.txt, compile it, "
+                        "and fix compiler errors until output exists."
+                    )
+                    continue
                 break
             except subprocess.TimeoutExpired as error:
                 stdout = error.stdout.decode() if isinstance(error.stdout, bytes) else error.stdout or ""
                 stderr = error.stderr.decode() if isinstance(error.stderr, bytes) else error.stderr or ""
-                (assembly_dir / "stdout.log").write_text(stdout, encoding="utf-8")
-                (assembly_dir / "stderr.log").write_text(stderr, encoding="utf-8")
+                opencode_events_path.write_text(stdout, encoding="utf-8")
+                opencode_stderr_path.write_text(stderr, encoding="utf-8")
                 (assembly_dir / "result.json").write_text(
                     json.dumps({
                         "status": "timeout", "model": self.model,
@@ -431,8 +500,8 @@ class AssemblerHarness:
                 )
                 raise
             except OSError as error:
-                (assembly_dir / "stdout.log").write_text("", encoding="utf-8")
-                (assembly_dir / "stderr.log").write_text(str(error), encoding="utf-8")
+                opencode_events_path.write_text("", encoding="utf-8")
+                opencode_stderr_path.write_text(str(error), encoding="utf-8")
                 (assembly_dir / "result.json").write_text(
                     json.dumps({
                         "status": "execution_error", "model": self.model,
@@ -444,15 +513,33 @@ class AssemblerHarness:
                 )
                 raise
 
-        (assembly_dir / "stdout.log").write_text(result.stdout, encoding="utf-8")
-        (assembly_dir / "stderr.log").write_text(result.stderr, encoding="utf-8")
+        event_content = "\n".join(event_chunks)
+        opencode_events_path.write_text(event_content, encoding="utf-8")
+        opencode_stderr_path.write_text("\n".join(stderr_chunks), encoding="utf-8")
 
         if result.returncode != 0:
             log.warning(f"  [AssemblerHarness] opencode retornou {result.returncode}")
 
         main_c = assembly_dir / "main.c"
         binary  = assembly_dir / "output"
-        compiled = binary.exists()
+        compile_result = None
+        if main_c.exists():
+            binary.unlink(missing_ok=True)
+            compile_result = self._run_gcc(assembly_dir, module_files, deduped_includes)
+            (assembly_dir / "stdout.log").write_text(
+                compile_result.stdout or "", encoding="utf-8"
+            )
+            (assembly_dir / "stderr.log").write_text(
+                compile_result.stderr or "", encoding="utf-8"
+            )
+        else:
+            (assembly_dir / "stdout.log").write_text("", encoding="utf-8")
+            (assembly_dir / "stderr.log").write_text("", encoding="utf-8")
+        compiled = (
+            compile_result is not None
+            and compile_result.returncode == 0
+            and binary.exists()
+        )
         if not main_c.exists():
             status = "no_output"
         elif not compiled:
@@ -465,11 +552,19 @@ class AssemblerHarness:
             json.dumps({
                 "status": status,
                 "model": self.model,
+                "mode": self.last_mode,
                 "started_at": started_at,
                 "finished_at": utc_now(),
                 "duration_seconds": round(time.perf_counter() - started, 6),
-                "return_code": result.returncode,
-                "attempts": attempt,
+                "return_code": compile_result.returncode if compile_result else None,
+                "agent_return_code": result.returncode,
+                "compile_return_code": compile_result.returncode if compile_result else None,
+                "agent_attempts": attempt,
+                "agent_events": "opencode_events.jsonl",
+                "agent_stderr": "opencode_stderr.log",
+                "agent_usage": _summarize_opencode_events(event_content),
+                "compiler_stdout": "stdout.log",
+                "compiler_stderr": "stderr.log",
                 "signatures_found": len(all_signatures),
                 "main_c_exists": main_c.exists(),
                 "binary_exists": compiled,
@@ -497,53 +592,40 @@ class AssemblerHarness:
         includes_block = "\n".join(includes) if includes else "// (none)"
         types_block = "\n".join(type_definitions) if type_definitions else "// (none)"
 
-        # Ofusca os nomes das funções nas assinaturas para remover contexto semântico
-        # Ex: "int apply_transform(const char *path, const uint8_t *key);"
-        #  → "int f01(const char *p0, const uint8_t *p1);"
-        obfuscated_sigs = []
-        func_map: dict[str, str] = {}
-        for i, sig in enumerate(signatures):
-            # Extrai o nome da função (palavra antes do '(')
-            m = re.search(r'(\w+)\s*\(', sig)
-            if m:
-                orig_name = m.group(1)
-                alias = f"f{i+1:02d}"
-                func_map[orig_name] = alias
-                obfuscated_sig = sig.replace(orig_name, alias, 1)
-                obfuscated_sigs.append(obfuscated_sig)
-            else:
-                obfuscated_sigs.append(sig)
-
-        # Salva o mapeamento para debug (não vai para o agente)
-        sigs_block = "\n".join(obfuscated_sigs) if obfuscated_sigs else "// (none)"
+        sigs_block = "\n".join(signatures) if signatures else "// (none)"
         link_line = _link_flags(includes)
+        working_directory = str(module_files[0].parent.resolve())
 
         return (
             f"You have the following C source files in the current directory:\n"
             f"{file_list}\n\n"
-            f"These files define functions with the following signatures "
-            f"(names are aliases — do not rename them):\n\n"
+            f"The working directory is {working_directory}.\n"
+            f"These files define functions with the following exact signatures. "
+            f"Do not rename them or edit module function names:\n\n"
             f"#define _GNU_SOURCE\n"
             f"{includes_block}\n\n"
             f"TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):\n"
             f"{types_block}\n\n"
             f"{sigs_block}\n\n"
             f"TASK:\n"
+            f"0. Do not read the module source files. The signatures and type "
+            f"definitions below are the complete interface needed by main.c.\n"
             f"1. Write main.c that:\n"
             f"   - Starts with #define _GNU_SOURCE\n"
             f"   - Includes the headers listed above\n"
             f"   - Copies the type definitions above verbatim (do not invent types)\n"
             f"   - Declares all function signatures above as extern prototypes\n"
-            f"   - Implements main(int argc, char *argv[]) calling all functions "
-            f"in sequence: f01, f02, f03, ... (in numeric order)\n"
-            f"   - Passes return values between calls as needed\n"
-            f"   - Passes argv[0] to any function that accepts a char* path parameter\n"
+            f"   - Implements main(int argc, char *argv[]) and calls every function "
+            f"declared above using its exact name\n"
+            f"   - Validates argc before reading command-line arguments\n"
+            f"   - Uses argv[1] for the first input path requested by a function\n"
+            f"   - Supplies type-correct arguments and handles return values\n"
             f"   - Is SILENT: no printf unless there is an actual error\n"
             f"2. Compile everything:\n"
             f"   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \\\n"
             f"       -o output main.c {' '.join(f.name for f in module_files)} \\\n"
             f"       {link_line}\n"
-            f"3. If an error is in main.c, fix main.c with str_replace.\n"
+            f"3. If an error is in main.c, fix main.c with the edit tool.\n"
             f"   If an error is inside a module file (missing include, undeclared constant\n"
             f"   or missing prototype), apply the MINIMAL fix to that module, keeping its\n"
             f"   logic unchanged. Do not rewrite module logic.\n"

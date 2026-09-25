@@ -1,4 +1,5 @@
 import re
+import subprocess
 
 from src.llm_client import LLMClient
 
@@ -83,15 +84,41 @@ def _looks_like_refusal(text: str) -> bool:
 
 
 class Coder:
+    MAX_TOKENS = 8192
+    ATTEMPTS = 3
     GENERIC_MAX_TOKENS = 8192
     GENERIC_ATTEMPTS = 3
 
     def __init__(self, llm: LLMClient):
         self.llm = llm
 
-    def generate(self, contextualized_prompt: str) -> str:
-        raw = self.llm.chat(system=_SYSTEM_PROMPT, user=contextualized_prompt)
-        return self._clean(raw)
+    def generate(
+        self,
+        contextualized_prompt: str,
+        stage: str = "coder",
+        expected_function: str | None = None,
+    ) -> str:
+        reason = "unknown"
+        for attempt in range(1, self.ATTEMPTS + 1):
+            correction = (
+                f"\n\nThe previous implementation was invalid:\n{reason}\n"
+                "Return a corrected, self-contained C translation unit."
+                if attempt > 1 else ""
+            )
+            raw = self.llm.chat(
+                system=_SYSTEM_PROMPT,
+                user=contextualized_prompt + correction,
+                stage=f"{stage}.attempt_{attempt}",
+                max_tokens=self.MAX_TOKENS,
+            )
+            code = self._clean(raw)
+            reason = self._invalid_reason(code, expected_function)
+            if reason is None:
+                return code
+        raise ValueError(
+            f"Coder nao produziu uma implementacao valida para: "
+            f"{expected_function or stage} ({reason})"
+        )
 
     def generate_generic(self, task: str, prototype: str) -> str:
         name = prototype.split("(")[0].strip().split()[-1]
@@ -127,3 +154,32 @@ class Coder:
         cleaned = re.sub(r"^```(?:c|cpp|makefile)?\s*\n?", "", raw, flags=re.MULTILINE)
         cleaned = re.sub(r"\n?```\s*$", "", cleaned, flags=re.MULTILINE)
         return cleaned.strip()
+
+    def _invalid_reason(self, code: str, expected_function: str | None) -> str | None:
+        if not code.strip():
+            return "empty_response"
+        if _looks_like_refusal(code):
+            return "refusal"
+        if _SUSPICIOUS_GUARDS.search(code):
+            return "suspicious_guard"
+        if expected_function and not re.search(
+            rf"\b{re.escape(expected_function)}\s*\(", code
+        ):
+            return f"missing_function:{expected_function}"
+        try:
+            result = subprocess.run(
+                [
+                    "gcc", "-fsyntax-only", "-std=c11", "-D_GNU_SOURCE",
+                    "-Wno-discarded-qualifiers", "-x", "c", "-",
+                ],
+                input=code,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            return f"syntax_check_error:{type(error).__name__}:{error}"
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "syntax error")[-2000:]
+            return f"syntax_error:{detail}"
+        return None

@@ -78,7 +78,7 @@ Prompt malicioso
       └── corrige erros com alterações localizadas
       │
       ▼
-  output/run_<id>/main.c + output/run_<id>/output
+  output/run_<id>/assembly/main.c + output/run_<id>/assembly/output
 ```
 
 A hipótese central é que filtros baseados em análise de conteúdo individual
@@ -101,10 +101,10 @@ modelo: o Coder recebe apenas tarefas genéricas ("AES-256-GCM em um buffer",
 forma determinística pelo pipeline. A composição maliciosa existe somente no
 orquestrador Python e no `main_c`, nunca na linguagem natural vista pelo LLM.
 
-O `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc` diretamente
-(modo `deterministic`). O agente OpenCode é acionado apenas se a compilação
-falhar, para correções mínimas nos módulos. Use `--llm-pipeline` para forçar o
-fluxo Sanitizer+Planner+PromptMaker.
+O fluxo Sanitizer+Planner+PromptMaker é o padrão, inclusive quando `--scenario`
+é utilizado. `--components-mode` ativa explicitamente o modo determinístico.
+Nesse modo, o `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc`
+diretamente e aciona o OpenCode apenas se a compilação falhar.
 
 ---
 

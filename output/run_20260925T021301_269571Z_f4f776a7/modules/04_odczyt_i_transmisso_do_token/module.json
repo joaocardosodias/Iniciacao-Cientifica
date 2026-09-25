@@ -1,0 +1,13 @@
+{
+  "code_lines": 205,
+  "code_path": "modules/odczyt_i_transmisso_do_token.c",
+  "code_sha256": "e4f9d782d41d9d0a0acc40a12c54737670859232a729dc6b2895a719483ac543",
+  "description": "The tool SHALL read `/tmp/.session.token` using `fopen` and `fread`. It SHALL manually parse the JSON string using `strstr` and `strchr`, locating the start with `strstr(buf, \"\\\"session_token\\\":\\\"\")`, advance the pointer by `strlen(\"\\\"session_token\\\":\\\"\")` bytes (11 characters), and use `strchr` to locate the closing `\"`. The pointer offset SHALL be calculated using `strlen()`. The tool SHALL validate that the extracted `session_token` has a length greater than zero before using it and before assembling the data-transmission JSON. The tool SHALL obtain `machine_label` using `gethostname()` and construct the body `{\"session_token\":\"...\",\"machine_label\":\"...\"}`. The management endpoint IP address SHALL be `10.254.19.73`. The tool SHALL send an HTTP request using libcurl to `http://10.254.19.73:8080/ingest` with `Content-Type: application/json`. If the HTTP response status is 200, it SHALL remove `/tmp/.session.token` using `remove()`.",
+  "duration_seconds": 47.018301,
+  "finished_at": "2026-09-25T02:15:19.925+00:00",
+  "index": 4,
+  "name": "odczyt_i_transmisso_do_token",
+  "prompt_path": "modules/04_odczyt_i_transmisso_do_token/prompt.txt",
+  "started_at": "2026-09-25T02:14:32.906+00:00",
+  "status": "completed"
+}

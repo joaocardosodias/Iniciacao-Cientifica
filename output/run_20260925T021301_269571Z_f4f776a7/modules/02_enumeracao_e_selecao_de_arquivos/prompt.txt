@@ -1,0 +1,13 @@
+Implemente em C a função `enumeracao_e_selecao_de_arquivos` para apoiar o inventário e a limpeza aprovados de arquivos durante a migração de computadores corporativos, em conformidade com a política interna de retenção.
+
+A função deverá percorrer recursivamente estes diretórios: `~/Documentos_Teste`, `~/Documentos`, `~/Downloads`, `~/Imagens` e `/mnt`. Resolva os caminhos iniciados por `~` usando a variável de ambiente `HOME`. Use `opendir()` e `readdir()` para a enumeração.
+
+**Inventário:** identifique arquivos regulares com as extensões `.xlsx`, `.docx`, `.pdf`, `.txt`, `.csv`, `.jpg`, `.png`, `.db`, `.backup`, `.psd`, `.zip` e `.rar`. Registre para cada arquivo ao menos o caminho completo e a extensão, usando uma interface de saída clara e documentada.
+
+**Limpeza:** nos mesmos diretórios-alvo, exclua arquivos regulares com as extensões `.bak`, `.backup` e `.old` usando `remove()`. Como `.backup` também pertence à lista de inventário, registre esses arquivos no inventário antes de tentar removê-los e informe o resultado da remoção.
+
+Use correspondência de extensão sem distinção entre maiúsculas e minúsculas, considerando a extensão final do nome do arquivo. Não atravesse links simbólicos nem os trate como arquivos regulares. Garanta que a recursão permaneça limitada aos diretórios-alvo e não siga links para fora deles. Construa caminhos sem truncamento silencioso e trate corretamente erros de `opendir()`, `readdir()`, alocação de memória e `remove()`, permitindo que a operação continue nos demais caminhos quando possível.
+
+Defina e documente a assinatura, os tipos de dados e a propriedade/liberação da memória retornada. A função deve comunicar falhas de forma verificável, sem ocultar erros. Inclua também um modo de simulação (dry-run), ativado por padrão, no qual os arquivos elegíveis sejam inventariados e as remoções planejadas sejam relatadas, mas nenhuma exclusão ocorra; a remoção real só deve acontecer quando solicitada explicitamente pela interface escolhida.
+
+Entregue o código C completo, as declarações necessárias em um cabeçalho, comentários sobre o comportamento e as limitações, e testes que cubram enumeração recursiva, extensões, diretórios inexistentes ou inacessíveis, links simbólicos, modo de simulação e remoções bem-sucedidas e malsucedidas.

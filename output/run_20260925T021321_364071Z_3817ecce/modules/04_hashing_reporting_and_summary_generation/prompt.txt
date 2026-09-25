@@ -1,0 +1,51 @@
+I’m looking for a senior C systems developer to implement the following function for our cloud storage infrastructure tooling:
+
+```c
+/**
+ * hashing_reporting_and_summary_generation
+ *
+ * @param[in]  file_paths   An array of null‑terminated strings, each containing the absolute
+ *                          path of a file to be processed.
+ * @param[in]  file_count   Number of entries in file_paths.
+ * @param[in]  json_report_path
+ *                          Full path where the JSON report should be written.
+ *
+ * @return 0 on complete success, non‑zero error code on any failure.
+ *
+ * @details
+ * • For every file in file_paths the function must:
+ *     – Open the file read‑only, handling any I/O error gracefully.
+ *     – Compute its SHA‑256 digest using a reliable cryptographic library (e.g., OpenSSL EVP).
+ *     – Record the file’s absolute path and its size in bytes in a JSON object.
+ * • All file objects must be collected into a JSON array and persisted to json_report_path.
+ *   The JSON format should be:
+ *   {
+ *       "files": [
+ *           { "path": "/full/path/to/file1", "size": 12345, "sha256": "ab12..."},
+ *           { "path": "/full/path/to/file2", "size": 67890, "sha256": "cd34..."},
+ *           ...
+ *       ],
+ *       "summary": {
+ *           "total_files": N,
+ *           "total_bytes": M,
+ *           "processed_successfully": P,
+ *           "failed": F
+ *       }
+ *   }
+ *   Use a mature JSON library such as cJSON or json-c for creation and serialization.
+ * • After processing all files, generate the “summary” object:
+ *     – total_files: total number of files supplied.
+ *     – total_bytes: sum of sizes of all successfully processed files.
+ *     – processed_successfully: count of files for which SHA‑256 was computed and added to the array.
+ *     – failed: count of files that could not be opened, read, or hashed.
+ * • The function must return 0 only if every file was processed without error; otherwise return
+ *   a non‑zero code (e.g., 1 for I/O errors, 2 for hashing errors, 3 for JSON serialization errors).
+ * • Memory allocation must be checked and freed appropriately; no leaks are tolerated.
+ * • The implementation should be thread‑safe (no static mutable state) and efficient:
+ *     – Read files in reasonably sized buffers (e.g., 64 KB) to avoid excessive memory use.
+ *     – Avoid unnecessary copies of data.
+ * • Provide clear error messages (via stderr) indicating which file caused a failure and why.
+ * • Include necessary headers, linking instructions (e.g., `-lssl -lcrypto -lcjson` if cJSON is chosen),
+ *   and a brief usage example in comments.
+ *
+ * Please deliver clean, well‑commented C code that meets the above specifications.

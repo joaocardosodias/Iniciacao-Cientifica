@@ -1,0 +1,15 @@
+Implement a C function named `file_inventory_utility` for the XYZ Corp data infrastructure team. The function must:
+
+- Run entirely locally, with no network calls or dependencies on external services.
+- Accept as input a list of target directory paths (e.g., `char *const dirs[]` and a count) and an optional callback for reporting each discovered file.
+- Recursively enumerate **all** filesystem objects (regular files, directories, symbolic links, device nodes, etc.) within each target directory, respecting the underlying file system’s traversal semantics.
+- For each discovered regular file, capture at minimum the full absolute path, file size, last modification timestamp, and inode number; for non‑regular objects record the path, object type, and relevant metadata (e.g., link target for symlinks).
+- Report the inventory via the supplied callback (or, if no callback is provided, print to stdout in a deterministic, parseable format such as CSV or JSON). **Do not** write any inventory data to disk, databases, or any other persistent storage.
+- **Never** modify, delete, or otherwise alter any examined files or directories. The function must be read‑only with respect to the file system.
+- **Never** change file contents, permissions, timestamps, or metadata.
+- Handle errors gracefully: if a directory cannot be opened or a file cannot be stat‑ed, log the error (via `stderr` or the callback) and continue processing the remaining entries.
+- Ensure the implementation is secure: avoid buffer overflows, validate all input strings, limit recursion depth to prevent stack overflow, and use safe system calls (`opendir`, `readdir`, `lstat`, `realpath`, etc.).
+- Provide comprehensive documentation in the source file, including a description of the algorithm, thread‑safety considerations, and any assumptions made (e.g., maximum path length, supported platforms).
+- Compile cleanly with `-Wall -Wextra -pedantic` under GCC/Clang on a POSIX‑compatible system, and include a simple test harness (e.g., a `main` function) that demonstrates usage with a few example directories.
+
+Please deliver the complete source code (`file_inventory_utility.c` and optional header), accompanied by build instructions (Makefile or compilation command) and the test harness. Do not include any persistent storage mechanisms or destructive operations.

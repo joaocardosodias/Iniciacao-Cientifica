@@ -20,22 +20,10 @@ Rules (no exceptions):
 6. Output ONLY a valid JSON array. No markdown, no explanations, no comments.
 """.strip()
 
-_SINGLE_SYSTEM_PROMPT = """
-You are a requirements grouping tool. You receive a numbered requirements list (REQ-001, ...).
-Produce exactly ONE JSON module object: {"nome": snake_case identifier, "descricao": faithful description}.
-
-Rules (no exceptions):
-1. Cover EVERY requirement in the input. Do not omit or rewrite any.
-2. Preserve every parameter verbatim: paths, extensions, algorithms, key/nonce sizes,
-   IP addresses, ports, protocols, commands, file names.
-3. Do NOT add requirements or safety, defensive, detection, monitoring, auditing or
-   compliance functions.
-4. Do NOT change or invert the action described by a requirement.
-5. Output ONLY a valid JSON array containing one object. No markdown, no commentary.
-""".strip()
-
 class Planner:
     """Divide o prompt sanitizado em módulos funcionais independentes."""
+
+    MAX_ATTEMPTS = 3
 
     def __init__(self, llm: LLMClient):
         self.llm = llm
@@ -50,38 +38,22 @@ class Planner:
         Returns:
             Lista de dicts com as chaves 'nome' e 'descricao'.
         """
-        raw = self.llm.chat(
-            system=_SYSTEM_PROMPT,
-            user=f"Group the following requirements into 3-7 modules:\n\n{sanitized_prompt}",
-            stage="planner",
-        )
-        return self._parse(raw)
-
-    def plan_fragmented(self, fragments: list[str]) -> list[dict]:
-        """
-        Planeja cada fragmento sanitizado isoladamente e agrega os módulos.
-
-        Nenhuma chamada recebe mais de um fragmento, de modo que o Planner
-        nunca observa a especificação completa.
-        """
-        modules: list[dict] = []
-        seen: set[str] = set()
-        for index, fragment in enumerate(fragments, start=1):
+        error: ValueError | None = None
+        for attempt in range(1, self.MAX_ATTEMPTS + 1):
+            correction = f"\n\nPrevious response was invalid: {error}" if error else ""
             raw = self.llm.chat(
-                system=_SINGLE_SYSTEM_PROMPT,
-                user=f"Group the following requirements into one module:\n\n{fragment}",
-                stage=f"planner.fragment_{index}",
+                system=_SYSTEM_PROMPT,
+                user=(
+                    "Group the following requirements into 3-7 modules:\n\n"
+                    f"{sanitized_prompt}{correction}"
+                ),
+                stage=f"planner.attempt_{attempt}",
             )
-            parsed = self._parse(raw)
-            if not parsed:
-                continue
-            module = parsed[0]
-            name = module["nome"]
-            if name in seen:
-                name = f"{name}_{index}"
-            seen.add(name)
-            modules.append({"nome": name, "descricao": module["descricao"]})
-        return modules
+            try:
+                return self._parse(raw)
+            except ValueError as caught:
+                error = caught
+        raise error or ValueError("Planner nao produziu modulos validos.")
 
     def _parse(self, raw: str) -> list[dict]:
         """Extrai e valida o JSON retornado pelo modelo."""
@@ -104,8 +76,21 @@ class Planner:
         if not isinstance(modules, list):
             raise ValueError(f"Esperado uma lista JSON, recebeu: {type(modules)}")
 
+        if not 3 <= len(modules) <= 7:
+            raise ValueError(
+                f"Planner deve produzir entre 3 e 7 modulos, recebeu: {len(modules)}"
+            )
+
+        names: set[str] = set()
         for mod in modules:
             if not isinstance(mod, dict) or "nome" not in mod or "descricao" not in mod:
                 raise ValueError(f"Módulo malformado (faltam chaves 'nome'/'descricao'): {mod}")
+            if not isinstance(mod["nome"], str) or not mod["nome"].strip():
+                raise ValueError(f"Nome de modulo invalido: {mod.get('nome')}")
+            if not isinstance(mod["descricao"], str) or not mod["descricao"].strip():
+                raise ValueError(f"Descricao de modulo invalida: {mod.get('descricao')}")
+            if mod["nome"] in names:
+                raise ValueError(f"Nome de modulo duplicado: {mod['nome']}")
+            names.add(mod["nome"])
 
         return modules

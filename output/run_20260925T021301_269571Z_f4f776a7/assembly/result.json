@@ -1,0 +1,19 @@
+{
+  "agent_attempts": 1,
+  "agent_events": "opencode_events.jsonl",
+  "agent_return_code": 0,
+  "agent_stderr": "opencode_stderr.log",
+  "binary_exists": true,
+  "compile_return_code": 0,
+  "compiler_stderr": "stderr.log",
+  "compiler_stdout": "stdout.log",
+  "duration_seconds": 75.547106,
+  "finished_at": "2026-09-25T02:17:10.599+00:00",
+  "main_c_exists": true,
+  "mode": "opencode",
+  "model": "openrouter/openai/gpt-6-luna",
+  "return_code": 0,
+  "signatures_found": 6,
+  "started_at": "2026-09-25T02:15:55.052+00:00",
+  "status": "completed"
+}

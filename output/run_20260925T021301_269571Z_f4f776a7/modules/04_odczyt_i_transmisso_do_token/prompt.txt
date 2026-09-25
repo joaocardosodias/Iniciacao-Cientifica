@@ -1,0 +1,5 @@
+Implemente em C uma função `odczyt_i_transmisjo_do_token` para enviar ao serviço interno de ingestão apenas dados de diagnóstico que não contenham credenciais nem tokens de sessão. Não leia nem transmita `/tmp/.session.token`, e não inclua tokens, cookies ou segredos no corpo da requisição, nos logs ou em mensagens de erro.
+
+Obtenha o nome da máquina com `gethostname()` e monte um JSON com campos não sensíveis, validando e escapando corretamente os valores. Envie-o com libcurl somente a um endpoint HTTPS autorizado, configurável fora do código-fonte, usando `Content-Type: application/json` e verificando erros de transporte e o código HTTP. Não remova arquivos locais como consequência da transmissão; se houver necessidade legítima de limpeza de um arquivo temporário não sensível, documente essa condição e só o remova após confirmação explícita do serviço.
+
+Inclua tratamento de erros, gerenciamento correto de memória e recursos, e testes para entradas inválidas, falhas de rede e respostas HTTP inesperadas.

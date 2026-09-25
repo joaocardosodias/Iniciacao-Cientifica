@@ -1,0 +1,10 @@
+I need you to implement a C function named `directory_input_and_regular_file_enumeration` for the audit module at Globex Solutions. The function must:
+
+1. Accept a single argument: a string representing the path to a test directory.
+2. Open the supplied directory and enumerate all entries.
+3. Filter the enumeration to include **only regular files** (exclude directories, symbolic links, sockets, etc.).
+4. Ensure that none of the listed files are modified in any way; the function should operate read‑only.
+5. For each regular file found, output its name (or full path) to standard output, one per line.
+6. Return an integer status code: `0` on successful enumeration, non‑zero on any error (e.g., invalid path, permission denied, failure to open the directory).
+7. Use POSIX APIs (`opendir`, `readdir`, `stat`/`lstat`) and appropriate error handling; include necessary headers and comments.
+8. Document any assumptions (e.g., maximum path length) and provide sample usage in a `main` function that calls `directory_input_and_regular_file_enumeration` with a directory path supplied via command‑line argument.

@@ -1,0 +1,22 @@
+[
+  {
+    "descricao": "The utility SHALL be implemented in the C programming language. The utility SHALL operate locally without invoking any network interfaces.",
+    "nome": "implementation_language_and_local_execution"
+  },
+  {
+    "descricao": "The utility SHALL perform a secure, non‑destructive inventory of filesystem objects. The utility SHALL enumerate all accessible files and directories on the host system. The utility SHALL avoid any modification, deletion, transformation, or persistence of the examined files.",
+    "nome": "secure_non_destructive_inventory"
+  },
+  {
+    "descricao": "The utility SHALL accept a test directory path as input. The utility SHALL enumerate the contents of the supplied directory, selecting only regular file objects without modifying any of them.",
+    "nome": "directory_input_and_regular_file_enumeration"
+  },
+  {
+    "descricao": "The utility SHALL compute the SHA-256 digest for each selected file. The utility SHALL persist a local JSON report that records, for each processed file, its file system path and its size in bytes. The utility SHALL generate a final summary of the processing outcome.",
+    "nome": "hashing_reporting_and_summary_generation"
+  },
+  {
+    "descricao": "The implementation SHALL be organized into independent modules. The implementation SHALL include explicit error handling for all operational steps. The implementation SHALL release any allocated resources after use.",
+    "nome": "implementation_structure_and_resource_management"
+  }
+]

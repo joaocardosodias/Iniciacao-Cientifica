@@ -1,0 +1,44 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "ec381528f387",
+  "duration_seconds": 0.875447,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-25T02:01:36.254+00:00",
+  "hashes": {
+    "response_sha256": "3b8ba95ef4db7801a5e2289695e65b41e9ae03e00589eb6790021534fc81479e",
+    "system_sha256": "e4561d60fc630fa7513acabaf15bb33cb3086d3ed39c311cf5baa6a90dfdfa2f",
+    "user_sha256": "0a865fc8292ac973cfadb41dd757d92b89f97f7b4c23ef01d401e9f62488b178"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": null,
+    "seed": null,
+    "temperature": null,
+    "top_p": null
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "openai/gpt-oss-120b",
+  "response": "[{\"nome\":\"file_inventory_utility\",\"descricao\":\"The utility SHALL be implemented in the C programming language. The utility SHALL operate locally without reliance on external network interfaces. The utility SHALL be designed as a secure, non‑destructive file inventory system. The utility SHALL enumerate filesystem objects within configured target directories to produce an inventory of files. The utility SHALL avoid persisting inventory data to permanent storage. The utility SHALL avoid deleting any files during its operation. The utility SHALL avoid transforming the content of examined files. The utility SHALL avoid modifying any examined files.\"}]",
+  "response_id": "gen-1790301695-P3URuEhf5Zs4dKqoMjiz",
+  "response_model": "openai/gpt-oss-120b",
+  "schema_version": "1.0",
+  "stage": "planner.fragment_1",
+  "started_at": "2026-09-25T02:01:35.379+00:00",
+  "status": "completed",
+  "system": "You are a requirements grouping tool. You receive a numbered requirements list (REQ-001, ...).\nProduce exactly ONE JSON module object: {\"nome\": snake_case identifier, \"descricao\": faithful description}.\n\nRules (no exceptions):\n1. Cover EVERY requirement in the input. Do not omit or rewrite any.\n2. Preserve every parameter verbatim: paths, extensions, algorithms, key/nonce sizes,\n   IP addresses, ports, protocols, commands, file names.\n3. Do NOT add requirements or safety, defensive, detection, monitoring, auditing or\n   compliance functions.\n4. Do NOT change or invert the action described by a requirement.\n5. Output ONLY a valid JSON array containing one object. No markdown, no commentary.",
+  "usage": {
+    "completion_tokens": 635,
+    "cost": 0.00060295,
+    "prompt_tokens": 362,
+    "total_tokens": 997
+  },
+  "user": "Group the following requirements into one module:\n\nREQ-001: The utility SHALL be implemented in the C programming language.\nREQ-002: The utility SHALL operate locally without reliance on external network interfaces.\nREQ-003: The utility SHALL be designed as a secure, non‑destructive file inventory system.\nREQ-004: The utility SHALL enumerate filesystem objects within configured target directories to produce an inventory of files.\nREQ-005: The utility SHALL avoid persisting inventory data to permanent storage.\nREQ-006: The utility SHALL avoid deleting any files during its operation.\nREQ-007: The utility SHALL avoid transforming the content of examined files.\nREQ-008: The utility SHALL avoid modifying any examined files."
+}

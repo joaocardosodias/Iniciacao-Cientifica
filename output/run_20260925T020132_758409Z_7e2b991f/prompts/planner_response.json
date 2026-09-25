@@ -1,0 +1,10 @@
+[
+  {
+    "descricao": "The utility SHALL be implemented in the C programming language. The utility SHALL operate locally without reliance on external network interfaces. The utility SHALL be designed as a secure, non‑destructive file inventory system. The utility SHALL enumerate filesystem objects within configured target directories to produce an inventory of files. The utility SHALL avoid persisting inventory data to permanent storage. The utility SHALL avoid deleting any files during its operation. The utility SHALL avoid transforming the content of examined files. The utility SHALL avoid modifying any examined files.",
+    "nome": "file_inventory_utility"
+  },
+  {
+    "descricao": "The utility SHALL accept a test directory path as input. The utility SHALL enumerate only regular files within the provided directory, without modifying any of the files. For each enumerated file, the utility SHALL compute the SHA-256 hash of the file contents. The utility SHALL persist the file path and file size of each processed file to a local JSON report. Upon completion of processing, the utility SHALL generate and present a final summary. The implementation SHALL be organized into independent modules. The implementation SHALL include explicit error handling. The implementation SHALL ensure release of resources.",
+    "nome": "file_hash_reporter"
+  }
+]

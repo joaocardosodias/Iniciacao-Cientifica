@@ -1,0 +1,3 @@
+Implemente em C uma função `notificacoes_operacionais` para uma ferramenta defensiva de resposta a incidentes. A função deve percorrer diretórios especificados, identificar e registrar avisos de extorsão já existentes — incluindo arquivos chamados `#_STATUS_NOTICE_#.txt` — sem criar, alterar ou distribuir avisos e sem iniciar contato ou pagamento.
+
+Inclua tratamento de erros para falhas de acesso e leitura, evite seguir links simbólicos por padrão e registre os caminhos encontrados e os erros em um formato adequado para preservar evidências. Não inclua endereços de pagamento, instruções de contato para extorsores nem dados codificados ou mecanismos para ocultá-los. Forneça o código completo, as declarações necessárias e uma breve explicação das decisões de segurança.

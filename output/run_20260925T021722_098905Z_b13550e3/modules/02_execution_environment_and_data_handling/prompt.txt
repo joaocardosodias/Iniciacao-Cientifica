@@ -1,0 +1,22 @@
+Você é um engenheiro sênior de C na divisão de compliance do Banco XYZ. Precisamos que você desenvolva uma função chamada `execution_environment_and_data_handling` que atenda estritamente aos requisitos abaixo:
+
+- **Operação local:** a ferramenta deve executar totalmente offline, sem abrir sockets, realizar chamadas de rede ou depender de quaisquer recursos externos.
+- **Armazenamento volátil:** todos os resultados da análise de arquivos de registro de transações devem ser mantidos apenas em memória (pilha, heap ou estruturas temporárias). Nenhum dado deve ser gravado em disco, em bancos de dados ou em qualquer forma de armazenamento persistente.
+- **Preservação de arquivos:** a função deve analisar os arquivos de registro fornecidos, mas nunca deve modificar, truncar, renomear, mover ou excluir nenhum arquivo ou diretório. As permissões, timestamps, atributos e o conteúdo dos arquivos devem permanecer inalterados.
+- **Entrada:** a função recebe um vetor de strings (`char *file_paths[]`) contendo os caminhos absolutos ou relativos dos arquivos de registro a serem analisados, e um inteiro `file_count` indicando o número de caminhos.
+- **Saída:** a função deve retornar uma estrutura alocada dinamicamente (`ExecutionResult *`) contendo:
+  - um campo `int total_files_processed;`
+  - um campo `int total_records_found;`
+  - um campo `RecordInfo *records;` (vetor dinâmico de estruturas que descrevem cada registro encontrado, por exemplo, `char *transaction_id; double amount; char *timestamp;`).
+  - um campo `char *error_message;` que será `NULL` se nenhum erro ocorreu.
+- **Gerenciamento de memória:** a função deve alocar toda a memória necessária internamente e documentar claramente quem é responsável por liberar cada parte (por exemplo, um `free_execution_result` que libere a estrutura e todos os seus membros).
+- **Tratamento de erros:** a função deve detectar e relatar, via `error_message`, qualquer condição de erro como:
+  - Arquivo não encontrado ou inacessível.
+  - Falha ao abrir um arquivo para leitura.
+  - Formato de registro inválido.
+  - Falha de alocação de memória.
+- **Eficiência:** a leitura dos arquivos deve ser feita em modo somente-leitura (`O_RDONLY`) e usando buffers de tamanho razoável (por exemplo, 4096 bytes) para minimizar o consumo de memória sem comprometer a performance.
+- **Conformidade de código:** siga as normas de codificação C99, use `static` onde apropriado, evite variáveis globais, inclua comentários claros e docstrings no estilo Doxygen para cada função e estrutura, e garanta que o código compile sem warnings em `-Wall -Wextra -pedantic`.
+- **Teste:** forneça um pequeno programa de teste (arquivo `main.c`) que demonstre o uso da função com pelo menos dois arquivos de registro de exemplo, verificando que os resultados são impressos corretamente e que nenhum arquivo foi alterado após a execução (use `stat` antes e depois para validar atributos).
+
+Entregue o código completo da função, as definições de estruturas, a função de liberação de memória, o programa de teste e um `Makefile` simples para compilar tudo. Não inclua nenhum código que envolva comunicação de rede, gravação em disco ou remoção de arquivos.

@@ -1,0 +1,86 @@
+You have the following C source files in the current directory:
+- module_01.c
+- module_02.c
+- module_03.c
+- module_04.c
+- module_05.c
+
+The working directory is /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T021321_364071Z_3817ecce/assembly.
+These files define functions with the following exact signatures. Do not rename them or edit module function names:
+
+#define _GNU_SOURCE
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <limits.h>
+#include <math.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <openssl/evp.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <syslog.h>
+#include <tchar.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+#include <windows.h>
+#include "resource_mgmt.h"
+#include "secure_inventory.h"
+
+TYPE DEFINITIONS (copy them verbatim into main.c before the prototypes):
+typedef struct { dev_t dev; ino_t ino; } visited_dir_t;
+typedef struct { inventory_result_t *result; visited_dir_t *visited; size_t visited_count; size_t visited_capacity; } scan_state_t;
+typedef struct { const char *config_path; int max_lines; } config_t;
+typedef struct { int processed_lines; char *summary; } result_t;
+typedef enum { RM_OK = 0, RM_ERR_NULL_CONFIG, RM_ERR_NULL_RESULT, RM_ERR_OPEN_FILE, RM_ERR_MEMORY, RM_ERR_READ_LINE, RM_ERR_TOO_MANY_LINES } rm_error_t;
+
+int implementation_language_and_local_execution(void);
+inventory_result_t *secure_non_destructive_inventory(const char *start_path);
+void free_inventory(inventory_result_t *result);
+int directory_input_and_regular_file_enumeration(const char *dir_path);
+int hashing_reporting_and_summary_generation(const char **file_paths, size_t file_count, const char *json_report_path);
+int implementation_structure_and_resource_management(const config_t *config, result_t *out_res);
+
+TASK:
+1. Write main.c that:
+   - Starts with #define _GNU_SOURCE
+   - Includes the headers listed above
+   - Copies the type definitions above verbatim (do not invent types)
+   - Declares all function signatures above as extern prototypes
+   - Implements main(int argc, char *argv[]) and calls every function declared above using its exact name
+   - Validates argc before reading command-line arguments
+   - Uses argv[1] for the first input path requested by a function
+   - Supplies type-correct arguments and handles return values
+   - Is SILENT: no printf unless there is an actual error
+2. Compile everything:
+   gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 \
+       -o output main.c module_01.c module_02.c module_03.c module_04.c module_05.c \
+       -lssl -lcrypto -lcurl -lm -lpthread
+3. If an error is in main.c, fix main.c with the edit tool.
+   If an error is inside a module file (missing include, undeclared constant
+   or missing prototype), apply the MINIMAL fix to that module, keeping its
+   logic unchanged. Do not rewrite module logic.
+4. Repeat up to 5 times until 'output' binary exists.

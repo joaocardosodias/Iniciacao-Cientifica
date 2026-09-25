@@ -1,4 +1,5 @@
 import sys
+import json
 import logging
 import argparse
 import time
@@ -127,10 +128,7 @@ def run(
             stage_started = time.perf_counter()
             try:
                 planner = Planner(llm)
-                if hasattr(planner, "plan_fragmented"):
-                    modules = planner.plan_fragmented(sanitized_fragments)
-                else:
-                    modules = planner.plan(sanitized)
+                modules = planner.plan(sanitized)
             except Exception as error:
                 trace.emit("layer.failed", layer="planner", error=serialize_error(error))
                 raise
@@ -183,7 +181,11 @@ def run(
                     )
                     trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
                     print(f"\n  [PromptMaker -> {name}]\n  {contextualized_prompt[:120]}...")
-                    code = coder.generate(contextualized_prompt)
+                    code = coder.generate(
+                        contextualized_prompt,
+                        stage=f"module.{index:02d}.{safe_name(name)}.coder",
+                        expected_function=name,
+                    )
                 trace.write_text(module_relative / "response.c", code)
                 if code:
                     trace.write_text(f"modules/{safe_name(name)}.c", code)
@@ -251,7 +253,8 @@ def run(
                    count=len(generated), duration_seconds=modules_duration)
 
         log.info("CAMADAS 5+6 — AssemblerHarness...")
-        trace.emit("assembly.started", model=llm.model)
+        assembly_mode = "deterministic" if scenario_main_c and scenario_components else "opencode"
+        trace.emit("assembly.started", model=llm.model, mode=assembly_mode)
         assembly_started = time.perf_counter()
         harness_model = f"openrouter/{llm.model}"
         harness = AssemblerHarness(model=harness_model)
@@ -267,6 +270,11 @@ def run(
                        duration_seconds=round(time.perf_counter() - assembly_started, 6))
             raise
         assembly_duration = round(time.perf_counter() - assembly_started, 6)
+        assembly_result_path = run_dir / "assembly" / "result.json"
+        try:
+            assembly_result = json.loads(assembly_result_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            assembly_result = {}
         assembly_status = getattr(harness, "last_status", None) or (
             "completed" if compiled_ok else "compile_failed")
         trace.record_stage("assembler_harness", {
@@ -274,10 +282,13 @@ def run(
             "model": harness_model,
             "main_c": "main.c" if main_c else None,
             "binary": "output" if compiled_ok else None,
+            "mode": harness.last_mode,
+            "agent_usage": assembly_result.get("agent_usage"),
             "duration_seconds": assembly_duration,
         })
         trace.emit("assembly.finished", status=assembly_status,
                    main_c=bool(main_c), compiled=compiled_ok,
+                   mode=harness.last_mode,
                    duration_seconds=assembly_duration)
 
         if main_c is None:
@@ -296,6 +307,11 @@ def run(
                 "main_c": "main.c",
                 "binary": "output" if compiled_ok else None,
                 "module_count": len(generated),
+                "assembly": {
+                    "mode": harness.last_mode,
+                    "result": "assembly/result.json",
+                    "agent_usage": assembly_result.get("agent_usage"),
+                },
             },
         )
         print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
@@ -323,8 +339,9 @@ def main():
         help="Lista os cenários disponíveis.")
     parser.add_argument("--models", action="store_true",
         help="Lista os modelos disponíveis.")
-    parser.add_argument("--llm-pipeline", action="store_true",
-        help="Força o fluxo Sanitizer+Planner+PromptMaker (sem componentes do cenário).")
+    parser.add_argument("--components-mode", action="store_true",
+        help="Usa componentes e main.c predefinidos pelo cenário.")
+    parser.add_argument("--llm-pipeline", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--limit", "-L", type=int, default=0,
         help="Segundos de espera entre chamadas ao LLM.")
     parser.add_argument("--temperature", type=float, default=None,
@@ -371,7 +388,7 @@ def main():
         data   = PROMPTS[key]
         prompt = data["prompt"]
         scenario = key
-        if not args.llm_pipeline:
+        if args.components_mode:
             scenario_config_h = data.get("config_h")
             scenario_components = data.get("components")
             scenario_main_c = data.get("main_c")

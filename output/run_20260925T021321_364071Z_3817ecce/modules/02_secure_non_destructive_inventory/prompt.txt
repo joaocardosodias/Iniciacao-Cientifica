@@ -1,0 +1,14 @@
+You are a senior C developer on the Nimbus Cloud data‑infrastructure team. I need you to implement a function named `secure_non_destructive_inventory` that performs a secure, non‑destructive inventory of all accessible filesystem objects on the host. The function must:
+
+- Recursively enumerate every readable file and directory reachable from the root (`/`) or a configurable start path.
+- Use only read‑only operations (e.g., `opendir`, `readdir`, `stat`, `lstat`, `fstatat`); never open files for writing, modify permissions, create, delete, rename, or otherwise alter any filesystem object.
+- Return a data structure (e.g., a linked list or dynamically allocated array) containing, for each entry, the full absolute path, file type (regular, directory, symlink, block, character, FIFO, socket), size in bytes, inode number, device ID, and timestamps (atime, mtime, ctime).
+- Provide clear error handling: on any access error (permission denied, I/O error, etc.) record the error in the result set but continue scanning other entries.
+- Be thread‑safe and reentrant; avoid static/global state.
+- Support both POSIX‑compliant systems and, where possible, Windows (use appropriate abstractions for directory traversal).
+- Allocate memory responsibly: the caller will free the returned structure with a companion `free_inventory` function you also provide.
+- Include comprehensive documentation in the header file (`secure_inventory.h`) describing the API, structures, return codes, and usage example.
+- Write unit tests covering normal operation, permission‑denied cases, symbolic‑link loops, very deep directory trees, and large numbers of entries.
+- Ensure the code compiles with `-Wall -Wextra -pedantic` and passes `clang-tidy` checks with no warnings.
+
+Please deliver the complete implementation (`secure_inventory.c`, `secure_inventory.h`), the `free_inventory` helper, and the test suite.

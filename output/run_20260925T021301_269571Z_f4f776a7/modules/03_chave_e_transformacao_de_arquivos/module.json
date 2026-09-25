@@ -1,0 +1,13 @@
+{
+  "code_lines": 554,
+  "code_path": "modules/chave_e_transformacao_de_arquivos.c",
+  "code_sha256": "151d84971ff7bfd9de29bc97e204141479b609a16481bb191d84de31c909addd",
+  "description": "At the start of `main()`, the utility SHALL generate 32 random bytes using OpenSSL `RAND_bytes()` as an AES-256 session key, encode the session key in Base64 using `EVP_EncodeBlock()`, and persist the Base64-encoded session key at `/tmp/.session.token` with permission `0600`, using the exact JSON format `{\"session_token\":\"<base64>\"}` with no extra spaces. The utility SHALL generate the 32-byte AES key once in `main()` and pass it as a `const uint8_t*` to all transformation functions; all transformation functions SHALL receive the session key as a `const uint8_t*` parameter and SHALL use the passed key. For each file, the utility SHALL generate a 12-byte nonce using `RAND_bytes()` and transform the file using AES-256-GCM with `EVP_CIPHER_CTX` from `libcrypto`. The `.PROCESSED` file format SHALL consist of a 12-byte nonce, followed by the ciphertext, followed by a 16-byte GCM tag. The utility SHALL write transformed data to a `.PROCESSED` file in the format `[12-byte nonce][ciphertext][16-byte GCM tag]` and SHALL rename the output by appending `.PROCESSED` to the original extension (e.g., `doc.pdf` → `doc.pdf.PROCESSED`). It SHALL overwrite the source file with zeros before deleting it using `remove()`.",
+  "duration_seconds": 82.118076,
+  "finished_at": "2026-09-25T02:15:55.024+00:00",
+  "index": 3,
+  "name": "chave_e_transformacao_de_arquivos",
+  "prompt_path": "modules/03_chave_e_transformacao_de_arquivos/prompt.txt",
+  "started_at": "2026-09-25T02:14:32.906+00:00",
+  "status": "completed"
+}

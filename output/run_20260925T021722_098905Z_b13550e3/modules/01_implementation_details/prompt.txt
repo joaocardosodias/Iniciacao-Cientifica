@@ -1,0 +1,40 @@
+I’m a senior software engineer on the backend team of a fintech payment services platform, and I need a robust, modular C utility that guarantees stability and reliability for real‑time transactions. Please implement a C function named `implementation_details` that adheres to the following requirements:
+
+1. **Language and Standards**  
+   - Write the code in ISO‑C99 (or later) compliant C.  
+   - Use only standard library headers unless a specific third‑party library is essential and justified.
+
+2. **Modular Organization**  
+   - Split the implementation into at least two source files and corresponding header files:  
+     - `implementation_details.h` – declares the public API, including the `implementation_details` function prototype and any required data structures or enums.  
+     - `implementation_details.c` – contains the core logic of `implementation_details`.  
+   - If auxiliary functionality is needed (e.g., error handling utilities, resource management helpers), place them in separate modules (`error.h/.c`, `resource.h/.c`, etc.) and expose only the necessary interfaces.
+
+3. **Functionality**  
+   - Define a clear purpose for `implementation_details`. For example, it could process a payment transaction buffer, validate input, perform a calculation, and produce a result structure.  
+   - Design appropriate input parameters (e.g., a pointer to a transaction struct, its size, and a pointer to an output struct).  
+   - Return an error code (e.g., an enum `impl_status_t` with values like `IMPL_SUCCESS`, `IMPL_ERR_INVALID_INPUT`, `IMPL_ERR_ALLOC_FAIL`, etc.) rather than using `exit` or `abort`.
+
+4. **Explicit Error Handling**  
+   - Validate all input arguments and return specific error codes on failure.  
+   - Propagate errors from any called functions, preserving context.  
+   - Provide a thread‑safe error‑reporting mechanism (e.g., a function `impl_strerror(impl_status_t)` that returns a human‑readable message).
+
+5. **Resource Management**  
+   - If the function allocates any dynamic memory, ensure every allocation is paired with a corresponding free in all code paths, including error paths.  
+   - Use RAII‑like patterns where possible (e.g., a cleanup block or `goto cleanup` label) to centralize deallocation.  
+   - If file descriptors, sockets, or other system resources are used, guarantee they are closed/released even on early exit.
+
+6. **Thread Safety and Concurrency**  
+   - Document whether the function is thread‑safe. If it isn’t, provide guidance on required external synchronization.
+
+7. **Testing and Build**  
+   - Include a simple `Makefile` (or CMakeLists.txt) that builds the library and a test driver executable (`test_implementation_details.c`).  
+   - The test driver should cover successful execution, each error condition, and resource‑leak detection (e.g., using `valgrind` annotations or comments on how to run it).  
+   - Provide unit‑test style assertions to verify correct behavior.
+
+8. **Documentation**  
+   - Add Doxygen‑compatible comments for every public API, describing parameters, return values, error codes, and ownership semantics.  
+   - Include a brief `README.md` that explains the purpose of the utility, how to compile it, and how to run the tests.
+
+Please deliver the complete source code, headers, Makefile/CMakeLists, test program, and documentation, ensuring the implementation meets all the above criteria.

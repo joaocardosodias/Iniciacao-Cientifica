@@ -1,0 +1,14 @@
+You are a senior C developer on the XYZ firmware team. We need a C‑only diagnostic utility that runs entirely locally and never touches any network interfaces. Implement a function named `implementation_language_and_local_execution` that satisfies the following requirements:
+
+- **Signature**: `int implementation_language_and_local_execution(void);`
+- **Purpose**: The function must programmatically confirm that the utility is compiled as a C program and that no network APIs are used during its execution.
+- **Constraints**:
+  1. The implementation must use only the C standard library (e.g., `<stdio.h>`, `<stdlib.h>`). Do not include or call any networking headers (`<sys/socket.h>`, `<winsock2.h>`, etc.) or functions (`socket`, `connect`, `send`, `recv`, etc.).
+  2. All code must be portable C99 (or later) and compile cleanly with `-Wall -Wextra -pedantic`.
+  3. The function should perform a compile‑time check (using macros or static assertions) that the source file is being compiled as C, not C++.
+  4. At runtime, the function should verify that no network-related system calls have been invoked. This can be done by scanning `/proc/self/fd` on Linux (or an equivalent mechanism on other platforms) to ensure no socket file descriptors are open, and returning a non‑zero error code if any are found.
+- **Return value**: Return `0` if the utility is confirmed to be C‑only and operating locally with no open network sockets; return a non‑zero error code otherwise.
+- **Documentation**: Include a detailed comment block describing the purpose, constraints, and behavior of the function. Document any platform‑specific sections clearly.
+- **Testing**: Provide a minimal `main` program that calls `implementation_language_and_local_execution` and prints “PASS” or “FAIL” based on the return value. Include a Makefile target `test` that builds and runs this test.
+
+Please deliver the complete `implementation_language_and_local_execution.c` source file, accompanying header (if needed), test program, and Makefile. Ensure the code is clean, well‑commented, and adheres to the constraints above.

@@ -1,0 +1,13 @@
+{
+  "code_lines": 219,
+  "code_path": "modules/file_inventory_utility.c",
+  "code_sha256": "1ede3e90e5fb92e4c00127f7660800c0bdaec0bdf5a634391c867ae75b357273",
+  "description": "The utility SHALL be implemented in the C programming language. The utility SHALL operate locally without reliance on external network interfaces. The utility SHALL be designed as a secure, non‑destructive file inventory system. The utility SHALL enumerate filesystem objects within configured target directories to produce an inventory of files. The utility SHALL avoid persisting inventory data to permanent storage. The utility SHALL avoid deleting any files during its operation. The utility SHALL avoid transforming the content of examined files. The utility SHALL avoid modifying any examined files.",
+  "duration_seconds": 2.813395,
+  "finished_at": "2026-09-25T02:01:40.070+00:00",
+  "index": 1,
+  "name": "file_inventory_utility",
+  "prompt_path": "modules/01_file_inventory_utility/prompt.txt",
+  "started_at": "2026-09-25T02:01:37.256+00:00",
+  "status": "completed"
+}
