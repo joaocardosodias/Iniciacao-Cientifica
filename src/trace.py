@@ -13,6 +13,7 @@ from typing import Any
 from src.call_summary import summarize_calls
 from src.events import EventLog, utc_now
 from src.environment import collect as collect_environment
+from src.experiment_index import try_index_experiment
 from src.provenance import collect as collect_provenance
 from src.provenance import find_repo_root
 
@@ -238,6 +239,7 @@ class RunTrace:
             self.manifest["updated_at"] = finished_at
             self._write_json_atomic(self.run_dir / "result.json", result)
             self._save_manifest()
+            try_index_experiment(self.run_dir, self.manifest, result)
             self._finalized = True
             return self.run_dir / "result.json"
 

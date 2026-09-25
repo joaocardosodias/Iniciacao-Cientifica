@@ -8,6 +8,7 @@ from typing import Any
 
 from src.call_summary import summarize_calls
 from src.events import EventLog, utc_now
+from src.experiment_index import index_existing_runs, try_index_experiment
 from src.trace import artifact_index, write_json_atomic
 
 log = logging.getLogger("pipeline.recovery")
@@ -68,7 +69,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
     result_existed = result_path.exists()
     if result_existed:
         try:
-            terminal = json.loads(result_path.read_text(encoding="utf-8")).get("status")
+            result = json.loads(result_path.read_text(encoding="utf-8"))
+            terminal = result.get("status")
         except (OSError, ValueError):
             return {"run_id": run_id, "status": "skipped", "reason": "unreadable_result"}
         if not terminal:
@@ -90,7 +92,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
         reason = "process_not_alive"
         terminal = "abandoned"
         events.emit("run.recovered", reason=reason, pid=pid, hostname=host)
-        write_json_atomic(result_path, {
+        result = {
             "schema_version": manifest.get("schema_version", "1.0"),
             "run_id": run_id,
             "status": terminal,
@@ -105,7 +107,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
             "recovered_at": now,
             "llm_calls": summarize_calls(run_dir),
             "artifacts": artifact_index(run_dir),
-        })
+        }
+        write_json_atomic(result_path, result)
 
     manifest["status"] = terminal
     manifest["updated_at"] = now
@@ -117,6 +120,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
         "result_existed": result_existed,
     }
     write_json_atomic(manifest_path, manifest)
+    try_index_experiment(run_dir, manifest, result)
 
     return {"run_id": run_id, "status": "recovered", "terminal_status": terminal,
             "reason": reason, "pid": pid}
@@ -140,4 +144,5 @@ def recover_stale_runs(output_root: Path) -> list[dict[str, Any]]:
         if outcome.get("status") == "recovered":
             recovered.append(outcome)
             log.warning(f"Execucao abandonada recuperada: {outcome['run_id']} (pid {outcome['pid']})")
+    index_existing_runs(output_root)
     return recovered

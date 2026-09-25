@@ -160,6 +160,20 @@ Cada execução recebe um identificador único baseado em horário UTC, precisã
 microssegundos e sufixo aleatório. Uma execução não reutiliza nem sobrescreve
 uma pasta existente.
 
+`output/experiments.jsonl` mantém um índice global, com uma linha JSON por
+execução finalizada ou recuperada. Cada registro aponta para o `result.json`
+correspondente por caminhos relativos a `output/` e resume status, cenário,
+quantidade de módulos, hash combinado das fontes, modelo, duração e chamadas
+ao LLM, sem copiar o prompt. Escritas concorrentes são protegidas por lock.
+Se os dados resumidos no índice mudarem, uma nova linha com `revision` maior é
+adicionada; a última linha de cada `run_id` é a vigente. Quando ausente no
+`result.json`, a quantidade de módulos vem do estágio `planner` ou `components`
+do manifesto. Falha ao escrever o índice gera aviso, sem alterar o status da
+execução. Na próxima inicialização,
+execuções antigas com `manifest.json` e `result.json` também entram no índice;
+esse preenchimento pode aumentar o tempo de inicialização quando houver muitas
+execuções.
+
 ```text
 output/run_<id>/
 ├── manifest.json
