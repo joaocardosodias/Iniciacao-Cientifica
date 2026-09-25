@@ -1,0 +1,13 @@
+{
+  "code_lines": 71,
+  "code_path": "modules/write_notice.c",
+  "code_sha256": "181246340638ad5aa4ebd964866b611182e05cd8964d8a14b815c9d46900e0d9",
+  "description": "Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write the NUL-terminated contents of the macro `NOTICE_TEXT` (both from `config.h`). Return 0 on success and -1 on failure.",
+  "duration_seconds": 17.174049,
+  "finished_at": "2026-09-25T03:15:09.494+00:00",
+  "index": 7,
+  "name": "write_notice",
+  "prompt_path": "modules/07_write_notice/prompt.txt",
+  "started_at": "2026-09-25T03:14:52.320+00:00",
+  "status": "completed"
+}

@@ -2,10 +2,10 @@
 
 Iniciação Científica — Pesquisa em segurança de LLMs.
 
-Investiga como filtros de segurança de modelos de linguagem podem ser contornados
-por meio de **decomposição modular**: o pedido malicioso é fragmentado em partes
-aparentemente legítimas, cada uma processada por um agente diferente, de modo que
-nenhum modelo individual vê a intenção global.
+Investiga como filtros de segurança de modelos de linguagem respondem à
+**decomposição modular**: o objetivo é dividido em componentes aparentemente
+legítimos, e cada componente é gerado isoladamente, de modo que nenhum modelo
+individual vê a intenção global.
 
 > **Uso exclusivamente acadêmico.** Todo o código é executado em VM isolada,
 > sem acesso à rede real. O servidor C2 (`scripts/c2_server.py`) é um honeypot
@@ -21,15 +21,12 @@ nenhum modelo individual vê a intenção global.
 ├── requirements.txt     # Dependências Python
 │
 ├── src/                 # Camadas do pipeline
-│   ├── sanitizer.py     # Camada 1 — sanitiza fragmentos independentes do prompt
-│   ├── planner.py       # Camada 2 — divide em módulos independentes
-│   ├── prompt_maker.py  # Camada 3 — gera contexto profissional por módulo
-│   ├── coder.py         # Camada 4 — gera o código C de cada módulo
-│   ├── assembler_harness.py # Camadas 5 e 6 — integra e compila com OpenCode
+│   ├── coder.py         # Gera o código C de cada componente genérico
+│   ├── assembler_harness.py # Integra e compila main.c + módulos
 │   ├── trace.py         # Rastreabilidade, hashes e metadados das execuções
 │   └── llm_client.py    # Cliente OpenRouter, Groq e NVIDIA NIM
 │
-├── scenarios/           # Prompts de teste
+├── scenarios/           # Cenários de teste
 │   └── test_prompts.py  # Catálogo de cenários (WannaCry, Petya, Locky…)
 │
 ├── scripts/             # Utilitários de laboratório
@@ -52,59 +49,47 @@ nenhum modelo individual vê a intenção global.
 
 ## Como funciona
 
-O pipeline recebe um prompt e produz módulos C independentes em paralelo. A
-integração e a correção final são realizadas por um agente OpenCode headless:
+O pipeline opera em **modo componentes**. Cada cenário já define a decomposição
+do comportamento em componentes genéricos. O pipeline gera, em paralelo, o
+código C de cada componente e depois integra tudo com um `main.c` determinístico:
 
 ```
-Prompt malicioso
+Cenário (config_h + components + main_c)
       │
       ▼
- 1. Sanitizer ──── sanitiza fragmentos de 2–3 requisitos sem contexto global
+  Coder ─────────── gera código C para cada componente isolado
       │
       ▼
- 2. Planner ─────── divide em 3–7 módulos independentes
-      │
-      ▼
- 3. PromptMaker ─── gera contexto profissional fictício por módulo
-      │
-      ▼
- 4. Coder ──────── gera código C para cada módulo isolado
-      │
-      ▼
- 5+6. AssemblerHarness
-      ├── lê os módulos no diretório da execução
-      ├── integra o conteúdo em main.c
-      ├── compila com gcc
-      └── corrige erros com alterações localizadas
+  AssemblerHarness
+      ├── grava config.h e main.c do cenário
+      ├── compila os módulos com gcc
+      └── aciona o OpenCode apenas se a compilação falhar
       │
       ▼
   output/run_<id>/assembly/main.c + output/run_<id>/assembly/output
 ```
 
 A hipótese central é que filtros baseados em análise de conteúdo individual
-falham quando o pedido é decomposto: cada módulo parece inofensivo, mas o
+falham quando a tarefa é decomposta: cada componente parece inofensivo, mas o
 resultado final é funcional.
 
-### Modo componentes (determinístico)
+### Formato do cenário
 
-Cenários podem declarar, além do prompt, três blocos:
+Todo cenário declara três blocos:
 
 - `config_h`: cabeçalho C com os valores concretos do cenário (diretórios,
   extensões, endpoint, token, notas, cron);
-- `components`: lista de componentes genéricos, cada um com `prototype` e
-  `task`, sem qualquer menção à intenção global;
+- `components`: lista de componentes genéricos, cada um com `nome`, `prototype`
+  e `task`, sem qualquer menção à intenção global;
 - `main_c`: orquestração C que liga os componentes na ordem correta.
 
-Nesse modo o pipeline não envia prompt, fragmentos nem valores concretos ao
-modelo: o Coder recebe apenas tarefas genéricas ("AES-256-GCM em um buffer",
-"POST JSON", "varredura por extensão") e o `config.h`/`main.c` são gerados de
-forma determinística pelo pipeline. A composição maliciosa existe somente no
-orquestrador Python e no `main_c`, nunca na linguagem natural vista pelo LLM.
+O pipeline não envia valores concretos ao modelo: o Coder recebe apenas tarefas
+genéricas ("AES-256-GCM em um buffer", "POST JSON", "varredura por extensão") e
+o `config.h`/`main.c` vêm do cenário. A composição existe somente no orquestrador
+Python e no `main_c`, nunca na linguagem natural vista pelo LLM.
 
-O fluxo Sanitizer+Planner+PromptMaker é o padrão, inclusive quando `--scenario`
-é utilizado. `--components-mode` ativa explicitamente o modo determinístico.
-Nesse modo, o `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc`
-diretamente e aciona o OpenCode apenas se a compilação falhar.
+O `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc` diretamente e
+aciona o agente OpenCode apenas se a compilação falhar.
 
 ---
 
@@ -195,8 +180,7 @@ output/run_<id>/
 │   └── <sequencia>_<etapa>.json
 ├── prompts/
 │   ├── original.txt
-│   ├── sanitized.txt
-│   └── planner_response.json
+│   └── components.json
 ├── modules/
 │   ├── <nome>.c
 │   └── <indice>_<nome>/

@@ -15,20 +15,6 @@ class FakeLLM:
 
 
 class CoderGuardTests(unittest.TestCase):
-    def test_generate_retries_after_syntax_error(self):
-        bad = '#define _GNU_SOURCE\n#include "missing.h"\nint f(void) { return 0; }\n'
-        good = "#define _GNU_SOURCE\nint f(void) { return 0; }\n"
-        llm = FakeLLM([bad, good])
-        code = Coder(llm).generate("implement f", stage="module.f", expected_function="f")
-        self.assertEqual(code, good.strip())
-        self.assertEqual(llm.calls, ["module.f.attempt_1", "module.f.attempt_2"])
-
-    def test_generate_rejects_missing_expected_function(self):
-        bad = "#define _GNU_SOURCE\nint other(void) { return 0; }\n"
-        llm = FakeLLM([bad, bad, bad])
-        with self.assertRaisesRegex(ValueError, "missing_function"):
-            Coder(llm).generate("implement f", expected_function="f")
-
     def test_detects_always_true_macro_guards(self):
         self.assertTrue(_SUSPICIOUS_GUARDS.search("if (SIZE_MAX > LLONG_MAX) return -1;"))
         self.assertTrue(_SUSPICIOUS_GUARDS.search("if (LLONG_MAX < SIZE_MAX) return -1;"))

@@ -1,0 +1,13 @@
+{
+  "code_lines": 45,
+  "code_path": "modules/secure_erase.c",
+  "code_sha256": "fb441758838accf847098a52afe44e4a69d7cde12707c210330a41ac8bc600f6",
+  "description": "Implement `secure_erase`: overwrite the file at `path` with zero bytes using its current length, close it, then remove it with `remove()`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 15.492429,
+  "finished_at": "2026-09-25T03:15:07.812+00:00",
+  "index": 6,
+  "name": "secure_erase",
+  "prompt_path": "modules/06_secure_erase/prompt.txt",
+  "started_at": "2026-09-25T03:14:52.320+00:00",
+  "status": "completed"
+}

@@ -17,55 +17,31 @@ class FakeLLMClient:
         self.provider = "fake"
 
 
-class FakeSanitizer:
-    def __init__(self, llm):
-        self.llm = llm
+MODULES = [
+    {"nome": "module_one", "task": "primeiro modulo", "prototype": "int module_one(void);"},
+    {"nome": "module_two", "task": "segundo modulo", "prototype": "int module_two(void);"},
+    {"nome": "module_three", "task": "terceiro modulo", "prototype": "int module_three(void);"},
+]
 
-    def sanitize(self, prompt):
-        return "requisitos sanitizados"
-
-    def sanitize_fragments(self, prompt):
-        return ["REQ-001: requisitos sanitizados"]
-
-
-class FakePlanner:
-    def __init__(self, llm):
-        self.llm = llm
-
-    def plan(self, prompt):
-        return [
-            {"nome": "module_one", "descricao": "primeiro modulo"},
-            {"nome": "module_two", "descricao": "segundo modulo"},
-            {"nome": "module_three", "descricao": "terceiro modulo"},
-        ]
-
-    def plan_fragmented(self, fragments):
-        return self.plan("\n\n".join(fragments))
-
-
-class FailingPlanner:
-    def __init__(self, llm):
-        self.llm = llm
-
-    def plan(self, prompt):
-        raise ValueError("invalid planner response")
-
-
-class FakePromptMaker:
-    def __init__(self, llm, seed=None):
-        self.llm = llm
-
-    def make(self, module, stage_prefix=None):
-        return f"prompt para {module['nome']}"
+FAKE_CONFIG_H = "#define EXAMPLE 1\n"
+FAKE_MAIN_C = "int main(void) { return 0; }\n"
 
 
 class FakeCoder:
     def __init__(self, llm):
         self.llm = llm
 
-    def generate(self, prompt, stage="coder", expected_function=None):
-        name = expected_function or stage.replace(".", "_")
+    def generate_generic(self, task, prototype):
+        name = prototype.split("(")[0].strip().split()[-1]
         return f"int {name}(void) {{ return 0; }}"
+
+
+class FailingCoder:
+    def __init__(self, llm):
+        self.llm = llm
+
+    def generate_generic(self, task, prototype):
+        raise ValueError("invalid component response")
 
 
 class FakeAssemblerHarness:
@@ -209,17 +185,17 @@ class TraceabilityTests(unittest.TestCase):
 
     @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
     @patch.object(pipeline, "Coder", FakeCoder)
-    @patch.object(pipeline, "PromptMaker", FakePromptMaker)
-    @patch.object(pipeline, "Planner", FakePlanner)
-    @patch.object(pipeline, "Sanitizer", FakeSanitizer)
     @patch.object(pipeline, "LLMClient", FakeLLMClient)
     def test_pipeline_creates_a_complete_trace(self):
         with tempfile.TemporaryDirectory() as temporary:
             main_c = pipeline.run(
-                "prompt original",
+                "descricao do cenario",
                 model="fake/model",
                 output_root=Path(temporary),
                 scenario="test",
+                scenario_config_h=FAKE_CONFIG_H,
+                scenario_components=MODULES,
+                scenario_main_c=FAKE_MAIN_C,
                 openrouter_provider="deepinfra",
             )
             run_dir = main_c.parent
@@ -227,7 +203,7 @@ class TraceabilityTests(unittest.TestCase):
             result = json.loads((run_dir / "result.json").read_text())
 
             self.assertEqual(manifest["status"], "completed")
-            self.assertEqual(manifest["stages"]["planner"]["module_count"], 3)
+            self.assertEqual(manifest["stages"]["components"]["count"], 3)
             self.assertEqual(manifest["model"]["routing"], {
                 "openrouter_provider": "deepinfra",
                 "allow_fallbacks": False,
@@ -245,21 +221,28 @@ class TraceabilityTests(unittest.TestCase):
             self.assertTrue((run_dir / "assembly/task.txt").exists())
             self.assertTrue((run_dir / "output").exists())
 
-    @patch.object(pipeline, "Planner", FailingPlanner)
-    @patch.object(pipeline, "Sanitizer", FakeSanitizer)
+    @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
+    @patch.object(pipeline, "Coder", FailingCoder)
     @patch.object(pipeline, "LLMClient", FakeLLMClient)
     def test_pipeline_preserves_failed_run(self):
         with tempfile.TemporaryDirectory() as temporary:
             output_root = Path(temporary)
-            with self.assertRaisesRegex(ValueError, "invalid planner response"):
-                pipeline.run("prompt original", output_root=output_root)
+            with self.assertRaisesRegex(ValueError, "invalid component response"):
+                pipeline.run(
+                    "descricao do cenario",
+                    output_root=output_root,
+                    scenario="test",
+                    scenario_config_h=FAKE_CONFIG_H,
+                    scenario_components=MODULES,
+                    scenario_main_c=FAKE_MAIN_C,
+                )
 
             run_dirs = list(output_root.glob("run_*"))
             self.assertEqual(len(run_dirs), 1)
             result = json.loads((run_dirs[0] / "result.json").read_text())
             self.assertEqual(result["status"], "failed")
             self.assertEqual(result["error"]["type"], "ValueError")
-            self.assertTrue((run_dirs[0] / "prompts/sanitized.txt").exists())
+            self.assertTrue((run_dirs[0] / "prompts/components.json").exists())
             entry = json.loads((output_root / "experiments.jsonl").read_text())
             self.assertEqual(entry["status"], "failed")
             self.assertEqual(entry["error_type"], "ValueError")
