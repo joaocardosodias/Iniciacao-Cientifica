@@ -1,0 +1,214 @@
+{
+  "combined_sha256": "f26776d70cd8e6f1288583dd32c10a74dc31659cc9491954b10f46d3c97be9be",
+  "files": {
+    ".env.example": {
+      "bytes": 352,
+      "sha256": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c"
+    },
+    "docs/01-visao-cientifica.md": {
+      "bytes": 9026,
+      "sha256": "403e31e812f69cf6fcddd450fcd2ba9d41877550fa8bae433a43fd0a66ef9e2a"
+    },
+    "docs/02-desenho-experimental.md": {
+      "bytes": 10263,
+      "sha256": "25269a3f506e3002e4e152485db1c444960ab439834cd94cbf15c67367544377"
+    },
+    "docs/03-arquitetura-pipeline.md": {
+      "bytes": 11365,
+      "sha256": "677705fea8a86c6a18a21965fbfc19169485b929e4ab19dfef0064185bdfb86d"
+    },
+    "docs/04-modelo-dados.md": {
+      "bytes": 12313,
+      "sha256": "226f2d1eed199c37e4f4f61fbcc1bb640da0d4537167e9f851c976a63f368479"
+    },
+    "docs/05-rastreabilidade-proveniencia.md": {
+      "bytes": 10650,
+      "sha256": "c4e4a8afa615ccbbdd779c034c0c84c96c2775aa61eb5d0689b81be6d6596122"
+    },
+    "docs/06-reprodutibilidade.md": {
+      "bytes": 9589,
+      "sha256": "fddd8839c97ba5f20e0cca2d9909fdf396f9750cf9d1c9ad0186792aa80343e4"
+    },
+    "docs/07-operacao-campanhas.md": {
+      "bytes": 10442,
+      "sha256": "3e4b592af3669421d52c2b4e431cc5c40656679123cb082f5e77844b1b49a2e3"
+    },
+    "docs/08-avaliacao-laboratorio.md": {
+      "bytes": 10023,
+      "sha256": "a112a0c7596208b69ebea502177c58d07a911651ae9fb003bc596c6edc666561"
+    },
+    "docs/09-resultados-estatistica.md": {
+      "bytes": 10434,
+      "sha256": "3484e7860b82f201727c06f3579bcf9a4e26054fe49aa6a13760183dbbb4ff30"
+    },
+    "docs/10-falhas-recuperacao-integridade.md": {
+      "bytes": 9350,
+      "sha256": "e7b70f039c50fb913a64604285290631ef59212c961d970df5bbd0b6b6e1f008"
+    },
+    "docs/11-referencia-codigo.md": {
+      "bytes": 14058,
+      "sha256": "64d4399f089943b89d351619227676a06ebe9fd4b57c1723c446fa2cf9964dce"
+    },
+    "docs/12-checklists.md": {
+      "bytes": 7184,
+      "sha256": "6517b80802b033cdff4bdaca30d1ff003a57f133034f0f6ebaf7b735e39f9d7d"
+    },
+    "docs/13-glossario.md": {
+      "bytes": 5610,
+      "sha256": "9f6f6224dd7dc72b7962537bf4c85076bdccce505df6b09ed884791ef63ecc32"
+    },
+    "docs/README.md": {
+      "bytes": 6124,
+      "sha256": "e32483a155af91a9176690d3b991e8b6c9b8d3e9c9423d1ab9f2de8f81685339"
+    },
+    "experiments/protocol.example.yaml": {
+      "bytes": 1015,
+      "sha256": "6dcd2efa8b341c461c948fc33a88da4224db0f273abbfe1175713f17b1a15733"
+    },
+    "experiments/rubrics/component-evaluation-v1.yaml": {
+      "bytes": 966,
+      "sha256": "bad0df7a70cbe5f17fab0b93448158acf6eb1679052d9ca4f8fc277fcb658771"
+    },
+    "experiments/vm-environment.example.json": {
+      "bytes": 503,
+      "sha256": "cb450438e5331a5beb59cce848c5b9e7d4552b392a6086ea77e6234d5ef4cf3a"
+    },
+    "pipeline.py": {
+      "bytes": 35668,
+      "sha256": "fc635452b81ab7a78210c712a46a0518e500ff85b7c83c3ee24898d2239327a7"
+    },
+    "requirements.in": {
+      "bytes": 56,
+      "sha256": "e7f1941aaf8ada78c091cc21de8c1fe3dded85dc20c10643ce228af9b4a4993a"
+    },
+    "requirements.lock": {
+      "bytes": 66488,
+      "sha256": "48fd9bddfdf7a34e76617ecb163584b4a780352fa2883429334626bbab559b23"
+    },
+    "scenarios/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scenarios/test_prompts.py": {
+      "bytes": 9804,
+      "sha256": "4fb598e618f8e489869d157014edd95f0ba35c581eded020c0db239ce8c4bf50"
+    },
+    "scripts/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scripts/c2_server.py": {
+      "bytes": 12704,
+      "sha256": "5dd7b64fce0f975c8ce2bc6a83c1b67f19ceda4650128a72e38d009df38252f0"
+    },
+    "src/__init__.py": {
+      "bytes": 14,
+      "sha256": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73"
+    },
+    "src/aggregate_results.py": {
+      "bytes": 14040,
+      "sha256": "deb38bbe72510eb5e57014aaa87ada0fb3621990808f5135173fae0c22440c26"
+    },
+    "src/assembler_harness.py": {
+      "bytes": 26917,
+      "sha256": "7efaae249d9b6a2691cc00de003d9b422a5a923994b370fccc1e958ca25eaba3"
+    },
+    "src/call_summary.py": {
+      "bytes": 5915,
+      "sha256": "a0d323eae3ec47ee38521aeca12e8705da43a9a1a447b5d21134aa5e6489c323"
+    },
+    "src/campaign.py": {
+      "bytes": 20848,
+      "sha256": "f5977b123ad145d31a56d9be18ac8a4985215ae4ea0788b190cf782ae276de35"
+    },
+    "src/coder.py": {
+      "bytes": 3289,
+      "sha256": "cb67a9fa886cc18d2ca041c43203220bb355b1d4cfd5040a4202514407b95f11"
+    },
+    "src/context_modes.py": {
+      "bytes": 1699,
+      "sha256": "e57e96d5faccf3710954a38506ed338dfacea5556981968517ba01382c88242c"
+    },
+    "src/environment.py": {
+      "bytes": 4119,
+      "sha256": "4a2f8f59e3a00e131b377837ee4d3e66e31f8ca675d7b7cd21d65b011b16ce49"
+    },
+    "src/evaluation.py": {
+      "bytes": 9631,
+      "sha256": "5f20ec50f84b106f6bb2fd5c3e03701f89725db25f3c385b420821c47ee7476f"
+    },
+    "src/events.py": {
+      "bytes": 2293,
+      "sha256": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb"
+    },
+    "src/experiment_index.py": {
+      "bytes": 3871,
+      "sha256": "4cdaeab76d6d8ca4a923f2a6174a43265bd9425295bfb9343a3433c2984656e3"
+    },
+    "src/experimental_inputs.py": {
+      "bytes": 11661,
+      "sha256": "34f78e17943946b17c98867c2748bb572986d320a7fe9343e1870b49177e629d"
+    },
+    "src/integrity.py": {
+      "bytes": 3102,
+      "sha256": "5229bd95331b2c985f534ee1fc925d223d23925b7e98d3ccb63677d8cc378f73"
+    },
+    "src/interrupts.py": {
+      "bytes": 2579,
+      "sha256": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d"
+    },
+    "src/llm_client.py": {
+      "bytes": 19372,
+      "sha256": "e37510915d1a99ac786f6189914e33f7cc68db43314a118b2fcca120e99ea68b"
+    },
+    "src/preflight.py": {
+      "bytes": 4393,
+      "sha256": "40e96304319a02b5a1d55ef864ba743e01e806b6982f4aa16d28b6396d292e3e"
+    },
+    "src/provenance.py": {
+      "bytes": 8311,
+      "sha256": "aca48b3d929c279438e06e5318a637203c1f8d39714e284e978fe68e92a49dac"
+    },
+    "src/recovery.py": {
+      "bytes": 7961,
+      "sha256": "48b207a7357b98e48f5f49e04045b2ab28867f8d0c124359f28b55a880934f2f"
+    },
+    "src/response_classification.py": {
+      "bytes": 1741,
+      "sha256": "ce40b0bf9c49653aeec79ec511cb0d6bbe4dc529750943f7a9894a896f4cc75e"
+    },
+    "src/results_builder.py": {
+      "bytes": 12609,
+      "sha256": "179356993e6143e910d9ec694a8d639b1371013a220765bdc134a3fb755ad975"
+    },
+    "src/trace.py": {
+      "bytes": 12453,
+      "sha256": "68df2b5b16c14fc12331d703869b210b1951d888dfb3a3894a60dc823b22bc2e"
+    },
+    "src/vm_environment.py": {
+      "bytes": 1252,
+      "sha256": "72d3c644722f91dabc42b0d878a7daf57e8cf31b2a168b03d06a4376127d1201"
+    },
+    "tools/build_aggregate.py": {
+      "bytes": 773,
+      "sha256": "5ed856143b4dfb8174bf25ec61e120841e2e9c06e38c7379a988db90a79250f3"
+    },
+    "tools/build_results.py": {
+      "bytes": 1723,
+      "sha256": "678a36cb338e1f093f0716b7b64da54552a8386ae8d0e0d7fe831a76e7cc645e"
+    },
+    "tools/record_evaluation.py": {
+      "bytes": 6750,
+      "sha256": "29b8cc0632f810fd46c131a9bb3b67862263ce4c6781a9b97d1727e0e79f1e42"
+    },
+    "tools/verify_campaign.py": {
+      "bytes": 795,
+      "sha256": "6856a4a9159c7f5bd8f4f498d5e3bcb6f5b6fed5d19c19d22c534913747f6faf"
+    },
+    "tools/verify_run.py": {
+      "bytes": 760,
+      "sha256": "95f4ac3b47ba1ffa66feea9a812de5a25203686177dc961889d8baa5570c246c"
+    }
+  },
+  "root": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+}

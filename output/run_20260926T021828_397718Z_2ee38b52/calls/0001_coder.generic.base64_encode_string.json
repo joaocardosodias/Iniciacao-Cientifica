@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "17b872ee0b29",
+  "duration_seconds": 3.257474,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-26T02:18:32.148+00:00",
+  "hashes": {
+    "response_sha256": "e4d2ee3ad4fb566756a90f79310c677fcd9108333cdfca5ff99b5b5c274274bf",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "0c1eb92c686b5cee6ca6bf17133502f445bc3ad4188965feb9477b384d6c6f38"
+  },
+  "inference_provider": "DeepInfra",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "deepseek/deepseek-v4-flash:0731",
+  "requested_model_input": "deepseek/deepseek-v4-flash:0731",
+  "response": "```c\n#define _GNU_SOURCE\n#include <openssl/evp.h>\n#include <string.h>\n\nint base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size)\n{\n    int encoded_len;\n    if (data_len > INT_MAX || out_size == 0)\n        return -1;\n    // Calculate expected length: ((data_len + 2) / 3) * 4 + 1 for null terminator\n    size_t needed = ((data_len + 2) / 3) * 4 + 1;\n    if (out_size < needed)\n        return -1;\n    encoded_len = EVP_EncodeBlock((unsigned char *)out, data, (int)data_len);\n    out[encoded_len] = '\\0';\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790389109,
+  "response_id": "gen-1790389109-aTcovEev1Wb1W7cwUHwc",
+  "response_model": "deepseek/deepseek-v4-flash",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.base64_encode_string",
+  "started_at": "2026-09-26T02:18:28.890+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 180,
+    "cost": 6.642e-05,
+    "prompt_tokens": 378,
+    "total_tokens": 558
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size` using OpenSSL `EVP_EncodeBlock`. Return 0 on success and -1 if the buffer is too small.\n\nEXACT PROTOTYPE (must match): int base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size);\n\nReturn ONLY the C source implementing that function."
+}

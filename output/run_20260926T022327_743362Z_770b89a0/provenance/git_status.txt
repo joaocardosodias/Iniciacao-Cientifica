@@ -1,0 +1,4 @@
+## main...origin/main
+ M output/experiments.jsonl
+?? output/run_20260926T021828_397718Z_2ee38b52/
+?? output/run_20260926T022327_743362Z_770b89a0/

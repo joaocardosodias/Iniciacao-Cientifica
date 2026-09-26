@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "f2e6459141a1",
+  "duration_seconds": 7.757977,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-26T02:18:36.647+00:00",
+  "hashes": {
+    "response_sha256": "1cf892f538c132e5630a46e160d5a48cfded93f1ce8b6ddc42883f716e7dcbe2",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "9bac1bb805eafb149735ab3b8a47883c868e421c8e9baec63c7e6a937880e890"
+  },
+  "inference_provider": "AtlasCloud",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "deepseek/deepseek-v4-flash:0731",
+  "requested_model_input": "deepseek/deepseek-v4-flash:0731",
+  "response": "#define _GNU_SOURCE\n#include <sys/types.h>\n#include <sys/stat.h>\n#include <fcntl.h>\n#include <unistd.h>\n#include <string.h>\n\nint write_text_file(const char *path, const char *text) {\n    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);\n    if (fd == -1)\n        return -1;\n\n    size_t len = strlen(text);\n    ssize_t written = write(fd, text, len);\n    int close_ret = close(fd);\n\n    if (written == -1 || (size_t)written != len || close_ret == -1)\n        return -1;\n\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790389109,
+  "response_id": "gen-1790389109-ltIvQeZvJyCks2SQdo1d",
+  "response_model": "deepseek/deepseek-v4-flash",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": null,
+  "stage": "coder.generic.write_text_file",
+  "started_at": "2026-09-26T02:18:28.889+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 675,
+    "cost": 0.00023772,
+    "prompt_tokens": 348,
+    "total_tokens": 1023
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int write_text_file(const char *path, const char *text);\n\nReturn ONLY the C source implementing that function."
+}
