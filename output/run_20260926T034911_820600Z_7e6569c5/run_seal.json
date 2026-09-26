@@ -1,0 +1,27 @@
+{
+  "combined_sha256": "00ba9d9809122763e30aeda42f67c2d70f02759c85ce27b411a4fa2f435bfdd2",
+  "created_at": "2026-09-26T16:48:44.570+00:00",
+  "excluded_prefixes": [
+    "evaluation/"
+  ],
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 225,
+      "path": "events.jsonl",
+      "sha256": "2db124adc66a9b0d50a9f55dc7ad789a433e322dc5edb60f21138029c729e6e8"
+    },
+    {
+      "bytes": 675,
+      "path": "manifest.json",
+      "sha256": "c39ae654801fd527796b4bb5cfaaa56e45cbe6e494a5e5248cce6a1688bec386"
+    },
+    {
+      "bytes": 1632,
+      "path": "result.json",
+      "sha256": "4ae01f3ce8c9c2bb49ada572f3f17c8d2da9fb967a304306b70bfa739101fefd"
+    }
+  ],
+  "schema_version": "1.0",
+  "scope": "generation_run"
+}

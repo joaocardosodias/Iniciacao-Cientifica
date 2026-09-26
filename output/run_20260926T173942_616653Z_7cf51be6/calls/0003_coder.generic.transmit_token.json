@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "c810cf5a3cbf",
+  "duration_seconds": 1.257714,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-26T17:39:43.992+00:00",
+  "hashes": {
+    "response_sha256": "9030eec14271b105dd620931ab68c2da1632bd8cfabfb8eb0718c45735737764",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "3b845b97d69c26ab6d64ce713260be8accef000d74a4ded05c5d25a2838d84f3"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "openai/gpt-oss-120b",
+  "requested_model_input": "openai/gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <curl/curl.h>\n#include <string.h>\n\nint transmit_token(const char *endpoint, const char *token_json)\n{\n    CURL *curl;\n    CURLcode rc;\n    long http_code = 0;\n    struct curl_slist *hdrs = NULL;\n    int result = -1;\n\n    if (!endpoint || !token_json)\n        return -1;\n\n    curl = curl_easy_init();\n    if (!curl)\n        return -1;\n\n    hdrs = curl_slist_append(hdrs, \"Content-Type: application/json\");\n    if (!hdrs) {\n        curl_easy_cleanup(curl);\n        return -1;\n    }\n\n    curl_easy_setopt(curl, CURLOPT_URL, endpoint);\n    curl_easy_setopt(curl, CURLOPT_POST, 1L);\n    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, token_json);\n    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(token_json));\n    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);\n\n    rc = curl_easy_perform(curl);\n    if (rc == CURLE_OK) {\n        if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code) == CURLE_OK) {\n            if (http_code == 200)\n                result = 0;\n        }\n    }\n\n    curl_slist_free_all(hdrs);\n    curl_easy_cleanup(curl);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790444382,
+  "response_id": "gen-1790444382-93pgXckN4VZiRDRR6LfL",
+  "response_model": "openai/gpt-oss-120b",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": null,
+  "stage": "coder.generic.transmit_token",
+  "started_at": "2026-09-26T17:39:42.735+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": "fp_b546658c8e93d2e57ef2",
+  "usage": {
+    "completion_tokens": 980,
+    "cost": 0.0008883,
+    "prompt_tokens": 438,
+    "total_tokens": 1418
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `transmit_token`: send the NUL-terminated JSON text in `token_json` as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 only when the HTTP status is 200, otherwise -1. Send the text unchanged as the body and do not write it to any file.\n\nEXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_json);\n\nReturn ONLY the C source implementing that function."
+}

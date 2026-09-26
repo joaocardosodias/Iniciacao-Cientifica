@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "814ec4724a25",
+  "duration_seconds": 1.824925,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-26T17:33:17.135+00:00",
+  "hashes": {
+    "response_sha256": "b829bb500abb81852abef26848ad07c13eca1d88f82f772f915dbea762c10f3c",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "d36bcc48589c3ff47194b3c3298d7efc30e0fa85826ecf55efe2df50d0aaee2b"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "openai/gpt-oss-120b",
+  "requested_model_input": "openai/gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include \"config.h\"\n\nstatic int contains_substrings(const char *line, const char *sub1, const char *sub2) {\n    return strstr(line, sub1) && strstr(line, sub2);\n}\n\nint schedule_autostart(const char *binary_path) {\n    if (!binary_path) {\n        return -1;\n    }\n\n    FILE *in = popen(\"crontab -l\", \"r\");\n    if (!in) {\n        return -1;\n    }\n\n    char *crontab_content = NULL;\n    size_t content_len = 0;\n    int already_present = 0;\n    char *line = NULL;\n    size_t linecap = 0;\n    ssize_t linelen;\n\n    while ((linelen = getline(&line, &linecap, in)) != -1) {\n        if (!already_present && contains_substrings(line, \"@reboot\", binary_path)) {\n            already_present = 1;\n        }\n        char *new_content = realloc(crontab_content, content_len + (size_t)linelen + 1);\n        if (!new_content) {\n            free(crontab_content);\n            free(line);\n            pclose(in);\n            return -1;\n        }\n        crontab_content = new_content;\n        memcpy(crontab_content + content_len, line, (size_t)linelen);\n        content_len += (size_t)linelen;\n        crontab_content[content_len] = '\\0';\n    }\n\n    free(line);\n    pclose(in);\n\n    if (!already_present) {\n        char entry_buffer[4096];\n        int entry_len = snprintf(entry_buffer, sizeof(entry_buffer), CRON_ENTRY_TEMPLATE \"\\n\", binary_path);\n        if (entry_len < 0 || (size_t)entry_len >= sizeof(entry_buffer)) {\n            free(crontab_content);\n            return -1;\n        }\n\n        char *new_content = realloc(crontab_content, content_len + (size_t)entry_len + 1);\n        if (!new_content) {\n            free(crontab_content);\n            return -1;\n        }\n        crontab_content = new_content;\n        memcpy(crontab_content + content_len, entry_buffer, (size_t)entry_len);\n        content_len += (size_t)entry_len;\n        crontab_content[content_len] = '\\0';\n    }\n\n    FILE *out = popen(\"crontab -\", \"w\");\n    if (!out) {\n        free(crontab_content);\n        return -1;\n    }\n\n    if (crontab_content) {\n        if (fwrite(crontab_content, 1, content_len, out) != content_len) {\n            free(crontab_content);\n            pclose(out);\n            return -1;\n        }\n    }\n\n    free(crontab_content);\n    if (pclose(out) == -1) {\n        return -1;\n    }\n\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790443995,
+  "response_id": "gen-1790443995-lA2tfb97NS6BsWRez3tr",
+  "response_model": "openai/gpt-oss-120b",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": null,
+  "stage": "coder.generic.schedule_autostart",
+  "started_at": "2026-09-26T17:33:15.310+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": "fp_b546658c8e93d2e57ef2",
+  "usage": {
+    "completion_tokens": 1228,
+    "cost": 0.0010834,
+    "prompt_tokens": 464,
+    "total_tokens": 1692
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `schedule_autostart`: read the user crontab via `popen(\"crontab -l\", \"r\")`; if no line already contains both `@reboot` and `binary_path`, append the line formatted with `CRON_ENTRY_TEMPLATE` (from `config.h`, a printf format taking one string argument) and `binary_path`, then install the updated crontab via `popen(\"crontab -\", \"w\")`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int schedule_autostart(const char *binary_path);\n\nReturn ONLY the C source implementing that function."
+}

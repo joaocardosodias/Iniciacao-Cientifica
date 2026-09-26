@@ -1,0 +1,17 @@
+[package]
+name = "decrypt_file"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Verificacao: descriptografa arquivos .PROCESSED com a chave AES enviada ao C2"
+
+[[bin]]
+name = "decrypt_file"
+path = "src/main.rs"
+
+[dependencies]
+aes-gcm = "0.10"
+base64 = "0.22"
+hex = "0.4"
+serde_json = "1"
+sha2 = "0.10"

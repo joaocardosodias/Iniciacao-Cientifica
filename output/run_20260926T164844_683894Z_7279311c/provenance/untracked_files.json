@@ -1,0 +1,23 @@
+{
+  "files": [
+    {
+      "bytes": 379,
+      "path": "scripts/gen_lab_tls.sh",
+      "sha256": "46adadf08bf2590bbd1883aed3d5b8850a1e25168bf6e49718400387046a9b54",
+      "stored": "untracked/scripts/gen_lab_tls.sh"
+    },
+    {
+      "bytes": 327,
+      "path": "tools/decrypt_file/Cargo.toml",
+      "sha256": "466a736d81365180835ce8550d6f659dfd74a81e57155adc015b02c099d28e46",
+      "stored": "untracked/tools/decrypt_file/Cargo.toml"
+    },
+    {
+      "bytes": 18008,
+      "path": "tools/decrypt_file/src/main.rs",
+      "sha256": "5b611aa6e9b1e73925dce03924c2717efbd09178f779fba6c04c7050cbab2533",
+      "stored": "untracked/tools/decrypt_file/src/main.rs"
+    }
+  ],
+  "stored_count": 3
+}

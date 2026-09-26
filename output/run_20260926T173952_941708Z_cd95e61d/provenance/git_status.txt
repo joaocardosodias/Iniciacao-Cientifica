@@ -1,0 +1,35 @@
+## main...origin/main
+ M Cargo.lock
+ M Cargo.toml
+ M output/experiments.jsonl
+ M scenarios/test_prompts.py
+ M scripts/c2_server.py
+ M src/evaluation.py
+ M tests/test_c2_consistency.py
+ M tests/test_evaluation_results.py
+ M tools/generate_test_files/Cargo.toml
+ M tools/generate_test_files/src/main.rs
+ M tools/record_evaluation.py
+ M tools/reset_vm/src/main.rs
+?? output/run_20260926T033103_907599Z_e027008c/
+?? output/run_20260926T033113_793669Z_fdf9894b/
+?? output/run_20260926T033507_417198Z_532ea2b3/
+?? output/run_20260926T034056_202657Z_37d2cfe7/
+?? output/run_20260926T034602_664856Z_b3715459/
+?? output/run_20260926T034629_524294Z_b5d8375d/
+?? output/run_20260926T034838_394319Z_a5ff2be1/
+?? output/run_20260926T034911_820600Z_7e6569c5/
+?? output/run_20260926T035032_484017Z_d3916242/
+?? output/run_20260926T035119_882789Z_61856d88/
+?? output/run_20260926T035212_729866Z_8c485bd5/
+?? output/run_20260926T035411_797610Z_a83d14a0/
+?? output/run_20260926T035602_054737Z_0b6e7058/
+?? output/run_20260926T164844_683894Z_7279311c/
+?? output/run_20260926T165014_194607Z_67bc5b13/
+?? output/run_20260926T165033_374164Z_d67b2204/
+?? output/run_20260926T173315_210272Z_1f0c3c0f/
+?? output/run_20260926T173321_134163Z_dfa21d17/
+?? output/run_20260926T173942_616653Z_7cf51be6/
+?? output/run_20260926T173952_941708Z_cd95e61d/
+?? scripts/decrypt_file.sh
+?? tools/decrypt_file/

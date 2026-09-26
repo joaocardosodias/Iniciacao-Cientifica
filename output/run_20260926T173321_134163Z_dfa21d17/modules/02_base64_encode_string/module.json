@@ -1,0 +1,16 @@
+{
+  "code_lines": 20,
+  "code_path": "modules/base64_encode_string.c",
+  "code_sha256": "a015b466abe4e1163d458d754662297011c19b24d64edbab03f30b62fc3f5183",
+  "context_mode": "fragmented",
+  "description": "Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size` using OpenSSL `EVP_EncodeBlock`. Return 0 on success and -1 if the buffer is too small.",
+  "duration_seconds": 0.870543,
+  "finished_at": "2026-09-26T17:33:22.095+00:00",
+  "index": 2,
+  "name": "base64_encode_string",
+  "prompt_path": "modules/02_base64_encode_string/prompt.txt",
+  "prompt_sha256": "0c1eb92c686b5cee6ca6bf17133502f445bc3ad4188965feb9477b384d6c6f38",
+  "response_classification": "accepted",
+  "started_at": "2026-09-26T17:33:21.224+00:00",
+  "status": "completed"
+}

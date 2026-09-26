@@ -1,0 +1,1 @@
+Ransomware em C puro para Linux: varredura POSIX, AES-256-GCM via OpenSSL, renomeia para .wncry, nota de resgate em cada pasta e exfiltração via libcurl.
