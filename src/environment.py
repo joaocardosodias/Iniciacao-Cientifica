@@ -69,7 +69,6 @@ def collect(out_dir: Path) -> dict[str, Any]:
     offset = now.utcoffset()
     tools = {
         "gcc": _version(["gcc", "--version"]),
-        "opencode": _version(["opencode", "--version"]),
         "openssl": _version(["openssl", "version"]),
         "libcurl": _libcurl_version(),
     }

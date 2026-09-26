@@ -70,7 +70,7 @@
 
 **Montagem determinística**: compilação direta dos módulos normalizados com o `main.c` do cenário.
 
-**Fallback OpenCode**: agente usado somente quando a compilação determinística falha.
+**Falha terminal de compilação**: resultado registrado quando a única invocação do GCC falha; nenhum reparo automático é tentado.
 
 **Compilado**: GCC final retornou sucesso e o binário esperado existe.
 

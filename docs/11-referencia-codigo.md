@@ -60,23 +60,22 @@ Implementa heurísticas determinísticas.
 
 As listas de indicadores fazem parte da definição operacional de recusa e devem ser versionadas junto com o estudo.
 
-## 6. `src/assembler_harness.py`
+## 6. `src/assembler.py`
 
-Normaliza módulos, compila e usa o OpenCode como fallback.
+Normaliza módulos e executa uma única compilação determinística com GCC.
 
 Funções auxiliares:
 
 - `_link_flags()` mapeia includes para bibliotecas;
-- `_summarize_opencode_events()` resume JSONL do agente;
 - `_with_standard_prelude()` garante macros e headers básicos;
 - `_strip_comments()` remove comentários respeitando literais;
 - `_strip_test_blocks()` remove blocos de teste;
 - `_iter_top_level_declarations()` percorre declarações no nível superior;
 - `_remove_main_definition()` remove `main` indevido;
-- `_extract_signatures()`, `_extract_includes()` e `_extract_type_definitions()` constroem o contexto de integração;
+- `_extract_signatures()` e `_extract_includes()` inspecionam as interfaces geradas;
 - `_prepare_module_source()` aplica a normalização.
 
-`AssemblerHarness.assemble()` controla o ciclo inteiro. `_build_task()` cria a tarefa do agente, `_compile_command()` constrói o GCC, `_run_gcc()` executa a verificação e `_build_fix_task()` cria reparos subsequentes.
+`Assembler.assemble()` preserva as fontes originais, grava cópias normalizadas, persiste `config.h` e `main.c`, remove um binário antigo, executa o GCC uma vez e registra `completed` ou `compile_failed`. `_compile_command()` constrói o comando e `_run_gcc()` o executa. Não há geração de tarefa, agente de reparo ou segunda tentativa de compilação.
 
 ## 7. `src/trace.py`
 
@@ -269,7 +268,6 @@ Implementada em Rust sob `tools/reset_vm/`. Remove diretório de testes e resíd
 
 - `requirements.in`: dependências Python diretas.
 - `requirements.lock`: versões transitivas e hashes reproduzíveis.
-- `opencode.json`: configuração do agente de montagem.
 - `.env.example`, quando presente: nomes de variáveis esperadas, nunca valores reais.
 - `Cargo.toml` e `Cargo.lock`: workspace e versões das ferramentas Rust.
 
@@ -278,7 +276,7 @@ Implementada em Rust sob `tools/reset_vm/`. Remove diretório de testes e resíd
 Os testes usam `unittest` e cobrem:
 
 - normalização e montagem C;
-- caminho determinístico e fallback;
+- compilação determinística e falha terminal sem reparo;
 - criação, falha, retomada e controle de campanhas;
 - resumo de chamadas, custo, providers e recusas;
 - classificação do Coder;

@@ -33,7 +33,7 @@ class EnvironmentTests(unittest.TestCase):
             self.assertIn("logical_count", recorded["cpu"])
             self.assertIn("preferred_encoding", recorded["locale"])
             self.assertIn("utc_offset_seconds", recorded["timezone"])
-            self.assertEqual(set(recorded["tools"]), {"gcc", "opencode", "openssl", "libcurl"})
+            self.assertEqual(set(recorded["tools"]), {"gcc", "openssl", "libcurl"})
             self.assertEqual(len(packages), software["package_count"])
             self.assertEqual(len(packages), len(list(environment.importlib.metadata.distributions())))
             self.assertNotIn(secret, details.read_text() + inventory.read_text())
@@ -62,7 +62,7 @@ class EnvironmentTests(unittest.TestCase):
             summary = environment.collect(Path(temporary))
             details = json.loads((Path(temporary) / "environment.json").read_text())
             self.assertEqual(details["tools"], dict.fromkeys(
-                ("gcc", "opencode", "openssl", "libcurl")
+                ("gcc", "openssl", "libcurl")
             ))
             self.assertEqual(summary["commands"], details["tools"])
             self.assertTrue((Path(temporary) / "python_packages.json").exists())

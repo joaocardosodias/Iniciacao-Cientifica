@@ -57,7 +57,6 @@ O pipeline depende, conforme o cenário e o caminho de compilação, de:
 - `pkg-config`;
 - headers e bibliotecas de OpenSSL;
 - headers e biblioteca libcurl;
-- OpenCode para fallback de montagem;
 - Git para snapshot completo de proveniência.
 
 As ferramentas Rust de laboratório dependem de Cargo para compilação. O servidor de coleta depende de Flask.
@@ -68,7 +67,7 @@ Versões são capturadas quando detectáveis. A ausência de uma ferramenta crí
 
 `run_preflight()` verifica antes de uma campanha:
 
-- presença de GCC, `pkg-config` e OpenCode;
+- presença de GCC e `pkg-config`;
 - importação de bibliotecas Python essenciais;
 - existência da variável de credencial adequada, sem ler seu valor para o relatório;
 - compatibilidade do provider fixado com o gateway;

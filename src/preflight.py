@@ -41,7 +41,7 @@ def run_preflight(
     minimum_free_bytes: int = 1_000_000_000,
 ) -> dict[str, Any]:
     checks = []
-    for tool in ("gcc", "pkg-config", "opencode"):
+    for tool in ("gcc", "pkg-config"):
         checks.append({"category": "tool", **_tool(tool)})
     for package in ("openai", "dotenv", "yaml"):
         checks.append({"category": "python_package", **_library(package)})

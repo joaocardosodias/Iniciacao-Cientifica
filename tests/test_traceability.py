@@ -1,4 +1,5 @@
 import json
+import shutil
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -53,15 +54,27 @@ class FailingCoder:
         raise ValueError("invalid component response")
 
 
-class FakeAssemblerHarness:
-    def __init__(self, model):
-        self.model = model
+class InvalidCCoder:
+    def __init__(self, llm):
+        self.llm = llm
+
+    @staticmethod
+    def user_prompt(task, prototype, global_context=None):
+        return Coder.user_prompt(task, prototype, global_context)
+
+    def generate_generic(self, task, prototype, global_context=None):
+        name = prototype.split("(")[0].strip().split()[-1]
+        return f"int {name}(void) {{ invalid_token return 0; }}"
+
+
+class FakeAssembler:
+    def __init__(self):
         self.last_mode = "fake"
+        self.last_status = "completed"
 
     def assemble(self, modules, run_dir, config_header=None, main_source=None):
         assembly_dir = run_dir / "assembly"
         assembly_dir.mkdir(exist_ok=True)
-        (assembly_dir / "task.txt").write_text("assemble", encoding="utf-8")
         main_c = run_dir / "main.c"
         main_c.write_text("int main(void) { return 0; }", encoding="utf-8")
         (run_dir / "output").write_bytes(b"binary")
@@ -194,7 +207,7 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(recover_stale_runs(root), [])
             self.assertEqual(len(index_path.read_text().splitlines()), 2)
 
-    @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
+    @patch.object(pipeline, "Assembler", FakeAssembler)
     @patch.object(pipeline, "Coder", FakeCoder)
     @patch.object(pipeline, "LLMClient", FakeLLMClient)
     def test_pipeline_creates_a_complete_trace(self):
@@ -236,10 +249,11 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(entry["result_path"], f"{run_dir.name}/result.json")
             self.assertTrue((run_dir / "modules/module_one.c").exists())
             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
-            self.assertTrue((run_dir / "assembly/task.txt").exists())
+            self.assertEqual(manifest["stages"]["assembler"]["status"], "completed")
+            self.assertFalse((run_dir / "assembly/task.txt").exists())
             self.assertTrue((run_dir / "output").exists())
 
-    @patch.object(pipeline, "AssemblerHarness", FakeAssemblerHarness)
+    @patch.object(pipeline, "Assembler", FakeAssembler)
     @patch.object(pipeline, "Coder", FailingCoder)
     @patch.object(pipeline, "LLMClient", FakeLLMClient)
     def test_pipeline_preserves_failed_run(self):
@@ -264,6 +278,29 @@ class TraceabilityTests(unittest.TestCase):
             entry = json.loads((output_root / "experiments.jsonl").read_text())
             self.assertEqual(entry["status"], "failed")
             self.assertEqual(entry["error_type"], "ValueError")
+
+    @unittest.skipUnless(shutil.which("gcc"), "gcc indisponivel")
+    @patch.object(pipeline, "Coder", InvalidCCoder)
+    @patch.object(pipeline, "LLMClient", FakeLLMClient)
+    def test_pipeline_preserves_terminal_compile_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output_root = Path(temporary)
+            main_c = pipeline.run(
+                "descricao do cenario",
+                model="fake/model",
+                output_root=output_root,
+                scenario="test",
+                scenario_config_h=FAKE_CONFIG_H,
+                scenario_components=MODULES,
+                scenario_main_c=FAKE_MAIN_C,
+            )
+            run_dir = main_c.parent.parent
+            result = json.loads((run_dir / "result.json").read_text())
+            assembly = json.loads((run_dir / "assembly/result.json").read_text())
+            self.assertEqual(result["status"], "compile_failed")
+            self.assertFalse(result["compiled"])
+            self.assertEqual(assembly["status"], "compile_failed")
+            self.assertFalse((run_dir / "assembly/output").exists())
 
     def test_invalid_experimental_identity_does_not_create_run(self):
         with tempfile.TemporaryDirectory() as temporary:

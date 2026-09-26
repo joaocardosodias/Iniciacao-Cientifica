@@ -42,10 +42,8 @@ Arquivos de chamada e eventos preservam o ponto de falha.
 
 - ausência de funções ligáveis;
 - erro do GCC;
-- timeout do OpenCode;
-- erro ao iniciar agente;
 - binário ausente;
-- falha da validação final.
+- retorno não zero da única compilação GCC.
 
 O diagnóstico fica em `assembly/`.
 

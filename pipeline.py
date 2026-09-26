@@ -1,5 +1,4 @@
 import sys
-import json
 import logging
 import argparse
 import time
@@ -10,7 +9,7 @@ load_dotenv()
 
 from src.llm_client import DEFAULT_MODEL, LLMClient, MODELS, _resolve
 from src.coder import Coder
-from src.assembler_harness import AssemblerHarness
+from src.assembler import Assembler
 from src.campaign import Campaign
 from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
@@ -281,50 +280,42 @@ def run(
                    count=len(generated), duration_seconds=modules_duration)
 
         log.info("CAMADA ASSEMBLER — compilação determinística...")
-        trace.emit("assembly.started", model=llm.model, mode="deterministic")
+        trace.emit("assembly.started", mode="deterministic")
         assembly_started = time.perf_counter()
-        harness_model = f"openrouter/{llm.model}"
-        harness = AssemblerHarness(model=harness_model)
+        assembler = Assembler()
         try:
-            main_c, compiled_ok = harness.assemble(
+            main_c, compiled_ok = assembler.assemble(
                 generated,
                 run_dir,
                 config_header=scenario_config_h,
                 main_source=scenario_main_c,
             )
         except Exception as error:
-            trace.emit("assembly.failed", model=harness_model, error=serialize_error(error),
+            trace.emit("assembly.failed", error=serialize_error(error),
                        duration_seconds=round(time.perf_counter() - assembly_started, 6))
             raise
         assembly_duration = round(time.perf_counter() - assembly_started, 6)
-        assembly_result_path = run_dir / "assembly" / "result.json"
-        try:
-            assembly_result = json.loads(assembly_result_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            assembly_result = {}
-        assembly_status = getattr(harness, "last_status", None) or (
+        assembly_status = getattr(assembler, "last_status", None) or (
             "completed" if compiled_ok else "compile_failed")
-        trace.record_stage("assembler_harness", {
+        trace.record_stage("assembler", {
             "status": assembly_status,
-            "model": harness_model,
             "main_c": "main.c" if main_c else None,
             "binary": "output" if compiled_ok else None,
-            "mode": harness.last_mode,
-            "agent_usage": assembly_result.get("agent_usage"),
+            "mode": assembler.last_mode,
             "duration_seconds": assembly_duration,
         })
         trace.emit("assembly.finished", status=assembly_status,
                    main_c=bool(main_c), compiled=compiled_ok,
-                   mode=harness.last_mode,
+                   mode=assembler.last_mode,
                    duration_seconds=assembly_duration)
 
         if main_c is None:
-            trace.emit("assembly.failed", model=harness_model,
+            trace.emit("assembly.failed",
                        error={"type": "RuntimeError",
-                              "message": f"AssemblerHarness status={assembly_status}"},
+                              "message": f"Assembler status={assembly_status}"},
                        duration_seconds=assembly_duration)
-            log.error(f"  [AssemblerHarness] main.c nao gerado (status={assembly_status}) — abortando")
-            raise RuntimeError(f"AssemblerHarness nao gerou main.c (status={assembly_status})")
+            log.error(f"  [Assembler] main.c nao gerado (status={assembly_status}) — abortando")
+            raise RuntimeError(f"Assembler nao gerou main.c (status={assembly_status})")
 
         status = "completed" if compiled_ok else "compile_failed"
         trace.finalize(
@@ -336,13 +327,12 @@ def run(
                 "module_count": len(generated),
                 "context_mode": context_mode,
                 "assembly": {
-                    "mode": harness.last_mode,
+                    "mode": assembler.last_mode,
                     "result": "assembly/result.json",
-                    "agent_usage": assembly_result.get("agent_usage"),
                 },
             },
         )
-        print(f"\n  [AssemblerHarness] {'compilou' if compiled_ok else 'nao compilou'}")
+        print(f"\n  [Assembler] {'compilou' if compiled_ok else 'nao compilou'}")
         return main_c
     except (RunInterrupted, KeyboardInterrupt) as interrupted:
         trace.finalize(status="interrupted", error=interrupted)

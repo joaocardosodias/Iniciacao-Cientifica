@@ -106,7 +106,7 @@ Lista arquivos não rastreados elegíveis com caminho, tamanho, hash e informaç
 
 ### `source_hashes.json`
 
-Calcula hashes para `pipeline.py`, módulos Python em `src/`, dependências, cenários Python, scripts Python, ferramentas Python, entradas experimentais, documentação e `opencode.json`. Um hash combinado ordenado identifica o conjunto.
+Calcula hashes para `pipeline.py`, módulos Python em `src/`, dependências, cenários Python, scripts Python, ferramentas Python, entradas experimentais e documentação. Um hash combinado ordenado identifica o conjunto.
 
 Na implementação atual, os padrões de `source_hashes.json` não incluem fontes Rust, `Cargo.toml`, `Cargo.lock` nem wrappers `.sh`. Quando rastreados pelo Git, eles continuam vinculados ao commit e qualquer modificação aparece em status e diff, mas não participam do hash combinado de fontes. Essa limitação precisa ser considerada se as ferramentas de VM forem tratadas como parte do instrumento experimental.
 
@@ -129,7 +129,7 @@ Valores das variáveis de ambiente não são gravados por `environment.py` ou `p
 - versão e implementação do Python;
 - executável Python;
 - CPU;
-- versões detectáveis de GCC, OpenCode, OpenSSL e libcurl.
+- versões detectáveis de GCC, OpenSSL e libcurl.
 
 Ferramenta ausente recebe `null`. A coleta de proveniência não falha somente porque uma versão não pôde ser consultada.
 

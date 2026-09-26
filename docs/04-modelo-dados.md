@@ -15,8 +15,7 @@ Iniciacao-Cientifica/
 ├── output/
 ├── results/
 ├── requirements.in
-├── requirements.lock
-└── opencode.json
+└── requirements.lock
 ```
 
 `src/` contém a implementação; `scenarios/` contém os estímulos em código; `experiments/` contém modelos de protocolo, rubrica e ambiente; `tools/` contém utilitários de avaliação, consolidação e integridade; `scripts/` contém utilidades do laboratório; `tests/` contém testes automatizados; `output/` armazena desenvolvimento; `results/` armazena campanhas.
@@ -171,13 +170,12 @@ Contém a unidade de integração:
 - cópias normalizadas `module_NN.c`;
 - `main.c`;
 - `config.h` quando necessário;
-- configuração e tarefa do OpenCode;
-- stdout, stderr e eventos do agente;
+- stdout e stderr do GCC;
 - diagnósticos do GCC;
 - `result.json`, específico da montagem;
 - binário `output`, somente se compilado.
 
-O binário não é executado nessa fase.
+O binário não é executado nessa fase. Uma falha do GCC é terminal para a montagem e nenhum arquivo é reparado automaticamente.
 
 ## 11. `provenance/`
 

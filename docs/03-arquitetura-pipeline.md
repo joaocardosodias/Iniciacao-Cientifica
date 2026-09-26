@@ -25,9 +25,7 @@ cenário determinístico
   -> geração paralela dos componentes pelo Coder
   -> normalização das fontes
   -> integração com main.c determinístico
-  -> compilação GCC
-  -> fallback OpenCode se necessário
-  -> verificação GCC final
+  -> uma compilação GCC
   -> resultado e selo
 ```
 
@@ -162,39 +160,43 @@ O `config.h` do cenário e o `main.c` determinístico também são persistidos. 
 
 ## 9. Normalização e montagem
 
-`AssemblerHarness` prepara cada fonte antes da compilação:
+`Assembler` prepara cada fonte antes da compilação:
 
 - remove comentários sem corromper literais de string;
 - remove blocos de teste conhecidos;
 - remove definições de `main` fornecidas indevidamente;
 - extrai includes;
 - extrai assinaturas externas;
-- extrai definições de tipos;
 - acrescenta `_GNU_SOURCE` e preâmbulo padrão quando necessários;
-- deduplica material usado na tarefa de reparo.
+- deduplica os includes usados para determinar as bibliotecas de linkedição.
 
 Essas transformações existem para reduzir erros mecânicos frequentes das respostas. A fonte original continua disponível no diretório do módulo.
 
 ## 10. Compilação determinística
 
-Quando o cenário fornece `main.c`, ele é gravado em `assembly/main.c`. O harness monta um comando equivalente a:
+Quando o cenário fornece `main.c`, ele é gravado em `assembly/main.c`. O Assembler monta um comando equivalente a:
 
 ```text
 gcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 -D_GNU_SOURCE -I. \
-    -o output main.c module_00.c module_01.c ... <bibliotecas>
+    -o output main.c module_01.c module_02.c ... <bibliotecas>
 ```
 
-As bibliotecas são derivadas dos includes, com suporte para flags usuais como OpenSSL, libcrypto e libcurl. O stdout, stderr, comando e código de saída são registrados.
+OpenSSL, libcrypto e libcurl são incluídas por padrão; includes reconhecidos podem acrescentar outras bibliotecas, como json-c, pthread e libm. O stdout, stderr, comando e código de saída são registrados.
 
-Se o GCC retorna sucesso e o binário existe, a montagem termina sem chamar o OpenCode. Esse é o caminho preferencial e determinístico.
+O GCC é executado uma única vez. A montagem só recebe `completed` quando o processo retorna zero e o binário `assembly/output` existe.
 
-## 11. Fallback OpenCode
+## 11. Falha de compilação
 
-Se a compilação determinística falha, o harness prepara uma tarefa de reparo para um agente OpenCode executado em modo headless no diretório `assembly/`. A tarefa contém módulos, protótipos, tipos, erro do compilador e restrições de escopo.
+Se o GCC retorna código diferente de zero ou o binário não existe, o Assembler:
 
-No caminho normal, a tarefa instrui o agente a usar as assinaturas e tipos extraídos sem ler as fontes dos módulos. No caminho de reparo após erro determinístico, ele recebe o diagnóstico do compilador e pode aplicar correções mínimas nos módulos, sem alterar `main.c` ou `config.h`. O processo possui limite de 600 segundos por invocação e até três invocações. Eventos brutos, stdout e stderr do OpenCode são preservados.
+- registra `compile_failed` em `assembly/result.json`;
+- preserva o comando executado e o código de retorno;
+- preserva `stdout.log` e `stderr.log`;
+- não modifica `main.c` ou os módulos;
+- não faz uma segunda compilação;
+- devolve `compiled: false` ao pipeline.
 
-A existência de uma afirmação do agente não determina sucesso. Depois dele, o harness executa novamente o GCC de forma independente. O campo `compiled` depende dessa verificação e da existência do binário.
+O pipeline finaliza a run com status `compile_failed`. Essa falha permanece como resultado experimental e a campanha continua para a próxima réplica.
 
 ## 12. Estados da montagem
 
@@ -202,12 +204,10 @@ O resultado da montagem pode registrar, entre outros:
 
 - `completed`;
 - `compile_failed`;
-- `timeout`;
-- `execution_error`;
-- `no_output`;
+- `no_main_source`;
 - `no_linkable_functions`.
 
-O estado, tentativas e referências aos diagnósticos ficam em `assembly/result.json`. A run incorpora o resumo, mas não substitui os artefatos detalhados.
+O estado, o comando, o código de retorno e as referências aos diagnósticos ficam em `assembly/result.json`. A run incorpora o resumo, mas não substitui os artefatos detalhados.
 
 ## 13. Finalização
 

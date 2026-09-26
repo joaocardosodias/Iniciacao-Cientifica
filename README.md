@@ -27,7 +27,7 @@ contexto global, e `full_context`, com o programa completo visível.
 │
 ├── src/                 # Camadas do pipeline
 │   ├── coder.py         # Gera o código C de cada componente genérico
-│   ├── assembler_harness.py # Integra e compila main.c + módulos
+│   ├── assembler.py     # Integra e compila main.c + módulos
 │   ├── campaign.py      # Campanhas oficiais, repetições e retomada
 │   ├── evaluation.py    # Avaliações manuais revisionadas
 │   ├── results_builder.py # Consolidação em CSV e JSON
@@ -81,10 +81,9 @@ Cenário (config_h + components + main_c)
   Coder ─────────── gera código C para cada componente
       │
       ▼
-  AssemblerHarness
+  Assembler
       ├── grava config.h e main.c do cenário
-      ├── compila os módulos com gcc
-      └── aciona o OpenCode apenas se a compilação falhar
+      └── compila os módulos uma vez com gcc
       │
       ▼
   output/run_<id>/assembly/main.c + output/run_<id>/assembly/output
@@ -112,8 +111,9 @@ completa de componentes, `config.h` e `main.c`. Cada chamada ainda implementa
 exatamente uma função, evitando confundir visibilidade de contexto com geração
 monolítica.
 
-O `AssemblerHarness` compila `main.c` + `module_NN.c` com `gcc` diretamente e
-aciona o agente OpenCode apenas se a compilação falhar.
+O `Assembler` compila `main.c` + `module_NN.c` diretamente com uma única
+invocação do GCC. Se a compilação falhar, a run termina como `compile_failed`;
+nenhum agente altera ou tenta reparar o código.
 
 ---
 
@@ -125,8 +125,8 @@ aciona o agente OpenCode apenas se a compilação falhar.
 pip install --require-hashes -r requirements.lock
 ```
 
-Também são necessários GCC, OpenSSL, libcurl e o executável `opencode` no
-`PATH` da máquina virtual.
+Também são necessários GCC, OpenSSL e libcurl no `PATH` da máquina que executa
+o pipeline.
 
 ### 2. Variável de ambiente
 
@@ -423,9 +423,6 @@ output/run_<id>/
 │       ├── prompt.txt
 │       └── response.c
 ├── assembly/
-│   ├── task.txt
-│   ├── opencode_events.jsonl
-│   ├── opencode_stderr.log
 │   ├── stdout.log
 │   ├── stderr.log
 │   ├── result.json
@@ -438,7 +435,7 @@ O `manifest.json` registra o modelo solicitado e resolvido, provedor,
 parâmetros de geração, commit Git, estado da árvore de trabalho e resumo do
 ambiente da máquina que executa o pipeline. `provenance/environment.json`
 identifica esse escopo como `pipeline_host` e detalha Python, sistema operacional,
-arquitetura, CPU, locale, timezone, GCC, OpenCode, OpenSSL e libcurl.
+arquitetura, CPU, locale, timezone, GCC, OpenSSL e libcurl.
 `provenance/python_packages.json` lista todos os pacotes Python instalados com
 suas versões. Cada chamada ao modelo
 conserva mensagens, resposta, duração, tentativas, uso de tokens quando fornecido
@@ -453,11 +450,9 @@ O custo usa `unit: provider_reported`, sem presumir moeda; sem custo informado,
 o total fica `null`. Execuções interrompidas e abandonadas também produzem
 `result.json` com os registros de chamadas disponíveis.
 
-As chamadas diretas do pipeline aparecem em `llm_calls`. A atividade do agente
-OpenCode fica separada em `assembly.agent_usage`, com sessões, passos, chamadas
-de ferramentas, tokens e custo extraídos de `assembly/opencode_events.jsonl`.
-`agent_return_code` representa o processo OpenCode e `compile_return_code`
-representa a verificação final independente do GCC.
+O resultado da única compilação fica em `assembly/result.json`. O comando,
+código de retorno, stdout e stderr são preservados. Não existe etapa de reparo
+automático depois da falha do GCC.
 
 ## Testes
 

@@ -17,7 +17,6 @@ SOURCE_PATTERNS = [
     "experiments/*.json",
     "experiments/rubrics/*.yaml",
     "docs/*.md",
-    "opencode.json",
 ]
 
 SECRET_NAMES = {".env"}

@@ -12,7 +12,7 @@
 ## 2. Antes do piloto
 
 - [ ] Criar ambiente Python a partir de `requirements.lock`.
-- [ ] Confirmar GCC, `pkg-config`, OpenSSL, libcurl e OpenCode.
+- [ ] Confirmar GCC, `pkg-config`, OpenSSL e libcurl.
 - [ ] Configurar credencial sem colocá-la no repositório.
 - [ ] Conferir modelo e provider disponíveis.
 - [ ] Revisar cenário, componentes, protótipos, `config.h` e `main.c`.

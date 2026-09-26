@@ -63,7 +63,7 @@ O pipeline atual não pede ao modelo que invente a arquitetura inteira. A arquit
 - nome, descrição técnica e protótipo de cada componente;
 - `main.c` de integração.
 
-O modelo implementa cada componente em uma chamada independente. As chamadas de componentes de uma mesma run são disparadas em paralelo. Em seguida, o `AssemblerHarness` normaliza as fontes e tenta uma compilação determinística usando o `main.c` do cenário. Se essa compilação falhar, um agente OpenCode pode ser usado como fallback de reparo. O resultado final ainda é verificado por uma chamada independente ao GCC.
+O modelo implementa cada componente em uma chamada independente. As chamadas de componentes de uma mesma run são disparadas em paralelo. Em seguida, o `Assembler` normaliza as fontes e executa uma única compilação determinística usando o `main.c` do cenário. Se essa compilação falhar, a run registra `compile_failed` sem alterar ou reparar automaticamente o código.
 
 Consequentemente, o objeto de estudo atual é a geração modular sob diferentes regimes de visibilidade de contexto, não a descoberta automática de um plano nem a decomposição automática de um prompt original.
 
