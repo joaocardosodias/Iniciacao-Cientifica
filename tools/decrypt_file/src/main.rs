@@ -17,6 +17,7 @@ const NONCE_LEN: usize = 12;
 const TAG_LEN: usize = 16;
 const KEY_LEN: usize = 32;
 const ENCRYPTED_SUFFIX: &str = ".PROCESSED";
+const STALE_TMP_SUFFIX: &str = ".PROCESSED.TMP";
 
 fn parse_key(input: &str) -> Result<Vec<u8>, String> {
     let trimmed = input.trim();
@@ -135,15 +136,50 @@ fn is_encrypted(path: &Path) -> bool {
     }
 }
 
-fn collect_targets(path: &Path, out: &mut Vec<PathBuf>) {
+fn is_stale_tmp(path: &Path) -> bool {
+    match path.file_name().and_then(|value| value.to_str()) {
+        Some(name) => {
+            name.len() > STALE_TMP_SUFFIX.len()
+                && name.to_ascii_uppercase().ends_with(STALE_TMP_SUFFIX)
+        }
+        None => false,
+    }
+}
+
+#[derive(Default)]
+struct ScanStats {
+    skipped: usize,
+    ignored_tmp: usize,
+}
+
+fn collect_targets(path: &Path, out: &mut Vec<PathBuf>, stats: &mut ScanStats) {
     if path.is_dir() {
-        if let Ok(entries) = fs::read_dir(path) {
-            for entry in entries.flatten() {
-                let child = entry.path();
-                if child.is_dir() {
-                    collect_targets(&child, out);
-                } else if is_encrypted(&child) {
-                    out.push(child);
+        let entries = match fs::read_dir(path) {
+            Ok(entries) => entries,
+            Err(_) => {
+                stats.skipped += 1;
+                return;
+            }
+        };
+        for entry in entries {
+            let entry = match entry {
+                Ok(entry) => entry,
+                Err(_) => {
+                    stats.skipped += 1;
+                    continue;
+                }
+            };
+            let child = entry.path();
+            match entry.file_type() {
+                Ok(file_type) if file_type.is_dir() => collect_targets(&child, out, stats),
+                Ok(_) if is_encrypted(&child) => out.push(child),
+                Ok(_) => {
+                    if is_stale_tmp(&child) {
+                        stats.ignored_tmp += 1;
+                    }
+                }
+                Err(_) => {
+                    stats.skipped += 1;
                 }
             }
         }
@@ -152,7 +188,16 @@ fn collect_targets(path: &Path, out: &mut Vec<PathBuf>) {
     }
 }
 
-fn decrypt_file(key: &[u8], path: &Path, out_dir: Option<&Path>) -> Result<PathBuf, String> {
+fn should_remove_source(keep: bool, hash_status: Option<&str>) -> bool {
+    !keep && hash_status != Some("mismatched")
+}
+
+fn decrypt_file(
+    key: &[u8],
+    path: &Path,
+    out_dir: Option<&Path>,
+    scan_root: Option<&Path>,
+) -> Result<PathBuf, String> {
     let blob =
         fs::read(path).map_err(|error| format!("nao foi possivel ler {}: {error}", path.display()))?;
     let plaintext = decrypt_blob(key, &blob)?;
@@ -160,9 +205,13 @@ fn decrypt_file(key: &[u8], path: &Path, out_dir: Option<&Path>) -> Result<PathB
         .file_name()
         .map(|value| value.to_string_lossy().to_string())
         .unwrap_or_else(|| "saida".to_string());
-    let target = match out_dir {
-        Some(directory) => directory.join(stripped_name(&name)),
-        None => path.with_file_name(stripped_name(&name)),
+    let target = match (out_dir, scan_root) {
+        (Some(directory), Some(root)) => match path.strip_prefix(root) {
+            Ok(relative) => directory.join(stripped_name(&relative.to_string_lossy())),
+            Err(_) => directory.join(stripped_name(&name)),
+        },
+        (Some(directory), None) => directory.join(stripped_name(&name)),
+        (None, _) => path.with_file_name(stripped_name(&name)),
     };
     if let Some(parent) = target.parent() {
         fs::create_dir_all(parent)
@@ -200,6 +249,7 @@ struct Options {
     out_dir: Option<PathBuf>,
     manifest: Option<PathBuf>,
     report: Option<PathBuf>,
+    keep: bool,
 }
 
 fn print_usage() {
@@ -213,6 +263,7 @@ fn print_usage() {
            -o, --out-dir PATH  pasta de saida (padrao: ao lado do arquivo)\n\
            -m, --manifest PATH manifest.json do generate_test_files para comparar hashes\n\
            --report PATH       grava relatorio JSON da recuperacao\n\
+           --keep              preserva os arquivos .PROCESSED apos descriptografar\n\
            -h, --help          esta ajuda"
     );
 }
@@ -225,6 +276,7 @@ fn parse_args() -> Result<Options, String> {
         out_dir: None,
         manifest: None,
         report: None,
+        keep: false,
     };
     let args: Vec<String> = env::args().skip(1).collect();
     let mut index = 0;
@@ -257,6 +309,9 @@ fn parse_args() -> Result<Options, String> {
                 index += 1;
                 options.report =
                     Some(PathBuf::from(args.get(index).ok_or("falta o valor de --report")?));
+            }
+            "--keep" => {
+                options.keep = true;
             }
             "-h" | "--help" => {
                 print_usage();
@@ -310,11 +365,13 @@ fn main() {
         .unwrap_or_else(|| PathBuf::from(prompt("  Arquivo ou pasta: ")));
 
     let mut targets = Vec::new();
-    collect_targets(&path, &mut targets);
+    let mut scan_stats = ScanStats::default();
+    collect_targets(&path, &mut targets, &mut scan_stats);
     if targets.is_empty() {
         println!("\n  Nenhum arquivo .PROCESSED encontrado em {}\n", path.display());
         return;
     }
+    let scan_root: Option<PathBuf> = if path.is_dir() { Some(path.clone()) } else { None };
 
     let verify_base: PathBuf = match &options.out_dir {
         Some(directory) => directory.clone(),
@@ -338,7 +395,7 @@ fn main() {
     let mut decrypted: Vec<(PathBuf, PathBuf)> = Vec::new();
     let mut failures: Vec<(PathBuf, String)> = Vec::new();
     for target in &targets {
-        match decrypt_file(&key, target, options.out_dir.as_deref()) {
+        match decrypt_file(&key, target, options.out_dir.as_deref(), scan_root.as_deref()) {
             Ok(output) => {
                 println!("  [ok]    {} -> {}", target.display(), output.display());
                 decrypted.push((target.clone(), output));
@@ -352,17 +409,20 @@ fn main() {
 
     let mut matched = 0usize;
     let mut mismatched = 0usize;
+    let mut removed = 0usize;
     let mut unlisted: Vec<String> = Vec::new();
     let mut seen: HashMap<String, bool> = HashMap::new();
     let mut entries_json = String::new();
-    if let Some(expected) = &manifest {
-        for (_, output) in &decrypted {
+    let mut finalized: Vec<(PathBuf, PathBuf, bool)> = Vec::with_capacity(decrypted.len());
+    for (input, output) in &decrypted {
+        let mut status = "unchecked";
+        if let Some(expected) = manifest.as_ref() {
             let relative = output
                 .strip_prefix(&verify_base)
                 .map(|value| manifest_key(&value.to_string_lossy()))
                 .unwrap_or_else(|_| manifest_key(&output.to_string_lossy()));
             let observed = sha256_file(output).unwrap_or_default();
-            let status = match expected.get(&relative) {
+            status = match expected.get(&relative) {
                 Some(want) if want == &observed => {
                     matched += 1;
                     seen.insert(relative.clone(), true);
@@ -390,6 +450,23 @@ fn main() {
             ));
             println!("  [hash:{status}] {relative}");
         }
+        let mut source_removed = false;
+        if should_remove_source(options.keep, Some(status)) {
+            match fs::remove_file(input) {
+                Ok(_) => {
+                    source_removed = true;
+                    removed += 1;
+                }
+                Err(error) => {
+                    failures.push((
+                        input.clone(),
+                        format!("recuperado, mas a origem nao pode ser removida: {error}"),
+                    ));
+                    println!("  [aviso] {}: origem preservada ({error})", input.display());
+                }
+            }
+        }
+        finalized.push((input.clone(), output.clone(), source_removed));
     }
     let missing: Vec<String> = manifest
         .as_ref()
@@ -404,14 +481,15 @@ fn main() {
 
     if let Some(report_path) = &options.report {
         let mut decrypted_json = String::new();
-        for (input, output) in &decrypted {
+        for (input, output, source_removed) in &finalized {
             if !decrypted_json.is_empty() {
                 decrypted_json.push(',');
             }
             decrypted_json.push_str(&format!(
-                "{{\"input\":\"{}\",\"output\":\"{}\"}}",
+                "{{\"input\":\"{}\",\"output\":\"{}\",\"source_removed\":{}}}",
                 json_escape(&input.to_string_lossy()),
-                json_escape(&output.to_string_lossy())
+                json_escape(&output.to_string_lossy()),
+                if *source_removed { "true" } else { "false" }
             ));
         }
         let mut failures_json = String::new();
@@ -460,15 +538,25 @@ fn main() {
 
     println!("\n{}", "=".repeat(55));
     println!(
-        "  {} descriptografado(s), {} falha(s)",
+        "  {} descriptografado(s), {} falha(s), {} origem(ns) removida(s)",
         decrypted.len(),
-        failures.len()
+        failures.len(),
+        removed
     );
     if manifest.is_some() {
         println!(
             "  hashes: {matched} iguais, {mismatched} divergentes, {} nao listados, {} ausentes",
             unlisted.len(),
             missing.len()
+        );
+    }
+    if scan_stats.skipped > 0 {
+        println!("  {} item(ns) ignorados (sem acesso)", scan_stats.skipped);
+    }
+    if scan_stats.ignored_tmp > 0 {
+        println!(
+            "  {} arquivo(s) .PROCESSED.tmp ignorados (residuo de formato antigo)",
+            scan_stats.ignored_tmp
         );
     }
     println!("{}\n", "=".repeat(55));
@@ -539,5 +627,49 @@ mod tests {
         assert_eq!(stripped_name("a.pdf.PROCESSED"), "a.pdf");
         assert_eq!(stripped_name("a.pdf.processed"), "a.pdf");
         assert_eq!(stripped_name("a.pdf"), "a.pdf.decrypted");
+    }
+
+    #[test]
+    fn removal_rules() {
+        assert!(should_remove_source(false, Some("matched")));
+        assert!(should_remove_source(false, Some("unlisted")));
+        assert!(should_remove_source(false, None));
+        assert!(!should_remove_source(false, Some("mismatched")));
+        assert!(!should_remove_source(true, Some("matched")));
+    }
+
+    #[test]
+    fn out_dir_preserves_subdirectory_structure() {
+        let root = env::temp_dir().join(format!("dec_out_{}", process::id()));
+        let _ = fs::remove_dir_all(&root);
+        let nested = root.join("src").join("sub");
+        fs::create_dir_all(&nested).unwrap();
+        let (key, blob) = sample();
+        fs::write(nested.join("f.txt.PROCESSED"), &blob).unwrap();
+        let out_dir = root.join("out");
+        let output = decrypt_file(
+            &key,
+            &nested.join("f.txt.PROCESSED"),
+            Some(&out_dir),
+            Some(&root.join("src")),
+        )
+        .unwrap();
+        assert_eq!(output, out_dir.join("sub").join("f.txt"));
+        assert_eq!(fs::read(&output).unwrap(), b"conteudo de teste");
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn stale_tmp_files_are_counted_not_processed() {
+        let root = env::temp_dir().join(format!("dec_tmp_{}", process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        fs::write(root.join("a.pdf.PROCESSED.tmp"), b"lixo").unwrap();
+        let mut targets = Vec::new();
+        let mut stats = ScanStats::default();
+        collect_targets(&root, &mut targets, &mut stats);
+        assert!(targets.is_empty());
+        assert_eq!(stats.ignored_tmp, 1);
+        let _ = fs::remove_dir_all(&root);
     }
 }
