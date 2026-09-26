@@ -58,6 +58,19 @@ def _parse_components(values: list[str]) -> list[dict[str, str]]:
     return assessments
 
 
+def _parse_stages(values: list[str]) -> list[dict[str, str]]:
+    stages = []
+    for value in values:
+        stage, separator, status = value.partition(":")
+        if not separator:
+            raise ValueError("Use --stage etapa:status.")
+        stages.append({
+            "stage": stage.strip(),
+            "status": status.strip(),
+        })
+    return stages
+
+
 def _prompt_evidence() -> list[Path]:
     paths = []
     while True:
@@ -86,6 +99,7 @@ def main() -> None:
     parser.add_argument("--environment-file", type=Path)
     parser.add_argument("--check", action="append", default=[])
     parser.add_argument("--component", action="append", default=[])
+    parser.add_argument("--stage", action="append", default=[])
     parser.add_argument("--notes")
     parser.add_argument("--evidence", action="append", type=Path, default=[])
     inclusion = parser.add_mutually_exclusive_group()
@@ -169,6 +183,7 @@ def main() -> None:
         exclusion_reason=reason,
         environment_file=args.environment_file,
         component_assessments=_parse_components(args.component),
+        stage_results=_parse_stages(args.stage),
     )
     print(json.dumps(manual, indent=2, ensure_ascii=False, sort_keys=True))
 

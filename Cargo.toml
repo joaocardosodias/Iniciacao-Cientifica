@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "tools/decrypt_file",
     "tools/generate_test_files",
     "tools/reset_vm",
 ]

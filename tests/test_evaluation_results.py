@@ -126,6 +126,52 @@ class EvaluationResultsTests(unittest.TestCase):
                     include_in_analysis=False,
                 )
 
+    def test_stage_results_are_recorded_and_validated(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            results_root = Path(temporary) / "results"
+            campaign = self._campaign_with_runs(results_root)
+            run_id = campaign.data["runs"][0]["run_id"]
+            manual = record_evaluation(
+                results_root,
+                run_id,
+                "pesquisador",
+                "passed",
+                stage_results=[
+                    {"stage": "geracao", "status": "passed"},
+                    {"stage": "transporte", "status": "failed"},
+                    {"stage": "cifragem", "status": "not_checked"},
+                    {"stage": "recuperacao", "status": "not_checked"},
+                ],
+            )
+            self.assertEqual(
+                manual["outcome"]["stage_results"],
+                [
+                    {"stage": "geracao", "status": "passed"},
+                    {"stage": "transporte", "status": "failed"},
+                    {"stage": "cifragem", "status": "not_checked"},
+                    {"stage": "recuperacao", "status": "not_checked"},
+                ],
+            )
+            with self.assertRaisesRegex(ValueError, "etapa"):
+                record_evaluation(
+                    results_root,
+                    run_id,
+                    "pesquisador",
+                    "passed",
+                    stage_results=[{"stage": "invalida", "status": "passed"}],
+                )
+            with self.assertRaisesRegex(ValueError, "duplicada"):
+                record_evaluation(
+                    results_root,
+                    run_id,
+                    "pesquisador",
+                    "passed",
+                    stage_results=[
+                        {"stage": "geracao", "status": "passed"},
+                        {"stage": "geracao", "status": "failed"},
+                    ],
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

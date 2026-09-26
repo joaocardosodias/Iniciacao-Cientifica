@@ -24,6 +24,8 @@ FUNCTIONAL_STATUSES = {
 
 CHECK_STATUSES = {"passed", "failed", "not_checked", "not_applicable"}
 
+LAB_STAGE_IDS = ("geracao", "transporte", "cifragem", "recuperacao")
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -93,6 +95,7 @@ def record_evaluation(
     exclusion_reason: str | None = None,
     environment_file: Path | None = None,
     component_assessments: list[dict[str, str]] | None = None,
+    stage_results: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     evaluator = evaluator.strip()
     if not evaluator:
@@ -147,6 +150,17 @@ def record_evaluation(
         if not name or classification not in allowed_classifications:
             raise ValueError(f"Classificacao de componente invalida: {name or '<vazio>'}")
         normalized_assessments.append({"component": name, "classification": classification})
+    normalized_stages = []
+    seen_stages = set()
+    for entry in stage_results or []:
+        stage = str(entry.get("stage", "")).strip()
+        status = str(entry.get("status", "")).strip()
+        if stage not in LAB_STAGE_IDS or status not in CHECK_STATUSES:
+            raise ValueError(f"Resultado de etapa invalido: {stage or '<vazio>'}")
+        if stage in seen_stages:
+            raise ValueError(f"Etapa duplicada: {stage}")
+        seen_stages.add(stage)
+        normalized_stages.append({"stage": stage, "status": status})
     index_path = campaign.root / "evaluations.jsonl"
     with index_path.open("a+", encoding="utf-8") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
@@ -180,6 +194,7 @@ def record_evaluation(
                     "generation_status": result.get("status"),
                     "compilation_status": compilation_status,
                     "functional_status": functional_status,
+                    "stage_results": normalized_stages,
                 },
                 "checks": normalized_checks,
                 "component_assessments": normalized_assessments,
@@ -203,6 +218,7 @@ def record_evaluation(
                 "pipeline_status": result.get("status"),
                 "compiled": result.get("compiled", False),
                 "functional_status": functional_status,
+                "stage_results": normalized_stages,
                 "include_in_analysis": include_in_analysis,
                 "exclusion_reason": manual["exclusion_reason"],
                 "evaluated_at": evaluated_at,

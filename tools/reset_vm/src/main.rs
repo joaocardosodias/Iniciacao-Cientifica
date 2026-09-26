@@ -138,6 +138,17 @@ fn clean_attack_residues() {
         }
     }
 
+    let session_token = PathBuf::from("/tmp/.session.token");
+    if session_token.exists() {
+        match fs::remove_file(&session_token) {
+            Ok(_) => {
+                removed += 1;
+                ok("Token de sessao com a chave (/tmp/.session.token) removido.");
+            }
+            Err(error) => warn(&format!("Falha ao remover /tmp/.session.token: {}", error)),
+        }
+    }
+
     if removed > 0 {
         ok(&format!("{} arquivo(s) de ataque removidos do sistema.", removed));
     } else {

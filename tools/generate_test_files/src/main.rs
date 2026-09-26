@@ -8,6 +8,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::thread;
 
+use sha2::{Digest, Sha256};
+
 const FOLDER_TREE: &[&str] = &[
     "Documentos/Financeiro/2023",
     "Documentos/Financeiro/2024",
@@ -556,6 +558,95 @@ fn print_usage() {
     );
 }
 
+fn sha256_file(path: &Path) -> io::Result<String> {
+    let mut file = File::open(path)?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 65536];
+    loop {
+        let read = file.read(&mut buffer)?;
+        if read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..read]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+fn json_escape(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 2);
+    for character in text.chars() {
+        match character {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            other if (other as u32) < 0x20 => {
+                out.push_str(&format!("\\u{:04x}", other as u32))
+            }
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+fn collect_generated(base: &Path, out: &mut Vec<PathBuf>) {
+    let entries = match fs::read_dir(base) {
+        Ok(entries) => entries,
+        Err(_) => return,
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let file_type = match entry.file_type() {
+            Ok(file_type) => file_type,
+            Err(_) => continue,
+        };
+        if file_type.is_symlink() {
+            continue;
+        }
+        if file_type.is_dir() {
+            collect_generated(&path, out);
+        } else if file_type.is_file() {
+            if path.file_name().and_then(|value| value.to_str()) == Some("manifest.json") {
+                continue;
+            }
+            out.push(path);
+        }
+    }
+}
+
+fn write_manifest(base: &Path) -> io::Result<usize> {
+    let mut generated = Vec::new();
+    collect_generated(base, &mut generated);
+    generated.sort();
+    let mut entries = String::new();
+    let mut recorded = 0usize;
+    for path in &generated {
+        let relative = path
+            .strip_prefix(base)
+            .map(|value| value.to_string_lossy().replace('\\', "/"))
+            .unwrap_or_else(|_| path.to_string_lossy().to_string());
+        let digest = sha256_file(path)?;
+        let bytes = path.metadata().map(|metadata| metadata.len()).unwrap_or(0);
+        if !entries.is_empty() {
+            entries.push(',');
+        }
+        entries.push_str(&format!(
+            "{{\"path\":\"{}\",\"bytes\":{},\"sha256\":\"{}\"}}",
+            json_escape(&relative),
+            bytes,
+            digest
+        ));
+        recorded += 1;
+    }
+    let manifest = format!(
+        "{{\"schema_version\":\"1.0\",\"file_count\":{},\"files\":[{}]}}",
+        recorded, entries
+    );
+    fs::write(base.join("manifest.json"), manifest)?;
+    Ok(recorded)
+}
+
 fn main() {
     let options = parse_args();
     let count = options.count;
@@ -631,6 +722,13 @@ fn main() {
 
     let failed = errors.load(Ordering::Relaxed);
     println!("\n\n[✓] Concluído! {} arquivo(s) criados, {} erro(s).\n", count.saturating_sub(failed), failed);
+    match write_manifest(&base) {
+        Ok(recorded) => println!("[✓] Manifesto: {} arquivo(s) com sha256 em manifest.json\n", recorded),
+        Err(error) => {
+            eprintln!("[ERRO] nao foi possivel escrever manifest.json: {}", error);
+            process::exit(1);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -667,5 +765,23 @@ mod tests {
         let unique: HashSet<_> = tasks.iter().map(|t| t.path.clone()).collect();
         assert_eq!(tasks.len(), 200);
         assert_eq!(unique.len(), 200);
+    }
+
+    #[test]
+    fn manifest_records_every_generated_file_with_hash() {
+        let root = env::temp_dir().join(format!("gen_manifest_{}", process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(root.join("Sub")).unwrap();
+        fs::write(root.join("a.txt"), b"alpha").unwrap();
+        fs::write(root.join("Sub").join("b.txt"), b"beta").unwrap();
+        let recorded = write_manifest(&root).unwrap();
+        assert_eq!(recorded, 2);
+        let manifest = fs::read_to_string(root.join("manifest.json")).unwrap();
+        assert!(manifest.contains("\"file_count\":2"));
+        assert!(manifest.contains("\"path\":\"a.txt\""));
+        assert!(manifest.contains("\"path\":\"Sub/b.txt\""));
+        let expected = format!("{:x}", Sha256::digest(b"alpha"));
+        assert!(manifest.contains(&expected));
+        let _ = fs::remove_dir_all(&root);
     }
 }

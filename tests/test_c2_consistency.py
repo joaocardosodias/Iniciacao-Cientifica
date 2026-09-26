@@ -41,6 +41,13 @@ class C2ConsistencyTests(unittest.TestCase):
         self.assertIn('payload.get("aes_key")', source)
         self.assertIn('payload.get("session_token")', source)
 
+    def test_collect_records_run_key_and_file_binding(self):
+        source = SERVER_PATH.read_text(encoding="utf-8")
+        self.assertIn('payload.get("run_id", "run-unknown")', source)
+        self.assertIn('payload.get("key_id", "key-1")', source)
+        self.assertIn('"file_count"', source)
+        self.assertIn('"confirmed"', source)
+
     def test_collect_aliases_are_registered(self):
         routes = server_routes()
         self.assertIn("/collect", routes)
