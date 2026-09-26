@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "5dd3a05ec295",
+  "duration_seconds": 0.735669,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-26T03:27:32.729+00:00",
+  "hashes": {
+    "response_sha256": "6abd317abd4d1ff0612f7bb5218df967419a8a650dddbd75595b04a5c4b477ea",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "0ec5a66b4ff8d62a0cc06f7743a0db6d9a500540aea583717af2d36095ee700c"
+  },
+  "inference_provider": "Cerebras",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": "cerebras/fp16",
+  "requested_model": "gpt-oss-120b",
+  "requested_model_input": "gpt-oss-120b",
+  "response": "#define _GNU_SOURCE\n#include <stddef.h>\n#include <openssl/rand.h>\n\nint random_bytes(unsigned char *out, size_t len) {\n    if (out == ((void *)0))\n        return -1;\n    if (RAND_bytes(out, (int)len) != 1)\n        return -1;\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790393252,
+  "response_id": "gen-1790393252-dl2KApE5znubUE9HgJjH",
+  "response_model": "openai/gpt-oss-120b",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": null,
+  "stage": "coder.generic.random_bytes",
+  "started_at": "2026-09-26T03:27:31.994+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": "fp_b546658c8e93d2e57ef2",
+  "usage": {
+    "completion_tokens": 302,
+    "cost": 0.00036545,
+    "prompt_tokens": 397,
+    "total_tokens": 699
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using OpenSSL `RAND_bytes`. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int random_bytes(unsigned char *out, size_t len);\n\nReturn ONLY the C source implementing that function."
+}

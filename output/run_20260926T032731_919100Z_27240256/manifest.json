@@ -1,0 +1,167 @@
+{
+  "campaign": null,
+  "created_at": "2026-09-26T03:27:31.919+00:00",
+  "experiment": {
+    "condition": null,
+    "id": null,
+    "replicate": null
+  },
+  "input": {
+    "characters": 153,
+    "path": "prompts/original.txt",
+    "sha256": "2f3070472302de847e718bfbbda3c1a652b5ee15751bbe86ca455d4010bc06d2"
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "path": "run_seal.json",
+    "scope": "generation_run"
+  },
+  "intervention": {
+    "context_mode": "fragmented",
+    "full_context_sha256": "ef0ffab3bf2070a5044e6587cc39f3530265aa1897414fbf0d2d2e2a647219a1",
+    "intervention_sha256": null,
+    "prompt_template_version": "context-comparison-v1",
+    "visibility": {
+      "all_components": false,
+      "configuration_header": false,
+      "integration_source": false,
+      "local_prototype": true,
+      "local_task": true,
+      "scenario_description": false
+    }
+  },
+  "model": {
+    "delay_seconds": 0,
+    "parameters": {
+      "max_tokens": null,
+      "seed": null,
+      "temperature": null,
+      "top_p": null
+    },
+    "provider": "openrouter",
+    "requested": "gpt-oss-120b",
+    "resolved": "gpt-oss-120b",
+    "routing": {
+      "allow_fallbacks": false,
+      "openrouter_provider": "cerebras/fp16"
+    }
+  },
+  "process": {
+    "hostname": "omarchy",
+    "pid": 144773
+  },
+  "run_id": "run_20260926T032731_919100Z_27240256",
+  "run_purpose": "development",
+  "schema_version": "1.0",
+  "software": {
+    "architecture": "x86_64",
+    "commands": {
+      "gcc": "gcc (GCC) 16.2.1 20260810",
+      "libcurl": "8.22.0",
+      "openssl": "OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)"
+    },
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1345U",
+    "environment_path": "provenance/environment.json",
+    "executable": "/home/cardoso/GitHub/Iniciacao-Cientifica/.venv/bin/python",
+    "git": {
+      "branch": "main",
+      "commit": "30a1c145d91815c660bd45ea555a01590a9567d6",
+      "dirty": true,
+      "files": {
+        "diff": "provenance/git.diff",
+        "source_hashes": "provenance/source_hashes.json",
+        "status": "provenance/git_status.txt",
+        "untracked": "provenance/untracked_files.json"
+      },
+      "source_combined_sha256": "66577405013aa89cd531d6df9edd0c88bfe4a926206a0c2b11f2b807822bc7ec",
+      "source_hashes": {
+        ".env.example": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c",
+        "docs/01-visao-cientifica.md": "f771ac58ec5b1ff5a208f67dc20ee7d1e13f28beb19fa5bdf8d1824ac5fdfbce",
+        "docs/02-desenho-experimental.md": "25269a3f506e3002e4e152485db1c444960ab439834cd94cbf15c67367544377",
+        "docs/03-arquitetura-pipeline.md": "a66c295cde6cf916d48106f0f2585e24bdc2f012ba2e5a6f413f42ec3d144e33",
+        "docs/04-modelo-dados.md": "983a0aafef94de82a210d61e581050343714da609f5ec5768242bd64841f44da",
+        "docs/05-rastreabilidade-proveniencia.md": "5910140f714cb571b4e67f9fea1ae4983976b549f43f79a0ef36fb47e3d92d5c",
+        "docs/06-reprodutibilidade.md": "887cd29e34b543e61af3d58ce8ad19907be55b12b8a139b8991548ac513b4171",
+        "docs/07-operacao-campanhas.md": "3e4b592af3669421d52c2b4e431cc5c40656679123cb082f5e77844b1b49a2e3",
+        "docs/08-avaliacao-laboratorio.md": "a112a0c7596208b69ebea502177c58d07a911651ae9fb003bc596c6edc666561",
+        "docs/09-resultados-estatistica.md": "3484e7860b82f201727c06f3579bcf9a4e26054fe49aa6a13760183dbbb4ff30",
+        "docs/10-falhas-recuperacao-integridade.md": "4cc6bf3516c653a3e96c5c950026078f034696eb197ff16a641ac5f7882c4f34",
+        "docs/11-referencia-codigo.md": "8934e9c0a47d4569034bf85df135b811f761ea1250f1bf881d3456cf41d76a7b",
+        "docs/12-checklists.md": "c8a1ab600a7925fc9b954b45a44f3384a2a49e9d745ffe3cdb142645051473d5",
+        "docs/13-glossario.md": "763e092da77b1e6a9b5659efc3dfb2b3c2a8e9d45e36570ad49b5cea057b80b1",
+        "docs/README.md": "e32483a155af91a9176690d3b991e8b6c9b8d3e9c9423d1ab9f2de8f81685339",
+        "experiments/protocol.example.yaml": "6dcd2efa8b341c461c948fc33a88da4224db0f273abbfe1175713f17b1a15733",
+        "experiments/rubrics/component-evaluation-v1.yaml": "bad0df7a70cbe5f17fab0b93448158acf6eb1679052d9ca4f8fc277fcb658771",
+        "experiments/vm-environment.example.json": "cb450438e5331a5beb59cce848c5b9e7d4552b392a6086ea77e6234d5ef4cf3a",
+        "pipeline.py": "e041d544adec17c07f7e429790377242dc84a1324c714a2e78967b8b70b3d005",
+        "requirements.in": "e7f1941aaf8ada78c091cc21de8c1fe3dded85dc20c10643ce228af9b4a4993a",
+        "requirements.lock": "48fd9bddfdf7a34e76617ecb163584b4a780352fa2883429334626bbab559b23",
+        "scenarios/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenarios/test_prompts.py": "c159958b0c3b068b2fe9c34cb07d6217f15882ebb24be61926aefed78ed00791",
+        "scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scripts/c2_server.py": "5dd7b64fce0f975c8ce2bc6a83c1b67f19ceda4650128a72e38d009df38252f0",
+        "src/__init__.py": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73",
+        "src/aggregate_results.py": "deb38bbe72510eb5e57014aaa87ada0fb3621990808f5135173fae0c22440c26",
+        "src/assembler.py": "07bfc7be0dca07ac0211c6821560d01d9210cafde68dae7bfb296bf65f33a8bb",
+        "src/call_summary.py": "a0d323eae3ec47ee38521aeca12e8705da43a9a1a447b5d21134aa5e6489c323",
+        "src/campaign.py": "f5977b123ad145d31a56d9be18ac8a4985215ae4ea0788b190cf782ae276de35",
+        "src/coder.py": "cb67a9fa886cc18d2ca041c43203220bb355b1d4cfd5040a4202514407b95f11",
+        "src/context_modes.py": "e57e96d5faccf3710954a38506ed338dfacea5556981968517ba01382c88242c",
+        "src/environment.py": "599b8933fd0342791bd045076d0262f176e4e4080d63c85bd779a1ba2380a339",
+        "src/evaluation.py": "5f20ec50f84b106f6bb2fd5c3e03701f89725db25f3c385b420821c47ee7476f",
+        "src/events.py": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb",
+        "src/experiment_index.py": "4cdaeab76d6d8ca4a923f2a6174a43265bd9425295bfb9343a3433c2984656e3",
+        "src/experimental_inputs.py": "34f78e17943946b17c98867c2748bb572986d320a7fe9343e1870b49177e629d",
+        "src/integrity.py": "5229bd95331b2c985f534ee1fc925d223d23925b7e98d3ccb63677d8cc378f73",
+        "src/interrupts.py": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d",
+        "src/llm_client.py": "e37510915d1a99ac786f6189914e33f7cc68db43314a118b2fcca120e99ea68b",
+        "src/preflight.py": "a1bab52f613907952628aaa16527bd9e6395b9a0b2699910aca3b659f9995ea5",
+        "src/provenance.py": "6ae7cde1be81befb6982812f0020b7ad4df0e8af6ffa34db6c357fb654de0e5e",
+        "src/recovery.py": "48b207a7357b98e48f5f49e04045b2ab28867f8d0c124359f28b55a880934f2f",
+        "src/response_classification.py": "ce40b0bf9c49653aeec79ec511cb0d6bbe4dc529750943f7a9894a896f4cc75e",
+        "src/results_builder.py": "179356993e6143e910d9ec694a8d639b1371013a220765bdc134a3fb755ad975",
+        "src/trace.py": "68df2b5b16c14fc12331d703869b210b1951d888dfb3a3894a60dc823b22bc2e",
+        "src/vm_environment.py": "72d3c644722f91dabc42b0d878a7daf57e8cf31b2a168b03d06a4376127d1201",
+        "tools/build_aggregate.py": "5ed856143b4dfb8174bf25ec61e120841e2e9c06e38c7379a988db90a79250f3",
+        "tools/build_results.py": "678a36cb338e1f093f0716b7b64da54552a8386ae8d0e0d7fe831a76e7cc645e",
+        "tools/record_evaluation.py": "29b8cc0632f810fd46c131a9bb3b67862263ce4c6781a9b97d1727e0e79f1e42",
+        "tools/verify_campaign.py": "6856a4a9159c7f5bd8f4f498d5e3bcb6f5b6fed5d19c19d22c534913747f6faf",
+        "tools/verify_run.py": "95f4ac3b47ba1ffa66feea9a812de5a25203686177dc961889d8baa5570c246c"
+      },
+      "untracked_count": 0,
+      "untracked_stored_count": 0
+    },
+    "locale": "en_US",
+    "package_count": 31,
+    "packages_path": "provenance/python_packages.json",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.7",
+    "timezone": "-03",
+    "working_directory": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+  },
+  "stages": {
+    "assembler": {
+      "binary": "output",
+      "duration_seconds": 0.619558,
+      "main_c": "main.c",
+      "mode": "deterministic",
+      "status": "completed"
+    },
+    "components": {
+      "context_mode": "fragmented",
+      "count": 9,
+      "prompt_template_version": "context-comparison-v1",
+      "source": "scenario"
+    },
+    "input": {
+      "scenario": "wannacry"
+    },
+    "modules": {
+      "count": 9,
+      "duration_seconds": 1.682331,
+      "status": "completed"
+    }
+  },
+  "status": "completed",
+  "updated_at": "2026-09-26T03:27:34.306+00:00"
+}

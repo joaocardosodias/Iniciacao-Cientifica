@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size` using OpenSSL `EVP_EncodeBlock`. Return 0 on success and -1 if the buffer is too small.
+
+EXACT PROTOTYPE (must match): int base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size);
+
+Return ONLY the C source implementing that function.
