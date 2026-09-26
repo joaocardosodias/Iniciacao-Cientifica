@@ -60,8 +60,8 @@ contexto global, e `full_context`, com o programa completo visível.
 `output/` contém runs de desenvolvimento que podem ser versionadas para
 transferência e teste nas VMs. `results/` contém as campanhas oficiais e também
 pode ser versionado para transportar as runs, avaliações e consolidações entre
-as VMs. Os formatos e o fluxo completo estão documentados em
-[`docs/pipeline.md`](docs/pipeline.md).
+as VMs. Os formatos, o desenho experimental e o fluxo completo estão no
+[`índice da documentação técnica`](docs/README.md).
 
 ---
 
