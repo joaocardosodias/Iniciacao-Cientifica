@@ -23,6 +23,7 @@ def create_protocol(root: Path, experiment_id: str, scenario: str, condition: st
             f"  planned_replicates: {replicas}",
             "conditions:",
             f"  - id: {condition}",
+            f"    context_mode: {condition}",
             "models:",
             "  - model: fake/model",
             "    provider: cerebras/fp16",
@@ -104,6 +105,7 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(campaign.data["status"], "interrupted")
             loaded = Campaign.find(root, "estudo-01", "fragmented", "fake/model")
             self.assertEqual(loaded.pending_replicates(), [3])
+            self.assertEqual(len(Campaign.find_all(root, "estudo-01", "fake/model")), 1)
             with self.assertRaises(FileExistsError):
                 Campaign.create(
                     root,
@@ -235,6 +237,54 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(resumed.data["started_replicates"], 3)
             self.assertEqual(resumed.data["completed_replicates"], 3)
             self.assertEqual(resumed.data["status"], "generation_completed")
+
+    def test_official_condition_controls_actual_context_mode(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            results_root = Path(temporary) / "results"
+            protocol = create_protocol(Path(temporary), "study", "sample", "full_context", 1)
+            observed = []
+
+            def fake_run(prompt, model, **kwargs):
+                observed.append(kwargs["context_mode"])
+                run_dir = create_run(
+                    kwargs["output_root"],
+                    kwargs["replicate"],
+                    kwargs["experiment_id"],
+                    kwargs["condition"],
+                    kwargs["campaign"],
+                )
+                main_c = run_dir / "main.c"
+                main_c.write_text("int main(void) { return 0; }", encoding="utf-8")
+                return main_c
+
+            with patch.object(pipeline, "run", side_effect=fake_run), patch.object(
+                pipeline,
+                "run_preflight",
+                return_value={"status": "passed", "checked_at": "now"},
+            ):
+                campaign = pipeline.run_official_campaign(
+                    prompt="scenario description",
+                    scenario="sample",
+                    scenario_config_h="#define X 1",
+                    scenario_components=[
+                        {"nome": "one", "task": "one", "prototype": "int one(void);"}
+                    ],
+                    scenario_main_c="int main(void) { return 0; }",
+                    model="fake/model",
+                    openrouter_provider="cerebras/fp16",
+                    experiment_id="study",
+                    condition="full_context",
+                    planned_replicates=1,
+                    results_root=results_root,
+                    protocol_path=protocol,
+                    rubric_path=Path("experiments/rubrics/component-evaluation-v1.yaml"),
+                )
+            self.assertEqual(observed, ["full_context"])
+            self.assertEqual(campaign.data["context_mode"], "full_context")
+            intervention = json.loads(
+                (campaign.root / "inputs" / "intervention.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(intervention["context_mode"], "full_context")
 
 
 if __name__ == "__main__":

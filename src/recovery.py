@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from src.call_summary import summarize_calls
+from src.call_summary import safety_outcome, summarize_calls
 from src.events import EventLog, utc_now
 from src.experiment_index import index_existing_runs, try_index_experiment
 from src.trace import artifact_index, write_json_atomic
@@ -29,6 +29,7 @@ def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
         "run_id": run_dir.name,
         "status": "initialization_failed",
         "run_purpose": purpose,
+        "context_mode": None,
         "created_at": created,
         "updated_at": now,
         "process": {},
@@ -43,10 +44,12 @@ def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
     }
     events = EventLog(run_dir / "events.jsonl", run_dir.name, reset=False)
     events.emit("run.recovered", reason="missing_manifest")
+    llm_calls = summarize_calls(run_dir)
     result = {
         "schema_version": "1.0",
         "run_id": run_dir.name,
         "run_purpose": purpose,
+        "context_mode": None,
         "status": "initialization_failed",
         "compiled": False,
         "finished_at": now,
@@ -54,7 +57,8 @@ def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
         "error": {"type": "InitializationFailure", "message": "diretorio criado sem manifest.json"},
         "recovered": True,
         "recovered_at": now,
-        "llm_calls": summarize_calls(run_dir),
+        "llm_calls": llm_calls,
+        "safety_outcome": safety_outcome(llm_calls),
         "artifacts": artifact_index(run_dir),
     }
     write_json_atomic(manifest_path, manifest)
@@ -144,10 +148,12 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
         reason = "process_not_alive"
         terminal = "abandoned"
         events.emit("run.recovered", reason=reason, pid=pid, hostname=host)
+        llm_calls = summarize_calls(run_dir)
         result = {
             "schema_version": manifest.get("schema_version", "1.0"),
             "run_id": run_id,
             "run_purpose": manifest.get("run_purpose", "development"),
+            "context_mode": (manifest.get("intervention") or {}).get("context_mode"),
             "status": terminal,
             "compiled": False,
             "finished_at": now,
@@ -158,7 +164,8 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
             },
             "recovered": True,
             "recovered_at": now,
-            "llm_calls": summarize_calls(run_dir),
+            "llm_calls": llm_calls,
+            "safety_outcome": safety_outcome(llm_calls),
             "artifacts": artifact_index(run_dir),
         }
         write_json_atomic(result_path, result)

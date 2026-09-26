@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from src.aggregate_results import wilson
+from src.aggregate_results import risk_difference, wilson
 from src.experimental_inputs import freeze_experimental_inputs, load_frozen_inputs
 from src.integrity import seal_run, verify_seal
 from src.recovery import recover_stale_runs
@@ -27,6 +27,7 @@ class ResearchControlTests(unittest.TestCase):
                 "  planned_replicates: 2",
                 "conditions:",
                 "  - id: fragmented",
+                "    context_mode: fragmented",
                 "models:",
                 "  - model: fake/model",
                 "    provider: openrouter",
@@ -48,6 +49,7 @@ class ResearchControlTests(unittest.TestCase):
             inputs = freeze_experimental_inputs(
                 root,
                 "sample",
+                "sample description",
                 "#define X 1",
                 [{"nome": "one", "task": "one", "prototype": "int one(void);"}],
                 "int main(void) { return 0; }",
@@ -61,6 +63,7 @@ class ResearchControlTests(unittest.TestCase):
                 "openrouter",
                 None,
                 {},
+                "fragmented",
             )
             loaded = load_frozen_inputs(root, inputs)
             self.assertEqual(loaded["scenario"], "sample")
@@ -115,6 +118,9 @@ class ResearchControlTests(unittest.TestCase):
             interval = wilson(5, 10)
             self.assertLess(interval["ci95_low"], interval["rate"])
             self.assertGreater(interval["ci95_high"], interval["rate"])
+            difference = risk_difference(0, 50, 50, 50)
+            self.assertEqual(difference["difference"], -1.0)
+            self.assertGreater(difference["ci95_high"], -1.0)
 
 
 if __name__ == "__main__":

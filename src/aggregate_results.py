@@ -52,6 +52,24 @@ def wilson(successes: int, total: int, z: float = 1.959963984540054) -> dict[str
     }
 
 
+def risk_difference(
+    successes_a: int,
+    total_a: int,
+    successes_b: int,
+    total_b: int,
+) -> dict[str, Any]:
+    if total_a == 0 or total_b == 0:
+        return {"difference": None, "ci95_low": None, "ci95_high": None}
+    interval_a = wilson(successes_a, total_a)
+    interval_b = wilson(successes_b, total_b)
+    difference = successes_a / total_a - successes_b / total_b
+    return {
+        "difference": round(difference, 6),
+        "ci95_low": round(max(-1.0, interval_a["ci95_low"] - interval_b["ci95_high"]), 6),
+        "ci95_high": round(min(1.0, interval_a["ci95_high"] - interval_b["ci95_low"]), 6),
+    }
+
+
 def _group_summary(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[dict[str, Any]]:
     groups: dict[tuple[str, ...], list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -63,8 +81,11 @@ def _group_summary(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[di
         functional = sum(item.get("functional_status") == "passed" for item in evaluated)
         compiled = sum(_boolean(item.get("compiled")) for item in included)
         completed = sum(item.get("status") == "completed" for item in included)
+        refused = sum(_boolean(item.get("run_refusal")) for item in included)
+        any_refusal = sum(_boolean(item.get("any_refusal")) for item in included)
         costs = [value for value in (_number(item.get("cost_total")) for item in included) if value is not None]
         stats = wilson(functional, len(evaluated))
+        refusal_stats = wilson(refused, len(included))
         record = {key: value for key, value in zip(keys, identity)}
         record.update({
             "runs": len(items),
@@ -77,6 +98,11 @@ def _group_summary(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[di
             "functional_success_rate": stats["rate"],
             "functional_ci95_low": stats["ci95_low"],
             "functional_ci95_high": stats["ci95_high"],
+            "runs_with_refusal": refused,
+            "runs_with_any_refusal": any_refusal,
+            "run_refusal_rate": refusal_stats["rate"],
+            "refusal_ci95_low": refusal_stats["ci95_low"],
+            "refusal_ci95_high": refusal_stats["ci95_high"],
             "cost_total": round(sum(costs), 12) if costs else None,
             "cost_per_success": round(sum(costs) / functional, 12) if costs and functional else None,
         })
@@ -85,41 +111,117 @@ def _group_summary(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[di
 
 
 def _condition_comparisons(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    grouped: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    grouped: dict[tuple[str, str, str], dict[str, list[dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
     for row in rows:
-        if _boolean(row.get("include_in_analysis")) and _boolean(row.get("evaluated")):
-            grouped[str(row.get("model") or "")][str(row.get("condition") or "")].append(row)
+        if _boolean(row.get("include_in_analysis")):
+            identity = (
+                str(row.get("model") or ""),
+                str(row.get("provider") or ""),
+                str(row.get("inference_provider") or ""),
+            )
+            grouped[identity][str(row.get("condition") or "")].append(row)
     comparisons = []
-    for model, conditions in sorted(grouped.items()):
+    for identity, conditions in sorted(grouped.items()):
+        model, provider, inference_provider = identity
         names = sorted(conditions)
         for left_index, left in enumerate(names):
             for right in names[left_index + 1:]:
                 left_rows = conditions[left]
                 right_rows = conditions[right]
-                left_success = sum(row.get("functional_status") == "passed" for row in left_rows)
-                right_success = sum(row.get("functional_status") == "passed" for row in right_rows)
-                left_rate = left_success / len(left_rows)
-                right_rate = right_success / len(right_rows)
-                difference = left_rate - right_rate
-                standard_error = math.sqrt(
-                    left_rate * (1 - left_rate) / len(left_rows)
-                    + right_rate * (1 - right_rate) / len(right_rows)
+                left_evaluated = [row for row in left_rows if _boolean(row.get("evaluated"))]
+                right_evaluated = [row for row in right_rows if _boolean(row.get("evaluated"))]
+                left_success = sum(row.get("functional_status") == "passed" for row in left_evaluated)
+                right_success = sum(row.get("functional_status") == "passed" for row in right_evaluated)
+                functional_difference = risk_difference(
+                    left_success,
+                    len(left_evaluated),
+                    right_success,
+                    len(right_evaluated),
                 )
-                margin = 1.959963984540054 * standard_error
+                left_refusals = sum(_boolean(row.get("run_refusal")) for row in left_rows)
+                right_refusals = sum(_boolean(row.get("run_refusal")) for row in right_rows)
+                refusal_difference = risk_difference(
+                    left_refusals,
+                    len(left_rows),
+                    right_refusals,
+                    len(right_rows),
+                )
                 comparisons.append({
                     "model": model,
+                    "provider": provider,
+                    "inference_provider": inference_provider,
                     "condition_a": left,
                     "condition_b": right,
-                    "n_a": len(left_rows),
-                    "n_b": len(right_rows),
+                    "n_a": len(left_evaluated),
+                    "n_b": len(right_evaluated),
                     "successes_a": left_success,
                     "successes_b": right_success,
-                    "risk_difference": round(difference, 6),
-                    "ci95_low": round(max(-1.0, difference - margin), 6),
-                    "ci95_high": round(min(1.0, difference + margin), 6),
-                    "method": "unpooled Wald confidence interval",
+                    "risk_difference": functional_difference["difference"],
+                    "ci95_low": functional_difference["ci95_low"],
+                    "ci95_high": functional_difference["ci95_high"],
+                    "refusal_n_a": len(left_rows),
+                    "refusal_n_b": len(right_rows),
+                    "refusals_a": left_refusals,
+                    "refusals_b": right_refusals,
+                    "refusal_risk_difference": refusal_difference["difference"],
+                    "refusal_ci95_low": refusal_difference["ci95_low"],
+                    "refusal_ci95_high": refusal_difference["ci95_high"],
+                    "method": "Newcombe-Wilson score confidence interval",
                 })
     return comparisons
+
+
+def _validate_campaign_controls(campaigns: list[Campaign]) -> dict[str, Any]:
+    condition_modes: dict[str, set[str]] = defaultdict(set)
+    for campaign in campaigns:
+        condition_modes[str(campaign.data.get("condition"))].add(
+            str(campaign.data.get("context_mode"))
+        )
+    ambiguous = {
+        condition: sorted(modes)
+        for condition, modes in condition_modes.items()
+        if len(modes) != 1
+    }
+    if ambiguous:
+        raise ValueError(f"Condicoes associadas a modos divergentes: {ambiguous}")
+    controls = {
+        "stimulus_sha256": sorted({
+            campaign.data.get("stimulus_sha256")
+            for campaign in campaigns
+            if campaign.data.get("stimulus_sha256")
+        }),
+        "protocol_sha256": sorted({
+            campaign.data.get("protocol_sha256")
+            for campaign in campaigns
+            if campaign.data.get("protocol_sha256")
+        }),
+        "rubric_sha256": sorted({
+            campaign.data.get("rubric_sha256")
+            for campaign in campaigns
+            if campaign.data.get("rubric_sha256")
+        }),
+        "full_context_sha256": sorted({
+            campaign.data.get("full_context_sha256")
+            for campaign in campaigns
+            if campaign.data.get("full_context_sha256")
+        }),
+        "condition_context_modes": {
+            condition: next(iter(modes))
+            for condition, modes in sorted(condition_modes.items())
+        },
+    }
+    for key in (
+        "stimulus_sha256",
+        "protocol_sha256",
+        "rubric_sha256",
+        "full_context_sha256",
+    ):
+        if len(controls[key]) > 1:
+            raise ValueError(f"Campanhas incomparaveis: mais de um {key}.")
+    controls["comparable"] = True
+    return controls
 
 
 def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool = False) -> dict[str, Any]:
@@ -133,6 +235,7 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
         campaigns.append(Campaign.load(path, results_root))
     if not campaigns:
         raise FileNotFoundError(f"Nenhuma campanha encontrada para {experiment_id}")
+    controls = _validate_campaign_controls(campaigns)
     rows = []
     campaign_records = []
     for campaign in campaigns:
@@ -150,6 +253,7 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
                 "provider": campaign.data["provider"],
                 "inference_provider": campaign.data.get("inference_provider"),
                 "condition": campaign.data["condition"],
+                "context_mode": campaign.data.get("context_mode"),
                 "campaign_kind": campaign.data.get("campaign_kind", "official"),
             })
             rows.append(row)
@@ -157,10 +261,13 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
             "campaign_id": campaign.data["campaign_id"],
             "path": campaign.root.relative_to(results_root).as_posix(),
             "condition": campaign.data["condition"],
+            "context_mode": campaign.data.get("context_mode"),
             "model": campaign.data["model"],
             "stimulus_sha256": campaign.data.get("stimulus_sha256"),
             "protocol_sha256": campaign.data.get("protocol_sha256"),
             "rubric_sha256": campaign.data.get("rubric_sha256"),
+            "intervention_sha256": campaign.data.get("intervention_sha256"),
+            "full_context_sha256": campaign.data.get("full_context_sha256"),
             "integrity_verified": True,
             "campaign_combined_sha256": verification.get("combined_sha256"),
         })
@@ -177,8 +284,11 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
     _write_csv(output_root / "summary_by_model.csv", by_model, summary_fields)
     _write_csv(output_root / "summary_by_condition.csv", by_condition, summary_fields)
     comparison_fields = sorted({key for row in comparisons for key in row}) or [
-        "model", "condition_a", "condition_b", "n_a", "n_b", "successes_a",
-        "successes_b", "risk_difference", "ci95_low", "ci95_high", "method",
+        "model", "provider", "inference_provider", "condition_a", "condition_b",
+        "n_a", "n_b", "successes_a", "successes_b", "risk_difference",
+        "ci95_low", "ci95_high", "refusal_n_a", "refusal_n_b", "refusals_a",
+        "refusals_b", "refusal_risk_difference", "refusal_ci95_low",
+        "refusal_ci95_high", "method",
     ]
     _write_csv(output_root / "condition_comparisons.csv", comparisons, comparison_fields)
     report = {
@@ -188,10 +298,11 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
         "include_pilots": include_pilots,
         "campaign_count": len(campaigns),
         "run_count": len(rows),
-        "method": "Wilson score interval, 95% confidence",
+        "method": "Wilson score intervals and Newcombe-Wilson risk differences, 95% confidence",
         "by_model": by_model,
         "by_condition": by_condition,
         "condition_comparisons": comparisons,
+        "experimental_controls": controls,
         "campaigns": campaign_records,
     }
     write_json_atomic(output_root / "statistics.json", report)

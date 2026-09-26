@@ -1,6 +1,7 @@
 import re
 
 from src.llm_client import LLMClient
+from src.response_classification import SUSPICIOUS_GUARDS, classify_coder_response
 
 _GENERIC_SYSTEM_PROMPT = """
 You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.
@@ -21,25 +22,21 @@ Rules (no exceptions):
     directly.
 """.strip()
 
-_REFUSAL_HINTS = (
-    "i can't", "i cannot", "i won't", "i will not", "i'm sorry", "i am sorry",
-    "cannot help", "can't help", "not able to", "unable to", "as an ai",
-    "não posso", "não consigo", "não vou", "lamento",
-)
-
-_SUSPICIOUS_GUARDS = re.compile(
-    r"(?:SIZE_MAX|UINT_MAX|ULONG_MAX|UINT64_MAX)\s*(?:>|>=)\s*"
-    r"(?:LLONG_MAX|LONG_MAX|INT_MAX|INT64_MAX)"
-    r"|(?:LLONG_MAX|LONG_MAX|INT_MAX|INT64_MAX)\s*(?:<|<=)\s*"
-    r"(?:SIZE_MAX|UINT_MAX|ULONG_MAX|UINT64_MAX)"
-)
+_SUSPICIOUS_GUARDS = SUSPICIOUS_GUARDS
 
 
 def _looks_like_refusal(text: str) -> bool:
-    lowered = text.strip().lower()
-    if "{" not in text:
-        return True
-    return any(hint in lowered for hint in _REFUSAL_HINTS)
+    return classify_coder_response(text) in {"explicit_refusal", "implicit_refusal"}
+
+
+class CoderGenerationError(ValueError):
+    def __init__(self, prototype: str, classification: str):
+        self.prototype = prototype
+        self.classification = classification
+        super().__init__(
+            f"Coder nao produziu uma implementacao valida para: "
+            f"{prototype} ({classification})"
+        )
 
 
 class Coder:
@@ -49,13 +46,23 @@ class Coder:
     def __init__(self, llm: LLMClient):
         self.llm = llm
 
-    def generate_generic(self, task: str, prototype: str) -> str:
-        name = prototype.split("(")[0].strip().split()[-1]
-        user = (
-            f"TASK: {task}\n\n"
+    @staticmethod
+    def user_prompt(task: str, prototype: str, global_context: str | None = None) -> str:
+        context = f"{global_context}\n\n" if global_context else ""
+        return (
+            f"{context}LOCAL COMPONENT TASK: {task}\n\n"
             f"EXACT PROTOTYPE (must match): {prototype}\n\n"
-            f"Return ONLY the C source implementing that function."
+            "Return ONLY the C source implementing that function."
         )
+
+    def generate_generic(
+        self,
+        task: str,
+        prototype: str,
+        global_context: str | None = None,
+    ) -> str:
+        name = prototype.split("(")[0].strip().split()[-1]
+        user = self.user_prompt(task, prototype, global_context)
         reason = "unknown"
         for _ in range(self.GENERIC_ATTEMPTS):
             raw = self.llm.chat(
@@ -65,19 +72,10 @@ class Coder:
                 max_tokens=self.GENERIC_MAX_TOKENS,
             )
             code = self._clean(raw)
-            if not code.strip():
-                reason = "empty_response"
-                continue
-            if _looks_like_refusal(code):
-                reason = "refusal"
-                continue
-            if _SUSPICIOUS_GUARDS.search(code):
-                reason = "suspicious_guard"
-                continue
-            return code
-        raise ValueError(
-            f"Coder nao produziu uma implementacao valida para: {prototype} ({reason})"
-        )
+            reason = classify_coder_response(code)
+            if reason == "accepted":
+                return code
+        raise CoderGenerationError(prototype, reason)
 
     def _clean(self, raw: str) -> str:
         cleaned = re.sub(r"^```(?:c|cpp|makefile)?\s*\n?", "", raw, flags=re.MULTILINE)

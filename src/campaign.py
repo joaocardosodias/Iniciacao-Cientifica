@@ -56,7 +56,10 @@ class Campaign:
         planned_replicates: int,
         generation_parameters: dict[str, Any],
         campaign_kind: str = "official",
+        context_mode: str = "fragmented",
     ) -> "Campaign":
+        from src.context_modes import validate_context_mode
+
         experiment_id = experiment_id.strip()
         condition = condition.strip()
         if not experiment_id:
@@ -72,6 +75,7 @@ class Campaign:
             raise ValueError("--runs deve ser um inteiro positivo.")
         if campaign_kind not in {"official", "pilot"}:
             raise ValueError("campaign_kind deve ser official ou pilot.")
+        context_mode = validate_context_mode(context_mode)
         provider_label = inference_provider or provider
         root = (
             results_root
@@ -98,6 +102,7 @@ class Campaign:
             "campaign_id": campaign_id,
             "experiment_id": experiment_id,
             "condition": condition,
+            "context_mode": context_mode,
             "scenario": scenario,
             "requested_model": requested_model,
             "model": resolved_model,
@@ -132,6 +137,7 @@ class Campaign:
             planned_replicates=planned_replicates,
             experiment_id=experiment_id,
             condition=condition,
+            context_mode=context_mode,
         )
         campaign._index()
         return campaign
@@ -146,6 +152,10 @@ class Campaign:
             "rubric_sha256",
             "rubric_path",
             "rubric_version",
+            "intervention_sha256",
+            "intervention_path",
+            "prompt_template_version",
+            "full_context_sha256",
         ):
             self.data[key] = inputs.get(key)
         self._save()
@@ -233,11 +243,49 @@ class Campaign:
             raise ValueError(f"Mais de uma campanha corresponde aos filtros: {joined}")
         return cls.load(matches[0], results_root)
 
+    @classmethod
+    def find_all(
+        cls,
+        results_root: Path,
+        experiment_id: str,
+        model: str | None = None,
+        provider: str | None = None,
+        include_pilots: bool = False,
+    ) -> list["Campaign"]:
+        campaigns = []
+        if results_root.exists():
+            for path in sorted(results_root.glob("*/*/*/campaign.json")):
+                try:
+                    data = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if data.get("experiment_id") != experiment_id:
+                    continue
+                if not include_pilots and data.get("campaign_kind", "official") == "pilot":
+                    continue
+                if model is not None and model not in {
+                    data.get("requested_model"),
+                    data.get("model"),
+                }:
+                    continue
+                if provider is not None and provider not in {
+                    data.get("provider"),
+                    data.get("inference_provider"),
+                }:
+                    continue
+                campaigns.append(cls.load(path, results_root))
+        if not campaigns:
+            raise FileNotFoundError(
+                f"Nenhuma campanha encontrada para experiment={experiment_id}"
+            )
+        return campaigns
+
     def run_reference(self, replicate: int) -> dict[str, Any]:
         return {
             "id": self.data["campaign_id"],
             "path": "../../campaign.json",
             "kind": self.data.get("campaign_kind", "official"),
+            "context_mode": self.data.get("context_mode", "fragmented"),
             "planned_replicates": self.data["planned_replicates"],
             "replicate": replicate,
             "stimulus_sha256": self.data.get("stimulus_sha256"),
@@ -245,6 +293,9 @@ class Campaign:
             "protocol_version": self.data.get("protocol_version"),
             "rubric_sha256": self.data.get("rubric_sha256"),
             "rubric_version": self.data.get("rubric_version"),
+            "intervention_sha256": self.data.get("intervention_sha256"),
+            "prompt_template_version": self.data.get("prompt_template_version"),
+            "full_context_sha256": self.data.get("full_context_sha256"),
         }
 
     def pending_replicates(self) -> list[int]:
@@ -428,6 +479,7 @@ class Campaign:
             "path": self.root.relative_to(self.results_root).as_posix(),
             "experiment_id": self.data.get("experiment_id"),
             "condition": self.data.get("condition"),
+            "context_mode": self.data.get("context_mode"),
             "scenario": self.data.get("scenario"),
             "model": self.data.get("model"),
             "provider": self.data.get("provider"),
@@ -442,6 +494,9 @@ class Campaign:
             "stimulus_sha256": self.data.get("stimulus_sha256"),
             "protocol_sha256": self.data.get("protocol_sha256"),
             "rubric_sha256": self.data.get("rubric_sha256"),
+            "intervention_sha256": self.data.get("intervention_sha256"),
+            "prompt_template_version": self.data.get("prompt_template_version"),
+            "full_context_sha256": self.data.get("full_context_sha256"),
             "protocol_version": self.data.get("protocol_version"),
             "rubric_version": self.data.get("rubric_version"),
             "updated_at": self.data.get("updated_at"),

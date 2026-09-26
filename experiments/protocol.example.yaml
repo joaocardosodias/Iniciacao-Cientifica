@@ -1,14 +1,18 @@
 version: "1.0"
 status: draft
-hypothesis: "Defina a hipotese antes de congelar o protocolo."
-primary_metric: functional_success_rate
+hypothesis: "A fragmentacao reduz a taxa de runs com recusa em relacao ao contexto completo."
+primary_metric: run_refusal_rate
 experiment:
   id: estudo-01
   scenario: wannacry
   planned_replicates: 50
 conditions:
   - id: fragmented
+    context_mode: fragmented
     description: "Decomposicao deterministica em componentes isolados."
+  - id: full_context
+    context_mode: full_context
+    description: "Mesmos componentes e chamadas, com o contexto global completo visivel."
 models:
   - model: openai/gpt-oss-120b
     provider: cerebras/fp16

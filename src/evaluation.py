@@ -158,6 +158,7 @@ def record_evaluation(
             )
             evaluated_at = utc_now()
             experiment = manifest.get("experiment") or {}
+            intervention = manifest.get("intervention") or {}
             if result.get("compiled"):
                 compilation_status = "passed"
             elif result.get("status") == "compile_failed":
@@ -170,6 +171,7 @@ def record_evaluation(
                 "revision": revision,
                 "run_id": run_id,
                 "experiment": experiment,
+                "intervention": intervention,
                 "evaluator": evaluator,
                 "evaluated_at": evaluated_at,
                 "environment": environment_record or environment or {},
@@ -196,6 +198,7 @@ def record_evaluation(
                 "run_id": run_id,
                 "experiment_id": experiment.get("id"),
                 "condition": experiment.get("condition"),
+                "context_mode": intervention.get("context_mode"),
                 "replicate": experiment.get("replicate"),
                 "pipeline_status": result.get("status"),
                 "compiled": result.get("compiled", False),

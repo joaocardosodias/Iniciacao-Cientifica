@@ -77,6 +77,7 @@ def main() -> None:
     parser.add_argument("--model")
     parser.add_argument("--provider")
     parser.add_argument("--list-pending", action="store_true")
+    parser.add_argument("--all-conditions", action="store_true")
     parser.add_argument("--evaluator")
     parser.add_argument("--functional-status", choices=sorted(FUNCTIONAL_STATUSES))
     parser.add_argument("--execution-vm-snapshot")
@@ -94,22 +95,36 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.list_pending:
-        if not args.experiment_id or not args.condition:
-            parser.error("--list-pending exige --experiment-id e --condition.")
-        campaign = Campaign.find(
+        if not args.experiment_id:
+            parser.error("--list-pending exige --experiment-id.")
+        if args.all_conditions and args.condition:
+            parser.error("--all-conditions nao pode ser combinado com --condition.")
+        if not args.all_conditions and not args.condition:
+            parser.error("Informe --condition ou --all-conditions.")
+        campaigns = Campaign.find_all(
+            args.results_root,
+            args.experiment_id,
+            args.model,
+            args.provider,
+        ) if args.all_conditions else [Campaign.find(
             args.results_root,
             args.experiment_id,
             args.condition,
             args.model,
             args.provider,
-        )
-        records = pending_runs(campaign)
+        )]
+        records = [
+            (campaign.data["condition"], record)
+            for campaign in campaigns
+            for record in pending_runs(campaign)
+        ]
         if not records:
             print("Nenhuma run pendente de avaliacao.")
             return
-        for record in records:
+        for condition, record in records:
             print(
-                f"replicate={record['replicate']} run_id={record['run_id']} "
+                f"condition={condition} replicate={record['replicate']} "
+                f"run_id={record['run_id']} "
                 f"status={record['status']}"
             )
         return

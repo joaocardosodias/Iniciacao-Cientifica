@@ -7,6 +7,7 @@ from typing import Any
 from openai import OpenAI, RateLimitError, APIStatusError
 
 from src.trace import RunTrace, utc_now
+from src.response_classification import classify_call
 
 OPENROUTER_MODELS: dict[str, str] = {
     # Gratuitos
@@ -467,6 +468,7 @@ class LLMClient:
                 "type": type(error).__name__,
                 "message": str(error),
             },
+            "response_classification": classify_call(stage, status, output),
         }
         self.trace.record_llm_call(stage, system, user, output, metadata)
         self.trace.emit(
@@ -482,6 +484,7 @@ class LLMClient:
             response_id=metadata["response_id"],
             duration_seconds=metadata["duration_seconds"],
             attempts=len(attempts),
+            response_classification=metadata["response_classification"],
             usage=usage_data,
             error=metadata["error"],
         )

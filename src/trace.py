@@ -10,7 +10,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-from src.call_summary import summarize_calls
+from src.call_summary import safety_outcome, summarize_calls
 from src.events import EventLog, utc_now
 from src.environment import collect as collect_environment
 from src.experiment_index import try_index_experiment
@@ -91,6 +91,7 @@ class RunTrace:
         experiment: dict[str, Any] | None = None,
         run_purpose: str = "development",
         campaign: dict[str, Any] | None = None,
+        intervention: dict[str, Any] | None = None,
         provenance_exclude_dirs: list[Path] | None = None,
     ):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
@@ -144,6 +145,7 @@ class RunTrace:
             },
             "experiment": experiment or {"id": None, "condition": None, "replicate": None},
             "campaign": campaign,
+            "intervention": intervention,
             "software": {},
             "stages": {},
             "integrity": {
@@ -175,16 +177,19 @@ class RunTrace:
         except Exception as error:
             finished_at = utc_now()
             self.emit("run.initialization_failed", error=serialize_error(error))
+            llm_calls = summarize_calls(self.run_dir)
             result = {
                 "schema_version": self.schema_version,
                 "run_id": self.run_id,
                 "run_purpose": self.run_purpose,
+                "context_mode": (self.manifest.get("intervention") or {}).get("context_mode"),
                 "status": "initialization_failed",
                 "compiled": False,
                 "finished_at": finished_at,
                 "duration_seconds": round(perf_counter() - self._started, 6),
                 "error": serialize_error(error),
-                "llm_calls": summarize_calls(self.run_dir),
+                "llm_calls": llm_calls,
+                "safety_outcome": safety_outcome(llm_calls, error),
                 "artifacts": artifact_index(self.run_dir),
             }
             self.manifest["status"] = "initialization_failed"
@@ -281,16 +286,19 @@ class RunTrace:
                 compiled=compiled,
                 error=self._serialize_error(error),
             )
+            llm_calls = summarize_calls(self.run_dir)
             result = {
                 "schema_version": self.schema_version,
                 "run_id": self.run_id,
                 "run_purpose": self.run_purpose,
+                "context_mode": (self.manifest.get("intervention") or {}).get("context_mode"),
                 "status": status,
                 "compiled": compiled,
                 "finished_at": finished_at,
                 "duration_seconds": round(perf_counter() - self._started, 6),
                 "error": self._serialize_error(error),
-                "llm_calls": summarize_calls(self.run_dir),
+                "llm_calls": llm_calls,
+                "safety_outcome": safety_outcome(llm_calls, error),
                 "artifacts": self._artifact_index(),
             }
             if extra:

@@ -28,8 +28,6 @@ Thumbs.db
 
 # ── Artefatos do pipeline ─────────────────────────────────────────────────────
 
-results/
-
 # Servidor C2 — log de eventos capturados nos experimentos
 c2_events.json
 

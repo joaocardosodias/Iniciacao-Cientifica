@@ -1,4 +1,4 @@
-# Pipeline do modo componentes
+# Pipeline experimental de contexto
 
 Este documento descreve, em detalhe, como funciona o pipeline no modo
 componentes: o que o usuario define, o que vai para o LLM, o que o LLM devolve,
@@ -32,7 +32,7 @@ Fluxo resumido:
         |
         v
  para cada componente (em paralelo):
-     Coder -> LLM  (recebe somente task + prototype)
+     Coder -> LLM  (visibilidade definida por context_mode)
      salva modules/<nome>.c e modules/<idx>_<nome>/response.c
         |
         v
@@ -144,6 +144,8 @@ Flags relevantes:
 - `--limit` / `-L`: espera entre chamadas ao LLM.
 - `--experiment-id`: identificador comum a execucoes do mesmo experimento.
 - `--condition`: condicao experimental (ex.: baseline).
+- `--context-mode`: `fragmented` ou `full_context` em execucoes de desenvolvimento.
+- `--all-conditions`: executa todas as condicoes do protocolo oficial.
 - `--replicate`: numero positivo da repeticao.
 
 As tres flags de identidade sao opcionais, ficam em `manifest.json` e
@@ -179,6 +181,12 @@ da campanha e executa o preflight. O preflight ocorre antes da primeira chamada
 experimental. `--pilot` identifica ensaios preliminares; eles nao entram na
 consolidacao global por padrao.
 
+Em campanhas oficiais, cada entrada de `conditions` no protocolo deve declarar
+`context_mode`. O comando `--all-conditions` cria uma campanha separada para
+cada condicao e executa o total de `--runs` em cada uma. O modo e inferido do
+protocolo e registrado no manifesto, no resultado, nos indices e nos arquivos
+consolidados.
+
 Uma combinacao existente nao e sobrescrita. `--resume` le o manifesto da
 campanha, preserva as runs existentes e executa somente as replicas ausentes.
 
@@ -187,10 +195,13 @@ campanha, preserva as runs existentes e executa somente as replicas ausentes.
 `tools/record_evaluation.py` grava a avaliacao em
 `outputs/<run>/evaluation/manual.json`, preserva revisoes anteriores e mantem
 `evaluations.jsonl` append-only. O `result.json` automatico permanece imutavel.
+`--all-conditions --list-pending` lista as runs ainda nao avaliadas de todas as
+condicoes do experimento.
 
 `tools/build_results.py` combina campanha, manifestos, resultados e avaliacoes
 para regenerar `runs.csv`, `summary.csv`, `summary.json`, `exclusions.csv` e
-`provenance.json`. Tambem sela cada run e a campanha com SHA-256. Os comandos
+`provenance.json`. Com `--all-conditions`, regenera todas as campanhas e o
+agregado do experimento. Tambem sela cada run e a campanha com SHA-256. Os comandos
 `tools/verify_run.py` e `tools/verify_campaign.py` detectam arquivos ausentes,
 alterados ou acrescentados depois do selo.
 
@@ -230,7 +241,9 @@ Ainda em `run()`:
 - grava `config.h` no run (`prompts/` e depois `assembly/`);
 - grava `prompts/components.json` (copia do cenario);
 - registra o estagio `components` no manifesto;
-- **os valores do `config.h` e o `main_c` nao sao enviados ao LLM**.
+- em `fragmented`, `config.h`, `main_c`, descricao global e demais componentes
+  nao sao enviados ao LLM;
+- em `full_context`, esses quatro blocos sao enviados a todas as chamadas.
 
 ---
 
@@ -238,16 +251,17 @@ Ainda em `run()`:
 
 Para cada componente, em paralelo:
 
-1. O pipeline monta `modules/<idx>_<nome>/prompt.txt` com `task` + prototipo.
-2. Chama `Coder.generate_generic(task, prototype)` (`src/coder.py`).
+1. O pipeline monta `modules/<idx>_<nome>/prompt.txt` com o prompt exato.
+2. Chama `Coder.generate_generic(task, prototype, global_context)`.
 3. O Coder envia ao `LLMClient.chat(...)` com:
    - `system = _GENERIC_SYSTEM_PROMPT` (fixo);
-   - `user = "TASK: ...\n\nEXACT PROTOTYPE (must match): ...\n\nReturn ONLY the C source..."`;
+   - `user` contem sempre tarefa e prototipo locais e, em `full_context`, o
+     bloco global completo;
    - `stage = coder.generic.<nome>`;
    - `max_tokens = 8192`.
 4. Valida a resposta:
    - vazio -> `empty_response`;
-   - parece recusa -> `refusal`;
+   - recusa textual explicita ou implicita -> classificacao separada;
    - guarda suspeita (`SIZE_MAX > LLONG_MAX` etc.) -> `suspicious_guard`;
    - ate 3 tentativas; se falhar, lanca `ValueError`.
 5. Salva o codigo em:
@@ -261,7 +275,8 @@ Se qualquer modulo falhar, o pipeline aborta e finaliza como `failed`.
 
 ### 6.1 Exemplo do que vai ao LLM
 
-Um unico componente, uma unica chamada. Nada mais e enviado.
+Um unico componente e implementado por chamada. A condicao determina se o
+contexto global aparece antes da tarefa local.
 
 **system** (`_GENERIC_SYSTEM_PROMPT`):
 
@@ -481,8 +496,8 @@ Na raiz de `output/`:
   (agente OpenCode) se a compilacao falhar.
 - **O `main_c` nao compila.** Ele e compilado junto; quem invoca o `gcc` e o
   AssemblerHarness.
-- **`config.h` e `main_c` nao sao enviados ao LLM.** So o `task` e o `prototype`
-  de cada componente vao ao Coder.
+- **Em `fragmented`, `config.h` e `main_c` nao sao enviados ao LLM.**
+- **Em `full_context`, eles sao enviados junto da arquitetura completa.**
 - **Excecao:** o agente de reparo, por rodar em `assembly/`, consegue ler
   `config.h` e `main.c` do disco, mas isso so ocorre se o `gcc` falhar.
 - **Falha de indice nao derruba a execucao.** Se `experiments.jsonl` nao puder
@@ -604,6 +619,7 @@ Campos:
 - `status`, `compiled`, `recovered`, `error_type`;
 - `scenario`, `module_count`, `source_combined_sha256`;
 - `experiment` (`id`, `condition`, `replicate`) quando disponivel no manifesto;
+- `intervention` (`context_mode`, versao do template e visibilidade);
 - `input_sha256`;
 - `model`;
 - `llm_calls`;

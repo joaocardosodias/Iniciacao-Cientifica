@@ -15,12 +15,22 @@ from src.integrity import seal_campaign, seal_run, verify_seal
 RUN_FIELDS = [
     "replicate",
     "run_id",
+    "context_mode",
     "status",
     "compiled",
     "error_type",
     "duration_seconds",
     "llm_calls",
     "llm_refusals",
+    "provider_refusal_calls",
+    "textual_refusal_calls",
+    "explicit_refusal_calls",
+    "implicit_refusal_calls",
+    "empty_response_calls",
+    "invalid_code_calls",
+    "any_refusal",
+    "run_refusal",
+    "terminal_refusal_type",
     "llm_errors",
     "llm_retries",
     "tokens_total",
@@ -70,6 +80,7 @@ def _run_row(campaign: Campaign, record: dict[str, Any]) -> tuple[dict[str, Any]
         row = {
             "replicate": record.get("replicate"),
             "run_id": record.get("run_id"),
+            "context_mode": campaign.data.get("context_mode"),
             "status": record.get("status"),
             "compiled": False,
             "error_type": (record.get("error") or {}).get("type"),
@@ -87,6 +98,7 @@ def _run_row(campaign: Campaign, record: dict[str, Any]) -> tuple[dict[str, Any]
     llm = result.get("llm_calls") or {}
     tokens = llm.get("tokens") or {}
     cost = llm.get("cost") or {}
+    safety = result.get("safety_outcome") or {}
     manual = None
     sources = [manifest_path, result_path]
     if manual_path.exists():
@@ -96,12 +108,34 @@ def _run_row(campaign: Campaign, record: dict[str, Any]) -> tuple[dict[str, Any]
     row = {
         "replicate": record.get("replicate"),
         "run_id": result.get("run_id"),
+        "context_mode": result.get("context_mode", campaign.data.get("context_mode")),
         "status": result.get("status"),
         "compiled": result.get("compiled", False),
         "error_type": (result.get("error") or {}).get("type"),
         "duration_seconds": result.get("duration_seconds"),
         "llm_calls": llm.get("total", 0),
         "llm_refusals": llm.get("refused", 0),
+        "provider_refusal_calls": safety.get(
+            "provider_refusal_calls", llm.get("provider_refusals", 0)
+        ),
+        "textual_refusal_calls": safety.get(
+            "textual_refusal_calls", llm.get("textual_refusals", 0)
+        ),
+        "explicit_refusal_calls": safety.get(
+            "explicit_refusal_calls", llm.get("explicit_refusals", 0)
+        ),
+        "implicit_refusal_calls": safety.get(
+            "implicit_refusal_calls", llm.get("implicit_refusals", 0)
+        ),
+        "empty_response_calls": safety.get(
+            "empty_response_calls", llm.get("empty_responses", 0)
+        ),
+        "invalid_code_calls": safety.get(
+            "invalid_code_calls", llm.get("invalid_code_responses", 0)
+        ),
+        "any_refusal": safety.get("any_refusal", (llm.get("refused", 0) or 0) > 0),
+        "run_refusal": safety.get("terminal_refusal", False),
+        "terminal_refusal_type": safety.get("terminal_refusal_type"),
         "llm_errors": llm.get("errors", 0),
         "llm_retries": llm.get("retries", 0),
         "tokens_total": tokens.get("total"),
@@ -137,13 +171,21 @@ def _summary(campaign: Campaign, rows: list[dict[str, Any]]) -> dict[str, Any]:
         (row.get("llm_calls") or 0) + (row.get("llm_retries") or 0)
         for row in rows
     ])
-    runs_with_refusal = sum((row.get("llm_refusals") or 0) > 0 for row in rows)
+    runs_with_refusal = sum(bool(row.get("run_refusal")) for row in rows)
+    runs_with_any_refusal = sum(bool(row.get("any_refusal")) for row in rows)
+    runs_with_provider_refusal = sum(
+        (row.get("provider_refusal_calls") or 0) > 0 for row in rows
+    )
+    runs_with_textual_refusal = sum(
+        (row.get("textual_refusal_calls") or 0) > 0 for row in rows
+    )
     return {
         "schema_version": "1.0",
         "generated_at": utc_now(),
         "campaign_id": campaign.data["campaign_id"],
         "experiment_id": campaign.data["experiment_id"],
         "condition": campaign.data["condition"],
+        "context_mode": campaign.data.get("context_mode"),
         "model": campaign.data["model"],
         "provider": campaign.data["provider"],
         "inference_provider": campaign.data.get("inference_provider"),
@@ -169,13 +211,25 @@ def _summary(campaign: Campaign, rows: list[dict[str, Any]]) -> dict[str, Any]:
                 not row.get("include_in_analysis") for row in evaluated_rows
             ),
             "runs_with_refusal": runs_with_refusal,
+            "runs_with_any_refusal": runs_with_any_refusal,
+            "runs_with_provider_refusal": runs_with_provider_refusal,
+            "runs_with_textual_refusal": runs_with_textual_refusal,
             "refused_calls": sum(row.get("llm_refusals") or 0 for row in rows),
+            "provider_refusal_calls": sum(
+                row.get("provider_refusal_calls") or 0 for row in rows
+            ),
+            "textual_refusal_calls": sum(
+                row.get("textual_refusal_calls") or 0 for row in rows
+            ),
         },
         "rates": {
             "generation_completed": _rate(completed, planned),
             "compilation": _rate(compiled, started),
             "functional_success": _rate(functional_passed, len(included_evaluated)),
-            "runs_with_refusal": _rate(runs_with_refusal, started),
+            "runs_with_any_refusal": _rate(runs_with_any_refusal, started),
+            "run_refusal_rate": _rate(runs_with_refusal, started),
+            "provider_refusal": _rate(runs_with_provider_refusal, started),
+            "textual_refusal": _rate(runs_with_textual_refusal, started),
         },
         "usage": {
             "cost_total": round(sum(costs), 12) if costs else None,

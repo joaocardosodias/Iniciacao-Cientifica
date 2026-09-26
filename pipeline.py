@@ -15,8 +15,20 @@ from src.campaign import Campaign
 from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
 from src.recovery import recover_stale_runs
-from src.experimental_inputs import freeze_experimental_inputs, load_frozen_inputs
+from src.experimental_inputs import (
+    condition_context_mode,
+    freeze_experimental_inputs,
+    load_frozen_inputs,
+    load_yaml,
+    protocol_condition_ids,
+)
 from src.preflight import run_preflight
+from src.context_modes import (
+    PROMPT_TEMPLATE_VERSION,
+    component_context,
+    context_visibility,
+    validate_context_mode,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,6 +58,7 @@ def run(
     run_purpose: str = "development",
     campaign: dict | None = None,
     provenance_exclude_dirs: list[Path] | None = None,
+    context_mode: str = "fragmented",
 ) -> Path:
     if not scenario_components:
         raise ValueError("O modo componentes exige 'components' definido no cenario.")
@@ -63,6 +76,28 @@ def run(
         raise ValueError("--replicate deve ser maior que zero.")
     if run_purpose not in {"development", "official", "pilot"}:
         raise ValueError("run_purpose deve ser development, official ou pilot.")
+    context_mode = validate_context_mode(context_mode)
+    global_context = component_context(
+        context_mode,
+        prompt,
+        scenario_components,
+        scenario_config_h or "",
+        scenario_main_c or "",
+    )
+    full_context = component_context(
+        "full_context",
+        prompt,
+        scenario_components,
+        scenario_config_h or "",
+        scenario_main_c or "",
+    )
+    full_context_sha256 = sha256_text(full_context or "")
+    expected_full_context_sha256 = (campaign or {}).get("full_context_sha256")
+    if (
+        expected_full_context_sha256 is not None
+        and expected_full_context_sha256 != full_context_sha256
+    ):
+        raise ValueError("O contexto global da run difere da intervencao congelada.")
     parameters = {
         "temperature": temperature,
         "top_p": top_p,
@@ -87,6 +122,13 @@ def run(
         },
         run_purpose=run_purpose,
         campaign=campaign,
+        intervention={
+            "context_mode": context_mode,
+            "prompt_template_version": PROMPT_TEMPLATE_VERSION,
+            "visibility": context_visibility(context_mode),
+            "full_context_sha256": full_context_sha256,
+            "intervention_sha256": (campaign or {}).get("intervention_sha256"),
+        },
         provenance_exclude_dirs=provenance_exclude_dirs,
     )
     if scenario:
@@ -109,7 +151,7 @@ def run(
         trace.configure_model(llm.model, llm.provider)
         log.info(f"Modelo: {llm.model}")
 
-        log.info("MODO COMPONENTES — decomposição determinística do cenário")
+        log.info(f"MODO DE CONTEXTO — {context_mode}")
         modules = [
             {
                 "nome": component["nome"],
@@ -121,9 +163,16 @@ def run(
         ]
         trace.write_text("config.h", scenario_config_h or "")
         trace.write_json("prompts/components.json", scenario_components)
-        trace.record_stage("components", {"count": len(modules), "source": "scenario"})
+        if global_context is not None:
+            trace.write_text("prompts/global_context.txt", global_context)
+        trace.record_stage("components", {
+            "count": len(modules),
+            "source": "scenario",
+            "context_mode": context_mode,
+            "prompt_template_version": PROMPT_TEMPLATE_VERSION,
+        })
         trace.emit("layer.finished", layer="components", status="completed",
-                   count=len(modules))
+                   count=len(modules), context_mode=context_mode)
 
         run_dir = trace.run_dir
         log.info("CAMADA CODER — geração dos componentes (paralelo)...")
@@ -140,6 +189,7 @@ def run(
                 "index": index,
                 "name": name,
                 "description": module["descricao"],
+                "context_mode": context_mode,
                 "status": "running",
                 "started_at": module_started_at,
             })
@@ -147,10 +197,18 @@ def run(
                        total=len(modules), module_dir=module_relative.as_posix())
             log.info(f"  [{index}/{len(modules)}] {name} — iniciando...")
             try:
-                contextualized_prompt = f"{module['task']}\n\nEXACT PROTOTYPE: {module['prototype']}"
+                contextualized_prompt = Coder.user_prompt(
+                    module["task"],
+                    module["prototype"],
+                    global_context,
+                )
                 trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
                 print(f"\n  [Component -> {name}]\n  {module['prototype']}")
-                code = coder.generate_generic(module["task"], module["prototype"])
+                code = coder.generate_generic(
+                    module["task"],
+                    module["prototype"],
+                    global_context,
+                )
                 trace.write_text(module_relative / "response.c", code)
                 if code:
                     trace.write_text(f"modules/{safe_name(name)}.c", code)
@@ -158,11 +216,14 @@ def run(
                     "index": index,
                     "name": name,
                     "description": module["descricao"],
+                    "context_mode": context_mode,
                     "status": "completed",
                     "started_at": module_started_at,
                     "finished_at": utc_now(),
                     "duration_seconds": round(time.perf_counter() - module_started, 6),
                     "prompt_path": (module_relative / "prompt.txt").as_posix(),
+                    "prompt_sha256": sha256_text(contextualized_prompt),
+                    "response_classification": "accepted",
                     "code_path": f"modules/{safe_name(name)}.c",
                     "code_sha256": sha256_text(code),
                     "code_lines": len(code.splitlines()),
@@ -178,11 +239,13 @@ def run(
                     "index": index,
                     "name": name,
                     "description": module["descricao"],
+                    "context_mode": context_mode,
                     "status": "failed",
                     "started_at": module_started_at,
                     "finished_at": utc_now(),
                     "duration_seconds": round(time.perf_counter() - module_started, 6),
                     "error": {"type": type(error).__name__, "message": str(error)},
+                    "response_classification": getattr(error, "classification", None),
                 })
                 trace.emit("module.failed", index=index, name=name, status="failed",
                            duration_seconds=round(time.perf_counter() - module_started, 6),
@@ -271,6 +334,7 @@ def run(
                 "main_c": "main.c",
                 "binary": "output" if compiled_ok else None,
                 "module_count": len(generated),
+                "context_mode": context_mode,
                 "assembly": {
                     "mode": harness.last_mode,
                     "result": "assembly/result.json",
@@ -313,6 +377,7 @@ def run_official_campaign(
     protocol_path: Path | None = None,
     rubric_path: Path | None = None,
     campaign_kind: str = "official",
+    context_mode: str | None = None,
 ) -> Campaign:
     experiment_id = experiment_id.strip()
     condition = condition.strip()
@@ -337,6 +402,10 @@ def run_official_campaign(
         top_p = parameters.get("top_p")
         seed = parameters.get("seed")
         max_tokens = parameters.get("max_tokens")
+        stored_context_mode = campaign.data.get("context_mode", "fragmented")
+        if context_mode is not None and validate_context_mode(context_mode) != stored_context_mode:
+            raise ValueError("--context-mode difere da campanha existente.")
+        context_mode = validate_context_mode(stored_context_mode)
         campaign.data["status"] = "running"
         campaign.data["finished_at"] = None
         campaign.events.emit("campaign.resumed", pending_replicates=campaign.pending_replicates())
@@ -344,9 +413,12 @@ def run_official_campaign(
         if has_frozen_inputs:
             frozen = load_frozen_inputs(campaign.root, campaign.data)
             scenario = frozen["scenario"]
+            prompt = frozen["scenario_description"]
             scenario_config_h = frozen["scenario_config_h"]
             scenario_components = frozen["scenario_components"]
             scenario_main_c = frozen["scenario_main_c"]
+            if frozen["context_mode"] != context_mode:
+                raise ValueError("A intervencao congelada difere da campanha.")
         else:
             if campaign.data.get("experimental_controls_required"):
                 if protocol_path is None or rubric_path is None:
@@ -355,6 +427,7 @@ def run_official_campaign(
                     inputs = freeze_experimental_inputs(
                         campaign.root,
                         scenario,
+                        prompt,
                         scenario_config_h,
                         scenario_components,
                         scenario_main_c,
@@ -368,6 +441,7 @@ def run_official_campaign(
                         campaign.data["provider"],
                         campaign.data.get("inference_provider"),
                         parameters,
+                        context_mode,
                     )
                     campaign.attach_experimental_inputs(inputs)
                 except Exception as error:
@@ -390,6 +464,11 @@ def run_official_campaign(
             raise ValueError("Uma nova campanha exige --rubric.")
         if campaign_kind not in {"official", "pilot"}:
             raise ValueError("campaign_kind deve ser official ou pilot.")
+        protocol = load_yaml(protocol_path)
+        declared_context_mode = condition_context_mode(protocol, condition)
+        if context_mode is not None and validate_context_mode(context_mode) != declared_context_mode:
+            raise ValueError("--context-mode difere da condicao definida no protocolo.")
+        context_mode = declared_context_mode
         gateway, _, resolved_model = _resolve(model or DEFAULT_MODEL)
         parameters = {
             "delay": delay,
@@ -410,11 +489,13 @@ def run_official_campaign(
             planned_replicates=planned_replicates,
             generation_parameters=parameters,
             campaign_kind=campaign_kind,
+            context_mode=context_mode,
         )
         try:
             inputs = freeze_experimental_inputs(
                 campaign.root,
                 scenario,
+                prompt,
                 scenario_config_h,
                 scenario_components,
                 scenario_main_c,
@@ -428,6 +509,7 @@ def run_official_campaign(
                 gateway,
                 openrouter_provider,
                 parameters,
+                context_mode,
             )
             campaign.attach_experimental_inputs(inputs)
         except Exception as error:
@@ -475,6 +557,7 @@ def run_official_campaign(
                     run_purpose=campaign_kind,
                     campaign=campaign.run_reference(replicate),
                     provenance_exclude_dirs=[results_root],
+                    context_mode=context_mode,
                 )
             except (RunInterrupted, KeyboardInterrupt):
                 try:
@@ -532,6 +615,10 @@ def main():
         help="Identificador do experimento para agrupar execucoes.")
     parser.add_argument("--condition", default=None,
         help="Condicao experimental desta execucao.")
+    parser.add_argument("--all-conditions", action="store_true",
+        help="Executa todas as condicoes do protocolo em campanhas separadas.")
+    parser.add_argument("--context-mode", choices=("fragmented", "full_context"),
+        default=None, help="Visibilidade de contexto; em campanhas oficiais vem do protocolo.")
     parser.add_argument("--replicate", type=int, default=None,
         help="Numero da repeticao (inteiro positivo).")
     parser.add_argument("--official", action="store_true",
@@ -577,11 +664,21 @@ def main():
         parser.error("--runs so pode ser usado com --official.")
     if args.pilot and not args.official:
         parser.error("--pilot exige --official.")
+    if args.all_conditions and not args.official:
+        parser.error("--all-conditions exige --official.")
+    if args.all_conditions and args.condition:
+        parser.error("--all-conditions nao pode ser combinado com --condition.")
+    if args.all_conditions and args.context_mode:
+        parser.error("--all-conditions obtem cada context_mode do protocolo.")
     if args.official:
-        if not args.experiment_id or not args.condition:
-            parser.error("--official exige --experiment-id e --condition.")
-        if not args.experiment_id.strip() or not args.condition.strip():
-            parser.error("--experiment-id e --condition nao podem ser vazios.")
+        if not args.experiment_id:
+            parser.error("--official exige --experiment-id.")
+        if not args.experiment_id.strip():
+            parser.error("--experiment-id nao pode ser vazio.")
+        if not args.all_conditions and not args.condition:
+            parser.error("--official exige --condition ou --all-conditions.")
+        if args.condition is not None and not args.condition.strip():
+            parser.error("--condition nao pode ser vazia.")
         if not args.model:
             parser.error("--official exige --model explicito.")
         if args.replicate is not None:
@@ -592,15 +689,41 @@ def main():
             parser.error("Uma nova campanha oficial exige --runs com inteiro positivo.")
         if not args.resume and args.protocol is None:
             parser.error("Uma nova campanha oficial exige --protocol.")
+        if args.all_conditions and not args.resume and args.protocol is None:
+            parser.error("Uma nova execucao com --all-conditions exige --protocol.")
+    protocol = load_yaml(args.protocol) if args.all_conditions and not args.resume else None
+    conditions = protocol_condition_ids(protocol) if protocol is not None else []
     if args.resume:
-        previous = Campaign.find(
-            args.results_root,
-            args.experiment_id.strip(),
-            args.condition.strip(),
-            args.model,
-            args.openrouter_provider,
-        )
-        key = previous.data["scenario"]
+        if args.all_conditions:
+            existing_campaigns = Campaign.find_all(
+                args.results_root,
+                args.experiment_id.strip(),
+                args.model,
+                args.openrouter_provider,
+                include_pilots=True,
+            )
+            expected_kind = "pilot" if args.pilot else "official"
+            existing_campaigns = [
+                campaign
+                for campaign in existing_campaigns
+                if campaign.data.get("campaign_kind", "official") == expected_kind
+            ]
+            if not existing_campaigns:
+                parser.error(f"Nenhuma campanha {expected_kind} encontrada para retomar.")
+            conditions = [campaign.data["condition"] for campaign in existing_campaigns]
+            scenarios = {campaign.data["scenario"] for campaign in existing_campaigns}
+            if len(scenarios) != 1:
+                parser.error("As campanhas existentes possuem cenarios divergentes.")
+            key = next(iter(scenarios))
+        else:
+            previous = Campaign.find(
+                args.results_root,
+                args.experiment_id.strip(),
+                args.condition.strip(),
+                args.model,
+                args.openrouter_provider,
+            )
+            key = previous.data["scenario"]
     else:
         if not args.scenario:
             print("[ERRO] Informe um cenario com --scenario. Use --list.")
@@ -620,37 +743,64 @@ def main():
     print(f"  [MODO] componentes determinísticos ({len(scenario_components)})")
 
     if args.official:
-        try:
-            campaign = run_official_campaign(
-                prompt=prompt,
-                scenario=scenario,
-                scenario_config_h=scenario_config_h,
-                scenario_components=scenario_components,
-                scenario_main_c=scenario_main_c,
-                model=args.model,
-                openrouter_provider=args.openrouter_provider,
-                experiment_id=args.experiment_id.strip(),
-                condition=args.condition.strip(),
-                planned_replicates=args.runs,
-                delay=args.limit,
-                temperature=args.temperature,
-                top_p=args.top_p,
-                seed=args.seed,
-                max_tokens=args.max_tokens,
-                results_root=args.results_root,
-                resume=args.resume,
-                protocol_path=args.protocol,
-                rubric_path=args.rubric,
-                campaign_kind="pilot" if args.pilot else "official",
-            )
-        except Exception as error:
-            log.error(f"Falha na campanha: {error}")
-            raise
+        selected_conditions = conditions if args.all_conditions else [args.condition.strip()]
+        if args.all_conditions:
+            for selected_condition in selected_conditions:
+                try:
+                    Campaign.find(
+                        args.results_root,
+                        args.experiment_id.strip(),
+                        selected_condition,
+                        args.model,
+                        args.openrouter_provider,
+                    )
+                except FileNotFoundError:
+                    if args.resume:
+                        parser.error(
+                            f"Campanha ausente para retomar: {selected_condition}."
+                        )
+                else:
+                    if not args.resume:
+                        parser.error(
+                            f"Campanha ja existe para {selected_condition}; use --resume."
+                        )
+        campaigns = []
+        for selected_condition in selected_conditions:
+            try:
+                campaign = run_official_campaign(
+                    prompt=prompt,
+                    scenario=scenario,
+                    scenario_config_h=scenario_config_h,
+                    scenario_components=scenario_components,
+                    scenario_main_c=scenario_main_c,
+                    model=args.model,
+                    openrouter_provider=args.openrouter_provider,
+                    experiment_id=args.experiment_id.strip(),
+                    condition=selected_condition,
+                    planned_replicates=args.runs,
+                    delay=args.limit,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    seed=args.seed,
+                    max_tokens=args.max_tokens,
+                    results_root=args.results_root,
+                    resume=args.resume,
+                    protocol_path=args.protocol,
+                    rubric_path=args.rubric,
+                    campaign_kind="pilot" if args.pilot else "official",
+                    context_mode=args.context_mode,
+                )
+            except Exception as error:
+                log.error(f"Falha na campanha {selected_condition}: {error}")
+                raise
+            campaigns.append(campaign)
         print("\n" + "=" * 60)
-        print(f"  Campanha: {campaign.root}")
-        print(f"  Status: {campaign.data['status']}")
-        print(f"  Concluidas: {campaign.data['completed_replicates']}")
-        print(f"  Falhas: {campaign.data['failed_replicates']}")
+        for campaign in campaigns:
+            print(f"  Campanha: {campaign.root}")
+            print(f"  Contexto: {campaign.data['context_mode']}")
+            print(f"  Status: {campaign.data['status']}")
+            print(f"  Concluidas: {campaign.data['completed_replicates']}")
+            print(f"  Falhas: {campaign.data['failed_replicates']}")
         print("=" * 60 + "\n")
         return
 
@@ -671,6 +821,7 @@ def main():
             experiment_id=args.experiment_id,
             condition=args.condition,
             replicate=args.replicate,
+            context_mode=args.context_mode or "fragmented",
         )
     except Exception as error:
         log.error(f"Falha no pipeline: {error}")
