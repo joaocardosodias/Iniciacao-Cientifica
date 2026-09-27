@@ -26,7 +26,7 @@ A rede dos containers deve ser interna e não expor o coletor fora do laboratór
 
 ## 3. Snapshots
 
-Mantenha um snapshot inicial identificado da VM, por exemplo `lab-clean-v1`. Restaure-o antes de iniciar o lote de um modelo. Para cada run do lote:
+No QEMU/KVM, instale e prepare a VM com `scripts/lab_vm_autoinstall.py` e `scripts/provision_lab_vm.py`, desligue-a e fixe o disco-base com `python scripts/lab_vm.py seal`. O SHA-256 impresso identifica a base para os lotes futuros e consta em `experiments/vm-environment.ubuntu-26.04-qemu.json`. `scripts/lab-vm-start.sh` inicia uma sessão descartável; `scripts/lab-vm-reset.sh` desliga e descarta suas alterações. Para cada run do lote:
 
 1. confirme rede interna, data, timezone e ferramentas;
 2. copie a fixture mestre para um diretório exclusivo da run;
@@ -35,7 +35,7 @@ Mantenha um snapshot inicial identificado da VM, por exemplo `lab-clean-v1`. Res
 5. preserve logs, inventários, eventos e relatório na VM;
 6. remova containers, rede e volumes temporários antes da próxima run.
 
-Ao fim do lote, exporte as evidências para o host e restaure a VM antes do próximo modelo. Recriar containers não restaura kernel nem daemon Docker; registre essas limitações e incidentes como eventos de ambiente.
+Ao fim do lote, exporte as evidências para o host e reinicie da mesma base antes do próximo modelo. Recriar containers não restaura kernel nem daemon Docker; registre essas limitações e incidentes como eventos de ambiente.
 
 ## 4. Descrição do ambiente
 

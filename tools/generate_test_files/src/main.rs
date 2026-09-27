@@ -147,7 +147,7 @@ fn sentence(rng: &mut Rng) -> String {
         if index > 0 {
             text.push(' ');
         }
-        text.push_str(rng.pick(WORDS));
+        text.push_str(*rng.pick(WORDS));
     }
     let mut chars = text.chars();
     match chars.next() {
@@ -334,7 +334,7 @@ fn build_xlsx(rng: &mut Rng) -> Vec<u8> {
                 0 => sheet.push_str(&format!(
                     "<c r=\"{}\" t=\"inlineStr\"><is><t>{}</t></is></c>",
                     reference,
-                    xml_escape(rng.pick(LAST_NAMES))
+                    xml_escape(*rng.pick(LAST_NAMES))
                 )),
                 1 => sheet.push_str(&format!("<c r=\"{}\"><v>{}</v></c>", reference, rng.range(1000, 150000))),
                 2 => sheet.push_str(&format!(
@@ -347,7 +347,7 @@ fn build_xlsx(rng: &mut Rng) -> Vec<u8> {
                 _ => sheet.push_str(&format!(
                     "<c r=\"{}\" t=\"inlineStr\"><is><t>{}</t></is></c>",
                     reference,
-                    xml_escape(rng.pick(COMPANIES))
+                    xml_escape(*rng.pick(COMPANIES))
                 )),
             }
         }

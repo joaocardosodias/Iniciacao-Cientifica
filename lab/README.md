@@ -68,17 +68,52 @@ Fluxo entre modelos: rode o lote de um modelo, exporte `lab/runs/<experiment_id>
 para o host, reinicie a VM e repita com o próximo modelo. Mantenha a **mesma fixture
 mestre** e a mesma topologia para todos os modelos.
 
-No host, com o VirtualBox instalado, estes wrappers aplicam o ciclo da VM
-(padrões `LAB_VM_NAME=IC` e `LAB_SNAPSHOT=lab-clean-v1`):
+No host, use QEMU/KVM. Crie uma VM nova a partir da ISO Ubuntu 26.04 LTS:
+
+```bash
+python scripts/lab_vm.py init --size-gb 25
+python scripts/lab_vm_autoinstall.py --iso /caminho/ubuntu-26.04.1-desktop-amd64.iso --background
+python scripts/lab_vm.py provision
+python scripts/provision_lab_vm.py
+python scripts/lab_vm.py seal
+```
+
+O autoinstalador cria o usuário `fragment`, habilita acesso SSH pela chave pública
+`~/.ssh/lab_vm.pub` e desliga a VM ao terminar. Acompanhe a instalação em
+`~/.local/state/ic-lab/install.log` e `serial.log`. `provision` inicia a VM em modo
+headless com disco gravável e rede. `provision_lab_vm.py` instala Docker, Compose e
+dependências, constrói as três imagens Ubuntu 26.04, gera e sela a fixture sintética
+de 5.000 arquivos e desliga a VM. Se houver uma interrupção durante essa etapa,
+`python scripts/provision_lab_vm.py --resume` retoma após reiniciar a VM em modo
+`provision`. O disco raw esparso fica em
+`~/.local/share/ic-lab/base.raw`; o identificador SHA-256 da base fica em
+`~/.local/state/ic-lab/baseline.json`. Defina `LAB_VM_DISK` e `LAB_VM_STATE` para
+usar outros caminhos. O disco-base precisa ser fixado novamente após qualquer
+alteração intencional na instalação, sempre com a VM desligada.
+Todos os containers usam Ubuntu 26.04 LTS, incluindo a etapa de compilação do
+verificador. Para comparar lotes do mesmo estudo, mantenha a mesma versão do Ubuntu,
+as mesmas dependências e a mesma base em todos eles.
+
+Para cada lote, use os wrappers (6 CPUs, 6000 MiB, SSH em 127.0.0.1:2223):
 
 ```bash
 scripts/lab-vm-start.sh
+python scripts/lab_vm.py status
+ssh -p 2223 -i ~/.ssh/lab_vm fragment@127.0.0.1
 scripts/lab-vm-reset.sh
 ```
 
-O primeiro desliga a VM se estiver ligada, restaura o snapshot e inicia em modo
-headless. O segundo pede confirmação (ou `LAB_RESET_CONFIRM=yes`), desliga por ACPI
-com fallback para poweroff e restaura o snapshot. Exporte as evidências antes do reset.
+`start` inicia em modo headless com KVM e alterações temporárias em disco, confere o
+SHA-256 da base e envia `experiments/vm-environment.ubuntu-26.04-qemu.json` para o
+convidado. `reset` pede confirmação (ou `LAB_RESET_CONFIRM=yes`), desliga por ACPI
+com fallback para poweroff e descarta as alterações. O próximo `start` volta à base.
+Exporte as evidências antes do reset. A rede externa da VM é restrita no modo de
+avaliação; somente a porta SSH é encaminhada para o host. Durante a instalação a
+rede fica liberada para instalar dependências. O laboratório Docker continua na sua
+rede interna independente. Use `experiments/vm-environment.ubuntu-26.04-qemu.json`
+nas novas campanhas; o piloto anterior mantém seu registro histórico de VirtualBox.
+Transfira as campanhas a avaliar para a VM depois do `start` e exporte suas evidências
+antes de cada `reset`; os diretórios de resultados não integram a base limpa.
 
 ## O que o script faz
 
@@ -127,7 +162,7 @@ Verifique o acesso ao host separadamente antes de registrá-lo como ausente.
 - Recriar containers **não** restaura o kernel, o daemon Docker nem outros recursos da
   VM. Registre isso no artigo; trate falhas de limpeza como erro de ambiente.
 - O ambiente de containers não cobre reinicialização, systemd ou serviços completos.
-- Se o host de geração e o Ubuntu 24.04 do executor divergirem muito na glibc, a checagem de
+- Se o host de geração e o Ubuntu 26.04 LTS do executor divergirem muito na glibc, a checagem de
   compatibilidade reprova e o run vira `environment_error`; nesse caso use uma base
   compatível ou registre a limitação.
 - O avaliador funcional deve aplicar o mesmo procedimento a `fragmented` e

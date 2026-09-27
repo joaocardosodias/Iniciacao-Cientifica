@@ -1,4 +1,8 @@
-FROM rust:1.85-slim-bookworm@sha256:9f841bbe9e7d8e37ceb96ed907265a3a0df7f44e3737d0b100e7907a679acb36 AS build
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78 AS build
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends cargo rustc ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
@@ -6,7 +10,7 @@ COPY tools ./tools
 RUN cargo build --release --locked -p decrypt_file
 
 
-FROM ubuntu:24.04@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3
+FROM ubuntu:26.04@sha256:da6fc2be547864451aa253836dd926da33623312df4a9a243e35dc877c378a78
 
 RUN useradd --create-home --uid 10001 lab
 COPY --from=build /src/target/release/decrypt_file /usr/local/bin/decrypt_file
