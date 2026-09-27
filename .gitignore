@@ -61,3 +61,4 @@ artigo/*.fdb_latexmk
 artigo/*.fls
 artigo/*.out
 artigo/*.synctex.gz
+artigo/
