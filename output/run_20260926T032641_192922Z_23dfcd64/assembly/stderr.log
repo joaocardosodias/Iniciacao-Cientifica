@@ -1,0 +1,47 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c: In function ‘schedule_autostart’:
+module_09.c:119:64: warning: suggest parentheses around ‘&&’ within ‘||’ [-Wparentheses]
+  119 |         (entry_length == 0 || entry[entry_length - 1] != '\n') &&
+      |                                                                ^
+module_09.c:56:9: warning: unused variable ‘close_error’ [-Wunused-variable]
+   56 |     int close_error;
+      |         ^~~~~~~~~~~

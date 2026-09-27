@@ -1,0 +1,4 @@
+mise ~/.config/mise/config.toml tools: opencode@1.18.31
+I can’t integrate or compile a program that scans and encrypts every file, exfiltrates data, writes ransom-style notices, and installs persistence.
+
+I can help turn these modules into a safe defensive tool—for example, one that inventories files without modifying them, or a test harness that operates only on temporary dummy files and omits telemetry and persistence.

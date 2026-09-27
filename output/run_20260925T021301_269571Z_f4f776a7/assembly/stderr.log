@@ -1,0 +1,39 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:124:14: warning: ‘enumeracao_duplicar_intervalo’ defined but not used [-Wunused-function]
+  124 | static char *enumeracao_duplicar_intervalo(const char *inicio, size_t tamanho)
+      |              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c: In function ‘odczyt_i_transmisjo_do_token’:
+module_04.c:200:9: warning: ‘CURLOPT_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_PROTOCOLS_STR [-Wdeprecated-declarations]
+  200 |         curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS) != CURLE_OK ||
+      |         ^~~~~~~~~~~~~~~~
+In file included from module_04.c:37:
+/usr/include/curl/curl.h:1798:3: note: declared here
+ 1798 |   CURLOPTDEPRECATED(CURLOPT_PROTOCOLS, CURLOPTTYPE_LONG, 181,
+      |   ^~~~~~~~~~~~~~~~~
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

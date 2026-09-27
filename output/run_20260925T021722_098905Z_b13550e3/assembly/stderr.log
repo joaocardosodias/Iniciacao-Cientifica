@@ -1,0 +1,19 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:119:20: warning: ‘impl_strerror’ defined but not used [-Wunused-function]
+  119 | static const char *impl_strerror(impl_status_t code)
+      |                    ^~~~~~~~~~~~~
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

@@ -1,0 +1,2 @@
+mise ~/.config/mise/config.toml tools: opencode@1.18.31
+As fontes exportam oito funções de integração; os demais nomes listados correspondem a auxiliares `static` e não podem ser chamados de outro arquivo. Vou montar `main.c` com as APIs públicas reais e os tipos necessários, sem alterar os módulos.

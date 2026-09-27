@@ -1,0 +1,5 @@
+mise ~/.config/mise/config.toml tools: opencode@1.18.31
+Create main.c with required content, then compile.
+Create main.c with required includes, type definitions, extern prototypes, and main calling f01 then f02.
+We need to see git diff.
+Run git status with path.

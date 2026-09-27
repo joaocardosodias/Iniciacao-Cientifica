@@ -1,0 +1,48 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c: In function ‘write_encrypted_sibling’:
+module_05.c:110:9: warning: unused variable ‘rc’ [-Wunused-variable]
+  110 |     int rc;
+      |         ^~
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c: In function ‘write_notice’:
+module_07.c:79:13: warning: variable ‘written’ set but not used [-Wunused-but-set-variable=]
+   79 |     ssize_t written = 0;
+      |             ^~~~~~~
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

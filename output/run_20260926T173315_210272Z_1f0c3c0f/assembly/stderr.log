@@ -1,0 +1,52 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c: In function ‘secure_erase’:
+module_06.c:76:30: error: variable-sized object may not be initialized except with an empty initializer
+   76 |     char zero_buf[bufsize] = {0};
+      |                              ^
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c: In function ‘join_path’:
+module_07.c:50:21: error: lvalue required as unary ‘&’ operand
+   50 |     return asprintf(&((char *)0), "%s/%s", dir, file) == -1 ? NULL : NULL;
+      |                     ^
+module_07.c: At top level:
+module_07.c:46:14: warning: ‘join_path’ defined but not used [-Wunused-function]
+   46 | static char *join_path(const char *dir, const char *file)
+      |              ^~~~~~~~~
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

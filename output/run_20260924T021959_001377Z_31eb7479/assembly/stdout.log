@@ -1,0 +1,4 @@
+mise ~/.config/mise/config.toml tools: opencode@1.18.31
+Created `main.c` and compiled successfully on the first attempt. The `output` binary exists.
+
+The requested `f01`–`f03` names are linked to the actual module symbols (`create_test_fixtures`, `simulate_transform`, and `document_recovery`). `f01` takes a writable output buffer, so `main` passes it a correctly sized local buffer rather than `argv[0]`.

@@ -1,0 +1,42 @@
+main.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_05.c: In function ‘token_e_transmissao_http’:
+module_05.c:497:9: warning: ‘CURLOPT_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_PROTOCOLS_STR [-Wdeprecated-declarations]
+  497 |         curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS) != CURLE_OK ||
+      |         ^~~~~~~~~~~~~~~~
+In file included from module_05.c:38:
+/usr/include/curl/curl.h:1798:3: note: declared here
+ 1798 |   CURLOPTDEPRECATED(CURLOPT_PROTOCOLS, CURLOPTTYPE_LONG, 181,
+      |   ^~~~~~~~~~~~~~~~~
+module_05.c:498:9: warning: ‘CURLOPT_REDIR_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_REDIR_PROTOCOLS_STR [-Wdeprecated-declarations]
+  498 |         curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTPS) != CURLE_OK ||
+      |         ^~~~~~~~~~~~~~~~
+/usr/include/curl/curl.h:1804:3: note: declared here
+ 1804 |   CURLOPTDEPRECATED(CURLOPT_REDIR_PROTOCOLS, CURLOPTTYPE_LONG, 182,
+      |   ^~~~~~~~~~~~~~~~~
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

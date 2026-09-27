@@ -1,0 +1,7 @@
+I’ll inspect the three modules to determine their actual exported signatures and call dependencies, then write `main.c` and compile without changing the modules.
+The checked-in modules do not match the supplied interface: they contain no `f01`–`f28`; `module_01.c` already defines an unconditional `main`, and several functions in the other modules are `static` or test-only. A second `main.c` cannot both call those functions and link with the exact requested command. I’m checking the target directory state before deciding whether any safe `main.c`-only change is possible.
+I couldn’t create a `main.c` that satisfies the request with these module files, so I left the workspace unchanged.
+
+The modules do not define `f01`–`f28`. Also, `module_01.c` already defines an unconditional `main`, while functions needed from `module_02.c` and `module_03.c` are `static` or test-only. That makes the requested calls inaccessible and causes a duplicate `main` if `main.c` defines one. The exact compile command therefore cannot produce the requested program without corrected module files or permission to modify them.
+
+Please provide modules matching the listed interface, or authorize changes to the modules.

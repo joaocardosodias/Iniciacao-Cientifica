@@ -1,0 +1,13 @@
+mise by @jdx – installing 1 tool
+mise ⇢ opencode@1.18.31  1ms · already installed
+mise ████████████████ 1/1 · installed 0 tools · 1 already installed in 2ms
+[0m
+> build · deepseek/deepseek-v4-flash
+[0m
+[0m→ [0mRead init_session.c
+[0m→ [0mRead scan_storage.c
+[0m→ [0mRead apply_transform.c
+[0m→ [0mRead write_manifest.c
+[0m→ [0mRead sync_telemetry.c
+[0m→ [0mRead register_service.c
+[0m→ [0mRead purge_residuals.c

@@ -1,0 +1,949 @@
+mise by @jdx – installing 1 tool
+mise ⇢ opencode@1.18.31  1ms · already installed
+mise ████████████████ 1/1 · installed 0 tools · 1 already installed in 2ms
+[0m
+> build · openai/gpt-oss-120b
+[0m
+[0m$ [0mgcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 -o output main.c module_01.c module_02.c -lssl -lcrypto -lcurl -lm -lpthread
+cc1: fatal error: main.c: No such file or directory
+compilation terminated.
+cc1: fatal error: module_01.c: No such file or directory
+compilation terminated.
+cc1: fatal error: module_02.c: No such file or directory
+compilation terminated.
+[0m
+[0m✱ [0mGlob "module_*.c"[90m in /home/cardoso/GitHub/Iniciacao-Cientifica · 100 matches[0m
+[0m
+[0m✗ [0mInvalid Tool
+The arguments provided to the tool are invalid: Model tried to call unavailable tool 'ls'. Available tools: bash, edit, glob, grep, invalid, read, skill, task, todowrite, webfetch, write.
+[0m
+[0m→ [0mRead module_01.c[90m [offset=1, limit=20][0m
+[0m→ [0mRead module_01.c[90m [offset=21, limit=100][0m
+[0m→ [0mRead module_01.c[90m [limit=200, offset=121][0m
+[0m✱ [0mGrep "\bf01\b"[90m in . · 0 matches[0m
+[0m✱ [0mGrep "\bf02\b"[90m in . · 0 matches[0m
+[0m→ [0mRead module_02.c[90m [limit=200, offset=1][0m
+[0m→ [0mRead module_02.c[90m [limit=200, offset=201][0m
+[0m✱ [0mGrep "#define f01"[90m in . · 0 matches[0m
+[0m✱ [0mGrep "f01"[90m in . · 0 matches[0m
+[0m
+[0m✗ [0mInvalid Tool
+The arguments provided to the tool are invalid: Model tried to call unavailable tool 'apply_patch'. Available tools: bash, edit, glob, grep, invalid, read, skill, task, todowrite, webfetch, write.
+[0m
+[0m← [0mWrite main.c
+Wrote file successfully.
+[0m
+[0m$ [0mgcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 -o output main.c module_01.c module_02.c -lssl -lcrypto -lcurl -lm -lpthread
+module_01.c:167:4: error: conflicting types for ‘fi_ctx’; have ‘struct fi_context_s *’
+  167 | } *fi_ctx = NULL;
+      |    ^~~~~~
+module_01.c:94:8: note: previous declaration of ‘fi_ctx’ with type ‘struct fi_context_s *’
+   94 |     } *fi_ctx;
+      |        ^~~~~~
+module_02.c: In function ‘compute_sha256’:
+module_02.c:68:5: warning: ‘SHA256_Init’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   68 |     if (!SHA256_Init(&ctx)) {
+      |     ^~
+In file included from module_02.c:45:
+/usr/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+module_02.c:85:9: warning: ‘SHA256_Update’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   85 |         if (!SHA256_Update(&ctx, buf, n)) {
+      |         ^~
+/usr/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+module_02.c:101:5: warning: ‘SHA256_Final’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  101 |     if (!SHA256_Final(out_digest, &ctx)) {
+      |     ^~
+/usr/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+[0m
+[0m→ [0mRead module_01.c[90m [limit=30, offset=150][0m
+[0m
+[0m← [0mEdit module_01.c
+Index: /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
+===================================================================
+--- /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
++++ /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
+@@ -163,9 +163,10 @@
+  
+ static struct fi_context_s {
+     fi_report_cb_t cb;
+     void *user_data;
+-} *fi_ctx = NULL;
++};
++static struct fi_context_s *fi_ctx = NULL;
+ 
+  
+ void file_inventory_utility(char *const dirs[], size_t dir_count,
+                             fi_report_cb_t report_cb, void *user_data)
+
+[0m
+[0m→ [0mRead module_01.c[90m [limit=30, offset=190][0m
+[0m
+[0m← [0mEdit module_01.c
+Index: /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
+===================================================================
+--- /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
++++ /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_01.c
+@@ -60,8 +60,12 @@
+     FI_TYPE_BLOCKDEV,
+     FI_TYPE_FIFO,
+     FI_TYPE_SOCKET,
+     FI_TYPE_UNKNOWN_DEVICE
++}
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
+ } fi_obj_type_t;
+ 
+  
+ typedef void (*fi_report_cb_t)(const char *path,
+@@ -82,18 +86,26 @@
+     if (S_ISSOCK(mode))  return FI_TYPE_SOCKET;
+     return FI_TYPE_UNKNOWN_DEVICE;
+ }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+  
+ static int fi_nftw_callback(const char *fpath, const struct stat *sb,
+                             int typeflag, struct FTW *ftwbuf)
+ {
+      
+     extern struct fi_context_s {
+         fi_report_cb_t cb;
+         void *user_data;
+-    } *fi_ctx;
++    }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++} *fi_ctx;
++
+     const char *link_target = NULL;
+     char link_buf[PATH_MAX];
+     fi_obj_type_t obj_type = FI_TYPE_UNKNOWN;
+ 
+@@ -107,36 +119,68 @@
+         ssize_t len = readlink(fpath, link_buf, sizeof(link_buf) - 1);
+         if (len >= 0) {
+             link_buf[len] = '\0';
+             link_target = link_buf;
+-        } else {
++        }
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++} else {
+              
+         }
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
+     }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+     if (fi_ctx->cb) {
+         fi_ctx->cb(fpath, obj_type, sb, link_target, fi_ctx->user_data);
+-    } else {
++    }
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++} else {
+          
+         char mtime_iso[64];
+         struct tm tm;
+         if (gmtime_r(&sb->st_mtime, &tm) != NULL) {
+             if (strftime(mtime_iso, sizeof(mtime_iso),
+                          "%Y-%m-%dT%H:%M:%SZ", &tm) == 0) {
+                 strcpy(mtime_iso, "1970-01-01T00:00:00Z");
+             }
+-        } else {
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++        }
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++} else {
+             strcpy(mtime_iso, "1970-01-01T00:00:00Z");
+         }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+          
+         const char *size_str = "";
+         if (obj_type == FI_TYPE_REGULAR) {
+             static char size_buf[32];
+             snprintf(size_buf, sizeof(size_buf), "%lld", (long long)sb->st_size);
+             size_str = size_buf;
+         }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+         const char *type_str;
+         switch (obj_type) {
+             case FI_TYPE_REGULAR: type_str = "regular"; break;
+             case FI_TYPE_DIRECTORY: type_str = "directory"; break;
+@@ -147,8 +191,12 @@
+             case FI_TYPE_SOCKET: type_str = "socket"; break;
+             default: type_str = "unknown";
+         }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+         printf("\"%s\",%s,%s,%s,%llu,\"%s\"\n",
+                fpath,
+                type_str,
+                size_str,
+@@ -156,15 +204,27 @@
+                (unsigned long long)sb->st_ino,
+                link_target ? link_target : "");
+     }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+     return 0;  
+ }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+  
+ static struct fi_context_s {
+     fi_report_cb_t cb;
+     void *user_data;
++}
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
+ };
+ static struct fi_context_s *fi_ctx = NULL;
+ 
+  
+@@ -187,24 +247,44 @@
+             fprintf(stderr, "Directory pointer at index %zu is NULL, skipping.\n", i);
+             continue;
+         }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+          
+         if (realpath(dirs[i], real_path) == NULL) {
+             fprintf(stderr, "realpath failed for \"%s\": %s\n",
+                     dirs[i], strerror(errno));
+             continue;
+         }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+          
+         int flags = FTW_PHYS;         
+         int rc = nftw(real_path, fi_nftw_callback, 20, flags);
+         if (rc != 0) {
+             fprintf(stderr, "nftw failed for \"%s\": %s\n",
+                     real_path, strerror(errno));
+              
+         }
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
+     }
+ 
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
++}
++
+      
+     fi_ctx = NULL;
++}
++
++void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
++    file_inventory_utility(dirs, dir_count, report_cb, user_data);
+ }
+\ No newline at end of file
+
+[0m
+[0m→ [0mRead module_02.c[90m [limit=30, offset=225][0m
+[0m
+[0m← [0mEdit module_02.c
+Index: /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_02.c
+===================================================================
+--- /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_02.c
++++ /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/assembly/module_02.c
+@@ -52,8 +52,12 @@
+     FH_ERR_OPENFILE = 4,
+     FH_ERR_READ = 5,
+     FH_ERR_HASH = 6,
+     FH_ERR_JSON = 7
++}
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
+ } file_hash_error_t;
+ 
+  
+ static int compute_sha256(const char *filepath, unsigned char *out_digest, off_t *out_size)
+@@ -63,23 +67,35 @@
+         fprintf(stderr, "Error opening file '%s': %s\n", filepath, strerror(errno));
+         return FH_ERR_OPENFILE;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     SHA256_CTX ctx;
+     if (!SHA256_Init(&ctx)) {
+         fclose(fp);
+         fprintf(stderr, "SHA256_Init failed\n");
+         return FH_ERR_HASH;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     const size_t bufsize = 8192;
+     unsigned char *buf = malloc(bufsize);
+     if (!buf) {
+         fclose(fp);
+         fprintf(stderr, "Memory allocation failure\n");
+         return FH_ERR_HASH;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     off_t total = 0;
+     size_t n;
+     while ((n = fread(buf, 1, bufsize, fp)) > 0) {
+         if (!SHA256_Update(&ctx, buf, n)) {
+@@ -87,90 +103,146 @@
+             fclose(fp);
+             fprintf(stderr, "SHA256_Update failed\n");
+             return FH_ERR_HASH;
+         }
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
+         total += n;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     if (ferror(fp)) {
+         free(buf);
+         fclose(fp);
+         fprintf(stderr, "Error reading file '%s'\n", filepath);
+         return FH_ERR_READ;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     if (!SHA256_Final(out_digest, &ctx)) {
+         free(buf);
+         fclose(fp);
+         fprintf(stderr, "SHA256_Final failed\n");
+         return FH_ERR_HASH;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     free(buf);
+     fclose(fp);
+     *out_size = total;
+     return FH_SUCCESS;
+ }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+  
+ static void digest_to_hex(const unsigned char *digest, char *hexbuf)
+ {
+     static const char hexchars[] = "0123456789abcdef";
+     for (int i = 0; i < 32; ++i) {
+         hexbuf[i * 2] = hexchars[(digest[i] >> 4) & 0xF];
+         hexbuf[i * 2 + 1] = hexchars[digest[i] & 0xF];
+     }
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
+     hexbuf[64] = '\0';
+ }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+  
+ static int json_write_entry(FILE *f, const char *path, off_t size, const char *sha256_hex, int is_first)
+ {
+     if (!is_first) {
+         if (fprintf(f, ",\n") < 0)
+             return FH_ERR_JSON;
+     }
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
+     if (fprintf(f,
+                 "  {\n"
+                 "    \"path\": \"%s\",\n"
+                 "    \"size\": %jd,\n"
+                 "    \"sha256\": \"%s\"\n"
+-                "  }",
++                "  }
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}",
+                 path,
+                 (intmax_t)size,
+                 sha256_hex) < 0)
+         return FH_ERR_JSON;
+     return FH_SUCCESS;
+ }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+  
+ int file_hash_reporter(const char *directory_path)
+ {
+     if (!directory_path) {
+         fprintf(stderr, "Directory path is NULL\n");
+         return FH_ERR_INVALID_ARG;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     DIR *dir = opendir(directory_path);
+     if (!dir) {
+         fprintf(stderr, "Cannot open directory '%s': %s\n", directory_path, strerror(errno));
+         return FH_ERR_OPENDIR;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     FILE *json_fp = fopen("file_hash_report.json", "w");
+     if (!json_fp) {
+         fprintf(stderr, "Cannot create JSON report file: %s\n", strerror(errno));
+         closedir(dir);
+         return FH_ERR_JSON;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     if (fprintf(json_fp, "[\n") < 0) {
+         fprintf(stderr, "Error writing to JSON file\n");
+         fclose(json_fp);
+         closedir(dir);
+         return FH_ERR_JSON;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     struct dirent *entry;
+     int first = 1;
+     int total_files = 0;
+     off_t total_bytes = 0;
+@@ -184,14 +256,22 @@
+             fprintf(stderr, "Path too long: %s/%s\n", directory_path, entry->d_name);
+             continue;
+         }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+         struct stat st;
+         if (stat(full_path, &st) != 0) {
+             fprintf(stderr, "stat failed for '%s': %s\n", full_path, strerror(errno));
+             continue;
+         }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+         if (!S_ISREG(st.st_mode))
+             continue;  
+ 
+         unsigned char digest[32];
+@@ -201,8 +281,12 @@
+              
+             continue;
+         }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+         char sha256_hex[65];
+         digest_to_hex(digest, sha256_hex);
+ 
+         rc = json_write_entry(json_fp, full_path, filesize, sha256_hex, first);
+@@ -210,25 +294,41 @@
+             fprintf(stderr, "Failed to write JSON entry for '%s'\n", full_path);
+             continue;
+         }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+         if (first)
+             first = 0;
+ 
+         total_files++;
+         total_bytes += filesize;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     if (fprintf(json_fp, "\n]\n") < 0) {
+         fprintf(stderr, "Error finalizing JSON file\n");
+         fclose(json_fp);
+         closedir(dir);
+         return FH_ERR_JSON;
+     }
+ 
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
++}
++
+     fclose(json_fp);
+     closedir(dir);
+ 
+     printf("Processed %d files, total size %jd bytes. Report written to file_hash_report.json\n",
+            total_files, (intmax_t)total_bytes);
+     return FH_SUCCESS;
++}
++
++int f02(const char *directory_path) {
++    return file_hash_reporter(directory_path);
+ }
+\ No newline at end of file
+
+[0m
+[0m$ [0mgcc -O2 -Wall -Wno-discarded-qualifiers -std=c11 -o output main.c module_01.c module_02.c -lssl -lcrypto -lcurl -lm -lpthread
+module_01.c:66:1: error: expected ‘;’, identifier or ‘(’ before ‘void’
+   66 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      | ^~~~
+module_01.c:66:48: error: unknown type name ‘fi_report_cb_t’
+   66 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:68:3: warning: data definition has no type or storage class
+   68 | } fi_obj_type_t;
+      |   ^~~~~~~~~~~~~
+module_01.c:68:3: error: type defaults to ‘int’ in declaration of ‘fi_obj_type_t’ [-Wimplicit-int]
+module_01.c:72:32: error: expected declaration specifiers or ‘...’ before ‘fi_obj_type_t’
+   72 |                                fi_obj_type_t type,
+      |                                ^~~~~~~~~~~~~
+module_01.c:78:22: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘fi_mode_to_type’
+   78 | static fi_obj_type_t fi_mode_to_type(mode_t mode)
+      |                      ^~~~~~~~~~~~~~~
+module_01.c:90:48: error: unknown type name ‘fi_report_cb_t’
+   90 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c: In function ‘fi_nftw_callback’:
+module_01.c:100:9: error: unknown type name ‘fi_report_cb_t’
+  100 |         fi_report_cb_t cb;
+      |         ^~~~~~~~~~~~~~
+module_01.c:104:1: error: expected ‘;’, identifier or ‘(’ before ‘void’
+  104 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      | ^~~~
+module_01.c:104:48: error: unknown type name ‘fi_report_cb_t’
+  104 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:106:4: error: ‘fi_ctx’ undeclared (first use in this function)
+  106 | } *fi_ctx;
+      |    ^~~~~~
+module_01.c:106:4: note: each undeclared identifier is reported only once for each function it appears in
+module_01.c:110:5: warning: statement with no effect [-Wunused-value]
+  110 |     fi_obj_type_t obj_type = FI_TYPE_UNKNOWN;
+      |     ^~~~~~~~~~~~~
+module_01.c:110:18: error: expected ‘;’ before ‘obj_type’
+  110 |     fi_obj_type_t obj_type = FI_TYPE_UNKNOWN;
+      |                  ^~~~~~~~~
+      |                  ;
+module_01.c:115:5: error: ‘obj_type’ undeclared (first use in this function)
+  115 |     obj_type = fi_mode_to_type(sb->st_mode);
+      |     ^~~~~~~~
+module_01.c:115:16: error: implicit declaration of function ‘fi_mode_to_type’ [-Wimplicit-function-declaration]
+  115 |     obj_type = fi_mode_to_type(sb->st_mode);
+      |                ^~~~~~~~~~~~~~~
+module_01.c:125:48: error: unknown type name ‘fi_report_cb_t’
+  125 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:127:3: error: expected ‘}’ before ‘else’
+  127 | } else {
+      |   ^~~~
+module_01.c:131:48: error: unknown type name ‘fi_report_cb_t’
+  131 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:108:17: warning: variable ‘link_target’ set but not used [-Wunused-but-set-variable=]
+  108 |     const char *link_target = NULL;
+      |                 ^~~~~~~~~~~
+module_01.c:134:5: warning: no return statement in function returning non-void [-Wreturn-type]
+  134 |     }
+      |     ^
+module_01.c: At top level:
+module_01.c:136:48: error: unknown type name ‘fi_report_cb_t’
+  136 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:140:5: error: expected identifier or ‘(’ before ‘if’
+  140 |     if (fi_ctx->cb) {
+      |     ^~
+module_01.c:144:48: error: unknown type name ‘fi_report_cb_t’
+  144 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:146:3: error: expected identifier or ‘(’ before ‘else’
+  146 | } else {
+      |   ^~~~
+module_01.c:208:48: error: unknown type name ‘fi_report_cb_t’
+  208 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:212:5: error: expected identifier or ‘(’ before ‘return’
+  212 |     return 0;
+      |     ^~~~~~
+module_01.c:213:1: error: expected identifier or ‘(’ before ‘}’ token
+  213 | }
+      | ^
+module_01.c:215:48: error: unknown type name ‘fi_report_cb_t’
+  215 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:221:5: error: unknown type name ‘fi_report_cb_t’
+  221 |     fi_report_cb_t cb;
+      |     ^~~~~~~~~~~~~~
+module_01.c:225:1: error: expected ‘;’, identifier or ‘(’ before ‘void’
+  225 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      | ^~~~
+module_01.c:225:48: error: unknown type name ‘fi_report_cb_t’
+  225 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:232:29: error: unknown type name ‘fi_report_cb_t’
+  232 |                             fi_report_cb_t report_cb, void *user_data)
+      |                             ^~~~~~~~~~~~~~
+module_01.c:288:48: error: unknown type name ‘fi_report_cb_t’
+  288 | void f01(char *const dirs[], size_t dir_count, fi_report_cb_t report_cb, void *user_data) {
+      |                                                ^~~~~~~~~~~~~~
+module_01.c:228:29: warning: ‘fi_ctx’ defined but not used [-Wunused-variable]
+  228 | static struct fi_context_s *fi_ctx = NULL;
+      |                             ^~~~~~
+module_01.c:95:12: warning: ‘fi_nftw_callback’ defined but not used [-Wunused-function]
+   95 | static int fi_nftw_callback(const char *fpath, const struct stat *sb,
+      |            ^~~~~~~~~~~~~~~~
+module_02.c:58:1: error: expected ‘;’, identifier or ‘(’ before ‘int’
+   58 | int f02(const char *directory_path) {
+      | ^~~
+module_02.c: In function ‘f02’:
+module_02.c:59:12: error: implicit declaration of function ‘file_hash_reporter’ [-Wimplicit-function-declaration]
+   59 |     return file_hash_reporter(directory_path);
+      |            ^~~~~~~~~~~~~~~~~~
+module_02.c: At top level:
+module_02.c:60:3: warning: data definition has no type or storage class
+   60 | } file_hash_error_t;
+      |   ^~~~~~~~~~~~~~~~~
+module_02.c:60:3: error: type defaults to ‘int’ in declaration of ‘file_hash_error_t’ [-Wimplicit-int]
+module_02.c: In function ‘compute_sha256’:
+module_02.c:76:5: warning: ‘SHA256_Init’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+   76 |     if (!SHA256_Init(&ctx)) {
+      |     ^~
+In file included from module_02.c:45:
+/usr/include/openssl/sha.h:73:27: note: declared here
+   73 | OSSL_DEPRECATEDIN_3_0 int SHA256_Init(SHA256_CTX *c);
+      |                           ^~~~~~~~~~~
+module_02.c:82:5: error: redefinition of ‘f02’
+   82 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:71:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   71 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:94:5: error: redefinition of ‘f02’
+   94 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:82:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   82 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:101:9: warning: ‘SHA256_Update’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  101 |         if (!SHA256_Update(&ctx, buf, n)) {
+      |         ^~
+/usr/include/openssl/sha.h:74:27: note: declared here
+   74 | OSSL_DEPRECATEDIN_3_0 int SHA256_Update(SHA256_CTX *c,
+      |                           ^~~~~~~~~~~~~
+module_02.c:114:5: error: redefinition of ‘f02’
+  114 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:94:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   94 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:125:5: error: redefinition of ‘f02’
+  125 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:114:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  114 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:129:5: warning: ‘SHA256_Final’ is deprecated: Since OpenSSL 3.0 [-Wdeprecated-declarations]
+  129 |     if (!SHA256_Final(out_digest, &ctx)) {
+      |     ^~
+/usr/include/openssl/sha.h:76:27: note: declared here
+   76 | OSSL_DEPRECATEDIN_3_0 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
+      |                           ^~~~~~~~~~~~
+module_02.c:136:5: error: redefinition of ‘f02’
+  136 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:125:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  125 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c: At top level:
+module_02.c:146:5: error: redefinition of ‘f02’
+  146 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:58:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   58 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:165:5: error: redefinition of ‘f02’
+  165 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:58:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   58 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c: In function ‘json_write_entry’:
+module_02.c:185:17: warning: missing terminating " character
+  185 |                 "  }
+      |                 ^
+module_02.c:185:17: error: missing terminating " character
+  185 |                 "  }
+      |                 ^~~~
+module_02.c:184:43: error: expected ‘)’ before ‘int’
+  184 |                 "    \"sha256\": \"%s\"\n"
+      |                                           ^
+      |                                           )
+......
+  187 | int f02(const char *directory_path) {
+      | ~~~                                        
+module_02.c:180:16: note: to match this ‘(’
+  180 |     if (fprintf(f,
+      |                ^
+module_02.c:189:2: warning: missing terminating " character
+  189 | }",
+      |  ^
+module_02.c:189:2: error: missing terminating " character
+  189 | }",
+      |  ^~
+module_02.c:181:17: warning: format ‘%s’ expects a matching ‘char *’ argument [-Wformat=]
+  181 |                 "  {\n"
+      |                 ^~~~~~~
+module_02.c:182:35: note: format string is defined here
+  182 |                 "    \"path\": \"%s\",\n"
+      |                                  ~^
+      |                                   |
+      |                                   char *
+module_02.c:181:17: warning: format ‘%jd’ expects a matching ‘intmax_t’ argument [-Wformat=]
+  181 |                 "  {\n"
+      |                 ^~~~~~~
+module_02.c:183:34: note: format string is defined here
+  183 |                 "    \"size\": %jd,\n"
+      |                                ~~^
+      |                                  |
+      |                                  long int
+module_02.c:181:17: warning: format ‘%s’ expects a matching ‘char *’ argument [-Wformat=]
+  181 |                 "  {\n"
+      |                 ^~~~~~~
+module_02.c:184:37: note: format string is defined here
+  184 |                 "    \"sha256\": \"%s\"\n"
+      |                                    ~^
+      |                                     |
+      |                                     char *
+module_02.c: At top level:
+module_02.c:197:5: error: redefinition of ‘f02’
+  197 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:58:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   58 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c: In function ‘file_hash_reporter’:
+module_02.c:219:5: error: redefinition of ‘f02’
+  219 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:209:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  209 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:230:5: error: redefinition of ‘f02’
+  230 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:219:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  219 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:241:5: error: redefinition of ‘f02’
+  241 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:230:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  230 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:270:5: error: redefinition of ‘f02’
+  270 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:260:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  260 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:285:5: error: redefinition of ‘f02’
+  285 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:270:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  270 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:298:5: error: redefinition of ‘f02’
+  298 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:285:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  285 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:309:5: error: redefinition of ‘f02’
+  309 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:241:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  241 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:320:5: error: redefinition of ‘f02’
+  320 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:309:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+  309 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c: At top level:
+module_02.c:332:5: error: redefinition of ‘f02’
+  332 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:58:5: note: previous definition of ‘f02’ with type ‘int(const char *)’
+   58 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:320:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  320 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:309:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  309 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:298:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  298 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:285:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  285 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:270:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  270 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:260:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  260 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:241:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  241 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:230:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  230 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:219:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  219 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:209:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  209 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:177:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  177 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:159:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  159 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:136:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  136 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:125:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  125 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:114:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  114 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:108:5: warning: ‘f02’ defined but not used [-Wunused-function]
+  108 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:94:5: warning: ‘f02’ defined but not used [-Wunused-function]
+   94 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:82:5: warning: ‘f02’ defined but not used [-Wunused-function]
+   82 | int f02(const char *directory_path) {
+      |     ^~~
+module_02.c:71:5: warning: ‘f02’ defined but not used [-Wunused-function]
+   71 | int f02(const char *directory_path) {
+      |     ^~~
+[0m
+[0m$ [0mrtk git -C /home/cardoso/GitHub/Iniciacao-Cientifica status --porcelain
+?? output/run_20260925T020132_758409Z_7e2b991f/
+[0m
+[0m$ [0mrtk git -C /home/cardoso/GitHub/Iniciacao-Cientifica diff --stat
+[0m
+[0m$ [0mrtk git -C /home/cardoso/GitHub/Iniciacao-Cientifica log -1
+c3a06ee ip (19 minutes ago) <joaocardosodias>
+[0m
+[0m$ [0mrtk git -C /home/cardoso/GitHub/Iniciacao-Cientifica diff -- module_01.c
+[0m
+[0m$ [0mrtk git -C /home/cardoso/GitHub/Iniciacao-Cientifica status
+* main...origin/main
+?? output/run_20260925T020132_758409Z_7e2b991f/
+[0m
+[0m→ [0mRead /home/cardoso/GitHub/Iniciacao-Cientifica/output/run_20260924T222819_868356Z_579fdfe7/assembly/module_01.c[90m [limit=300, offset=1][0m
+[0m→ [0mRead module_01.c[90m [limit=300, offset=1][0m
+[0m✱ [0mGrep "file_inventory_utility"[90m in /home/cardoso/GitHub/Iniciacao-Cientifica · 27 matches[0m
+[93m[1m! [0mpermission requested: external_directory (/home/cardoso/GitHub Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/modules/*); auto-rejecting
+[0m✗ [0mRead /home/cardoso/GitHub Iniciacao-Cientifica/output/run_20260925T020132_758409Z_7e2b991f/modules/file_inventory_utility.c failed[90m [limit=200, offset=1][0m
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

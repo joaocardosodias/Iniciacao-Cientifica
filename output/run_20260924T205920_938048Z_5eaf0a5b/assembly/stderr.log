@@ -1,0 +1,4 @@
+module_09.c: In function ‘schedule_autostart’:
+module_09.c:90:58: warning: suggest parentheses around ‘&&’ within ‘||’ [-Wparentheses]
+   90 |         (entry_len == 0 || entry[entry_len - 1] != '\n') &&
+      |                                                          ^
