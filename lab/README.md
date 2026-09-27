@@ -68,6 +68,18 @@ Fluxo entre modelos: rode o lote de um modelo, exporte `lab/runs/<slug>/<experim
 para o host, reinicie a VM e repita com o próximo modelo. Mantenha a **mesma fixture
 mestre** e a mesma topologia para todos os modelos.
 
+No host, com o VirtualBox instalado, estes wrappers aplicam o ciclo da VM
+(padrões `LAB_VM_NAME=IC` e `LAB_SNAPSHOT=lab-clean-v1`):
+
+```bash
+scripts/lab-vm-start.sh
+scripts/lab-vm-reset.sh
+```
+
+O primeiro desliga a VM se estiver ligada, restaura o snapshot e inicia em modo
+headless. O segundo pede confirmação (ou `LAB_RESET_CONFIRM=yes`), desliga por ACPI
+com fallback para poweroff e restaura o snapshot. Exporte as evidências antes do reset.
+
 ## O que o script faz
 
 1. Preflight: valida `assembly/output`/`config.h`, `run_seal.json`, fixture e manifesto.

@@ -51,6 +51,9 @@ lab/runs/
 # Logs gerais
 logs/
 *.log
+# Excecao: logs do compilador selados nas runs (parte da evidencia)
+!results/**/assembly/*.log
+!output/**/assembly/*.log
 AGENTS.md
 
 # LaTeX
