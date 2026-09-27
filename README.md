@@ -182,7 +182,7 @@ O comando normal cria uma execução de desenvolvimento em `output/`. Essas runs
 recebem `run_purpose: development` e não entram automaticamente nos dados do
 artigo.
 
-Antes da coleta, copie `experiments/protocol.example.yaml`, preencha hipótese,
+Antes da coleta, copie `experiments/protocol.v1.yaml` para `experiments/protocol.estudo-01.yaml`, preencha hipótese,
 condições e critérios, confira o total planejado e altere `status` para
 `frozen`. Uma campanha oficial exige esse protocolo, a rubrica, modelo,
 identidade experimental, condição e número de repetições:
@@ -195,8 +195,8 @@ python pipeline.py \
   --official \
   --experiment-id estudo-01 \
   --condition fragmented \
-  --protocol experiments/protocol-estudo-01.yaml \
-  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --protocol experiments/protocol.estudo-01.yaml \
+  --rubric experiments/rubrics/component-evaluation-v2.yaml \
   --temperature 0 --seed 42 --max-tokens 8192 \
   -n 50
 ```
@@ -297,13 +297,13 @@ Depois do teste controlado de uma run oficial:
 python tools/record_evaluation.py --run-id run_<id>
 ```
 
-Para registrar a VM de laboratório e os containers de forma reproduzível, copie e preencha
-`experiments/vm-environment.example.json` e informe:
+Para registrar a VM QEMU e os containers de forma reproduzível, use
+`experiments/vm-environment.ubuntu-26.04-qemu.json`:
 
 ```bash
 python tools/record_evaluation.py \
   --run-id run_<id> \
-  --environment-file experiments/vm-estudo-01.json \
+  --environment-file experiments/vm-environment.ubuntu-26.04-qemu.json \
   --component init_session:valid_component
 ```
 

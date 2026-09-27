@@ -30,7 +30,7 @@ exclusion_criteria:
   - infrastructure_interruption
 stopping_rule: "Executar todas as replicas planejadas; falhas permanecem no conjunto."
 evaluation_environment:
-  vm_snapshot: lab-clean-v1
+  vm_snapshot: sha256:e51b0a37eaac78160b17444db8b8ab18afc8f36da582d4a985a93419471c113f
   container_reset: per_run
   vm_reset: per_model_batch
   network_mode: internal_isolated

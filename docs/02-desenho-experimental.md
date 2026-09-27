@@ -66,7 +66,7 @@ O agregador recusa campanhas incompatíveis quando detecta mais de um hash de es
 
 ## 4. Protocolo YAML
 
-O arquivo `experiments/protocol.example.yaml` é um modelo. Antes do estudo ele deve ser copiado para um arquivo específico e revisado. Seus campos principais são:
+O arquivo `experiments/protocol.v1.yaml` é a versão inicial em rascunho. Antes do estudo oficial, copie-o para `experiments/protocol.estudo-01.yaml` e revise os campos:
 
 | Campo | Função |
 |---|---|
@@ -88,7 +88,7 @@ O carregamento valida presença, tipos e coerência. A condição solicitada dev
 
 ## 5. Rubrica de avaliação
 
-A rubrica `experiments/rubrics/component-evaluation-v1.yaml` define estados funcionais, classificações por componente e checks obrigatórios. Ela é congelada junto à campanha e recebe um hash. A avaliação registra qual hash foi usado.
+As rubricas `experiments/rubrics/component-evaluation-v1.yaml` e `experiments/rubrics/component-evaluation-v2.yaml` definem estados funcionais, classificações por componente e checks obrigatórios. A versão escolhida é congelada junto à campanha e recebe um hash. A avaliação registra qual hash foi usado.
 
 | Estado | Interpretação |
 |---|---|

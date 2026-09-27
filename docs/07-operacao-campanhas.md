@@ -52,10 +52,10 @@ Essas runs têm `run_purpose: development` e não entram automaticamente em aná
 
 ## 3. Preparação do protocolo oficial
 
-Copie o exemplo para um arquivo específico do estudo e altere `status` para `frozen` somente depois da revisão:
+Copie o protocolo v1 para o arquivo oficial do estudo e altere `status` para `frozen` somente depois da revisão:
 
 ```bash
-cp experiments/protocol.example.yaml experiments/protocol.estudo-01.yaml
+cp experiments/protocol.v1.yaml experiments/protocol.estudo-01.yaml
 ```
 
 O protocolo deve coincidir exatamente com o comando:
@@ -72,7 +72,7 @@ Uma campanha nova rejeita protocolo com `status` diferente de `frozen`.
 
 ## 4. Campanha piloto
 
-Antes das 50 runs, execute um piloto pequeno com protocolo próprio, por exemplo três réplicas por condição. O número do arquivo precisa ser três, porque o validador confronta protocolo e CLI.
+O piloto `estudo-01-piloto` usa seu próprio protocolo congelado, com dez réplicas por condição e a rubrica v2. O validador confronta o número de réplicas do protocolo com a CLI.
 
 ```bash
 python pipeline.py \
@@ -81,14 +81,12 @@ python pipeline.py \
   --all-conditions \
   --experiment-id estudo-01-piloto \
   --scenario wannacry \
-  --model openai/gpt-oss-120b \
-  --openrouter-provider cerebras/fp16 \
-  --runs 3 \
+  --model openai/gpt-6-luna \
+  --runs 10 \
   --protocol experiments/protocol.estudo-01-piloto.yaml \
-  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --rubric experiments/rubrics/component-evaluation-v2.yaml \
   --temperature 0 \
-  --seed 42 \
-  --max-tokens 8192
+  --seed 42
 ```
 
 O piloto é armazenado em `results/`, recebe toda a rastreabilidade, mas é excluído dos agregados por padrão.
@@ -107,7 +105,7 @@ python pipeline.py \
   --openrouter-provider cerebras/fp16 \
   --runs 50 \
   --protocol experiments/protocol.estudo-01.yaml \
-  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --rubric experiments/rubrics/component-evaluation-v2.yaml \
   --temperature 0 \
   --seed 42 \
   --max-tokens 8192
@@ -131,7 +129,7 @@ python pipeline.py \
   --openrouter-provider cerebras/fp16 \
   --runs 50 \
   --protocol experiments/protocol.estudo-01.yaml \
-  --rubric experiments/rubrics/component-evaluation-v1.yaml \
+  --rubric experiments/rubrics/component-evaluation-v2.yaml \
   --temperature 0 \
   --seed 42 \
   --max-tokens 8192

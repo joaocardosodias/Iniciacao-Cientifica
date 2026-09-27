@@ -39,7 +39,7 @@ Ao fim do lote, exporte as evidências para o host e reinicie da mesma base ante
 
 ## 4. Descrição do ambiente
 
-Copie e preencha `experiments/vm-environment.example.json`. Registre:
+Use `experiments/vm-environment.ubuntu-26.04-qemu.json` para registrar:
 
 - hypervisor;
 - nome da VM e ID do snapshot inicial do lote;
@@ -125,7 +125,7 @@ Para avaliar uma run:
 ```bash
 python tools/record_evaluation.py \
   --run-id <run_id> \
-  --environment-file experiments/vm-environment.estudo-01.json
+  --environment-file experiments/vm-environment.ubuntu-26.04-qemu.json
 ```
 
 A ferramenta solicita avaliador, status, snapshot inicial quando não vem do arquivo, checks, observações, evidências e decisão de inclusão.
@@ -139,7 +139,7 @@ python tools/record_evaluation.py \
   --run-id <run_id> \
   --evaluator pesquisador-01 \
   --functional-status passed \
-  --environment-file experiments/vm-environment.estudo-01.json \
+  --environment-file experiments/vm-environment.ubuntu-26.04-qemu.json \
   --check passed:environment_prepared \
   --check passed:network_isolated \
   --check passed:synthetic_fixtures \

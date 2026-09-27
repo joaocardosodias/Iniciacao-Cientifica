@@ -84,7 +84,7 @@ O resultado é salvo em `preflight.json` e referenciado pela campanha. A disponi
 
 Antes da coleta oficial:
 
-1. copie `experiments/protocol.example.yaml` para um nome versionado;
+1. copie `experiments/protocol.v1.yaml` para `experiments/protocol.estudo-01.yaml`;
 2. substitua identificador, modelo, provider e parâmetros reais;
 3. declare as duas condições e seus modos;
 4. fixe o número de réplicas por condição;
@@ -141,7 +141,7 @@ Idealmente, a coleta oficial começa em worktree limpa, commit identificado e am
 
 O ambiente funcional é outro domínio: uma VM de laboratório com três containers (executor, coletor e verificador), rede Docker interna e fixtures sintéticas. Os containers são recriados por run, e a VM parte de um snapshot identificado antes de cada lote de modelo. A VM não é restaurada entre runs do mesmo lote.
 
-`experiments/vm-environment.example.json` oferece o contrato descritivo. Preencha hypervisor, nome da VM, ID do snapshot inicial, imagem, CPU, memória, ciclo de vida dos containers e propriedades verificadas da rede. O arquivo usado é copiado para cada avaliação e hashado.
+`experiments/vm-environment.ubuntu-26.04-qemu.json` descreve o laboratório atual: QEMU/KVM, identificador SHA-256 da base, Ubuntu 26.04, CPU, memória, ciclo de vida dos containers e propriedades verificadas da rede. O arquivo usado é copiado para cada avaliação e hashado.
 
 ## 13. Fixtures sintéticas
 
