@@ -257,14 +257,14 @@ fn print_usage() {
         "Uso: decrypt_file [opcoes]\n\
          \n\
          Opcoes:\n\
-           -k, --key VALUE     chave AES em base64 ou hex (se ausente, pergunta)\n\
-           -t, --token PATH    le o campo aes_key de um token JSON do C2\n\
-           -p, --path PATH     arquivo .PROCESSED ou pasta (se ausente, pergunta)\n\
-           -o, --out-dir PATH  pasta de saida (padrao: ao lado do arquivo)\n\
-           -m, --manifest PATH manifest.json do generate_test_files para comparar hashes\n\
-           --report PATH       grava relatorio JSON da recuperacao\n\
-           --keep              preserva os arquivos .PROCESSED apos descriptografar\n\
-           -h, --help          esta ajuda"
+           -k, --key VALUE      chave AES em base64 ou hex (se ausente, pergunta)\n\
+           -t, --token PATH     le o campo aes_key de um token JSON do C2\n\
+           -p, --path PATH      arquivo .PROCESSED ou pasta (se ausente, pergunta)\n\
+           -o, --out-dir PATH   pasta de saida (padrao: ao lado do arquivo)\n\
+           -m, --manifest PATH  manifesto do generate_test_files (compara hashes)\n\
+           --report PATH        grava relatorio JSON da recuperacao\n\
+           --keep               preserva os arquivos .PROCESSED\n\
+           -h, --help           esta ajuda"
     );
 }
 
@@ -334,9 +334,9 @@ fn main() {
         }
     };
 
-    println!("\n{}", "=".repeat(55));
-    println!("   VERIFICACAO DE DESCRIPTOGRAFIA — AES-256-GCM");
-    println!("{}", "=".repeat(55));
+    println!("{}", "=".repeat(64));
+    println!("  DESCRIPTOGRAFIA - AES-256-GCM");
+    println!("{}", "=".repeat(64));
 
     let key_input = if let Some(key) = options.key {
         key
@@ -533,19 +533,19 @@ fn main() {
             eprintln!("[ERRO] nao foi possivel escrever o relatorio: {error}");
             process::exit(1);
         }
-        println!("  Relatorio: {}", report_path.display());
+        println!("  relatorio  : {}", report_path.display());
     }
 
-    println!("\n{}", "=".repeat(55));
+    println!("\n{}", "-".repeat(64));
     println!(
-        "  {} descriptografado(s), {} falha(s), {} origem(ns) removida(s)",
+        "  {} descriptografado(s) | {} falha(s) | {} origem(ns) removida(s)",
         decrypted.len(),
         failures.len(),
         removed
     );
     if manifest.is_some() {
         println!(
-            "  hashes: {matched} iguais, {mismatched} divergentes, {} nao listados, {} ausentes",
+            "  hashes: {matched} iguais | {mismatched} divergentes | {} nao listados | {} ausentes",
             unlisted.len(),
             missing.len()
         );
@@ -559,7 +559,7 @@ fn main() {
             scan_stats.ignored_tmp
         );
     }
-    println!("{}\n", "=".repeat(55));
+    println!("{}\n", "=".repeat(64));
 
     if !failures.is_empty() || mismatched > 0 {
         process::exit(2);

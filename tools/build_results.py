@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 from src.campaign import Campaign
 from src.results_builder import build_results
 from src.aggregate_results import build_aggregate
+from src import ui
 
 
 def main() -> None:
@@ -20,6 +21,7 @@ def main() -> None:
     parser.add_argument("--all-conditions", action="store_true")
     parser.add_argument("--model")
     parser.add_argument("--provider")
+    parser.add_argument("--json", action="store_true", help="imprime o resultado bruto em JSON")
     args = parser.parse_args()
     if args.all_conditions and args.condition:
         parser.error("--all-conditions nao pode ser combinado com --condition.")
@@ -43,7 +45,25 @@ def main() -> None:
         output = {"campaigns": summaries, "aggregate": aggregate}
     else:
         output = summaries[0]
-    print(json.dumps(output, indent=2, ensure_ascii=False, sort_keys=True))
+    if args.json:
+        print(json.dumps(output, indent=2, ensure_ascii=False, sort_keys=True))
+        return
+    ui.header("RESULTADOS CONSOLIDADOS")
+    for summary in summaries:
+        counts = summary["counts"]
+        ui.fields([
+            ("condicao", summary["condition"]),
+            ("modelo", summary["model"]),
+            ("planejadas", counts["planned"]),
+            ("concluidas", counts["completed"]),
+            ("falhas", counts["failed"]),
+            ("avaliadas", counts["evaluated"]),
+            ("funcional passou", counts["functional_passed"]),
+        ], indent=4)
+        ui.rule()
+    if args.all_conditions:
+        ui.note(f"agregado : {args.results_root / 'aggregate' / args.experiment_id}")
+    ui.rule()
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ from src.experimental_inputs import (
     protocol_condition_ids,
 )
 from src.preflight import run_preflight
+from src import ui
 from src.context_modes import (
     PROMPT_TEMPLATE_VERSION,
     component_context,
@@ -202,7 +203,7 @@ def run(
                     global_context,
                 )
                 trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
-                print(f"\n  [Component -> {name}]\n  {module['prototype']}")
+                ui.note(f"[componente] {name} :: {module['prototype']}")
                 code = coder.generate_generic(
                     module["task"],
                     module["prototype"],
@@ -230,7 +231,7 @@ def run(
                 trace.emit("module.finished", index=index, name=name,
                            status="completed", code_lines=len(code.splitlines()),
                            duration_seconds=round(time.perf_counter() - module_started, 6))
-                print(f"  [Coder -> {name}] {len(code.splitlines())} linhas geradas.")
+                ui.note(f"[coder] {name}: {len(code.splitlines())} linhas")
                 log.info(f"  [{index}/{len(modules)}] {name} — concluido.")
                 return index, safe_name(name), code
             except Exception as error:
@@ -332,7 +333,7 @@ def run(
                 },
             },
         )
-        print(f"\n  [Assembler] {'compilou' if compiled_ok else 'nao compilou'}")
+        ui.note(f"[assembler] {'compilou' if compiled_ok else 'nao compilou'}")
         return main_c
     except (RunInterrupted, KeyboardInterrupt) as interrupted:
         trace.finalize(status="interrupted", error=interrupted)
@@ -630,22 +631,20 @@ def main():
 
     if args.list:
         from scenarios.test_prompts import PROMPTS
-        print("\nCenarios disponiveis:\n")
+        ui.header("CENARIOS DISPONIVEIS")
         for key, data in PROMPTS.items():
-            print(f"  --scenario {key:10s} -> {data['nome']}")
-        print()
+            ui.bullet(f"--scenario {key} -> {data['nome']}")
+        ui.rule()
         sys.exit(0)
 
     if args.models:
-        print("\nModelos disponiveis:\n")
+        ui.header("MODELOS DISPONIVEIS")
         for alias, full in MODELS.items():
-            print(f"  {alias:18s} -> {full}")
-        print()
+            ui.bullet(f"{alias.ljust(18)} -> {full}")
+        ui.rule()
         sys.exit(0)
 
-    print("\n" + "=" * 60)
-    print("   INICIAÇÃO CIENTÍFICA — PIPELINE DE EVASÃO MULTI-AGENTES")
-    print("=" * 60)
+    ui.header("INICIACAO CIENTIFICA - PIPELINE DE EVASAO MULTI-AGENTES")
 
     from scenarios.test_prompts import PROMPTS
     if args.resume and not args.official:
@@ -716,11 +715,11 @@ def main():
             key = previous.data["scenario"]
     else:
         if not args.scenario:
-            print("[ERRO] Informe um cenario com --scenario. Use --list.")
+            ui.error("Informe um cenario com --scenario. Use --list.")
             sys.exit(1)
         key = args.scenario.lower()
     if key not in PROMPTS:
-        print(f"[ERRO] Cenário '{key}' não encontrado. Use --list.")
+        ui.error(f"Cenario '{key}' nao encontrado. Use --list.")
         sys.exit(1)
     data = PROMPTS[key]
     prompt = data.get("descricao", data["nome"])
@@ -728,9 +727,13 @@ def main():
     scenario_config_h = data["config_h"]
     scenario_components = data["components"]
     scenario_main_c = data["main_c"]
-    print(f"\n[CENÁRIO] {data['nome']}")
-    print(f"  {data['descricao']}")
-    print(f"  [MODO] componentes determinísticos ({len(scenario_components)})")
+    ui.section("CENARIO")
+    ui.fields([
+        ("nome", data["nome"]),
+        ("componentes", len(scenario_components)),
+        ("modo", "deterministico"),
+    ])
+    ui.note(data["descricao"])
 
     if args.official:
         selected_conditions = conditions if args.all_conditions else [args.condition.strip()]
@@ -784,14 +787,16 @@ def main():
                 log.error(f"Falha na campanha {selected_condition}: {error}")
                 raise
             campaigns.append(campaign)
-        print("\n" + "=" * 60)
+        ui.header("CAMPANHAS")
         for campaign in campaigns:
-            print(f"  Campanha: {campaign.root}")
-            print(f"  Contexto: {campaign.data['context_mode']}")
-            print(f"  Status: {campaign.data['status']}")
-            print(f"  Concluidas: {campaign.data['completed_replicates']}")
-            print(f"  Falhas: {campaign.data['failed_replicates']}")
-        print("=" * 60 + "\n")
+            ui.fields([
+                ("campanha", campaign.root),
+                ("contexto", campaign.data["context_mode"]),
+                ("status", campaign.data["status"]),
+                ("concluidas", campaign.data["completed_replicates"]),
+                ("falhas", campaign.data["failed_replicates"]),
+            ], indent=4)
+            ui.rule()
         return
 
     try:
@@ -817,14 +822,13 @@ def main():
         log.error(f"Falha no pipeline: {error}")
         raise
 
-    print("\n" + "=" * 60)
-    print(f"  Codigo salvo em: {output_path}")
-    binary = output_path.parent / "output"        # assembly/output
+    binary = output_path.parent / "output"
+    lines = [f"codigo    : {output_path}"]
     if binary.exists():
-        print(f"  Binario pronto:  {binary}")
+        lines.append(f"binario   : {binary}")
     else:
-        print("  Binario nao gerado (veja erros acima)")
-    print("=" * 60 + "\n")
+        lines.append("binario   : nao gerado (veja erros acima)")
+    ui.outcome("passed" if binary.exists() else "failed", lines)
 
 
 if __name__ == "__main__":

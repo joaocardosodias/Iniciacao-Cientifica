@@ -19,21 +19,21 @@ const RANSOM_NOTES: &[&str] = &[
 ];
 
 fn ok(message: &str) {
-    println!("  [✓] {}", message);
+    println!("  [ ok ] {}", message);
 }
 
 fn skip(message: &str) {
-    println!("  [~] {}", message);
+    println!("  [skip] {}", message);
 }
 
 fn warn(message: &str) {
-    println!("  [!] {}", message);
+    println!("  [aviso] {}", message);
 }
 
 fn title(message: &str) {
-    println!("\n{}", "─".repeat(55));
+    println!("{}", "-".repeat(64));
     println!("  {}", message);
-    println!("{}", "─".repeat(55));
+    println!("{}", "-".repeat(64));
 }
 
 fn home_dir() -> PathBuf {
@@ -325,9 +325,9 @@ fn confirm(test_dir: &Path) -> bool {
 fn main() {
     let options = parse_args();
 
-    println!("\n{}", "=".repeat(55));
-    println!("   LIMPEZA COMPLETA — INICIAÇÃO CIENTÍFICA");
-    println!("{}", "=".repeat(55));
+    println!("{}", "=".repeat(64));
+    println!("  LIMPEZA DA VM DE LABORATORIO");
+    println!("{}", "=".repeat(64));
 
     if !options.force && !confirm(&options.test_dir) {
         println!("\n  Cancelado.\n");
@@ -341,9 +341,9 @@ fn main() {
     clean_crontab(&options.root);
     clean_pycache(&options.root);
 
-    println!("\n{}", "=".repeat(55));
-    println!("  ✓ Limpeza concluída em {:.1}s", started.elapsed().as_secs_f64());
-    println!("{}\n", "=".repeat(55));
+    println!("\n{}", "-".repeat(64));
+    println!("  conclusao : limpeza concluida em {:.1}s", started.elapsed().as_secs_f64());
+    println!("{}\n", "=".repeat(64));
 }
 
 #[cfg(test)]

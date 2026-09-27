@@ -671,10 +671,13 @@ fn main() {
     let mut rng = Rng::new(os_random_u64());
     let tasks = build_tasks(&folders, count, &mut rng);
 
-    println!("\n[+] Destino  : {}", base.display());
-    println!("[+] Pastas   : {}", folders.len());
-    println!("[+] Arquivos : {}", count);
-    println!("[+] Modo     : realista | workers: {}\n", workers);
+    println!("{}", "=".repeat(64));
+    println!("  GERADOR DE FIXTURES SINTETICAS");
+    println!("{}", "=".repeat(64));
+    println!("  destino    : {}", base.display());
+    println!("  pastas     : {}", folders.len());
+    println!("  arquivos   : {}", count);
+    println!("  workers    : {}\n", workers);
 
     let tasks = Arc::new(tasks);
     let next = Arc::new(AtomicUsize::new(0));
@@ -721,14 +724,16 @@ fn main() {
     }
 
     let failed = errors.load(Ordering::Relaxed);
-    println!("\n\n[✓] Concluído! {} arquivo(s) criados, {} erro(s).\n", count.saturating_sub(failed), failed);
+    println!("\n{}", "-".repeat(64));
+    println!("  [ ok ] {} arquivo(s) criados | {} erro(s)", count.saturating_sub(failed), failed);
     match write_manifest(&base) {
-        Ok(recorded) => println!("[✓] Manifesto: {} arquivo(s) com sha256 em manifest.json\n", recorded),
+        Ok(recorded) => println!("  [ ok ] manifesto: {} arquivo(s) com sha256", recorded),
         Err(error) => {
-            eprintln!("[ERRO] nao foi possivel escrever manifest.json: {}", error);
+            eprintln!("  [erro] nao foi possivel escrever manifest.json: {}", error);
             process::exit(1);
         }
     }
+    println!("{}\n", "=".repeat(64));
 }
 
 #[cfg(test)]

@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
 
 from src.campaign import Campaign
 from src.evaluation import FUNCTIONAL_STATUSES, pending_runs, record_evaluation
+from src import ui
 
 
 def _prompt_status() -> str:
@@ -100,6 +101,7 @@ def main() -> None:
     parser.add_argument("--check", action="append", default=[])
     parser.add_argument("--component", action="append", default=[])
     parser.add_argument("--stage", action="append", default=[])
+    parser.add_argument("--json", action="store_true", help="imprime o resultado bruto em JSON")
     parser.add_argument("--notes")
     parser.add_argument("--evidence", action="append", type=Path, default=[])
     inclusion = parser.add_mutually_exclusive_group()
@@ -133,14 +135,15 @@ def main() -> None:
             for record in pending_runs(campaign)
         ]
         if not records:
-            print("Nenhuma run pendente de avaliacao.")
+            ui.note("Nenhuma run pendente de avaliacao.")
             return
+        ui.header("RUNS PENDENTES DE AVALIACAO")
         for condition, record in records:
             print(
-                f"condition={condition} replicate={record['replicate']} "
-                f"run_id={record['run_id']} "
-                f"status={record['status']}"
+                f"  {str(condition).ljust(14)} replicate {str(record['replicate']).ljust(3)} "
+                f"{record['run_id']}  {record['status']}"
             )
+        ui.rule()
         return
 
     if not args.run_id:
@@ -185,7 +188,19 @@ def main() -> None:
         component_assessments=_parse_components(args.component),
         stage_results=_parse_stages(args.stage),
     )
-    print(json.dumps(manual, indent=2, ensure_ascii=False, sort_keys=True))
+    if args.json:
+        print(json.dumps(manual, indent=2, ensure_ascii=False, sort_keys=True))
+        return
+    ui.header("AVALIACAO REGISTRADA")
+    ui.fields([
+        ("run", manual["run_id"]),
+        ("avaliador", manual["evaluator"]),
+        ("status funcional", functional_status),
+        ("revisao", manual["revision"]),
+        ("incluida", "sim" if manual["include_in_analysis"] else "nao"),
+        ("avaliada em", manual["evaluated_at"]),
+    ])
+    ui.rule()
 
 
 if __name__ == "__main__":

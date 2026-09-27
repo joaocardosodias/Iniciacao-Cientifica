@@ -68,7 +68,7 @@ def _register(event_type: str, data: dict) -> dict:
     }
     _events.append(event)
     _save()
-    print(f"  [{event['timestamp']}] [{event_type}] IP={event['source_ip']} | {data}")
+    print(f"  [evento] {event['timestamp']}  {event_type}  ip={event['source_ip']}")
     return event
 
 
@@ -318,14 +318,14 @@ def main():
     parser.add_argument("--port", type=int, default=8080, help="Porta (padrão: 8080)")
     args = parser.parse_args()
 
-    print("\n" + "=" * 55)
-    print("   C2 RESEARCH SERVER — INICIAÇÃO CIENTÍFICA")
-    print("=" * 55)
-    print(f"  Escutando em : http://{args.host}:{args.port}")
-    print(f"  Dashboard    : http://localhost:{args.port}/")
-    print(f"  Endpoints    : POST /collect (alias /ingest)  POST /exfil  GET /ping")
-    print(f"  Log          : {LOG_FILE.resolve()}")
-    print("=" * 55 + "\n")
+    print("=" * 64)
+    print("  C2 RESEARCH SERVER - INICIACAO CIENTIFICA")
+    print("=" * 64)
+    print(f"  escuta     : http://{args.host}:{args.port}")
+    print(f"  dashboard  : http://localhost:{args.port}/")
+    print(f"  endpoints  : POST /collect (alias /ingest) | POST /exfil | GET /ping")
+    print(f"  log        : {LOG_FILE.resolve()}")
+    print("=" * 64 + "\n")
 
     app.run(host=args.host, port=args.port, debug=False)
 

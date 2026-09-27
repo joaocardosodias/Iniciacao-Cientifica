@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.integrity import create_seal, verify_seal
+from src.ui import divider, fields, header, outcome, stage_table
 
 COMPOSE = ROOT / "lab" / "compose.yaml"
 IMAGES = {
@@ -24,6 +25,16 @@ IMAGES = {
     "collector": "iniciacao-lab-collector:local",
     "verifier": "iniciacao-lab-verifier:local",
 }
+STAGE_ORDER = (
+    ("fixtures", "fixtures"),
+    ("build", "imagens"),
+    ("compat", "compatibilidade"),
+    ("collector", "coletor"),
+    ("execucao", "execucao"),
+    ("transporte", "transporte da chave"),
+    ("cifragem", "cifragem"),
+    ("recuperacao", "recuperacao"),
+)
 ENCRYPTED_SUFFIX = ".PROCESSED"
 STALE_SUFFIX = ".PROCESSED.TMP"
 NOTICE_NAME = "#_STATUS_NOTICE_#.txt"
@@ -237,6 +248,27 @@ def kill_lab_containers() -> None:
         subprocess.run(["docker", "kill", *ids], capture_output=True, check=False)
 
 
+def print_report(lab_root: Path, result: dict, seal: dict) -> None:
+    stage_table(result["stages"], STAGE_ORDER)
+    lines = []
+    counts = result.get("counts") or {}
+    parts = []
+    if "expected" in counts:
+        parts.append(f"esperados {counts['expected']}")
+    if "encrypted" in counts:
+        parts.append(f"cifrados {counts['encrypted']}")
+    if "matched" in counts:
+        parts.append(f"iguais {counts['matched']}")
+    if parts:
+        lines.append(" | ".join(parts))
+    lines.append(f"evidencia : {lab_root / 'metadata.json'}")
+    if seal:
+        lines.append(f"selo      : lab_seal.json ({seal['combined_sha256'][:16]})")
+    for message in result.get("errors", []):
+        lines.append(f"erro      : {message}")
+    outcome(result["status"], lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Executa e verifica uma run gerada em containers isolados.")
     parser.add_argument("--run", type=Path, required=True, help="diretorio da run de geracao")
@@ -274,6 +306,15 @@ def main() -> None:
     for directory in (sample_dir, collector_dir, verifier_dir, logs):
         directory.mkdir()
     token_path = lab_root / "token.json"
+
+    header("LABORATORIO DE EXECUCAO E VERIFICACAO")
+    fields([
+        ("run de geracao", generation_run_id),
+        ("fixture", str(fixture_dir)),
+        ("evidencia", str(lab_root)),
+        ("rede", f"interna | coletor {COLLECTOR_IP}:{COLLECTOR_PORT}"),
+    ])
+    divider()
 
     result: dict = {
         "schema_version": "1.0",
@@ -452,14 +493,11 @@ def main() -> None:
             if collector_started:
                 subprocess.run(["docker", "compose", "-f", str(COMPOSE), "down", "-v", "--remove-orphans"], env=env or os.environ.copy(), capture_output=True, check=False)
         result["finished_at"] = utc_now()
+        result["integrity"] = {"path": "lab_seal.json", "algorithm": "sha256", "scope": "lab_run"}
         write_json(lab_root / "metadata.json", result)
-        create_seal(lab_root, "lab_seal.json", "lab_run")
+        seal = create_seal(lab_root, "lab_seal.json", "lab_run")
+        print_report(lab_root, result, seal)
 
-    print(f"run: {lab_root}")
-    print(f"resultado: {result['status']}")
-    print(f"etapas: {json.dumps(result['stages'], ensure_ascii=False)}")
-    if result["errors"]:
-        print(f"erros: {'; '.join(result['errors'])}", file=sys.stderr)
     if result["status"] == "failed":
         raise SystemExit(2)
     if result["status"] == "environment_error":

@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from src.campaign import Campaign, campaign_model_slug
 from src.trace import safe_name
+from src.ui import divider, fields, header, outcome, tag
 from scripts.run_lab import COMPOSE, IMAGES, sha256_file, utc_now, write_json
 
 
@@ -240,6 +241,18 @@ def main() -> None:
     executable = any(target["has_binary"] for _, targets in plans for target in targets)
     all_summaries = []
     failures = 0
+    total_planned = sum(len(targets) for _, targets in plans)
+    first = campaigns[0].data
+    header("LABORATORIO EM LOTE")
+    fields([
+        ("experimento", args.experiment_id),
+        ("condicao", args.condition or "todas"),
+        ("modelo", args.model or first.get("model") or "-"),
+        ("provider", args.provider or first.get("inference_provider") or first.get("provider") or "-"),
+        ("runs", str(total_planned)),
+        ("evidencia", str(out)),
+    ])
+    divider()
     try:
         if executable:
             ensure_images(work_dir, args.no_build)
@@ -248,8 +261,13 @@ def main() -> None:
             eroot.mkdir(parents=True, exist_ok=True)
             entries = []
             for index, target in enumerate(targets, 1):
-                print(f"[{campaign.data.get('condition')}] [{index}/{len(targets)}] {target['run_id']}", flush=True)
                 record = run_single(target, args, eroot)
+                status = "skipped" if record.get("skipped") else record.get("status")
+                print(
+                    f"  [{campaign.data.get('condition')}] [{index}/{len(targets)}] "
+                    f"{target['run_id'].ljust(40)} {tag(status)}",
+                    flush=True,
+                )
                 entries.append({
                     "run_id": target["run_id"],
                     "replicate": target["replicate"],
@@ -269,7 +287,14 @@ def main() -> None:
     finally:
         shutil.rmtree(work_dir, ignore_errors=True)
 
-    print(json.dumps({"campaigns": all_summaries}, indent=2, ensure_ascii=False))
+    divider()
+    for summary in all_summaries:
+        detail = " | ".join(
+            f"{value} {name}" for name, value in sorted(summary["counts"].items())
+        )
+        print(f"  {str(summary['condition']).ljust(20)} {detail or 'sem runs'}")
+    lines = [f"total     : {total_planned} runs", f"evidencia : {out}"]
+    outcome("passed" if not failures else "failed", lines)
     if failures:
         raise SystemExit(2)
 
