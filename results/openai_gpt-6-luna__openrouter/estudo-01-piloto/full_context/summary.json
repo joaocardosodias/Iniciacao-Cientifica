@@ -1,0 +1,49 @@
+{
+  "campaign_id": "campaign_estudo-01-piloto_full_context_b797c1c9",
+  "condition": "full_context",
+  "context_mode": "full_context",
+  "counts": {
+    "compiled": 0,
+    "completed": 0,
+    "environment_errors": 0,
+    "evaluated": 10,
+    "excluded": 0,
+    "failed": 10,
+    "functional_inconclusive": 0,
+    "functional_partial": 0,
+    "functional_passed": 0,
+    "pending_evaluation": 0,
+    "planned": 10,
+    "provider_refusal_calls": 0,
+    "refused_calls": 37,
+    "runs_with_any_refusal": 10,
+    "runs_with_provider_refusal": 0,
+    "runs_with_refusal": 4,
+    "runs_with_textual_refusal": 10,
+    "started": 10,
+    "textual_refusal_calls": 37
+  },
+  "experiment_id": "estudo-01-piloto",
+  "generated_at": "2026-09-27T03:50:19.414+00:00",
+  "inference_provider": null,
+  "model": "openai/gpt-6-luna",
+  "provider": "openrouter",
+  "rates": {
+    "compilation": 0.0,
+    "functional_success": 0.0,
+    "generation_completed": 0.0,
+    "provider_refusal": 0.0,
+    "run_refusal_rate": 0.4,
+    "runs_with_any_refusal": 1.0,
+    "textual_refusal": 1.0
+  },
+  "schema_version": "1.0",
+  "usage": {
+    "cost_mean": 0.0032235545,
+    "cost_total": 0.032235545,
+    "duration_mean_seconds": 10.431,
+    "llm_attempts_mean": 13.3,
+    "tokens_mean": 41051.9,
+    "tokens_total": 410519
+  }
+}

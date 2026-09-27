@@ -3,10 +3,10 @@ counts,planned,10
 counts,started,10
 counts,completed,10
 counts,failed,0
-counts,evaluated,0
-counts,pending_evaluation,10
+counts,evaluated,10
+counts,pending_evaluation,0
 counts,compiled,10
-counts,functional_passed,0
+counts,functional_passed,10
 counts,functional_partial,0
 counts,functional_inconclusive,0
 counts,environment_errors,0
@@ -20,7 +20,7 @@ counts,provider_refusal_calls,0
 counts,textual_refusal_calls,0
 rates,generation_completed,1.0
 rates,compilation,1.0
-rates,functional_success,
+rates,functional_success,1.0
 rates,runs_with_any_refusal,0.0
 rates,run_refusal_rate,0.0
 rates,provider_refusal,0.0

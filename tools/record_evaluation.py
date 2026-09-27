@@ -92,6 +92,7 @@ def main() -> None:
     parser.add_argument("--provider")
     parser.add_argument("--list-pending", action="store_true")
     parser.add_argument("--all-conditions", action="store_true")
+    parser.add_argument("--include-pilots", action="store_true")
     parser.add_argument("--evaluator")
     parser.add_argument("--functional-status", choices=sorted(FUNCTIONAL_STATUSES))
     parser.add_argument("--vm-snapshot")
@@ -121,6 +122,7 @@ def main() -> None:
             args.experiment_id,
             args.model,
             args.provider,
+            args.include_pilots,
         ) if args.all_conditions else [Campaign.find(
             args.results_root,
             args.experiment_id,

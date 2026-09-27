@@ -5,7 +5,7 @@
   "condition": "fragmented",
   "context_mode": "fragmented",
   "created_at": "2026-09-27T02:05:48.539+00:00",
-  "evaluated_replicates": 0,
+  "evaluated_replicates": 10,
   "experiment_id": "estudo-01-piloto",
   "experimental_controls_required": true,
   "failed_replicates": 0,
@@ -147,8 +147,8 @@
   "scenario": "wannacry",
   "schema_version": "1.0",
   "started_replicates": 10,
-  "status": "generation_completed",
+  "status": "evaluation_completed",
   "stimulus_path": "inputs/scenario_snapshot.json",
   "stimulus_sha256": "d16cfe42e9f708ae5fcb98358953c4b4ee6ba4cbb75abd40169bd76b588c57ef",
-  "updated_at": "2026-09-27T02:15:02.984+00:00"
+  "updated_at": "2026-09-27T03:47:16.405+00:00"
 }

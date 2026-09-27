@@ -1,0 +1,3 @@
+compiled,condition,cost_per_success,cost_total,evaluated,excluded,functional_ci95_high,functional_ci95_low,functional_passed,functional_success_rate,generation_completed,included,inference_provider,model,provider,refusal_ci95_high,refusal_ci95_low,run_refusal_rate,runs,runs_with_any_refusal,runs_with_refusal
+10,fragmented,0.00563575,0.0563575,10,0,1.0,0.722467,10,1.0,10,10,,,,0.277533,0.0,0.0,10,0,0
+0,full_context,,0.032235545,10,0,0.277533,0.0,0,0.0,0,10,,,,0.687326,0.16818,0.4,10,10,4

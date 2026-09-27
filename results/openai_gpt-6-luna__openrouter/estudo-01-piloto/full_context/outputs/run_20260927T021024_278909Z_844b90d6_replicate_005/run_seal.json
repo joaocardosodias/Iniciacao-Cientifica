@@ -1,10 +1,10 @@
 {
-  "combined_sha256": "7eb671b4e1b9af0dff4d19712540e0f768298be555362f8fadd4ab146e0736a7",
-  "created_at": "2026-09-27T02:10:33.871+00:00",
+  "combined_sha256": "3f7040f27ef08ffc484668e0a890a8d0604ce06a78640495f4c6067482fe47f3",
+  "created_at": "2026-09-27T03:50:19.436+00:00",
   "excluded_prefixes": [
     "evaluation/"
   ],
-  "file_count": 53,
+  "file_count": 57,
   "files": [
     {
       "bytes": 12813,
@@ -67,14 +67,24 @@
       "sha256": "851365b9865385e04f61be2cdc2a1c189a72537ccb31cbc2d46dcccf68cd3632"
     },
     {
+      "bytes": 12185,
+      "path": "calls/0013_coder.generic.random_bytes.json",
+      "sha256": "95b1a062f772af1023e4e7e67aaa953e43796f6e3c94390c32582066ab1f5b6e"
+    },
+    {
+      "bytes": 12236,
+      "path": "calls/0014_coder.generic.random_bytes.json",
+      "sha256": "8d9bef1a4052fe9c3622bae051ba5de2aca597d8af0d0fcf20c39657c69d2436"
+    },
+    {
       "bytes": 872,
       "path": "config.h",
       "sha256": "68efa5d1be817e01b6b381ebad309cb8e85d752593773f0f0799e02018783793"
     },
     {
-      "bytes": 21114,
+      "bytes": 23335,
       "path": "events.jsonl",
-      "sha256": "87665e4ae61d12639f8fbb36cb0464f7244153345fc289fd64a131d2bc7181da"
+      "sha256": "3db0c7db486ad6868c2d73f00f8556ff879b4a5be486364d01e9bf8069dc1feb"
     },
     {
       "bytes": 9832,
@@ -82,14 +92,19 @@
       "sha256": "861cc1364dab809001769dca1f8455ec9f3a01324e28f155dcb3f034dd284543"
     },
     {
-      "bytes": 332,
+      "bytes": 745,
       "path": "modules/01_random_bytes/module.json",
-      "sha256": "999ab3170a688b6c5a719bd817b4c7805656ecb0e88f4354c163a26f49953f1b"
+      "sha256": "4c99079b512c0af8a6610df8aa455a65ff2d5cd0fdaf69d2b184682e18970c2d"
     },
     {
       "bytes": 9108,
       "path": "modules/01_random_bytes/prompt.txt",
       "sha256": "05ed7ca918f64d951267e2eb1b77ec18724dd546b08802956433ff6b2426f3b4"
+    },
+    {
+      "bytes": 138,
+      "path": "modules/01_random_bytes/response.c",
+      "sha256": "fd0cab13341a17d674b8c878a019d46be1827df4c97b1491744359c41954e145"
     },
     {
       "bytes": 752,
@@ -195,6 +210,11 @@
       "bytes": 368,
       "path": "modules/list_target_files.c",
       "sha256": "380db7bbc1ff7dbc04f09e43df39b2e6bc01ef29b87b1b4fd67ad4ea22a3eb97"
+    },
+    {
+      "bytes": 138,
+      "path": "modules/random_bytes.c",
+      "sha256": "fd0cab13341a17d674b8c878a019d46be1827df4c97b1491744359c41954e145"
     },
     {
       "bytes": 128,

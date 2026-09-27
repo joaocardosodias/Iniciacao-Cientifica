@@ -1,0 +1,34 @@
+{
+  "campaigns": [
+    {
+      "campaign_combined_sha256": "41260d446f5466382e3366a208da20d43c7e4311972142f03bad4b65b488e057",
+      "campaign_id": "campaign_estudo-01-piloto_fragmented_00f66281",
+      "condition": "fragmented",
+      "context_mode": "fragmented",
+      "full_context_sha256": "cee05fe4ede63b297e047a55ffffce8674e9cce77e778796460203f5904ffe1c",
+      "integrity_verified": true,
+      "intervention_sha256": "1646bb22055bb312d9315252f0ac3733c6e0dc86400da95aa143ee1643799974",
+      "model": "openai/gpt-6-luna",
+      "path": "openai_gpt-6-luna__openrouter/estudo-01-piloto/fragmented",
+      "protocol_sha256": "5048a74ab0983b4a025de9aca9ecd16b47ccb1da2394739848f89a20fd074082",
+      "rubric_sha256": "c5d57025af351e3817a88115b5c47c93925c22da543db3b1d696c3b0b115b9e5",
+      "stimulus_sha256": "d16cfe42e9f708ae5fcb98358953c4b4ee6ba4cbb75abd40169bd76b588c57ef"
+    },
+    {
+      "campaign_combined_sha256": "841a78be91084b31f0aa543c93327e9b0fe5330df8676e79d6b38e3b1ea30b2f",
+      "campaign_id": "campaign_estudo-01-piloto_full_context_b797c1c9",
+      "condition": "full_context",
+      "context_mode": "full_context",
+      "full_context_sha256": "cee05fe4ede63b297e047a55ffffce8674e9cce77e778796460203f5904ffe1c",
+      "integrity_verified": true,
+      "intervention_sha256": "8bcfaec45ea1b9e263f804ee8527d213750799c630e8d23f212084ed2c4d1a9b",
+      "model": "openai/gpt-6-luna",
+      "path": "openai_gpt-6-luna__openrouter/estudo-01-piloto/full_context",
+      "protocol_sha256": "5048a74ab0983b4a025de9aca9ecd16b47ccb1da2394739848f89a20fd074082",
+      "rubric_sha256": "c5d57025af351e3817a88115b5c47c93925c22da543db3b1d696c3b0b115b9e5",
+      "stimulus_sha256": "d16cfe42e9f708ae5fcb98358953c4b4ee6ba4cbb75abd40169bd76b588c57ef"
+    }
+  ],
+  "generated_at": "2026-09-27T03:50:26.517+00:00",
+  "schema_version": "1.0"
+}

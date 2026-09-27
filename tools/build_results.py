@@ -21,6 +21,7 @@ def main() -> None:
     parser.add_argument("--all-conditions", action="store_true")
     parser.add_argument("--model")
     parser.add_argument("--provider")
+    parser.add_argument("--include-pilots", action="store_true")
     parser.add_argument("--json", action="store_true", help="imprime o resultado bruto em JSON")
     args = parser.parse_args()
     if args.all_conditions and args.condition:
@@ -32,6 +33,7 @@ def main() -> None:
         args.experiment_id,
         args.model,
         args.provider,
+        args.include_pilots,
     ) if args.all_conditions else [Campaign.find(
         args.results_root,
         args.experiment_id,
