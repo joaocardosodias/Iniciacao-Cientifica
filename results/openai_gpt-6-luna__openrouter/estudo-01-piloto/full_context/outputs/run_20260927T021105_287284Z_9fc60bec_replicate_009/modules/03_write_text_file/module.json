@@ -1,0 +1,15 @@
+{
+  "context_mode": "full_context",
+  "description": "Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.",
+  "duration_seconds": 14.873137,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int write_text_file(const char *path, const char *text); (invalid_code)",
+    "type": "CoderGenerationError"
+  },
+  "finished_at": "2026-09-27T02:11:20.335+00:00",
+  "index": 3,
+  "name": "write_text_file",
+  "response_classification": "invalid_code",
+  "started_at": "2026-09-27T02:11:05.462+00:00",
+  "status": "failed"
+}

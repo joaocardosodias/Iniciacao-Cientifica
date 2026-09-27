@@ -1,0 +1,15 @@
+{
+  "context_mode": "fragmented",
+  "full_context_sha256": "cee05fe4ede63b297e047a55ffffce8674e9cce77e778796460203f5904ffe1c",
+  "intervention_sha256": "1646bb22055bb312d9315252f0ac3733c6e0dc86400da95aa143ee1643799974",
+  "prompt_template_version": "context-comparison-v1",
+  "schema_version": "1.0",
+  "visibility": {
+    "all_components": false,
+    "configuration_header": false,
+    "integration_source": false,
+    "local_prototype": true,
+    "local_task": true,
+    "scenario_description": false
+  }
+}

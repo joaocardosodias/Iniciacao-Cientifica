@@ -1,0 +1,15 @@
+{
+  "context_mode": "full_context",
+  "description": "Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with one of the suffixes in `exts`. The entries in `exts` include the leading dot (e.g. `.pdf`): compare the trailing characters of the filename without stripping the dot. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.",
+  "duration_seconds": 12.525385,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths); (explicit_refusal)",
+    "type": "CoderGenerationError"
+  },
+  "finished_at": "2026-09-27T02:11:28.339+00:00",
+  "index": 4,
+  "name": "list_target_files",
+  "response_classification": "explicit_refusal",
+  "started_at": "2026-09-27T02:11:15.813+00:00",
+  "status": "failed"
+}

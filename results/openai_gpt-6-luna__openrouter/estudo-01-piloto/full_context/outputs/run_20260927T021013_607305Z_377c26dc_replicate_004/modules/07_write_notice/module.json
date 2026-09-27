@@ -1,0 +1,15 @@
+{
+  "context_mode": "full_context",
+  "description": "Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write exactly `strlen(NOTICE_TEXT)` bytes of the macro `NOTICE_TEXT` (both from `config.h`), without the NUL terminator. Return 0 on success and -1 on failure.",
+  "duration_seconds": 15.572764,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int write_notice(const char *directory); (invalid_code)",
+    "type": "CoderGenerationError"
+  },
+  "finished_at": "2026-09-27T02:10:29.329+00:00",
+  "index": 7,
+  "name": "write_notice",
+  "response_classification": "invalid_code",
+  "started_at": "2026-09-27T02:10:13.756+00:00",
+  "status": "failed"
+}

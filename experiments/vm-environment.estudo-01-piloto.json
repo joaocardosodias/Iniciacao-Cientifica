@@ -5,8 +5,8 @@
     "vm_name": "IC",
     "hostname": "IC",
     "username": "fragment",
-    "snapshot_id": "preencher",
-    "os_image": "preencher",
+    "snapshot_id": "b23dce52-f3f6-43a3-8739-3cd31fbd1f19",
+    "os_image": "Ubuntu 24.04 LTS",
     "cpu_count": 6,
     "memory_mb": 6000
   },

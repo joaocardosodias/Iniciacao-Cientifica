@@ -1,0 +1,79 @@
+{
+  "checked_at": "2026-09-27T02:09:41.023+00:00",
+  "checks": [
+    {
+      "category": "tool",
+      "name": "gcc",
+      "path": "/usr/bin/gcc",
+      "status": "passed"
+    },
+    {
+      "category": "tool",
+      "name": "pkg-config",
+      "path": "/usr/bin/pkg-config",
+      "status": "passed"
+    },
+    {
+      "category": "python_package",
+      "name": "openai",
+      "status": "passed"
+    },
+    {
+      "category": "python_package",
+      "name": "dotenv",
+      "status": "passed"
+    },
+    {
+      "category": "python_package",
+      "name": "yaml",
+      "status": "passed"
+    },
+    {
+      "category": "credential",
+      "name": "OPENROUTER_API_KEY",
+      "status": "passed",
+      "value_recorded": false
+    },
+    {
+      "category": "routing",
+      "inference_provider": null,
+      "model": "openai/gpt-6-luna",
+      "name": "provider_compatibility",
+      "provider": "openrouter",
+      "status": "passed"
+    },
+    {
+      "category": "scenario",
+      "component_count": 8,
+      "malformed_components": [],
+      "name": "scenario_completeness",
+      "status": "passed"
+    },
+    {
+      "category": "filesystem",
+      "name": "campaign_writable",
+      "status": "passed"
+    },
+    {
+      "category": "filesystem",
+      "free_bytes": 20919173120,
+      "minimum_free_bytes": 1000000000,
+      "name": "free_space",
+      "status": "passed"
+    },
+    {
+      "category": "native_library",
+      "name": "openssl",
+      "status": "passed"
+    },
+    {
+      "category": "native_library",
+      "name": "libcurl",
+      "status": "passed"
+    }
+  ],
+  "failed_checks": [],
+  "remote_model_availability": "deferred_to_first_generation",
+  "schema_version": "1.0",
+  "status": "passed"
+}

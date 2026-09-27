@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `write_text_file`: write the NUL-terminated `text` to `path`, creating it with permissions 0600. Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE (must match): int write_text_file(const char *path, const char *text);
+
+Return ONLY the C source implementing that function.

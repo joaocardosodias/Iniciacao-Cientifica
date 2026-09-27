@@ -1,0 +1,50 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "d7cc899d57d3",
+  "duration_seconds": 10.28632,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-27T02:09:30.896+00:00",
+  "hashes": {
+    "response_sha256": "e2562e8b96f6dc63bbfaeb1aec815c1d04d722c6fce478750b56686327bd2f1b",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "3b845b97d69c26ab6d64ce713260be8accef000d74a4ded05c5d25a2838d84f3"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192,
+    "seed": 42,
+    "temperature": 0.0
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include <curl/curl.h>\n#include <pthread.h>\n#include <stddef.h>\n\nstatic pthread_once_t curl_once = PTHREAD_ONCE_INIT;\nstatic CURLcode curl_init_result = CURLE_FAILED_INIT;\n\nstatic void initialize_curl(void)\n{\n    curl_init_result = curl_global_init(CURL_GLOBAL_DEFAULT);\n}\n\nstatic size_t discard_response(char *data, size_t size, size_t nmemb, void *userdata)\n{\n    (void)data;\n    (void)userdata;\n    return size * nmemb;\n}\n\nint transmit_token(const char *endpoint, const char *token_json)\n{\n    CURL *curl = NULL;\n    struct curl_slist *headers = NULL;\n    CURLcode result;\n    long status = 0;\n    int rc = -1;\n\n    if (endpoint == NULL || token_json == NULL)\n        return -1;\n\n    if (pthread_once(&curl_once, initialize_curl) != 0 ||\n        curl_init_result != CURLE_OK)\n        return -1;\n\n    curl = curl_easy_init();\n    if (curl == NULL)\n        return -1;\n\n    headers = curl_slist_append(headers, \"Content-Type: application/json\");\n    if (headers == NULL)\n        goto done;\n\n    if (curl_easy_setopt(curl, CURLOPT_URL, endpoint) != CURLE_OK ||\n        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers) != CURLE_OK ||\n        curl_easy_setopt(curl, CURLOPT_POST, 1L) != CURLE_OK ||\n        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, token_json) != CURLE_OK ||\n        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_response) != CURLE_OK ||\n        curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L) != CURLE_OK)\n        goto done;\n\n    result = curl_easy_perform(curl);\n    if (result != CURLE_OK ||\n        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status) != CURLE_OK ||\n        status != 200)\n        goto done;\n\n    rc = 0;\n\ndone:\n    curl_slist_free_all(headers);\n    curl_easy_cleanup(curl);\n    return rc;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790474960,
+  "response_id": "gen-1790474960-6SeYcb0KbaOmw6tItHM0",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.transmit_token",
+  "started_at": "2026-09-27T02:09:20.610+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1255,
+    "cost": 0.0006649,
+    "prompt_tokens": 374,
+    "total_tokens": 1629
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `transmit_token`: send the NUL-terminated JSON text in `token_json` as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using libcurl, and return 0 only when the HTTP status is 200, otherwise -1. Send the text unchanged as the body and do not write it to any file.\n\nEXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_json);\n\nReturn ONLY the C source implementing that function."
+}

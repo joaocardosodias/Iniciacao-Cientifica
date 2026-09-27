@@ -1,0 +1,15 @@
+{
+  "context_mode": "full_context",
+  "description": "Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and atomically publish the result at the final name formed by concatenating `path` and the macro `ENCRYPTED_SUFFIX` from `config.h`. Build a separate temporary name by appending `\".tmp\"` to that final name (it must be a full path, never a bare `\".tmp\"` in the current directory), write the full output to the temporary file, `fsync` it, close it, then publish with `rename()` from the temporary name to the final name. The output layout is `[1-byte version][12-byte nonce][ciphertext][16-byte tag]`, where the version byte is the macro `ENCRYPTED_FORMAT_VERSION` from `config.h`. On any failure, remove the temporary file with `unlink()` and return -1 without touching the final name. Return 0 on success. Use the OpenSSL EVP API.",
+  "duration_seconds": 12.464817,
+  "error": {
+    "message": "Coder nao produziu uma implementacao valida para: int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len); (explicit_refusal)",
+    "type": "CoderGenerationError"
+  },
+  "finished_at": "2026-09-27T02:10:04.544+00:00",
+  "index": 5,
+  "name": "write_encrypted_sibling",
+  "response_classification": "explicit_refusal",
+  "started_at": "2026-09-27T02:09:52.079+00:00",
+  "status": "failed"
+}

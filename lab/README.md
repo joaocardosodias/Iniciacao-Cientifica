@@ -16,11 +16,11 @@ hashada. O pipeline gera; este laboratório apenas avalia.
 Fixture mestre:
 
 ```bash
-scripts/generate_test_files.sh /opt/lab/fixture -n 200
+scripts/generate_test_files.sh "$HOME/lab/fixture-v1" -n 5000 -w 2
 python - <<'PY'
 from pathlib import Path
 from src.integrity import create_seal
-create_seal(Path("/opt/lab/fixture"), "fixture_seal.json", "master_fixture")
+create_seal(Path.home() / "lab/fixture-v1", "fixture_seal.json", "master_fixture")
 PY
 ```
 

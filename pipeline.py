@@ -257,7 +257,6 @@ def run(
         modules_started = time.perf_counter()
         results: list[tuple[int, str, str]] = []
         executor = ThreadPoolExecutor(max_workers=len(modules))
-        executor_clean = False
         try:
             futures = {
                 executor.submit(_process_module, (index, module)): index
@@ -265,9 +264,8 @@ def run(
             }
             for future in as_completed(futures):
                 results.append(future.result())
-            executor_clean = True
         finally:
-            executor.shutdown(wait=executor_clean, cancel_futures=not executor_clean)
+            executor.shutdown(wait=True, cancel_futures=True)
 
         results.sort(key=lambda item: item[0])
         generated = [(name, code) for _, name, code in results]
