@@ -1,0 +1,84 @@
+name: iniciacao-lab
+
+x-hardening: &hardening
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  read_only: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,nodev,size=16m
+
+services:
+  collector:
+    image: iniciacao-lab-collector:local
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile.collector
+    user: "${LAB_UID:?}:${LAB_GID:?}"
+    <<: *hardening
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1.0
+    working_dir: /evidence
+    volumes:
+      - "${LAB_COLLECTOR_DIR:?}:/evidence"
+    networks:
+      labnet:
+        ipv4_address: 192.168.15.12
+
+  executor:
+    image: iniciacao-lab-executor:local
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile.executor
+    user: "${LAB_UID:?}:${LAB_GID:?}"
+    <<: *hardening
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1.0
+    depends_on:
+      - collector
+    environment:
+      HOME: /home/lab
+      RUN_ID: "${LAB_RUN_ID:?}"
+      KEY_ID: "${LAB_KEY_ID:?}"
+    volumes:
+      - "${LAB_SAMPLE_DIR:?}:/sample:ro"
+      - "${LAB_FIXTURES_DIR:?}:/home/lab/Documentos_Teste"
+    networks:
+      - labnet
+
+  verifier:
+    image: iniciacao-lab-verifier:local
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile.verifier
+    user: "${LAB_UID:?}:${LAB_GID:?}"
+    <<: *hardening
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1.0
+    network_mode: none
+    volumes:
+      - "${LAB_ENCRYPTED_DIR:?}:/input/encrypted:ro"
+      - "${LAB_MANIFEST:?}:/input/manifest.json:ro"
+      - "${LAB_TOKEN:?}:/input/token.json:ro"
+      - "${LAB_VERIFIER_DIR:?}:/output"
+    command:
+      - "--token"
+      - "/input/token.json"
+      - "--path"
+      - "/input/encrypted"
+      - "--manifest"
+      - "/input/manifest.json"
+      - "--out-dir"
+      - "/output"
+      - "--report"
+      - "/output/report.json"
+      - "--keep"
+
+networks:
+  labnet:
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.168.15.0/24

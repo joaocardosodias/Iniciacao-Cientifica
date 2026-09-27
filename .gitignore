@@ -45,6 +45,9 @@ target/
 # Pasta criada pelo generate_test_files (fora do repo, mas por segurança)
 Documentos_Teste/
 
+# Evidências do laboratório em containers (executadas na VM, não versionadas)
+lab/runs/
+
 # Logs gerais
 logs/
 *.log
