@@ -107,15 +107,15 @@ Exporte o diretório para o host e registre a avaliação manualmente com
 Três containers recriados a cada run, a partir das mesmas imagens. Não-root,
 `cap_drop: ALL`, `no-new-privileges`, raiz somente-leitura com `tmpfs`, limites de
 CPU/memória/processos. O executor só monta o binário (leitura) e a fixture (escrita);
-o verifier tem entradas somente-leitura e fica sem rede; a rede é `internal`, sem
-Internet e sem rota ao host.
+o verifier tem entradas somente-leitura e fica sem rede; a rede é `internal`.
+Verifique o acesso ao host separadamente antes de registrá-lo como ausente.
 
 ## Limites metodológicos
 
 - Recriar containers **não** restaura o kernel, o daemon Docker nem outros recursos da
   VM. Registre isso no artigo; trate falhas de limpeza como erro de ambiente.
 - O ambiente de containers não cobre reinicialização, systemd ou serviços completos.
-- Se a VM de geração e o Ubuntu 24.04 divergirem muito na glibc, a checagem de
+- Se o host de geração e o Ubuntu 24.04 do executor divergirem muito na glibc, a checagem de
   compatibilidade reprova e o run vira `environment_error`; nesse caso use uma base
   compatível ou registre a limitação.
 - O avaliador funcional deve aplicar o mesmo procedimento a `fragmented` e

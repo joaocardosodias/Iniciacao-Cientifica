@@ -71,7 +71,7 @@ class EvaluationResultsTests(unittest.TestCase):
                 first["run_id"],
                 "pesquisador-01",
                 "partial",
-                environment={"execution_vm_snapshot": "clean-v1"},
+                environment={"vm_snapshot": "clean-v1"},
                 checks=[{"description": "Iniciou", "status": "passed"}],
                 evidence=[evidence],
             )

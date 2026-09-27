@@ -58,9 +58,9 @@ contexto global, e `full_context`, com o programa completo visível.
 ```
 
 `output/` contém runs de desenvolvimento que podem ser versionadas para
-transferência e teste nas VMs. `results/` contém as campanhas oficiais e também
+transferência e teste na VM de laboratório. `results/` contém as campanhas oficiais e também
 pode ser versionado para transportar as runs, avaliações e consolidações entre
-as VMs. Os formatos, o desenho experimental e o fluxo completo estão no
+o host de geração e a VM. Os formatos, o desenho experimental e o fluxo completo estão no
 [`índice da documentação técnica`](docs/README.md).
 
 ---
@@ -295,7 +295,7 @@ Depois do teste controlado de uma run oficial:
 python tools/record_evaluation.py --run-id run_<id>
 ```
 
-Para registrar de forma reproduzível as duas VMs, copie e preencha
+Para registrar a VM de laboratório e os containers de forma reproduzível, copie e preencha
 `experiments/vm-environment.example.json` e informe:
 
 ```bash

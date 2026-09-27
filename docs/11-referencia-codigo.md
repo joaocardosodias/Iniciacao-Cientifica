@@ -262,7 +262,7 @@ O código implementa geração de ZIP/Office localmente e paraleliza trabalho. U
 
 Implementada em Rust sob `tools/reset_vm/`. Remove diretório de testes e resíduos conhecidos, limpa log C2, crontab relacionado e caches. Ignora symlinks na varredura. `scripts/reset_vm.sh` compila release e passa a raiz do projeto.
 
-É uma ferramenta destrutiva destinada somente à VM de laboratório. O snapshot do hypervisor continua sendo a restauração principal.
+É uma ferramenta destrutiva destinada somente à VM de laboratório. No fluxo em containers, a VM é restaurada entre lotes de modelos; containers e volumes novos isolam cada run.
 
 ## 31. Arquivos de dependência e configuração
 

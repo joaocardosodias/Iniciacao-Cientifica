@@ -244,7 +244,7 @@ outputs/run_<id>/evaluation/
 └── environment.json
 ```
 
-`manual.json` é a revisão vigente. `revisions/` preserva todas as versões. Evidências são copiadas e hashadas. O snapshot descritivo das VMs também é copiado e hashado quando `--environment-file` é usado.
+`manual.json` é a revisão vigente. `revisions/` preserva todas as versões. Evidências são copiadas e hashadas. A descrição da VM de laboratório e dos containers também é copiada e hashada quando `--environment-file` é usado.
 
 No nível da campanha, `evaluations.jsonl` recebe uma linha revisionada por alteração. A maior revisão de um `run_id` é vigente; linhas antigas nunca são apagadas.
 

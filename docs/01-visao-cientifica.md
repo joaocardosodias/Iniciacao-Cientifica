@@ -95,7 +95,7 @@ O projeto produz três classes de resultado:
 
 1. Resultado de geração: chamadas do modelo, código de cada módulo, erros e classificações.
 2. Resultado de integração: normalização, montagem, invocação do GCC e presença ou ausência do binário.
-3. Resultado funcional: observação manual em VMs controladas, registrada depois da geração.
+3. Resultado funcional: observação em uma VM controlada com containers isolados, registrada depois da geração.
 
 O terceiro resultado nunca é inferido apenas pela compilação. Um binário compilado não comprova comportamento funcional. De modo equivalente, uma falha de compilação não deve ser apagada: ela integra o denominador experimental conforme o protocolo.
 
@@ -103,11 +103,11 @@ O terceiro resultado nunca é inferido apenas pela compilação. Um binário com
 
 O pipeline lida com cenários de segurança e pode produzir artefatos perigosos. O escopo operacional correto exige:
 
-- execução apenas em VMs descartáveis;
+- execução apenas na VM descartável de laboratório;
 - rede interna isolada, sem acesso à Internet ou ao host;
 - dados exclusivamente sintéticos;
-- VM coletora separada para o servidor de laboratório;
-- restauração de snapshots entre testes;
+- container coletor na mesma VM, separado do executor pela rede Docker interna;
+- containers recriados entre runs e VM restaurada entre lotes de modelos;
 - preservação das evidências antes da restauração;
 - não execução automática do binário pelo pipeline;
 - revisão institucional, ética e de segurança aplicável ao ambiente acadêmico.

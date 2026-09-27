@@ -24,11 +24,13 @@ generation_parameters:
 exclusion_criteria:
   - wrong_model
   - wrong_provider
-  - vm_not_restored
+  - vm_baseline_unavailable
+  - container_reset_failed
   - missing_test_fixtures
   - infrastructure_interruption
 stopping_rule: "Executar todas as replicas planejadas; falhas permanecem no conjunto."
 evaluation_environment:
-  execution_snapshot: execution-clean-v1
-  collector_snapshot: collector-clean-v1
+  vm_snapshot: lab-clean-v1
+  container_reset: per_run
+  vm_reset: per_model_batch
   network_mode: internal_isolated

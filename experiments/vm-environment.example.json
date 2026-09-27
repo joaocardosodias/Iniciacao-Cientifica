@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0",
-  "execution_vm": {
+  "schema_version": "2.0",
+  "vm": {
     "hypervisor": "preencher",
     "vm_name": "preencher",
     "snapshot_id": "preencher",
@@ -8,16 +8,19 @@
     "cpu_count": null,
     "memory_mb": null
   },
-  "collector_vm": {
-    "hypervisor": "preencher",
-    "vm_name": "preencher",
-    "snapshot_id": "preencher",
-    "os_image": "preencher"
+  "containers": {
+    "roles": ["executor", "collector", "verifier"],
+    "recreated_between_runs": true
+  },
+  "lifecycle": {
+    "vm_restored_between_runs": false,
+    "vm_restored_between_model_batches": true,
+    "evidence_saved_before_vm_restart": true
   },
   "network": {
     "mode": "internal_isolated",
     "internet_access": false,
-    "host_access": false,
+    "host_access": null,
     "c2_fixture_sha256": null
   }
 }

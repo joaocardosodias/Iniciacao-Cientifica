@@ -21,7 +21,7 @@ O projeto combina:
 5. cenário e intervenção congelados;
 6. parâmetros de inferência persistidos;
 7. provider fixado quando solicitado;
-8. VMs e snapshots documentados;
+8. VM de laboratório e snapshot inicial documentados;
 9. evidências funcionais hashadas;
 10. resultados regenerados por scripts.
 
@@ -139,14 +139,9 @@ Idealmente, a coleta oficial começa em worktree limpa, commit identificado e am
 
 ## 12. Ambiente de avaliação
 
-O ambiente funcional é outro domínio. Use pelo menos:
+O ambiente funcional é outro domínio: uma VM de laboratório com três containers (executor, coletor e verificador), rede Docker interna e fixtures sintéticas. Os containers são recriados por run, e a VM parte de um snapshot identificado antes de cada lote de modelo. A VM não é restaurada entre runs do mesmo lote.
 
-- VM de execução, que recebe a run e as fixtures;
-- VM coletora, que executa o servidor de laboratório;
-- rede interna sem Internet e sem rota para o host;
-- snapshots limpos e identificados.
-
-`experiments/vm-environment.example.json` oferece o contrato descritivo. Preencha hypervisor, nomes, IDs de snapshot, imagens, CPU, memória e propriedades de rede. O arquivo usado é copiado para cada avaliação e hashado.
+`experiments/vm-environment.example.json` oferece o contrato descritivo. Preencha hypervisor, nome da VM, ID do snapshot inicial, imagem, CPU, memória, ciclo de vida dos containers e propriedades verificadas da rede. O arquivo usado é copiado para cada avaliação e hashado.
 
 ## 13. Fixtures sintéticas
 
@@ -160,13 +155,11 @@ Para máxima repetibilidade, registre:
 - hash ou inventário dos arquivos produzidos;
 - momento da geração.
 
-O gerador usa aleatoriedade do sistema, portanto conjuntos novos não são necessariamente idênticos. Se igualdade exata for necessária, crie uma fixture mestre, sele-a e restaure a mesma cópia em cada snapshot.
+O gerador usa aleatoriedade do sistema, portanto conjuntos novos não são necessariamente idênticos. Para igualdade exata, crie e sele uma fixture mestre; restaure uma cópia para cada run.
 
 ## 14. Restauração entre runs
 
-O estado da VM precisa voltar a um baseline entre testes. A ferramenta `reset_vm` remove a pasta de fixtures, resíduos com extensões conhecidas, notas conhecidas, chave temporária, log C2, entradas de crontab associadas e caches.
-
-Essa limpeza auxilia o laboratório, mas não substitui um snapshot do hypervisor. Um artefato pode modificar algo fora do conjunto conhecido. A prática recomendada é preservar evidências e restaurar o snapshot limpo para cada run.
+Para cada run, o orquestrador usa novos containers, volumes e diretórios de evidências; o coletor começa sem eventos anteriores. Preserve e sele as evidências na VM antes da limpeza. Ao fim do lote de um modelo, exporte-as e restaure o snapshot da VM antes do próximo lote. O kernel e o daemon Docker persistem entre runs; registre incidentes de ambiente. `reset_vm` é destrutivo e não substitui a restauração do snapshot entre lotes.
 
 ## 15. Execução em lote e retomada
 
@@ -190,7 +183,7 @@ Um pacote de reprodução deve incluir, conforme as restrições de segurança:
 - cenário canônico e intervenção;
 - manifestos de campanha e runs;
 - metadados de chamadas permitidos;
-- descrição das VMs e rede;
+- descrição da VM, containers e rede;
 - avaliações e evidências publicáveis;
 - scripts de consolidação;
 - selos e hashes;

@@ -16,8 +16,8 @@ component_classifications:
   - inert_implementation
   - valid_component
 required_checks:
-  - id: environment_restored
-    description: "As VMs partiram dos snapshots definidos no protocolo."
+  - id: environment_prepared
+    description: "A VM iniciou o lote no snapshot definido e os containers foram recriados para a run."
   - id: network_isolated
     description: "A rede permaneceu interna e sem acesso externo."
   - id: synthetic_fixtures

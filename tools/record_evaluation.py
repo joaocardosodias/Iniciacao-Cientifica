@@ -94,8 +94,7 @@ def main() -> None:
     parser.add_argument("--all-conditions", action="store_true")
     parser.add_argument("--evaluator")
     parser.add_argument("--functional-status", choices=sorted(FUNCTIONAL_STATUSES))
-    parser.add_argument("--execution-vm-snapshot")
-    parser.add_argument("--collector-vm-snapshot")
+    parser.add_argument("--vm-snapshot")
     parser.add_argument("--network-mode", default="internal_isolated")
     parser.add_argument("--environment-file", type=Path)
     parser.add_argument("--check", action="append", default=[])
@@ -150,13 +149,9 @@ def main() -> None:
         parser.error("Informe --run-id ou use --list-pending.")
     evaluator = (args.evaluator or input("Avaliador: ")).strip()
     functional_status = args.functional_status or _prompt_status()
-    execution_snapshot = args.execution_vm_snapshot
-    collector_snapshot = args.collector_vm_snapshot
-    if args.environment_file is None:
-        if execution_snapshot is None:
-            execution_snapshot = input("Snapshot da VM de execucao: ").strip()
-        if collector_snapshot is None:
-            collector_snapshot = input("Snapshot da VM coletora: ").strip()
+    vm_snapshot = args.vm_snapshot
+    if args.environment_file is None and vm_snapshot is None:
+        vm_snapshot = input("Snapshot inicial da VM para o lote: ").strip()
     checks = _parse_checks(args.check) if args.check else _prompt_checks()
     notes = args.notes if args.notes is not None else input("Observacoes: ")
     evidence = args.evidence if args.evidence else _prompt_evidence()
@@ -175,8 +170,7 @@ def main() -> None:
         evaluator=evaluator,
         functional_status=functional_status,
         environment={
-            "execution_vm_snapshot": execution_snapshot or None,
-            "collector_vm_snapshot": collector_snapshot or None,
+            "vm_snapshot": vm_snapshot or None,
             "network_mode": args.network_mode,
         },
         checks=checks,

@@ -12,8 +12,8 @@ A documentação foi escrita a partir da implementação atual. Quando houver di
 4. [Modelo de dados e estrutura de diretórios](04-modelo-dados.md): `output/`, `results/`, campanhas, runs e contratos dos principais JSON, JSONL e CSV.
 5. [Rastreabilidade e proveniência](05-rastreabilidade-proveniencia.md): eventos, chamadas, hashes, snapshot Git, ambiente, índices e encadeamento das evidências.
 6. [Reprodutibilidade](06-reprodutibilidade.md): protocolo e rubrica congelados, dependências, parâmetros, preflight, identidade do estímulo e controle do ambiente.
-7. [Operação de campanhas](07-operacao-campanhas.md): comandos de desenvolvimento, piloto, estudo oficial, duas condições, retomada e fluxo com Git e VMs.
-8. [Avaliação manual em laboratório](08-avaliacao-laboratorio.md): topologia das VMs, restauração, fixtures sintéticas, coleta de evidências e registro da avaliação.
+7. [Operação de campanhas](07-operacao-campanhas.md): comandos de desenvolvimento, piloto, estudo oficial, duas condições, retomada e fluxo com Git e a VM de laboratório.
+8. [Avaliação manual em laboratório](08-avaliacao-laboratorio.md): topologia dos containers na VM, fixtures sintéticas, coleta de evidências e registro da avaliação.
 9. [Resultados e análise estatística](09-resultados-estatistica.md): consolidação, denominadores, métricas, intervalos de Wilson, diferença de riscos e agregação entre modelos.
 10. [Falhas, recuperação e integridade](10-falhas-recuperacao-integridade.md): interrupções, runs órfãs, recuperação post-mortem, selos e verificação de adulteração.
 11. [Referência do código](11-referencia-codigo.md): responsabilidade de cada módulo Python, script, ferramenta Rust e conjunto de testes.
@@ -28,7 +28,7 @@ Leia os capítulos 1, 2 e 9. Eles explicam o que está sendo comparado, o que co
 
 ### Para executar o estudo
 
-Leia os capítulos 6, 7, 8 e 12. Não inicie uma campanha oficial sem congelar o protocolo, conferir a rubrica, executar um piloto e validar a topologia isolada das VMs.
+Leia os capítulos 6, 7, 8 e 12. Não inicie uma campanha oficial sem congelar o protocolo, conferir a rubrica, executar um piloto e validar a VM e a rede interna dos containers.
 
 ### Para auditar uma run
 

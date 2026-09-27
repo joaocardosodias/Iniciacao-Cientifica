@@ -21,8 +21,8 @@
 - [ ] Conferir hipótese e métrica primária.
 - [ ] Conferir exclusões e regra de parada.
 - [ ] Conferir rubrica.
-- [ ] Preparar duas VMs e rede interna.
-- [ ] Criar snapshots limpos.
+- [ ] Preparar uma VM com Docker Compose e rede interna.
+- [ ] Identificar o snapshot inicial da VM para cada lote de modelo.
 - [ ] Preencher JSON do ambiente de VM.
 - [ ] Preparar fixtures exclusivamente sintéticas.
 - [ ] Executar testes automatizados.
@@ -40,7 +40,7 @@
 - [ ] Falha individual não interrompeu o lote.
 - [ ] `--resume` completou somente lacunas em um teste controlado.
 - [ ] Transporte para a VM funcionou.
-- [ ] Snapshot foi restaurado por run.
+- [ ] Containers e volumes foram recriados por run.
 - [ ] Evidências foram copiadas e hashadas.
 - [ ] Avaliação revisionada funcionou.
 - [ ] CSVs e agregado foram regenerados.
@@ -90,10 +90,10 @@
 
 - [ ] Identificar `run_id`, campanha, condição e réplica.
 - [ ] Verificar selo da run.
-- [ ] Restaurar snapshot da VM de execução.
-- [ ] Restaurar snapshot da VM coletora.
+- [ ] Conferir o snapshot inicial da VM para este lote de modelo.
+- [ ] Confirmar containers e volumes novos para esta run.
 - [ ] Confirmar rede interna sem Internet.
-- [ ] Confirmar ausência de rota para o host.
+- [ ] Verificar e registrar o acesso ao host; não marcar ausência de rota sem evidência.
 - [ ] Limpar ou restaurar estado do coletor.
 - [ ] Restaurar a mesma fixture sintética.
 - [ ] Confirmar hash ou inventário da fixture.
@@ -116,7 +116,7 @@
 - [ ] Justificar toda exclusão.
 - [ ] Registrar avaliação pela ferramenta.
 - [ ] Conferir `manual.json` e evidências copiadas.
-- [ ] Restaurar snapshots antes da próxima run.
+- [ ] Descartar containers e volumes temporários antes da próxima run; restaurar a VM entre lotes de modelos.
 
 ## 9. Antes da consolidação
 

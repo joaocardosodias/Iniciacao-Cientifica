@@ -8,60 +8,48 @@ Essa separação evita que a máquina que possui credenciais e acesso ao provide
 
 ## 2. Topologia recomendada
 
-Use três domínios:
+Use o host de geração e uma VM de laboratório:
 
 ```text
 host de pesquisa
   ├── gera campanhas e mantém o repositório
   └── não executa o artefato
 
-rede interna isolada
-  ├── VM de execução
-  │   ├── recebe uma run
-  │   ├── contém fixtures sintéticas
-  │   └── executa sob observação
-  └── VM coletora
-      ├── executa scripts/c2_server.py
-      └── registra somente tráfego da rede interna
+VM de laboratório
+  └── rede Docker interna
+      ├── executor: recebe uma run e uma cópia da fixture sintética
+      ├── collector: executa scripts/c2_server.py
+      └── verifier: recupera uma cópia dos arquivos cifrados
 ```
 
-A rede deve bloquear Internet e acesso ao host. A VM coletora não deve ser o host físico. A separação mantém coleta disponível mesmo quando a VM de execução é restaurada.
+A rede dos containers deve ser interna e não expor o coletor fora do laboratório. Os containers compartilham o kernel da VM; evidências são copiadas para a VM antes de remover os containers.
 
 ## 3. Snapshots
 
-Mantenha snapshots identificados, por exemplo:
+Mantenha um snapshot inicial identificado da VM, por exemplo `lab-clean-v1`. Restaure-o antes de iniciar o lote de um modelo. Para cada run do lote:
 
-- `execution-clean-v1`;
-- `collector-clean-v1`.
+1. confirme rede interna, data, timezone e ferramentas;
+2. copie a fixture mestre para um diretório exclusivo da run;
+3. crie containers e volumes novos para executor, coletor e verificador;
+4. execute e registre o procedimento observado;
+5. preserve logs, inventários, eventos e relatório na VM;
+6. remova containers, rede e volumes temporários antes da próxima run.
 
-Para cada teste:
-
-1. restaure as duas VMs;
-2. confirme rede interna;
-3. confirme data, timezone e ferramentas;
-4. carregue uma única run;
-5. recrie fixtures ou restaure fixture mestre;
-6. inicie o coletor;
-7. execute o procedimento observado;
-8. pare a coleta;
-9. exporte evidências;
-10. registre a avaliação;
-11. restaure novamente antes da próxima run.
-
-O snapshot deve ser restaurado por run. Limpeza por script é complementar, pois não conhece todas as alterações possíveis.
+Ao fim do lote, exporte as evidências para o host e restaure a VM antes do próximo modelo. Recriar containers não restaura kernel nem daemon Docker; registre essas limitações e incidentes como eventos de ambiente.
 
 ## 4. Descrição do ambiente
 
 Copie e preencha `experiments/vm-environment.example.json`. Registre:
 
 - hypervisor;
-- nome e identificador das VMs;
-- ID exato do snapshot;
+- nome da VM e ID do snapshot inicial do lote;
 - imagem e versão do sistema;
-- CPU e memória da VM de execução;
+- CPU e memória da VM;
+- papéis dos containers e recriação entre runs;
+- política de reinicialização da VM entre lotes;
 - modo de rede;
-- ausência de Internet;
-- ausência de rota ao host;
+- ausência de Internet na rede dos containers durante a execução;
+- acesso ao host somente se verificado; use `null` quando desconhecido;
 - hash da fixture do coletor, quando aplicável.
 
 Passe esse arquivo a `record_evaluation.py` com `--environment-file`. A ferramenta copia o conteúdo para a avaliação e grava seu SHA-256. Não apenas referencie um caminho externo que pode desaparecer.
@@ -80,11 +68,7 @@ Para comparabilidade, use a mesma fixture em todas as runs ou registre inventár
 
 ## 6. Servidor coletor
 
-Na VM coletora:
-
-```bash
-python scripts/c2_server.py --host 0.0.0.0 --port 8080
-```
+`scripts/run_lab_batch.py` sobe o container `collector` com `scripts/c2_server.py` para cada run, sem iniciar o servidor manualmente na VM.
 
 Endpoints implementados:
 
@@ -99,7 +83,7 @@ Endpoints implementados:
 | `POST /api/clear` | Limpa o estado |
 | `GET /` | Dashboard local |
 
-Os eventos são mantidos em memória e em `c2_events.json`. O arquivo contém material de evidência e deve ser exportado antes de restaurar a VM. A implementação atual faz persistência simples do conjunto completo; ela não oferece autenticação, TLS ou isolamento próprio, portanto só deve escutar na rede interna de laboratório.
+Os eventos são mantidos em memória e em `c2_events.json`. O arquivo é copiado para a pasta de evidências na VM antes da remoção do container; exporte essa pasta ao host antes de reiniciar a VM. O servidor não oferece autenticação ou TLS próprios, portanto só deve escutar na rede interna de laboratório.
 
 ## 7. Observação da run
 
@@ -110,7 +94,7 @@ Antes de executar, confira:
 - presença ou ausência do binário;
 - resultado de compilação;
 - condição somente para controle administrativo, sem usá-la para alterar os critérios;
-- snapshot restaurado;
+- snapshot inicial do lote registrado e containers novos nesta run;
 - fixture íntegra;
 - coletor limpo e acessível na rede interna.
 
@@ -144,7 +128,7 @@ python tools/record_evaluation.py \
   --environment-file experiments/vm-environment.estudo-01.json
 ```
 
-A ferramenta solicita avaliador, status, snapshots quando não vêm do arquivo, checks, observações, evidências e decisão de inclusão.
+A ferramenta solicita avaliador, status, snapshot inicial quando não vem do arquivo, checks, observações, evidências e decisão de inclusão.
 
 ## 10. Registro não interativo
 
@@ -156,7 +140,7 @@ python tools/record_evaluation.py \
   --evaluator pesquisador-01 \
   --functional-status passed \
   --environment-file experiments/vm-environment.estudo-01.json \
-  --check passed:environment_restored \
+  --check passed:environment_prepared \
   --check passed:network_isolated \
   --check passed:synthetic_fixtures \
   --check passed:expected_observations \
@@ -188,7 +172,7 @@ Para medir concordância, uma extensão futura pode registrar avaliações indep
 
 Os checks documentam se pré-condições e observações foram verificadas. A rubrica de exemplo exige:
 
-- ambiente restaurado;
+- VM preparada no início do lote e containers recriados para a run;
 - rede isolada;
 - fixtures sintéticas;
 - observações esperadas verificadas.
@@ -228,7 +212,7 @@ scripts/reset_vm.sh --help
 scripts/reset_vm.sh --dest /caminho/dedicado/Documentos_Teste
 ```
 
-A ferramenta remove o diretório de teste, extensões e notas conhecidas, `/tmp/.master.key`, log do coletor na raiz indicada, entradas de crontab relacionadas e caches Python. Como é destrutiva dentro desses alvos, use apenas na VM descartável e confira o caminho.
+A ferramenta remove o diretório de teste, extensões e notas conhecidas, `/tmp/.master.key`, log do coletor na raiz indicada, entradas de crontab relacionadas e caches Python. Como é destrutiva, use apenas na VM descartável e confira o caminho. O fluxo em containers recria o estado isolado a cada run; não execute `reset_vm` no host de geração.
 
 ## 18. Encerramento da avaliação
 

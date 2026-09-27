@@ -57,7 +57,7 @@ Dentro de uma comparação válida, devem permanecer constantes:
 - `temperature`, `top_p`, `seed` e `max_tokens`;
 - número planejado de réplicas;
 - rubrica de avaliação;
-- snapshots das VMs;
+- snapshot da VM de laboratório;
 - fixtures sintéticas;
 - topologia de rede;
 - critérios de inclusão e exclusão.

@@ -20,7 +20,9 @@ def snapshot_environment(source: Path, evaluation_dir: Path) -> dict[str, Any]:
     data = json.loads(source.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("A descricao do ambiente deve ser um objeto JSON.")
-    required = {"schema_version", "execution_vm", "collector_vm", "network"}
+    if data.get("schema_version") != "2.0":
+        raise ValueError("A descricao da VM deve usar schema_version 2.0.")
+    required = {"schema_version", "vm", "containers", "lifecycle", "network"}
     missing = sorted(required - set(data))
     if missing:
         raise ValueError(f"Campos ausentes na descricao do ambiente: {', '.join(missing)}")

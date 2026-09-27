@@ -229,4 +229,4 @@ Git oferece histórico e transporte, mas arquivos grandes e binários podem exig
 - hashes dos commits e selos fora da árvore principal;
 - registro de quem realizou transporte e avaliação.
 
-Antes de clonar para a VM, confira o commit. Depois de copiar evidências de volta, confirme seus hashes antes de restaurar a VM.
+Antes de clonar para a VM, confira o commit. Depois do lote, exporte as evidências e confirme seus hashes antes de restaurar a VM para o próximo modelo.

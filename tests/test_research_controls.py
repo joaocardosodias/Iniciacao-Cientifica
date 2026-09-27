@@ -108,9 +108,10 @@ class ResearchControlTests(unittest.TestCase):
             root = Path(temporary)
             source = root / "environment-source.json"
             source.write_text(json.dumps({
-                "schema_version": "1.0",
-                "execution_vm": {},
-                "collector_vm": {},
+                "schema_version": "2.0",
+                "vm": {},
+                "containers": {},
+                "lifecycle": {},
                 "network": {},
             }), encoding="utf-8")
             record = snapshot_environment(source, root / "evaluation")
@@ -121,6 +122,31 @@ class ResearchControlTests(unittest.TestCase):
             difference = risk_difference(0, 50, 50, 50)
             self.assertEqual(difference["difference"], -1.0)
             self.assertGreater(difference["ci95_high"], -1.0)
+
+    def test_environment_requires_vm_containers_and_lifecycle(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "environment-source.json"
+            source.write_text(json.dumps({
+                "schema_version": "2.0",
+                "network": {},
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Campos ausentes"):
+                snapshot_environment(source, root / "evaluation")
+
+    def test_environment_rejects_old_schema_version(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "environment-source.json"
+            source.write_text(json.dumps({
+                "schema_version": "1.0",
+                "vm": {},
+                "containers": {},
+                "lifecycle": {},
+                "network": {},
+            }), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "schema_version 2.0"):
+                snapshot_environment(source, root / "evaluation")
 
 
 if __name__ == "__main__":
