@@ -8,6 +8,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.aggregate_results import build_aggregate
+from src.trace import safe_name
 from src import ui
 
 
@@ -29,7 +30,7 @@ def main() -> None:
         ("runs", report["run_count"]),
         ("inclui pilotos", "sim" if report["include_pilots"] else "nao"),
         ("metodo", report["method"]),
-        ("saida", args.results_root / "aggregate" / args.experiment_id),
+        ("saida", args.results_root / safe_name(args.experiment_id) / "summary"),
     ])
     ui.rule()
 

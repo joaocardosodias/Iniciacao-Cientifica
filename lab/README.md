@@ -57,14 +57,14 @@ python scripts/run_lab_batch.py \
   `tools/build_results.py` e `tools/record_evaluation.py`.
 - Itera `campaign.data["runs"]` da campanha; runs sem diretório ou sem
   `assembly/output` viram `not_run` com motivo, sem executar.
-- A evidência espelha `results/`: `<out>/<modelo__provider>/<experiment_id>/<condition>/<run_id>/`,
+- A evidência espelha `results/`: `<out>/<experiment_id>/models/<modelo__provider>/<condition>/<run_id>/`,
   com `--out` padrão em `lab/runs/`.
 - No nível da condição grava `lab_summary.json` e `lab_summary.sha256`; com `--archive`,
   gera `<condition>.tar.gz` e `<condition>.archive.json`.
 - Retomada: rodar de novo pula o que já tem `metadata.json`. `--force` reexecuta,
   `--limit N` limita o total e `--no-build` reutiliza imagens.
 
-Fluxo entre modelos: rode o lote de um modelo, exporte `lab/runs/<slug>/<experiment_id>/<condition>/`
+Fluxo entre modelos: rode o lote de um modelo, exporte `lab/runs/<experiment_id>/models/<slug>/<condition>/`
 para o host, reinicie a VM e repita com o próximo modelo. Mantenha a **mesma fixture
 mestre** e a mesma topologia para todos os modelos.
 

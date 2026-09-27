@@ -10,6 +10,7 @@ from src.results_builder import build_results
 from src.trace import RunTrace
 from src.aggregate_results import build_aggregate
 from src.integrity import verify_seal
+from tools.migrate_results_layout import migrate
 
 
 class EvaluationResultsTests(unittest.TestCase):
@@ -109,7 +110,7 @@ class EvaluationResultsTests(unittest.TestCase):
             aggregate = build_aggregate(results_root, "estudo-01")
             self.assertEqual(aggregate["campaign_count"], 1)
             self.assertEqual(aggregate["run_count"], 2)
-            aggregate_root = results_root / "aggregate" / "estudo-01"
+            aggregate_root = results_root / "estudo-01" / "summary"
             self.assertTrue((aggregate_root / "condition_comparisons.csv").exists())
 
     def test_exclusion_requires_reason(self):
@@ -125,6 +126,38 @@ class EvaluationResultsTests(unittest.TestCase):
                     "environment_error",
                     include_in_analysis=False,
                 )
+
+    def test_migrate_existing_campaign_and_summary(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            results_root = Path(temporary) / "results"
+            campaign = self._campaign_with_runs(results_root)
+            build_results(campaign)
+            build_aggregate(results_root, "estudo-01")
+            original = campaign.root
+            legacy = results_root / original.parent.name / "estudo-01" / "fragmented"
+            legacy.parent.mkdir(parents=True)
+            original.rename(legacy)
+            campaign.root = legacy
+            campaign._index()
+            old_summary = results_root / "aggregate" / "estudo-01"
+            old_summary.parent.mkdir()
+            (results_root / "estudo-01" / "summary").rename(old_summary)
+
+            campaigns = migrate(results_root)
+            self.assertEqual(campaigns, [original / "campaign.json"])
+            self.assertFalse(legacy.exists())
+            self.assertTrue(verify_seal(original, "campaign_seal.json")["valid"])
+            self.assertEqual(Campaign.find(results_root, "estudo-01", "fragmented").root, original)
+            provenance = json.loads(
+                (results_root / "estudo-01" / "summary" / "provenance.json").read_text()
+            )
+            self.assertEqual(provenance["campaigns"][0]["path"], original.relative_to(results_root).as_posix())
+            index = results_root / "campaigns.jsonl"
+            entries = [json.loads(line) for line in index.read_text().splitlines()]
+            self.assertEqual(entries[-1]["path"], original.relative_to(results_root).as_posix())
+            self.assertGreater(entries[-1]["revision"], entries[-2]["revision"])
+            self.assertEqual(migrate(results_root), campaigns)
+            self.assertEqual(len(index.read_text().splitlines()), len(entries))
 
     def test_stage_results_are_recorded_and_validated(self):
         with tempfile.TemporaryDirectory() as temporary:

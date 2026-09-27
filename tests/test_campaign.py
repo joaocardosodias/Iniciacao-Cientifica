@@ -84,6 +84,12 @@ class CampaignTests(unittest.TestCase):
                 3,
                 {"temperature": 0},
             )
+            self.assertEqual(
+                campaign.root,
+                root / "estudo-01" / "models" / "fake_model__cerebras_fp16" / "fragmented",
+            )
+            self.assertFalse((campaign.root / "figures").exists())
+            self.assertFalse((campaign.root / "tables").exists())
             self.assertEqual(campaign.pending_replicates(), [1, 2, 3])
             run_dir = create_run(
                 campaign.outputs_dir,

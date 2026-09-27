@@ -281,8 +281,8 @@ python tools/build_aggregate.py \
 Verifique os selos após a consolidação:
 
 ```bash
-python tools/verify_campaign.py results/<modelo>/<experimento>/<condicao>
-python tools/verify_run.py results/<modelo>/<experimento>/<condicao>/outputs/<run>
+python tools/verify_campaign.py results/<experimento>/models/<modelo>__<provider>/<condicao>
+python tools/verify_run.py results/<experimento>/models/<modelo>__<provider>/<condicao>/outputs/<run>
 ```
 
 Uma alteração posterior de avaliação exige nova consolidação e novo selo de campanha.

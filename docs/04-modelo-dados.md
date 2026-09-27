@@ -47,35 +47,41 @@ output/
 
 ## 3. Campanhas
 
-O caminho de campanha é derivado de modelo, provider, experimento e condição. Barras e caracteres inadequados são convertidos para um slug seguro:
+O caminho de campanha é derivado de experimento, modelo, provider e condição. Barras e caracteres inadequados são convertidos para um slug seguro:
 
 ```text
 results/
 ├── campaigns.jsonl
-├── aggregate/
-│   └── <experiment_id>/
-└── <model_slug>__<provider_slug>/
-    └── <experiment_id>/
-        └── <condition>/
-            ├── campaign.json
-            ├── events.jsonl
-            ├── evaluations.jsonl
-            ├── preflight.json
-            ├── inputs/
-            ├── outputs/
-            │   ├── experiments.jsonl
-            │   └── run_<id>/
-            ├── figures/
-            ├── tables/
-            ├── runs.csv
-            ├── summary.csv
-            ├── summary.json
-            ├── exclusions.csv
-            ├── provenance.json
-            └── campaign_seal.json
+└── <experiment_id>/
+    ├── summary/
+    │   ├── all_runs.csv
+    │   ├── summary_by_model.csv
+    │   ├── summary_by_condition.csv
+    │   ├── condition_comparisons.csv
+    │   ├── statistics.json
+    │   └── provenance.json
+    └── models/
+        └── <model_slug>__<provider_slug>/
+            └── <condition>/
+                ├── campaign.json
+                ├── events.jsonl
+                ├── evaluations.jsonl
+                ├── preflight.json
+                ├── inputs/
+                ├── outputs/
+                │   ├── experiments.jsonl
+                │   └── run_<id>/
+                ├── runs.csv
+                ├── summary.csv
+                ├── summary.json
+                ├── exclusions.csv
+                ├── provenance.json
+                └── campaign_seal.json
 ```
 
-Os arquivos consolidados aparecem depois de `build_results.py`. `figures/` e `tables/` são reservados para produtos derivados. `outputs/` contém evidência bruta por run.
+Os arquivos consolidados aparecem depois de `build_results.py`. `outputs/` contém evidência bruta por run. `summary/` é gerado pela agregação do experimento.
+
+Para reorganizar resultados criados no formato antigo, execute `python tools/migrate_results_layout.py`. O comando move as campanhas, registra uma nova revisão dos caminhos em `campaigns.jsonl` e atualiza a proveniência em `summary/` sem alterar as evidências seladas das runs.
 
 ## 4. Identificadores
 
@@ -290,7 +296,7 @@ Sela o estado completo consolidado da campanha, incluindo avaliações e produto
 
 ## 19. Agregados do experimento
 
-`tools/build_aggregate.py` cria uma pasta por experimento em `results/aggregate/`. Ela contém todas as linhas incluídas, resumos por grupo, comparações entre condições, estatísticas e proveniência da agregação. Campanhas piloto ficam de fora por padrão.
+`tools/build_aggregate.py` cria `results/<experiment_id>/summary/`. Ela contém todas as linhas incluídas, resumos por grupo, comparações entre condições, estatísticas e proveniência da agregação. Campanhas piloto ficam de fora por padrão.
 
 ## 20. Caminhos relativos e portabilidade
 

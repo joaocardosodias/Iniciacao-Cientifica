@@ -36,7 +36,7 @@ def _sha256(path: Path) -> str:
 
 
 def find_run(results_root: Path, run_id: str) -> Path:
-    matches = list(results_root.glob(f"*/*/*/outputs/{run_id}"))
+    matches = list(results_root.glob(f"*/models/*/*/outputs/{run_id}"))
     if not matches:
         raise FileNotFoundError(f"Run oficial nao encontrada: {run_id}")
     if len(matches) > 1:

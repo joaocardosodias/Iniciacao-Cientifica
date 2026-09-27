@@ -8,7 +8,7 @@ from typing import Any
 from src.campaign import Campaign
 from src.events import utc_now
 from src.results_builder import build_results
-from src.trace import write_json_atomic
+from src.trace import safe_name, write_json_atomic
 from src.integrity import verify_seal
 
 
@@ -226,7 +226,7 @@ def _validate_campaign_controls(campaigns: list[Campaign]) -> dict[str, Any]:
 
 def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool = False) -> dict[str, Any]:
     campaigns = []
-    for path in sorted(results_root.glob("*/*/*/campaign.json")):
+    for path in sorted((results_root / safe_name(experiment_id) / "models").glob("*/*/campaign.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
         if data.get("experiment_id") != experiment_id:
             continue
@@ -271,10 +271,8 @@ def build_aggregate(results_root: Path, experiment_id: str, include_pilots: bool
             "integrity_verified": True,
             "campaign_combined_sha256": verification.get("combined_sha256"),
         })
-    output_root = results_root / "aggregate" / experiment_id
+    output_root = results_root / safe_name(experiment_id) / "summary"
     output_root.mkdir(parents=True, exist_ok=True)
-    (output_root / "figures").mkdir(exist_ok=True)
-    (output_root / "tables").mkdir(exist_ok=True)
     run_fields = sorted({key for row in rows for key in row})
     by_model = _group_summary(rows, ("model", "provider", "inference_provider", "condition"))
     by_condition = _group_summary(rows, ("condition",))

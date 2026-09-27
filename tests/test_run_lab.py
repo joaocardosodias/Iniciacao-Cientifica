@@ -166,7 +166,7 @@ class BatchTargetTests(unittest.TestCase):
         root = evidence_root(Path("/lab"), campaign)
         self.assertEqual(
             root,
-            Path("/lab") / "openai_gpt-oss-120b__cerebras_fp16" / "estudo-01" / "fragmented",
+            Path("/lab") / "estudo-01" / "models" / "openai_gpt-oss-120b__cerebras_fp16" / "fragmented",
         )
 
 

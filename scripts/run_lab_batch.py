@@ -48,8 +48,9 @@ def evidence_root(out: Path, campaign: Campaign) -> Path:
     provider = campaign.data.get("inference_provider") or campaign.data.get("provider") or ""
     return (
         out
-        / campaign_model_slug(campaign.data.get("model") or "", provider)
         / safe_name(campaign.data.get("experiment_id") or "")
+        / "models"
+        / campaign_model_slug(campaign.data.get("model") or "", provider)
         / safe_name(campaign.data.get("condition") or "")
     )
 

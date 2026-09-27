@@ -128,7 +128,7 @@ Uma run não avaliada não aparece como excluída automaticamente. Ela é penden
 
 ## 8. Agregação do experimento
 
-`build_aggregate()` encontra `campaign.json` sob `results/*/*/*/`, seleciona o `experiment_id` e remove pilotos por padrão. Para cada campanha:
+`build_aggregate()` encontra `campaign.json` sob `results/<experiment_id>/models/*/*/` e remove pilotos por padrão. Para cada campanha:
 
 - gera resultados se faltarem;
 - verifica `campaign_seal.json`;
@@ -138,15 +138,13 @@ Uma run não avaliada não aparece como excluída automaticamente. Ela é penden
 Os produtos são gravados em:
 
 ```text
-results/aggregate/<experiment_id>/
+results/<experiment_id>/summary/
 ├── all_runs.csv
 ├── summary_by_model.csv
 ├── summary_by_condition.csv
 ├── condition_comparisons.csv
 ├── statistics.json
-├── provenance.json
-├── figures/
-└── tables/
+└── provenance.json
 ```
 
 `--include-pilots` existe para análises diagnósticas. Não use pilotos na estimativa oficial sem justificativa metodológica prévia.

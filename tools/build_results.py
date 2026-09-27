@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 from src.campaign import Campaign
 from src.results_builder import build_results
 from src.aggregate_results import build_aggregate
+from src.trace import safe_name
 from src import ui
 
 
@@ -43,7 +44,7 @@ def main() -> None:
     )]
     summaries = [build_results(campaign) for campaign in campaigns]
     if args.all_conditions:
-        aggregate = build_aggregate(args.results_root, args.experiment_id)
+        aggregate = build_aggregate(args.results_root, args.experiment_id, args.include_pilots)
         output = {"campaigns": summaries, "aggregate": aggregate}
     else:
         output = summaries[0]
@@ -64,7 +65,7 @@ def main() -> None:
         ], indent=4)
         ui.rule()
     if args.all_conditions:
-        ui.note(f"agregado : {args.results_root / 'aggregate' / args.experiment_id}")
+        ui.note(f"resumo : {args.results_root / safe_name(args.experiment_id) / 'summary'}")
     ui.rule()
 
 

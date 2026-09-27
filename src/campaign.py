@@ -79,8 +79,9 @@ class Campaign:
         provider_label = inference_provider or provider
         root = (
             results_root
-            / campaign_model_slug(resolved_model, provider_label)
             / safe_name(experiment_id)
+            / "models"
+            / campaign_model_slug(resolved_model, provider_label)
             / safe_name(condition)
         )
         path = root / "campaign.json"
@@ -90,8 +91,6 @@ class Campaign:
             )
         root.mkdir(parents=True, exist_ok=True)
         (root / "outputs").mkdir()
-        (root / "figures").mkdir()
-        (root / "tables").mkdir()
         created_at = utc_now()
         campaign_id = (
             f"campaign_{safe_name(experiment_id)}_{safe_name(condition)}_"
@@ -212,7 +211,7 @@ class Campaign:
     ) -> "Campaign":
         matches = []
         if results_root.exists():
-            for path in results_root.glob("*/*/*/campaign.json"):
+            for path in (results_root / safe_name(experiment_id) / "models").glob("*/*/campaign.json"):
                 try:
                     data = json.loads(path.read_text(encoding="utf-8"))
                 except (OSError, ValueError):
@@ -254,7 +253,7 @@ class Campaign:
     ) -> list["Campaign"]:
         campaigns = []
         if results_root.exists():
-            for path in sorted(results_root.glob("*/*/*/campaign.json")):
+            for path in sorted((results_root / safe_name(experiment_id) / "models").glob("*/*/campaign.json")):
                 try:
                     data = json.loads(path.read_text(encoding="utf-8"))
                 except (OSError, ValueError):

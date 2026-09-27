@@ -267,21 +267,23 @@ python pipeline.py \
 ```text
 results/
 ├── campaigns.jsonl
-└── openai_gpt-oss-120b__cerebras_fp16/
-    └── estudo-01/
-        └── fragmented/
-            ├── campaign.json
-            ├── events.jsonl
-            ├── evaluations.jsonl
-            ├── runs.csv
-            ├── summary.csv
-            ├── summary.json
-            ├── exclusions.csv
-            ├── provenance.json
-            ├── outputs/
-            │   └── run_<id>_replicate_<n>/
-            ├── figures/
-            └── tables/
+└── estudo-01/
+    ├── summary/
+    │   ├── summary_by_model.csv
+    │   └── condition_comparisons.csv
+    └── models/
+        └── openai_gpt-oss-120b__cerebras_fp16/
+            └── fragmented/
+                ├── campaign.json
+                ├── events.jsonl
+                ├── evaluations.jsonl
+                ├── runs.csv
+                ├── summary.csv
+                ├── summary.json
+                ├── exclusions.csv
+                ├── provenance.json
+                └── outputs/
+                    └── run_<id>_replicate_<n>/
 ```
 
 `campaign.json` mantém o plano, progresso, parâmetros e referências das runs.
@@ -371,7 +373,7 @@ Para consolidar todos os modelos e condições de um experimento:
 python tools/build_aggregate.py --experiment-id estudo-01
 ```
 
-O diretório `results/aggregate/estudo-01/` recebe todas as linhas, resumos por
+O diretório `results/estudo-01/summary/` recebe todas as linhas, resumos por
 modelo e condição, intervalos de confiança de 95%, comparações entre condições
 para sucesso funcional e recusa, e a proveniência das campanhas utilizadas. Pilotos só entram quando
 `--include-pilots` é informado explicitamente.
