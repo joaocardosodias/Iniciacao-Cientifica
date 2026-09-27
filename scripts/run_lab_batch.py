@@ -60,7 +60,9 @@ def select_campaigns(args) -> list:
     if not args.all_conditions and not args.condition:
         raise ValueError("Informe --condition ou --all-conditions.")
     if args.all_conditions:
-        return Campaign.find_all(args.results_root, args.experiment_id, args.model, args.provider)
+        return Campaign.find_all(
+            args.results_root, args.experiment_id, args.model, args.provider, include_pilots=True
+        )
     return [Campaign.find(args.results_root, args.experiment_id, args.condition, args.model, args.provider)]
 
 
