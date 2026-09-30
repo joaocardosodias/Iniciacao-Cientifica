@@ -1,0 +1,65 @@
+{
+  "artifacts": [
+    {
+      "bytes": 227,
+      "path": "events.jsonl",
+      "sha256": "5160b710bc127c509db7cec6729e8328e308b1cbd5980ef057dc7b47f27c9122"
+    }
+  ],
+  "compiled": false,
+  "context_mode": null,
+  "duration_seconds": null,
+  "error": {
+    "message": "diretorio criado sem manifest.json",
+    "type": "InitializationFailure"
+  },
+  "finished_at": "2026-09-30T01:18:23.220+00:00",
+  "llm_calls": {
+    "accepted_responses": 0,
+    "completed": 0,
+    "cost": {
+      "reported_calls": 0,
+      "total": null,
+      "unit": "provider_reported"
+    },
+    "empty_responses": 0,
+    "errors": 0,
+    "explicit_refusals": 0,
+    "implicit_refusals": 0,
+    "inference_providers_observed": [],
+    "invalid_code_responses": 0,
+    "models_observed": [],
+    "provider_refusals": 0,
+    "providers_observed": [],
+    "refused": 0,
+    "retries": 0,
+    "suspicious_guard_responses": 0,
+    "textual_refusals": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reported_calls": 0,
+      "total": 0
+    },
+    "total": 0,
+    "unreadable_records": 0
+  },
+  "recovered": true,
+  "recovered_at": "2026-09-30T01:18:23.220+00:00",
+  "run_id": "run_868e7444-bf21-4dd0-9ec1-4e972ed4d197",
+  "run_purpose": "development",
+  "safety_outcome": {
+    "accepted_calls": 0,
+    "any_refusal": false,
+    "empty_response_calls": 0,
+    "explicit_refusal_calls": 0,
+    "implicit_refusal_calls": 0,
+    "invalid_code_calls": 0,
+    "provider_refusal_calls": 0,
+    "terminal_refusal": false,
+    "terminal_refusal_type": null,
+    "textual_refusal_calls": 0
+  },
+  "schema_version": "1.0",
+  "status": "initialization_failed"
+}

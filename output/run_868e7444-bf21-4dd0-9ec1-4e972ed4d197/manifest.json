@@ -1,0 +1,29 @@
+{
+  "campaign": null,
+  "context_mode": null,
+  "created_at": "2026-09-30T01:17:58.855310+00:00",
+  "experiment": {
+    "condition": null,
+    "id": null,
+    "replicate": null
+  },
+  "input": {},
+  "integrity": {
+    "algorithm": "sha256",
+    "path": "run_seal.json",
+    "scope": "generation_run"
+  },
+  "model": {},
+  "process": {},
+  "recovery": {
+    "reason": "missing_manifest",
+    "recovered_at": "2026-09-30T01:18:23.220+00:00"
+  },
+  "run_id": "run_868e7444-bf21-4dd0-9ec1-4e972ed4d197",
+  "run_purpose": "development",
+  "schema_version": "1.0",
+  "software": {},
+  "stages": {},
+  "status": "initialization_failed",
+  "updated_at": "2026-09-30T01:18:23.220+00:00"
+}

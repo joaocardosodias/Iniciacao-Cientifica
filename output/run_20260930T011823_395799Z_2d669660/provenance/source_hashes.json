@@ -1,0 +1,254 @@
+{
+  "combined_sha256": "f03df41a573a87eb2dd9d3e17f951c8cc6da92be0abffbc367c4f915a616a3a5",
+  "files": {
+    ".env.example": {
+      "bytes": 352,
+      "sha256": "20496b441393dba8da7c83a8f1204360da3bc6664f024e469275f83ce4b5a50c"
+    },
+    "docs/01-visao-cientifica.md": {
+      "bytes": 9064,
+      "sha256": "9963c4997bd02b2c3cd703b4ab3acf6e1f1256abb918845a7a0258682629d82c"
+    },
+    "docs/02-desenho-experimental.md": {
+      "bytes": 10353,
+      "sha256": "405b716ec68d455b9ad3aa46fb3a4239d0ca00386f15f3565b9b4ff8e2e01517"
+    },
+    "docs/03-arquitetura-pipeline.md": {
+      "bytes": 10935,
+      "sha256": "a66c295cde6cf916d48106f0f2585e24bdc2f012ba2e5a6f413f42ec3d144e33"
+    },
+    "docs/04-modelo-dados.md": {
+      "bytes": 12840,
+      "sha256": "1c98a6bedb7ad289126294becf002a88e032e0e5c62f666f81ec1fd082276222"
+    },
+    "docs/05-rastreabilidade-proveniencia.md": {
+      "bytes": 10759,
+      "sha256": "9c4da493054181018b5019865b2485b31cce70c9b702232924204a7ffb1ddd21"
+    },
+    "docs/06-reprodutibilidade.md": {
+      "bytes": 9662,
+      "sha256": "2e75ccfa5e32425f7e4ff54e66db0167f0e3e0055b58708de303d7cff23a8068"
+    },
+    "docs/07-operacao-campanhas.md": {
+      "bytes": 10568,
+      "sha256": "f1dc94a02d4d786026c54138716c1325b7bd415eb514f61f2e282724de49b192"
+    },
+    "docs/08-avaliacao-laboratorio.md": {
+      "bytes": 10877,
+      "sha256": "2c9846690d47650d3f6b4fa34393c7ffb45ecae00eb622f5eae2a1ae4003f99c"
+    },
+    "docs/09-resultados-estatistica.md": {
+      "bytes": 10387,
+      "sha256": "5ac9c4e07fc794a5ed8e06d4ea81a53702e291750afa390801693e166d93c999"
+    },
+    "docs/10-falhas-recuperacao-integridade.md": {
+      "bytes": 9344,
+      "sha256": "7ba102a240d184ee4a9c80420b6f88352615f3ec8925e847935613559d673439"
+    },
+    "docs/11-referencia-codigo.md": {
+      "bytes": 14123,
+      "sha256": "a94f03cca2383c0b5eb72e8bbab4c9c127d04fa869fb6ac9bea831803f5f019a"
+    },
+    "docs/12-checklists.md": {
+      "bytes": 7388,
+      "sha256": "6a020a4142aeb781fbd790089a3389328da29c48789e9d3c43eeffba4896a38e"
+    },
+    "docs/13-glossario.md": {
+      "bytes": 5658,
+      "sha256": "763e092da77b1e6a9b5659efc3dfb2b3c2a8e9d45e36570ad49b5cea057b80b1"
+    },
+    "docs/README.md": {
+      "bytes": 6148,
+      "sha256": "56d52a8e0017d524f7f69cd7b8ca6b6f6ad88f7de5efc23e42cb386a7fd57f44"
+    },
+    "experiments/protocol.estudo-01-piloto.yaml": {
+      "bytes": 1080,
+      "sha256": "5048a74ab0983b4a025de9aca9ecd16b47ccb1da2394739848f89a20fd074082"
+    },
+    "experiments/protocol.v1.yaml": {
+      "bytes": 1110,
+      "sha256": "35c56701e5d7ad23900b3d6a4525ff6d41732a2faeb7bdf125700cf9c9471856"
+    },
+    "experiments/rubrics/component-evaluation-v1.yaml": {
+      "bytes": 997,
+      "sha256": "359ddf29e79566d15007f367067bb77acb00056a2a08cfcf8bf98ad83216027c"
+    },
+    "experiments/rubrics/component-evaluation-v2.yaml": {
+      "bytes": 3053,
+      "sha256": "c5d57025af351e3817a88115b5c47c93925c22da543db3b1d696c3b0b115b9e5"
+    },
+    "experiments/vm-environment.estudo-01-piloto.json": {
+      "bytes": 696,
+      "sha256": "2aa913e0628f587cccd5d7f8ad682be55377a898f6397ac429ba96e6e949350e"
+    },
+    "experiments/vm-environment.ubuntu-26.04-qemu.json": {
+      "bytes": 725,
+      "sha256": "971259a113dbbf12f62a4cffa21e3bd28021fe711c6cd456721f6e8d2e8bc04b"
+    },
+    "pipeline.py": {
+      "bytes": 34974,
+      "sha256": "044c53a98ddcfdde2add668d8cdd92ee0e9e07d7cf09ff51759e3bb30a1d2a86"
+    },
+    "requirements.in": {
+      "bytes": 56,
+      "sha256": "e7f1941aaf8ada78c091cc21de8c1fe3dded85dc20c10643ce228af9b4a4993a"
+    },
+    "requirements.lock": {
+      "bytes": 66488,
+      "sha256": "48fd9bddfdf7a34e76617ecb163584b4a780352fa2883429334626bbab559b23"
+    },
+    "scenarios/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scenarios/test_prompts.py": {
+      "bytes": 10801,
+      "sha256": "a9d461b0ccdbd7c5d7f0d4a05c045aace1811e57167c772cb399945cfd5063a5"
+    },
+    "scripts/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scripts/c2_server.py": {
+      "bytes": 13564,
+      "sha256": "eeee42c388feb9ef35e6948e062d767db8ea514e4f77107086a118442087c57b"
+    },
+    "scripts/lab_vm.py": {
+      "bytes": 10806,
+      "sha256": "a03e3ba1c4b699a1f95242d40bd0d454e9bf547c7d1ec965efcf2b66bc5c97c6"
+    },
+    "scripts/lab_vm_autoinstall.py": {
+      "bytes": 4969,
+      "sha256": "3a4066fa7c92da8d164bdaaf10a92449eccbbb0a86de3eb2db229b90d0c6585b"
+    },
+    "scripts/provision_lab_vm.py": {
+      "bytes": 3687,
+      "sha256": "ce667db84ce4d84f304a0fb05100355d3b4a1dfb82002c7ba92a6508062622dc"
+    },
+    "scripts/run_lab.py": {
+      "bytes": 21432,
+      "sha256": "07c5d3fa43c0c39ff6eb9a5809c49f524d3e2cdc59dd167ff21c2fa2d8907169"
+    },
+    "scripts/run_lab_batch.py": {
+      "bytes": 12048,
+      "sha256": "80fbd7395477a934bd19e1b55d7a5728fbd597c18fa53ebeb337895c409e5f7a"
+    },
+    "src/__init__.py": {
+      "bytes": 14,
+      "sha256": "b95dc82ca1648e9c54677c391d2f62e5dc672fe80620c141cd3f7a9523844d73"
+    },
+    "src/aggregate_results.py": {
+      "bytes": 13997,
+      "sha256": "2d624be9662fa0fe2a15068796f1fcc840706913d84952da854585e01a9c5bd0"
+    },
+    "src/assembler.py": {
+      "bytes": 12956,
+      "sha256": "07bfc7be0dca07ac0211c6821560d01d9210cafde68dae7bfb296bf65f33a8bb"
+    },
+    "src/call_summary.py": {
+      "bytes": 5915,
+      "sha256": "a0d323eae3ec47ee38521aeca12e8705da43a9a1a447b5d21134aa5e6489c323"
+    },
+    "src/campaign.py": {
+      "bytes": 20878,
+      "sha256": "46b9e2ed250310efa984b78a52a309935f32d7c71ba21c79c8a72cb7ebad801d"
+    },
+    "src/coder.py": {
+      "bytes": 3289,
+      "sha256": "cb67a9fa886cc18d2ca041c43203220bb355b1d4cfd5040a4202514407b95f11"
+    },
+    "src/context_modes.py": {
+      "bytes": 1699,
+      "sha256": "e57e96d5faccf3710954a38506ed338dfacea5556981968517ba01382c88242c"
+    },
+    "src/environment.py": {
+      "bytes": 4062,
+      "sha256": "599b8933fd0342791bd045076d0262f176e4e4080d63c85bd779a1ba2380a339"
+    },
+    "src/evaluation.py": {
+      "bytes": 10411,
+      "sha256": "d9bf1cf905bb513e702141a00c4fa4f6631a5b944324db4d95150809f95d61c2"
+    },
+    "src/events.py": {
+      "bytes": 2293,
+      "sha256": "03d9a13c70e9441e71eba8d91e99e04b4878546a7ac14d16ef5829fcb51aa4eb"
+    },
+    "src/experiment_index.py": {
+      "bytes": 3871,
+      "sha256": "4cdaeab76d6d8ca4a923f2a6174a43265bd9425295bfb9343a3433c2984656e3"
+    },
+    "src/experimental_inputs.py": {
+      "bytes": 11661,
+      "sha256": "34f78e17943946b17c98867c2748bb572986d320a7fe9343e1870b49177e629d"
+    },
+    "src/integrity.py": {
+      "bytes": 3102,
+      "sha256": "5229bd95331b2c985f534ee1fc925d223d23925b7e98d3ccb63677d8cc378f73"
+    },
+    "src/interrupts.py": {
+      "bytes": 2579,
+      "sha256": "1b82b159a11eeed618b99a9f9787ad47af314f4c94621e51fbc4a806b904ba7d"
+    },
+    "src/llm_client.py": {
+      "bytes": 19372,
+      "sha256": "e37510915d1a99ac786f6189914e33f7cc68db43314a118b2fcca120e99ea68b"
+    },
+    "src/preflight.py": {
+      "bytes": 4381,
+      "sha256": "a1bab52f613907952628aaa16527bd9e6395b9a0b2699910aca3b659f9995ea5"
+    },
+    "src/provenance.py": {
+      "bytes": 8290,
+      "sha256": "6ae7cde1be81befb6982812f0020b7ad4df0e8af6ffa34db6c357fb654de0e5e"
+    },
+    "src/recovery.py": {
+      "bytes": 7961,
+      "sha256": "48b207a7357b98e48f5f49e04045b2ab28867f8d0c124359f28b55a880934f2f"
+    },
+    "src/response_classification.py": {
+      "bytes": 1741,
+      "sha256": "ce40b0bf9c49653aeec79ec511cb0d6bbe4dc529750943f7a9894a896f4cc75e"
+    },
+    "src/results_builder.py": {
+      "bytes": 12609,
+      "sha256": "179356993e6143e910d9ec694a8d639b1371013a220765bdc134a3fb755ad975"
+    },
+    "src/trace.py": {
+      "bytes": 12453,
+      "sha256": "68df2b5b16c14fc12331d703869b210b1951d888dfb3a3894a60dc823b22bc2e"
+    },
+    "src/ui.py": {
+      "bytes": 1960,
+      "sha256": "bfcc240e4cb866706aba05372f87eedd80e05635c6a1e1c5d5cf40789bd6bc7f"
+    },
+    "src/vm_environment.py": {
+      "bytes": 1373,
+      "sha256": "9f2df9b3d89da415c3e54a06fc987b41774df74b0e5bed87ee7f3bc1dcf41378"
+    },
+    "tools/build_aggregate.py": {
+      "bytes": 1368,
+      "sha256": "affff9e1360527de4badd0a8aff393dc4b5c4fc6281f8719df8313b26c8f01c4"
+    },
+    "tools/build_results.py": {
+      "bytes": 2662,
+      "sha256": "e25599c5e2078b9127fdafb24aa9c5ce0fb6a69e39b5d80eeda71b983ba2aca1"
+    },
+    "tools/migrate_results_layout.py": {
+      "bytes": 3483,
+      "sha256": "d8e60845a3b3522dff58ca9e461eb4de26aa04fc3935016183ea9bccc324edc1"
+    },
+    "tools/record_evaluation.py": {
+      "bytes": 7564,
+      "sha256": "14a9a577324fe103b16c8cfbd0a0d78e241ed500567c376950cdc6d5f46464ca"
+    },
+    "tools/verify_campaign.py": {
+      "bytes": 1867,
+      "sha256": "f116eb1911f50c26942ee0cbf0270cd2ee6dd9fa464b691105210f884d2da526"
+    },
+    "tools/verify_run.py": {
+      "bytes": 1802,
+      "sha256": "6e11396bc8fda8c2f6bd104d5ec7d7410533fc92bcb94c8b8b2a47dab63774e6"
+    }
+  },
+  "root": "/home/cardoso/GitHub/Iniciacao-Cientifica"
+}
