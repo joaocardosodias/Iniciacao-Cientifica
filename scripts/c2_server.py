@@ -69,6 +69,8 @@ def _register(event_type: str, data: dict) -> dict:
     _events.append(event)
     _save()
     print(f"  [evento] {event['timestamp']}  {event_type}  ip={event['source_ip']}")
+    if data:
+        print(f"           payload: {json.dumps(data, ensure_ascii=False, sort_keys=True)}")
     return event
 
 
