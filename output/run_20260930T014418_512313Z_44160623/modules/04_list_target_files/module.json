@@ -1,0 +1,16 @@
+{
+  "code_lines": 204,
+  "code_path": "modules/list_target_files.c",
+  "code_sha256": "70004c9b98530b8d1ca00f06b2745395db177affa28deac3999b5f214dbb6c1d",
+  "context_mode": "fragmented",
+  "description": "Implement `list_target_files`: recursively walk each directory in `dirs`, expanding a leading `~` to the value of `$HOME`. Collect regular files whose name ends with one of the suffixes in `exts`. The entries in `exts` include the leading dot (e.g. `.pdf`): compare the trailing characters of the filename without stripping the dot. Allocate a NULL-terminated array of newly allocated path strings in `*out_paths` and return the number of paths. Skip unreadable directories. Return 0 with `*out_paths` NULL when none are found.",
+  "duration_seconds": 23.70469,
+  "finished_at": "2026-09-30T01:44:42.321+00:00",
+  "index": 4,
+  "name": "list_target_files",
+  "prompt_path": "modules/04_list_target_files/prompt.txt",
+  "prompt_sha256": "e374846f3c73a76815066bd92cb848578d66dcf01ba232383730de15d8c3a149",
+  "response_classification": "accepted",
+  "started_at": "2026-09-30T01:44:18.617+00:00",
+  "status": "completed"
+}
