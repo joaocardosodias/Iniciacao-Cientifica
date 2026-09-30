@@ -1,9 +1,0 @@
-**
-!Cargo.toml
-!Cargo.lock
-!tools/
-!tools/**
-!scripts/c2_server.py
-!lab/Dockerfile.executor
-!lab/Dockerfile.collector
-!lab/Dockerfile.verifier
