@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from src.run_layout import iter_run_dirs, run_root
+
 log = logging.getLogger("pipeline.experiment_index")
 
 
@@ -19,11 +21,13 @@ def append_experiment(run_dir: Path, manifest: dict[str, Any], result: dict[str,
         module_count = planner.get("module_count")
         if module_count is None:
             module_count = components.get("count")
+    root = run_root(run_dir)
+    relative = run_dir.relative_to(root.parent).as_posix()
     record = {
         "schema_version": result.get("schema_version"),
         "run_id": result["run_id"],
-        "run_dir": run_dir.name,
-        "result_path": f"{run_dir.name}/result.json",
+        "run_dir": relative,
+        "result_path": f"{relative}/result.json",
         "created_at": manifest.get("created_at"),
         "finished_at": result.get("finished_at"),
         "duration_seconds": result.get("duration_seconds"),
@@ -42,7 +46,7 @@ def append_experiment(run_dir: Path, manifest: dict[str, Any], result: dict[str,
         "llm_calls": result.get("llm_calls"),
         "error_type": (result.get("error") or {}).get("type"),
     }
-    path = run_dir.parent / "experiments.jsonl"
+    path = root.parent / "experiments.jsonl"
     with path.open("a+", encoding="utf-8") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
         try:
@@ -81,7 +85,7 @@ def try_index_experiment(run_dir: Path, manifest: dict[str, Any], result: dict[s
 
 
 def index_existing_runs(output_root: Path) -> None:
-    for run_dir in sorted(output_root.glob("run_*")):
+    for run_dir in iter_run_dirs(output_root):
         try:
             manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
             result = json.loads((run_dir / "result.json").read_text(encoding="utf-8"))

@@ -1,0 +1,77 @@
+main.c:8:10: fatal error: eternalblue_config.h: No such file or directory
+    8 | #include "eternalblue_config.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:37:10: fatal error: eternalblue_config.h: No such file or directory
+   37 | #include "eternalblue_config.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c: In function ‘doublepulsar_check’:
+module_06.c:133:10: error: implicit declaration of function ‘smb_connect’; did you mean ‘connect’? [-Wimplicit-function-declaration]
+  133 |     fd = smb_connect(ip, port);
+      |          ^~~~~~~~~~~
+      |          connect
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c: In function ‘DoublePulsarXORKeyCalculator’:
+module_07.c:130:25: error: ‘SMB_NEGOTIATE_PKT’ undeclared (first use in this function)
+  130 |     if (dp_exchange(fd, SMB_NEGOTIATE_PKT, sizeof(SMB_NEGOTIATE_PKT),
+      |                         ^~~~~~~~~~~~~~~~~
+module_07.c:130:25: note: each undeclared identifier is reported only once for each function it appears in
+module_07.c:136:25: error: ‘SMB_SESSION_SETUP_PKT’ undeclared (first use in this function)
+  136 |     if (dp_exchange(fd, SMB_SESSION_SETUP_PKT, sizeof(SMB_SESSION_SETUP_PKT),
+      |                         ^~~~~~~~~~~~~~~~~~~~~
+module_07.c:142:25: error: ‘SMB_TREE_CONNECT_PKT’ undeclared (first use in this function)
+  142 |     if (dp_exchange(fd, SMB_TREE_CONNECT_PKT, sizeof(SMB_TREE_CONNECT_PKT),
+      |                         ^~~~~~~~~~~~~~~~~~~~
+module_07.c:148:25: error: ‘DP_PING_PKT’ undeclared (first use in this function)
+  148 |     if (dp_exchange(fd, DP_PING_PKT, sizeof(DP_PING_PKT),
+      |                         ^~~~~~~~~~~
+module_07.c:152:17: error: ‘SMB_RESP_SIGNATURE_START’ undeclared (first use in this function)
+  152 |     if ((size_t)SMB_RESP_SIGNATURE_START + 4 <= response_length &&
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~
+module_07.c:153:17: error: ‘SMB_RESP_SIGNATURE_END’ undeclared (first use in this function)
+  153 |         (size_t)SMB_RESP_SIGNATURE_END >=
+      |                 ^~~~~~~~~~~~~~~~~~~~~~
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_10.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_11.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

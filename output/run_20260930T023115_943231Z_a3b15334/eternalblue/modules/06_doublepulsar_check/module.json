@@ -1,0 +1,16 @@
+{
+  "code_lines": 129,
+  "code_path": "modules/doublepulsar_check.c",
+  "code_sha256": "583bb4658bb1a4a0b85bcf13586e7da6d29ea91bb8e02e3e6fd1231df8394e41",
+  "context_mode": "fragmented",
+  "description": "Implement `doublepulsar_check`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response and extract the 16-bit Multiplex ID at offset `SMB_RESP_MUX_ID_OFFSET`. If it equals `DP_MULTIPLEX_ID_PING`, return 1 (active); otherwise return 0. Return -1 on error.",
+  "duration_seconds": 40.802818,
+  "finished_at": "2026-09-30T02:31:56.886+00:00",
+  "index": 6,
+  "name": "doublepulsar_check",
+  "prompt_path": "modules/06_doublepulsar_check/prompt.txt",
+  "prompt_sha256": "7d8d67c9a9f44afa20ef54fad07fc3358d165e54937c4437d1d9cdf6d52528c5",
+  "response_classification": "accepted",
+  "started_at": "2026-09-30T02:31:16.083+00:00",
+  "status": "completed"
+}

@@ -1,0 +1,18 @@
+## main...origin/main
+ M builder/assembler.py
+ M builder/generator.py
+ M output/experiments.jsonl
+ M pipeline.py
+ M prompts/__init__.py
+ M src/campaign.py
+ M src/evaluation.py
+ M src/experiment_index.py
+ M src/recovery.py
+ M src/trace.py
+ M tests/test_traceability.py
+?? output/run_20260930T022129_995506Z_80e9a3b9/
+?? output/run_20260930T023115_943231Z_a3b15334/
+?? output/run_20260930T023337_318277Z_2a695521/
+?? prompts/eternalblue.py
+?? src/run_layout.py
+?? templates/eternalblue/

@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "0636c3607f08",
+  "duration_seconds": 40.786184,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T02:31:56.876+00:00",
+  "hashes": {
+    "response_sha256": "583bb4658bb1a4a0b85bcf13586e7da6d29ea91bb8e02e3e6fd1231df8394e41",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "7d8d67c9a9f44afa20ef54fad07fc3358d165e54937c4437d1d9cdf6d52528c5"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"doublepulsar.h\"\n\n#include <errno.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <string.h>\n#include <sys/socket.h>\n#include <unistd.h>\n\nstatic int dp_send_all(int fd, const void *data, size_t length)\n{\n    const unsigned char *p = data;\n\n    while (length > 0) {\n        ssize_t n = send(fd, p, length, MSG_NOSIGNAL);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        p += (size_t)n;\n        length -= (size_t)n;\n    }\n    return 0;\n}\n\nstatic int dp_read_all(int fd, void *data, size_t length)\n{\n    unsigned char *p = data;\n\n    while (length > 0) {\n        ssize_t n = recv(fd, p, length, 0);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        p += (size_t)n;\n        length -= (size_t)n;\n    }\n    return 0;\n}\n\nstatic int dp_send_packet(int fd, const void *packet)\n{\n    const unsigned char *p = packet;\n    size_t length = 4U + ((size_t)p[1] << 16) +\n                    ((size_t)p[2] << 8) + (size_t)p[3];\n\n    return dp_send_all(fd, packet, length);\n}\n\nstatic int dp_read_frame(int fd, unsigned char **frame, size_t *frame_length)\n{\n    unsigned char header[4];\n    size_t payload_length;\n    unsigned char *buffer;\n\n    if (dp_read_all(fd, header, sizeof(header)) < 0)\n        return -1;\n\n    payload_length = ((size_t)header[1] << 16) |\n                     ((size_t)header[2] << 8) |\n                     (size_t)header[3];\n\n    buffer = malloc(sizeof(header) + payload_length);\n    if (buffer == NULL)\n        return -1;\n\n    memcpy(buffer, header, sizeof(header));\n    if (payload_length > 0 &&\n        dp_read_all(fd, buffer + sizeof(header), payload_length) < 0) {\n        free(buffer);\n        return -1;\n    }\n\n    *frame = buffer;\n    *frame_length = sizeof(header) + payload_length;\n    return 0;\n}\n\nint doublepulsar_check(const char *ip, int port)\n{\n    int fd;\n    int result = -1;\n    const void *packets[] = {\n        SMB_NEGOTIATE_PKT,\n        SMB_SESSION_SETUP_PKT,\n        SMB_TREE_CONNECT_PKT,\n        DP_PING_PKT\n    };\n\n    fd = smb_connect(ip, port);\n    if (fd < 0)\n        return -1;\n\n    for (size_t i = 0; i < sizeof(packets) / sizeof(packets[0]); i++) {\n        unsigned char *response = NULL;\n        size_t response_length = 0;\n\n        if (dp_send_packet(fd, packets[i]) < 0)\n            goto done;\n\n        if (dp_read_frame(fd, &response, &response_length) < 0)\n            goto done;\n\n        if (i == sizeof(packets) / sizeof(packets[0]) - 1) {\n            if (response_length >= SMB_RESP_MUX_ID_OFFSET + 2) {\n                uint16_t multiplex_id =\n                    (uint16_t)response[SMB_RESP_MUX_ID_OFFSET] |\n                    ((uint16_t)response[SMB_RESP_MUX_ID_OFFSET + 1] << 8);\n                result = multiplex_id == DP_MULTIPLEX_ID_PING ? 1 : 0;\n            }\n            free(response);\n            goto done;\n        }\n\n        free(response);\n    }\n\ndone:\n    close(fd);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790735476,
+  "response_id": "gen-1790735476-YictlEXBudSBxdKuOfKC",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.doublepulsar_check",
+  "started_at": "2026-09-30T02:31:16.090+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 4324,
+    "cost": 0.0022014,
+    "prompt_tokens": 394,
+    "total_tokens": 4718
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response and extract the 16-bit Multiplex ID at offset `SMB_RESP_MUX_ID_OFFSET`. If it equals `DP_MULTIPLEX_ID_PING`, return 1 (active); otherwise return 0. Return -1 on error.\n\nEXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

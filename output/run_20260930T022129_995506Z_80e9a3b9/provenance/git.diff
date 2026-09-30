@@ -1,0 +1,14 @@
+diff --git c/prompts/__init__.py w/prompts/__init__.py
+index c26ee9b..ebdf187 100644
+--- c/prompts/__init__.py
++++ w/prompts/__init__.py
+@@ -1,7 +1,9 @@
+ from prompts.wannacry import PROMPT as WANNACRY
++from prompts.eternalblue import PROMPT as ETERNALBLUE
+ 
+ PROMPTS = {
+     "wannacry": WANNACRY,
++    "eternalblue": ETERNALBLUE,
+ }
+ 
+ __all__ = ["PROMPTS"]

@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "92757a22482d",
+  "duration_seconds": 27.622505,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T02:38:10.308+00:00",
+  "hashes": {
+    "response_sha256": "00df1a145143b2c096e853fa1a89f70808b525ba0eb9ab37e498bf844a5a2970",
+    "system_sha256": "a4680998e5f9a1428b3ab920cb3fe691ca79c61a8033d393cc6d84ae25b8bd90",
+    "user_sha256": "7865f9b2edf083698018a0a1c39dd8c2fad79760bd8ace6afe0ff517e9e8978c"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n\n#include <errno.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <sys/socket.h>\n#include <unistd.h>\n\nextern int smb_connect(const char *ip, int port);\n\nstatic int\nsmb_send_all(int fd, const unsigned char *data, size_t length)\n{\n    size_t sent = 0;\n\n    while (sent < length) {\n        ssize_t n = send(fd, data + sent, length - sent, MSG_NOSIGNAL);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        sent += (size_t)n;\n    }\n\n    return 0;\n}\n\nstatic int\nsmb_recv_all(int fd, unsigned char *data, size_t length)\n{\n    size_t received = 0;\n\n    while (received < length) {\n        ssize_t n = recv(fd, data + received, length - received, 0);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        received += (size_t)n;\n    }\n\n    return 0;\n}\n\nstatic int\nsmb_exchange(int fd, const unsigned char *packet, size_t packet_length,\n             unsigned char **response, size_t *response_length)\n{\n    unsigned char header[4];\n    size_t body_length;\n    unsigned char *buffer;\n\n    if (smb_send_all(fd, packet, packet_length) < 0)\n        return -1;\n    if (smb_recv_all(fd, header, sizeof(header)) < 0)\n        return -1;\n\n    body_length = ((size_t)header[1] << 16) |\n                  ((size_t)header[2] << 8) |\n                  (size_t)header[3];\n    buffer = malloc(sizeof(header) + body_length);\n    if (buffer == NULL)\n        return -1;\n\n    for (size_t i = 0; i < sizeof(header); i++)\n        buffer[i] = header[i];\n\n    if (smb_recv_all(fd, buffer + sizeof(header), body_length) < 0) {\n        free(buffer);\n        return -1;\n    }\n\n    *response = buffer;\n    *response_length = sizeof(header) + body_length;\n    return 0;\n}\n\nint\nms17_vuln_status(const char *ip, int port)\n{\n    const unsigned char *packets[] = {\n        (const unsigned char *)(const void *)SMB_NEGOTIATE_PKT,\n        (const unsigned char *)(const void *)SMB_SESSION_SETUP_PKT,\n        (const unsigned char *)(const void *)SMB_TREE_CONNECT_PKT,\n        (const unsigned char *)(const void *)SMB_TRANS_NAMED_PIPE_PKT\n    };\n    const size_t packet_lengths[] = {\n        sizeof(SMB_NEGOTIATE_PKT),\n        sizeof(SMB_SESSION_SETUP_PKT),\n        sizeof(SMB_TREE_CONNECT_PKT),\n        sizeof(SMB_TRANS_NAMED_PIPE_PKT)\n    };\n    int fd = smb_connect(ip, port);\n    int result = -1;\n    unsigned char *response = NULL;\n    size_t response_length = 0;\n\n    if (fd < 0)\n        return -1;\n\n    for (size_t i = 0; i < sizeof(packets) / sizeof(packets[0]); i++) {\n        if (smb_exchange(fd, packets[i], packet_lengths[i],\n                         &response, &response_length) < 0)\n            goto done;\n\n        if (i == sizeof(packets) / sizeof(packets[0]) - 1) {\n            size_t offset = (size_t)SMB_RESP_NT_STATUS_OFFSET;\n\n            if (offset > response_length ||\n                response_length - offset < sizeof(uint32_t))\n                goto done;\n\n            uint32_t status = (uint32_t)response[offset] |\n                              ((uint32_t)response[offset + 1] << 8) |\n                              ((uint32_t)response[offset + 2] << 16) |\n                              ((uint32_t)response[offset + 3] << 24);\n            result = status == (uint32_t)NT_STATUS_INSUFF_SERVER_RESOURCES\n                         ? 1\n                         : 0;\n        }\n\n        free(response);\n        response = NULL;\n        response_length = 0;\n    }\n\ndone:\n    free(response);\n    close(fd);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790735862,
+  "response_id": "gen-1790735862-d0NklwTU6BzeJ9EPOLgR",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.ms17_vuln_status",
+  "started_at": "2026-09-30T02:37:42.685+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.\n11. Include ONLY standard system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other\n    project header such as \"smb.h\" or \"doublepulsar.h\".\n12. Use ONLY the macros, constants and arrays that the task says are defined in the\n    scenario config header, with their EXACT names. Never invent or rename a constant\n    (for example, do not write `SMB_TRANS_PKT` when the task names `SMB_TRANS_NAMED_PIPE_PKT`).",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 3159,
+    "cost": 0.001634,
+    "prompt_tokens": 545,
+    "total_tokens": 3704
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `ms17_vuln_status`: connect to `ip:port` via `smb_connect`. Send the 4 packets `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, `SMB_TRANS_NAMED_PIPE_PKT` (from `config.h`). Read the response and extract the 32-bit NT_STATUS at offset `SMB_RESP_NT_STATUS_OFFSET`. If it equals `NT_STATUS_INSUFF_SERVER_RESOURCES`, return 1 (vulnerable); otherwise return 0 (not vulnerable). Return -1 on connection error. Close the socket before returning.\n\nEXACT PROTOTYPE (must match): int ms17_vuln_status(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

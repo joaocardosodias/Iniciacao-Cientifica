@@ -1,0 +1,206 @@
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c: In function ‘send_packet_and_read_response’:
+module_04.c:119:27: warning: suggest parentheses around arithmetic in operand of ‘|’ [-Wparentheses]
+  119 |     size_t packet_len = 4 + ((size_t)packet[1] << 16) |
+      |                         ~~^~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_04.c: At top level:
+module_04.c:117:1: warning: ‘send_packet_and_read_response’ defined but not used [-Wunused-function]
+  117 | send_packet_and_read_response(int fd, const unsigned char *packet)
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c: In function ‘build_launcher_dll’:
+module_09.c:336:73: error: expected ‘)’ at end of input
+  336 |                                   "\x48\xc7\x44\x24\x38\x00\x00\x00\x00"
+      |                                                                         ^
+      |                                                                         )
+module_09.c:332:24: note: to match this ‘(’
+  332 |         launcher_append(&section, "\x31\xd2\x45\x31\xc0\x4d\x31\xc9"
+      |                        ^
+module_09.c:332:9: error: too few arguments to function ‘launcher_append’; expected 3, have 2
+  332 |         launcher_append(&section, "\x31\xd2\x45\x31\xc0\x4d\x31\xc9"
+      |         ^~~~~~~~~~~~~~~
+module_09.c:79:12: note: declared here
+   79 | static int launcher_append(struct launcher_buffer *buffer,
+      |            ^~~~~~~~~~~~~~~
+module_09.c:331:5: note: ‘-Wmisleading-indentation’ is disabled from this point onwards, since column-tracking was disabled due to the size of the code/headers
+  331 |     if (launcher_emit32(&section, 0) < 0 ||
+      |     ^~
+module_09.c:336:35: error: expected declaration or statement at end of input
+  336 |                                   "\x48\xc7\x44\x24\x38\x00\x00\x00\x00"
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_09.c:329:9: error: label ‘done’ used but not defined
+  329 |         goto done;
+      |         ^~~~
+module_09.c:223:12: warning: unused variable ‘written_offset’ [-Wunused-variable]
+  223 |     size_t written_offset;
+      |            ^~~~~~~~~~~~~~
+module_09.c:221:9: warning: unused variable ‘result’ [-Wunused-variable]
+  221 |     int result = -1;
+      |         ^~~~~~
+module_09.c:220:9: warning: unused variable ‘output_fd’ [-Wunused-variable]
+  220 |     int output_fd = -1;
+      |         ^~~~~~~~~
+module_09.c:218:12: warning: variable ‘drop_path_length’ set but not used [-Wunused-but-set-variable=]
+  218 |     size_t drop_path_length;
+      |            ^~~~~~~~~~~~~~~~
+module_09.c:216:14: warning: unused variable ‘reloc_rva’ [-Wunused-variable]
+  216 |     uint32_t reloc_rva;
+      |              ^~~~~~~~~
+module_09.c:215:14: warning: unused variable ‘iat_size’ [-Wunused-variable]
+  215 |     uint32_t iat_size;
+      |              ^~~~~~~~
+module_09.c:214:14: warning: unused variable ‘iat_rva’ [-Wunused-variable]
+  214 |     uint32_t iat_rva;
+      |              ^~~~~~~
+module_09.c:213:14: warning: unused variable ‘import_size’ [-Wunused-variable]
+  213 |     uint32_t import_size;
+      |              ^~~~~~~~~~~
+module_09.c:212:14: warning: unused variable ‘import_rva’ [-Wunused-variable]
+  212 |     uint32_t import_rva;
+      |              ^~~~~~~~~~
+module_09.c:211:14: warning: unused variable ‘size_of_image’ [-Wunused-variable]
+  211 |     uint32_t size_of_image;
+      |              ^~~~~~~~~~~~~
+module_09.c:210:14: warning: unused variable ‘section_raw_size’ [-Wunused-variable]
+  210 |     uint32_t section_raw_size;
+      |              ^~~~~~~~~~~~~~~~
+module_09.c:209:14: warning: unused variable ‘section_virtual_size’ [-Wunused-variable]
+  209 |     uint32_t section_virtual_size;
+      |              ^~~~~~~~~~~~~~~~~~~~
+module_09.c:207:12: warning: unused variable ‘label_return_true’ [-Wunused-variable]
+  207 |     size_t label_return_true;
+      |            ^~~~~~~~~~~~~~~~~
+module_09.c:206:12: warning: variable ‘label_no_write’ set but not used [-Wunused-but-set-variable=]
+  206 |     size_t label_no_write;
+      |            ^~~~~~~~~~~~~~
+module_09.c:205:12: warning: variable ‘branch_no_write’ set but not used [-Wunused-but-set-variable=]
+  205 |     size_t branch_no_write;
+      |            ^~~~~~~~~~~~~~~
+module_09.c:204:12: warning: variable ‘branch_not_attach’ set but not used [-Wunused-but-set-variable=]
+  204 |     size_t branch_not_attach;
+      |            ^~~~~~~~~~~~~~~~~
+module_09.c:203:12: warning: unused variable ‘fix_iat_create_process’ [-Wunused-variable]
+  203 |     size_t fix_iat_create_process;
+      |            ^~~~~~~~~~~~~~~~~~~~~~
+module_09.c:202:12: warning: variable ‘fix_iat_close_handle’ set but not used [-Wunused-but-set-variable=]
+  202 |     size_t fix_iat_close_handle;
+      |            ^~~~~~~~~~~~~~~~~~~~
+module_09.c:201:12: warning: variable ‘fix_iat_write_file’ set but not used [-Wunused-but-set-variable=]
+  201 |     size_t fix_iat_write_file;
+      |            ^~~~~~~~~~~~~~~~~~
+module_09.c:200:12: warning: variable ‘fix_iat_create_file’ set but not used [-Wunused-but-set-variable=]
+  200 |     size_t fix_iat_create_file;
+      |            ^~~~~~~~~~~~~~~~~~~
+module_09.c:199:12: warning: variable ‘fix_binary’ set but not used [-Wunused-but-set-variable=]
+  199 |     size_t fix_binary;
+      |            ^~~~~~~~~~
+module_09.c:198:12: warning: variable ‘fix_path_process’ set but not used [-Wunused-but-set-variable=]
+  198 |     size_t fix_path_process;
+      |            ^~~~~~~~~~~~~~~~
+module_09.c:197:12: warning: variable ‘fix_path_create’ set but not used [-Wunused-but-set-variable=]
+  197 |     size_t fix_path_create;
+      |            ^~~~~~~~~~~~~~~
+module_09.c:195:12: warning: unused variable ‘file_size’ [-Wunused-variable]
+  195 |     size_t file_size;
+      |            ^~~~~~~~~
+module_09.c:194:12: warning: unused variable ‘image_size’ [-Wunused-variable]
+  194 |     size_t image_size;
+      |            ^~~~~~~~~~
+module_09.c:193:12: warning: unused variable ‘raw_size’ [-Wunused-variable]
+  193 |     size_t raw_size;
+      |            ^~~~~~~~
+module_09.c:192:12: warning: unused variable ‘reloc_offset’ [-Wunused-variable]
+  192 |     size_t reloc_offset;
+      |            ^~~~~~~~~~~~
+module_09.c:191:12: warning: unused variable ‘dll_name_offset’ [-Wunused-variable]
+  191 |     size_t dll_name_offset;
+      |            ^~~~~~~~~~~~~~~
+module_09.c:190:12: warning: unused variable ‘iat_offset’ [-Wunused-variable]
+  190 |     size_t iat_offset;
+      |            ^~~~~~~~~~
+module_09.c:189:12: warning: unused variable ‘int_offset’ [-Wunused-variable]
+  189 |     size_t int_offset;
+      |            ^~~~~~~~~~
+module_09.c:188:12: warning: unused variable ‘descriptor_offset’ [-Wunused-variable]
+  188 |     size_t descriptor_offset;
+      |            ^~~~~~~~~~~~~~~~~
+module_09.c:187:12: warning: unused variable ‘binary_offset’ [-Wunused-variable]
+  187 |     size_t binary_offset;
+      |            ^~~~~~~~~~~~~
+module_09.c:186:12: warning: unused variable ‘path_offset’ [-Wunused-variable]
+  186 |     size_t path_offset;
+      |            ^~~~~~~~~~~
+module_09.c:185:12: warning: unused variable ‘code_length’ [-Wunused-variable]
+  185 |     size_t code_length;
+      |            ^~~~~~~~~~~
+module_09.c:184:12: warning: unused variable ‘import_name_offsets’ [-Wunused-variable]
+  184 |     size_t import_name_offsets[4];
+      |            ^~~~~~~~~~~~~~~~~~~
+module_09.c:182:20: warning: unused variable ‘image’ [-Wunused-variable]
+  182 |     unsigned char *image = NULL;
+      |                    ^~~~~
+module_09.c:177:24: warning: unused variable ‘import_names’ [-Wunused-variable]
+  177 |     static const char *import_names[4] = {
+      |                        ^~~~~~~~~~~~
+module_09.c:175:32: warning: unused variable ‘section_name’ [-Wunused-variable]
+  175 |     static const unsigned char section_name[8] =
+      |                                ^~~~~~~~~~~~
+module_09.c:169:32: warning: unused variable ‘dos_stub’ [-Wunused-variable]
+  169 |     static const unsigned char dos_stub[64] = {
+      |                                ^~~~~~~~
+module_09.c:337: warning: control reaches end of non-void function [-Wreturn-type]
+module_09.c: At top level:
+module_09.c:153:12: warning: ‘launcher_add_import_name’ defined but not used [-Wunused-function]
+  153 | static int launcher_add_import_name(struct launcher_buffer *section,
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~
+module_09.c:129:13: warning: ‘launcher_put64’ defined but not used [-Wunused-function]
+  129 | static void launcher_put64(unsigned char *data, size_t offset, uint64_t value)
+      |             ^~~~~~~~~~~~~~
+module_09.c:115:13: warning: ‘launcher_put16’ defined but not used [-Wunused-function]
+  115 | static void launcher_put16(unsigned char *data, size_t offset, uint16_t value)
+      |             ^~~~~~~~~~~~~~
+module_09.c:99:12: warning: ‘launcher_emit8’ defined but not used [-Wunused-function]
+   99 | static int launcher_emit8(struct launcher_buffer *buffer, unsigned char value)
+      |            ^~~~~~~~~~~~~~
+module_10.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_11.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

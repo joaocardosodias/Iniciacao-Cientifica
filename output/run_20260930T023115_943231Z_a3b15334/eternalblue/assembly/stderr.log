@@ -1,0 +1,71 @@
+main.c:8:10: fatal error: eternalblue_config.h: No such file or directory
+    8 | #include "eternalblue_config.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+module_01.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_02.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_03.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_04.c:37:10: fatal error: eternalblue_config.h: No such file or directory
+   37 | #include "eternalblue_config.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+module_05.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_06.c:37:10: fatal error: doublepulsar.h: No such file or directory
+   37 | #include "doublepulsar.h"
+      |          ^~~~~~~~~~~~~~~~
+compilation terminated.
+module_07.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_07.c:37:10: fatal error: smb.h: No such file or directory
+   37 | #include "smb.h"
+      |          ^~~~~~~
+compilation terminated.
+module_08.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_09.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_10.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+module_10.c:57:2: error: #error SMB_CHUNK_SIZE must be defined
+   57 | #error SMB_CHUNK_SIZE must be defined
+      |  ^~~~~
+module_10.c: In function ‘upload_payload’:
+module_10.c:160:9: error: ‘DP_EXEC_CHUNK_SIZE’ undeclared (first use in this function)
+  160 |         DP_EXEC_CHUNK_SIZE > SIZE_MAX - DP_EXEC_PKT_LEN) {
+      |         ^~~~~~~~~~~~~~~~~~
+module_10.c:160:9: note: each undeclared identifier is reported only once for each function it appears in
+module_10.c:169:45: error: ‘SMB_CHUNK_SIZE’ undeclared (first use in this function)
+  169 |     packet_size = DP_EXEC_PKT_LEN + (size_t)SMB_CHUNK_SIZE;
+      |                                             ^~~~~~~~~~~~~~
+module_11.c:1:9: warning: ‘_GNU_SOURCE’ redefined
+    1 | #define _GNU_SOURCE
+      |         ^~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition

@@ -1,0 +1,29 @@
+{
+  "files": [
+    {
+      "bytes": 7938,
+      "path": "prompts/eternalblue.py",
+      "sha256": "3234b9535c07f39664cfe3dabcf0ae3b5c3d185efe738f93b3ffe7bb7624f1fd",
+      "stored": "untracked/prompts/eternalblue.py"
+    },
+    {
+      "bytes": 643,
+      "path": "src/run_layout.py",
+      "sha256": "42daad4b4d69016ffd6f3db9ef3a39779b15adaca0ec512f653f6798bae148fd",
+      "stored": "untracked/src/run_layout.py"
+    },
+    {
+      "bytes": 9439,
+      "path": "templates/eternalblue/config.h.tpl",
+      "sha256": "0fa7e04576a42c417bff2a3f6c1a5b35e8566238ccea48b8971aebc6588e4dc5",
+      "stored": "untracked/templates/eternalblue/config.h.tpl"
+    },
+    {
+      "bytes": 864,
+      "path": "templates/eternalblue/main.c.tpl",
+      "sha256": "345bb9410ca237c1726b2db0dedd00e55da9b1b70b72ef3fe798a547c7900c01",
+      "stored": "untracked/templates/eternalblue/main.c.tpl"
+    }
+  ],
+  "stored_count": 4
+}

@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "34e44a0cb9ad",
+  "duration_seconds": 13.850817,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T02:39:39.388+00:00",
+  "hashes": {
+    "response_sha256": "6224edca9f973e14cad2583ecd7b5842bd876554d9c1c492363606534f70fe1c",
+    "system_sha256": "a0d2611d4f9dd3d427604e07354c76e9365cf2798a7300a891ddb7d64f6b9853",
+    "user_sha256": "a70cb31d8312ac9b0847501b6935463c5d718608ddfaf3750abcd6e52d8bfac3"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#ifdef _WIN32\n#include <winsock2.h>\n#include <ws2tcpip.h>\n#include <windows.h>\n#include <limits.h>\n\nstatic INIT_ONCE smb_wsa_once = INIT_ONCE_STATIC_INIT;\n\nstatic BOOL CALLBACK smb_wsa_startup(PINIT_ONCE once, PVOID parameter, PVOID *context)\n{\n    WSADATA data;\n\n    (void)once;\n    (void)parameter;\n    (void)context;\n    return WSAStartup(MAKEWORD(2, 2), &data) == 0;\n}\n#else\n#include <sys/types.h>\n#include <sys/socket.h>\n#include <sys/time.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n#include <unistd.h>\n#endif\n\nint smb_connect(const char *ip, int port)\n{\n    struct sockaddr_in address;\n#ifdef _WIN32\n    SOCKET sock;\n    DWORD timeout = 2000;\n\n    if (ip == NULL || port < 1 || port > 65535 ||\n        !InitOnceExecuteOnce(&smb_wsa_once, smb_wsa_startup, NULL, NULL))\n        return -1;\n\n    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);\n    if (sock == INVALID_SOCKET)\n        return -1;\n\n    address.sin_family = AF_INET;\n    address.sin_port = htons((unsigned short)port);\n    if (InetPtonA(AF_INET, ip, &address.sin_addr) != 1 ||\n        setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout,\n                   (int)sizeof(timeout)) == SOCKET_ERROR ||\n        setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char *)&timeout,\n                   (int)sizeof(timeout)) == SOCKET_ERROR ||\n        connect(sock, (const struct sockaddr *)&address, (int)sizeof(address)) == SOCKET_ERROR ||\n        (unsigned long long)sock > INT_MAX) {\n        closesocket(sock);\n        return -1;\n    }\n\n    return (int)sock;\n#else\n    int sock;\n    struct timeval timeout = { 2, 0 };\n\n    if (ip == NULL || port < 1 || port > 65535)\n        return -1;\n\n    sock = socket(AF_INET, SOCK_STREAM, 0);\n    if (sock < 0)\n        return -1;\n\n    address.sin_family = AF_INET;\n    address.sin_port = htons((unsigned short)port);\n    if (inet_pton(AF_INET, ip, &address.sin_addr) != 1 ||\n        setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0 ||\n        setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0 ||\n        connect(sock, (const struct sockaddr *)&address, sizeof(address)) < 0) {\n        close(sock);\n        return -1;\n    }\n\n    return sock;\n#endif\n}",
+  "response_classification": "accepted",
+  "response_created": 1790735965,
+  "response_id": "gen-1790735965-7WDLcc4OGXyUZwG1kYQd",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_connect",
+  "started_at": "2026-09-30T02:39:25.537+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.\n11. Include ONLY standard system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other\n    project header such as \"smb.h\" or \"doublepulsar.h\".\n12. Use ONLY the macros, constants and arrays that the task says are defined in the\n    scenario config header, with their EXACT names. Never invent or rename a constant\n    (for example, do not write `SMB_TRANS_PKT` when the task names `SMB_TRANS_NAMED_PIPE_PKT`).\n13. When your function calls another scenario component, declare its `extern` prototype\n    at the top of the file, exactly as given in the task. Never rely on an implicit\n    function declaration.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1520,
+    "cost": 0.0008145,
+    "prompt_tokens": 545,
+    "total_tokens": 2065
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_connect`: create a TCP socket and connect to `ip:port`. On Windows, use Winsock (`WSAStartup`, `socket`, `connect`); on Linux, use POSIX sockets. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO).\n\nEXACT PROTOTYPE (must match): int smb_connect(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

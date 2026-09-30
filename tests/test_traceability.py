@@ -10,6 +10,7 @@ import pipeline
 from builder.generator import Coder
 from src.experiment_index import append_experiment
 from src.recovery import recover_stale_runs
+from src.run_layout import iter_run_dirs
 from src.trace import RunTrace, sha256_text
 
 
@@ -245,8 +246,8 @@ class TraceabilityTests(unittest.TestCase):
             self.assertEqual(entry["module_count"], 3)
             self.assertEqual(entry["source_combined_sha256"],
                              manifest["software"]["git"]["source_combined_sha256"])
-            self.assertEqual(entry["run_dir"], run_dir.name)
-            self.assertEqual(entry["result_path"], f"{run_dir.name}/result.json")
+            self.assertEqual(entry["run_dir"], run_dir.relative_to(Path(temporary)).as_posix())
+            self.assertEqual(entry["result_path"], f"{entry['run_dir']}/result.json")
             self.assertTrue((run_dir / "modules/module_one.c").exists())
             self.assertTrue((run_dir / "modules/01_module_one/prompt.txt").exists())
             self.assertEqual(manifest["stages"]["assembler"]["status"], "completed")
@@ -269,7 +270,7 @@ class TraceabilityTests(unittest.TestCase):
                     scenario_main_c=FAKE_MAIN_C,
                 )
 
-            run_dirs = list(output_root.glob("run_*"))
+            run_dirs = list(iter_run_dirs(output_root))
             self.assertEqual(len(run_dirs), 1)
             result = json.loads((run_dirs[0] / "result.json").read_text())
             self.assertEqual(result["status"], "failed")

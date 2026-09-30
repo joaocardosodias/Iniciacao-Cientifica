@@ -16,6 +16,8 @@ from src.environment import collect as collect_environment
 from src.experiment_index import try_index_experiment
 from src.provenance import collect as collect_provenance
 from src.provenance import find_repo_root
+from src.run_layout import run_root
+from src.run_layout import iter_run_dirs
 
 
 def sha256_bytes(content: bytes) -> str:
@@ -93,13 +95,15 @@ class RunTrace:
         campaign: dict[str, Any] | None = None,
         intervention: dict[str, Any] | None = None,
         provenance_exclude_dirs: list[Path] | None = None,
+        scenario: str | None = None,
     ):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
         replicate = (experiment or {}).get("replicate")
         suffix = f"_replicate_{replicate:03d}" if run_purpose in {"official", "pilot"} and type(replicate) is int else ""
         self.run_id = f"run_{timestamp}_{uuid.uuid4().hex[:8]}{suffix}"
         self.run_purpose = run_purpose
-        self.run_dir = output_root / self.run_id
+        self.run_root = output_root / self.run_id
+        self.run_dir = self.run_root / safe_name(scenario) if scenario else self.run_root
         self.calls_dir = self.run_dir / "calls"
         self.prompts_dir = self.run_dir / "prompts"
         self.modules_dir = self.run_dir / "modules"

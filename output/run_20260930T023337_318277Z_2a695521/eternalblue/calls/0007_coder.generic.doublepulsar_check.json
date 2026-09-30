@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "dfa53a1eca18",
+  "duration_seconds": 32.699998,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T02:34:10.141+00:00",
+  "hashes": {
+    "response_sha256": "373ea565d1b308362aa69b93622b4c9d9930d8ec1ed8942842d79edeb7d1b086",
+    "system_sha256": "c1926bae699e219590e98e6abb46fd0b0b7e0d5ed544da8d5fb7803a1c74515c",
+    "user_sha256": "7d8d67c9a9f44afa20ef54fad07fc3358d165e54937c4437d1d9cdf6d52528c5"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include \"config.h\"\n\n#include <errno.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <sys/socket.h>\n#include <unistd.h>\n\nextern int smb_connect(const char *ip, int port);\n\nstatic int doublepulsar_send_all(int fd, const void *data, size_t length)\n{\n    const unsigned char *p = data;\n\n    while (length != 0) {\n        ssize_t n = send(fd, p, length, MSG_NOSIGNAL);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        p += (size_t)n;\n        length -= (size_t)n;\n    }\n    return 0;\n}\n\nstatic int doublepulsar_recv_all(int fd, void *data, size_t length)\n{\n    unsigned char *p = data;\n\n    while (length != 0) {\n        ssize_t n = recv(fd, p, length, 0);\n        if (n < 0) {\n            if (errno == EINTR)\n                continue;\n            return -1;\n        }\n        if (n == 0)\n            return -1;\n        p += (size_t)n;\n        length -= (size_t)n;\n    }\n    return 0;\n}\n\nstatic int doublepulsar_read_response(int fd, unsigned char **response,\n                                      size_t *response_length)\n{\n    unsigned char header[4];\n    size_t payload_length;\n    unsigned char *buffer;\n\n    if (doublepulsar_recv_all(fd, header, sizeof(header)) < 0)\n        return -1;\n\n    payload_length = ((size_t)header[1] << 16) |\n                     ((size_t)header[2] << 8) |\n                     (size_t)header[3];\n    buffer = malloc(sizeof(header) + payload_length);\n    if (buffer == NULL)\n        return -1;\n\n    for (size_t i = 0; i < sizeof(header); ++i)\n        buffer[i] = header[i];\n\n    if (doublepulsar_recv_all(fd, buffer + sizeof(header), payload_length) < 0) {\n        free(buffer);\n        return -1;\n    }\n\n    *response = buffer;\n    *response_length = sizeof(header) + payload_length;\n    return 0;\n}\n\nstatic int doublepulsar_exchange(int fd, const void *packet, size_t packet_length,\n                                 unsigned char **response, size_t *response_length)\n{\n    if (doublepulsar_send_all(fd, packet, packet_length) < 0)\n        return -1;\n    return doublepulsar_read_response(fd, response, response_length);\n}\n\nint doublepulsar_check(const char *ip, int port)\n{\n    int fd;\n    unsigned char *response = NULL;\n    size_t response_length = 0;\n    uint16_t multiplex_id;\n    int result = -1;\n\n    fd = smb_connect(ip, port);\n    if (fd < 0)\n        return -1;\n\n    if (doublepulsar_exchange(fd, SMB_NEGOTIATE_PKT,\n                              sizeof(SMB_NEGOTIATE_PKT) - 1,\n                              &response, &response_length) < 0)\n        goto out;\n    free(response);\n    response = NULL;\n\n    if (doublepulsar_exchange(fd, SMB_SESSION_SETUP_PKT,\n                              sizeof(SMB_SESSION_SETUP_PKT) - 1,\n                              &response, &response_length) < 0)\n        goto out;\n    free(response);\n    response = NULL;\n\n    if (doublepulsar_exchange(fd, SMB_TREE_CONNECT_PKT,\n                              sizeof(SMB_TREE_CONNECT_PKT) - 1,\n                              &response, &response_length) < 0)\n        goto out;\n    free(response);\n    response = NULL;\n\n    if (doublepulsar_exchange(fd, DP_PING_PKT,\n                              sizeof(DP_PING_PKT) - 1,\n                              &response, &response_length) < 0)\n        goto out;\n\n    if ((size_t)SMB_RESP_MUX_ID_OFFSET + 2 > response_length)\n        goto out;\n\n    multiplex_id = (uint16_t)response[SMB_RESP_MUX_ID_OFFSET] |\n                   ((uint16_t)response[SMB_RESP_MUX_ID_OFFSET + 1] << 8);\n    result = multiplex_id == DP_MULTIPLEX_ID_PING ? 1 : 0;\n\nout:\n    free(response);\n    close(fd);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790735617,
+  "response_id": "gen-1790735617-tkizGqpbKKeIsWuS9L76",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.doublepulsar_check",
+  "started_at": "2026-09-30T02:33:37.441+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.\n11. Include ONLY standard system headers and the scenario config header named in the task\n    (for example `#include \"eternalblue_config.h\"`). Never invent or include any other\n    project header such as \"smb.h\" or \"doublepulsar.h\".",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 3103,
+    "cost": 0.0015966,
+    "prompt_tokens": 451,
+    "total_tokens": 3554
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response and extract the 16-bit Multiplex ID at offset `SMB_RESP_MUX_ID_OFFSET`. If it equals `DP_MULTIPLEX_ID_PING`, return 1 (active); otherwise return 0. Return -1 on error.\n\nEXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

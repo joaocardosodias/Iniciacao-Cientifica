@@ -20,6 +20,15 @@ Rules (no exceptions):
     compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is
     always true and would make the function fail. Perform the requested operation
     directly.
+11. Include ONLY standard system headers and the scenario config header named in the task
+    (for example `#include "config.h"`). Never invent or include any other
+    project header such as "smb.h" or "doublepulsar.h".
+12. Use ONLY the macros, constants and arrays that the task says are defined in the
+    scenario config header, with their EXACT names. Never invent or rename a constant
+    (for example, do not write `SMB_TRANS_PKT` when the task names `SMB_TRANS_NAMED_PIPE_PKT`).
+13. When your function calls another scenario component, declare its `extern` prototype
+    at the top of the file, exactly as given in the task. Never rely on an implicit
+    function declaration.
 """.strip()
 
 _SUSPICIOUS_GUARDS = SUSPICIOUS_GUARDS
@@ -40,7 +49,7 @@ class CoderGenerationError(ValueError):
 
 
 class Coder:
-    GENERIC_MAX_TOKENS = 8192
+    GENERIC_MAX_TOKENS = 16384
     GENERIC_ATTEMPTS = 3
 
     def __init__(self, llm: LLMClient):

@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "b93e89686dde",
+  "duration_seconds": 13.711334,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T02:21:43.881+00:00",
+  "hashes": {
+    "response_sha256": "126931122b1a99c10ede179711824fb18c9f7b6c3ad713e51cdbd4c94e776a8f",
+    "system_sha256": "36eaf24b1babe4272df0b4fc4f7c74eee2841d4d1846abc2aa8957b2de862a2c",
+    "user_sha256": "a70cb31d8312ac9b0847501b6935463c5d718608ddfaf3750abcd6e52d8bfac3"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 8192
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n\n#include <limits.h>\n#include <stdio.h>\n#include <stdlib.h>\n\n#ifdef _WIN32\n#include <winsock2.h>\n#include <ws2tcpip.h>\n\nstatic INIT_ONCE smb_wsa_once = INIT_ONCE_STATIC_INIT;\nstatic int smb_wsa_result;\n\nstatic BOOL CALLBACK\nsmb_wsa_initialize(PINIT_ONCE once, PVOID parameter, PVOID *context)\n{\n    WSADATA data;\n\n    (void)once;\n    (void)parameter;\n    (void)context;\n    smb_wsa_result = WSAStartup(MAKEWORD(2, 2), &data);\n    return TRUE;\n}\n#else\n#include <sys/socket.h>\n#include <sys/time.h>\n#include <netdb.h>\n#include <unistd.h>\n#endif\n\nint\nsmb_connect(const char *ip, int port)\n{\n    struct addrinfo hints;\n    struct addrinfo *addresses = NULL;\n    struct addrinfo *address;\n    char service[6];\n    int result = -1;\n\n    if (ip == NULL || port < 1 || port > 65535)\n        return -1;\n\n#ifdef _WIN32\n    if (!InitOnceExecuteOnce(&smb_wsa_once, smb_wsa_initialize, NULL, NULL) ||\n        smb_wsa_result != 0)\n        return -1;\n#endif\n\n    if (snprintf(service, sizeof(service), \"%d\", port) < 0)\n        return -1;\n\n    for (size_t i = 0; service[i] != '\\0'; ++i) {\n        if (i >= sizeof(service) - 1)\n            return -1;\n    }\n\n    memset(&hints, 0, sizeof(hints));\n    hints.ai_family = AF_UNSPEC;\n    hints.ai_socktype = SOCK_STREAM;\n    hints.ai_protocol = IPPROTO_TCP;\n\n    if (getaddrinfo(ip, service, &hints, &addresses) != 0)\n        return -1;\n\n    for (address = addresses; address != NULL; address = address->ai_next) {\n#ifdef _WIN32\n        SOCKET socket_fd = socket(address->ai_family, address->ai_socktype,\n                                  address->ai_protocol);\n        DWORD timeout_ms = 2000;\n        int option_length = (int)sizeof(timeout_ms);\n\n        if (socket_fd == INVALID_SOCKET)\n            continue;\n\n        if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO,\n                       (const char *)&timeout_ms, option_length) == SOCKET_ERROR ||\n            setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO,\n                       (const char *)&timeout_ms, option_length) == SOCKET_ERROR ||\n            connect(socket_fd, address->ai_addr,\n                    (int)address->ai_addrlen) == SOCKET_ERROR ||\n            socket_fd > INT_MAX) {\n            closesocket(socket_fd);\n            continue;\n        }\n\n        result = (int)socket_fd;\n#else\n        int socket_fd = socket(address->ai_family, address->ai_socktype,\n                               address->ai_protocol);\n        struct timeval timeout = { .tv_sec = 2, .tv_usec = 0 };\n\n        if (socket_fd < 0)\n            continue;\n\n        if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO,\n                       &timeout, sizeof(timeout)) < 0 ||\n            setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO,\n                       &timeout, sizeof(timeout)) < 0 ||\n            connect(socket_fd, address->ai_addr, address->ai_addrlen) < 0) {\n            close(socket_fd);\n            continue;\n        }\n\n        result = socket_fd;\n#endif\n        break;\n    }\n\n    freeaddrinfo(addresses);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790734890,
+  "response_id": "gen-1790734890-jgMyNYG7RP6fdN9NR4th",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_connect",
+  "started_at": "2026-09-30T02:21:30.169+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1632,
+    "cost": 0.0008544,
+    "prompt_tokens": 384,
+    "total_tokens": 2016
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_connect`: create a TCP socket and connect to `ip:port`. On Windows, use Winsock (`WSAStartup`, `socket`, `connect`); on Linux, use POSIX sockets. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO).\n\nEXACT PROTOTYPE (must match): int smb_connect(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

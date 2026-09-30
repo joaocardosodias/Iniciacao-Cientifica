@@ -10,6 +10,7 @@ from typing import Any
 from src.campaign import Campaign
 from src.events import utc_now
 from src.trace import safe_name, write_json_atomic
+from src.run_layout import run_root
 from src.experimental_inputs import load_yaml, sha256_file
 from src.vm_environment import snapshot_environment
 
@@ -45,7 +46,7 @@ def find_run(results_root: Path, run_id: str) -> Path:
 
 
 def _campaign_for_run(run_dir: Path, results_root: Path) -> Campaign:
-    return Campaign.load(run_dir.parent.parent / "campaign.json", results_root)
+    return Campaign.load(run_root(run_dir).parent.parent / "campaign.json", results_root)
 
 
 def _next_revision(handle: Any, run_id: str) -> int:

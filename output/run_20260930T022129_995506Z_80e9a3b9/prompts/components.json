@@ -1,0 +1,57 @@
+[
+  {
+    "nome": "smb_connect",
+    "prototype": "int smb_connect(const char *ip, int port);",
+    "task": "Implement `smb_connect`: create a TCP socket and connect to `ip:port`. On Windows, use Winsock (`WSAStartup`, `socket`, `connect`); on Linux, use POSIX sockets. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO)."
+  },
+  {
+    "nome": "smb_send",
+    "prototype": "int smb_send(int sock, const uint8_t *data, size_t len);",
+    "task": "Implement `smb_send`: send exactly `len` bytes from `data` over `sock`. Loop until all bytes are sent or an error occurs. Return 0 on success, -1 on failure."
+  },
+  {
+    "nome": "smb_recv",
+    "prototype": "int smb_recv(int sock, uint8_t *buf, size_t buf_len);",
+    "task": "Implement `smb_recv`: receive up to `buf_len` bytes into `buf`. Return the number of bytes received, or -1 on error, or 0 on connection closed."
+  },
+  {
+    "nome": "ms17_vuln_status",
+    "prototype": "int ms17_vuln_status(const char *ip, int port);",
+    "task": "Implement `ms17_vuln_status`: connect to `ip:port` via `smb_connect`. Send the 4 packets `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, `SMB_TRANS_NAMED_PIPE_PKT` (from `eternalblue_config.h`). Read the response and extract the 32-bit NT_STATUS at offset `SMB_RESP_NT_STATUS_OFFSET`. If it equals `NT_STATUS_INSUFF_SERVER_RESOURCES`, return 1 (vulnerable); otherwise return 0 (not vulnerable). Return -1 on connection error. Close the socket before returning."
+  },
+  {
+    "nome": "EternalBlue",
+    "prototype": "int EternalBlue(const char *ip, int port);",
+    "task": "Implement `EternalBlue`: orchestrate the exploit. Open `NUM_SOCKETS` (from `eternalblue_config.h`) TCP connections to `ip:port`. On each socket, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`. On socket 0, additionally send multiple malformed NT trans packets (use `SMB_CHUNK_SIZE` chunks). Then send `DP_EXEC_PKT` (the DoublePulsar payload) on sockets 2..NUM_SOCKETS-1 in chunks of `SMB_CHUNK_SIZE` bytes. Finally, close all sockets in order (this detonates the exploit). Return 0 on success, -1 on failure. Log each step with printf."
+  },
+  {
+    "nome": "doublepulsar_check",
+    "prototype": "int doublepulsar_check(const char *ip, int port);",
+    "task": "Implement `doublepulsar_check`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response and extract the 16-bit Multiplex ID at offset `SMB_RESP_MUX_ID_OFFSET`. If it equals `DP_MULTIPLEX_ID_PING`, return 1 (active); otherwise return 0. Return -1 on error."
+  },
+  {
+    "nome": "DoublePulsarXORKeyCalculator",
+    "prototype": "unsigned int DoublePulsarXORKeyCalculator(const char *ip, int port);",
+    "task": "Implement `DoublePulsarXORKeyCalculator`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response. Extract the 4 bytes from `SMB_RESP_SIGNATURE_START` to `SMB_RESP_SIGNATURE_END` and combine them into a 32-bit unsigned integer (big-endian). This integer is the XOR key. Return it, or 0 on error."
+  },
+  {
+    "nome": "xor_buffer",
+    "prototype": "void xor_buffer(uint8_t *data, size_t len, unsigned int key);",
+    "task": "Implement `xor_buffer`: XOR each byte of `data` with the corresponding byte of `key` (rotating the key right by 8 bits after each byte). This is the DoublePulsar obfuscation scheme. Return nothing."
+  },
+  {
+    "nome": "build_launcher_dll",
+    "prototype": "int build_launcher_dll(const char *binary_path, const char *dll_out_path);",
+    "task": "Implement `build_launcher_dll`: read the binary file at `binary_path`, embed its bytes into a launcher DLL, and write the resulting DLL to `dll_out_path`. The DLL, when loaded in the target process, must: 1) in DllMain (DLL_PROCESS_ATTACH), write the binary bytes to DROP_PATH (defined in eternalblue_config.h); 2) call CreateProcessA to execute the binary; 3) return TRUE."
+  },
+  {
+    "nome": "upload_payload",
+    "prototype": "int upload_payload(const char *ip, int port, const char *payload_path, int payload_type);",
+    "task": "Implement `upload_payload`: read the launcher DLL at `payload_path`, calculate the XOR key via `DoublePulsarXORKeyCalculator`, apply `xor_buffer`, and assemble the final payload in the order: [KERNEL_SHELLCODE_X64_PART1] [hash of target process] [KERNEL_SHELLCODE_X64_PART2] [USERLAND_SHELLCODE_X64] [encrypted launcher DLL]. Send the buffer via `smb_send` in chunks of `SMB_CHUNK_SIZE` using the `DP_EXEC_PKT` template. Return 0 on success, -1 on failure."
+  },
+  {
+    "nome": "execute_eternalblue",
+    "prototype": "int execute_eternalblue(const char *ip, int port, const char *payload_path);",
+    "task": "Implement `execute_eternalblue`: orchestrate the full pipeline. Step 1: call `ms17_vuln_status`; if not vulnerable, return -1. Step 2: loop up to `MAX_RETRIES` calling `EternalBlue`; if all fail, return -2. Step 3: call `doublepulsar_check`; if not active, return -3. Step 4: call `build_launcher_dll(TARGET_BINARY, PAYLOAD_DLL_PATH)`; if it fails, return -4. Step 5: call `upload_payload(ip, port, PAYLOAD_DLL_PATH, 1)`; if it fails, return -5. Return 0 on success. Log each step with printf."
+  }
+]

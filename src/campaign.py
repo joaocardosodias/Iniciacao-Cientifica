@@ -8,6 +8,7 @@ from typing import Any
 
 from src.events import EventLog, utc_now
 from src.trace import safe_name, serialize_error, write_json_atomic
+from src.run_layout import iter_run_dirs
 
 
 def _parse_time(value: Any) -> datetime | None:
@@ -311,7 +312,7 @@ class Campaign:
 
     def record_replicate(self, replicate: int) -> dict[str, Any]:
         candidates = []
-        for run_dir in self.outputs_dir.glob("run_*"):
+        for run_dir in iter_run_dirs(self.outputs_dir):
             manifest_path = run_dir / "manifest.json"
             result_path = run_dir / "result.json"
             if not manifest_path.exists() or not result_path.exists():
@@ -359,7 +360,7 @@ class Campaign:
         before = json.dumps(self.data, ensure_ascii=False, sort_keys=True)
         observed: dict[int, dict[str, Any]] = {}
         if self.outputs_dir.exists():
-            for run_dir in self.outputs_dir.glob("run_*"):
+            for run_dir in iter_run_dirs(self.outputs_dir):
                 manifest_path = run_dir / "manifest.json"
                 result_path = run_dir / "result.json"
                 if not manifest_path.exists() or not result_path.exists():

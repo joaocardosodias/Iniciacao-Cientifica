@@ -263,7 +263,11 @@ class Assembler:
         ))
 
         if config_header:
-            (assembly_dir / "config.h").write_text(config_header, encoding="utf-8")
+            config_names = {"config.h"}
+            for include in re.findall(r'#\s*include\s*"([^"]+\.h)"', main_source or ""):
+                config_names.add(include)
+            for name in config_names:
+                (assembly_dir / name).write_text(config_header, encoding="utf-8")
 
         if not all_signatures:
             self.last_status = "no_linkable_functions"

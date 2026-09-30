@@ -130,6 +130,7 @@ def run(
             "intervention_sha256": (campaign or {}).get("intervention_sha256"),
         },
         provenance_exclude_dirs=provenance_exclude_dirs,
+        scenario=scenario,
     )
     if scenario:
         trace.record_stage("input", {"scenario": scenario})

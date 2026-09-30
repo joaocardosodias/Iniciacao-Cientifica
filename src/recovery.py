@@ -11,22 +11,24 @@ from src.call_summary import safety_outcome, summarize_calls
 from src.events import EventLog, utc_now
 from src.experiment_index import index_existing_runs, try_index_experiment
 from src.trace import artifact_index, write_json_atomic
+from src.run_layout import iter_run_dirs, run_root
 
 log = logging.getLogger("pipeline.recovery")
 
 
 def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
     manifest_path = run_dir / "manifest.json"
+    orphan_id = run_root(run_dir).name
     if manifest_path.exists():
-        return {"run_id": run_dir.name, "status": "skipped", "reason": "manifest_exists"}
+        return {"run_id": orphan_id, "status": "skipped", "reason": "manifest_exists"}
     now = utc_now()
-    match = re.search(r"_replicate_(\d+)$", run_dir.name)
+    match = re.search(r"_replicate_(\d+)$", orphan_id)
     replicate = int(match.group(1)) if match else None
     created = datetime.fromtimestamp(run_dir.stat().st_mtime, timezone.utc).isoformat()
     purpose = "official" if replicate is not None else "development"
     manifest = {
         "schema_version": "1.0",
-        "run_id": run_dir.name,
+        "run_id": orphan_id,
         "status": "initialization_failed",
         "run_purpose": purpose,
         "context_mode": None,
@@ -42,7 +44,7 @@ def recover_orphan_run(run_dir: Path) -> dict[str, Any]:
         "integrity": {"path": "run_seal.json", "algorithm": "sha256", "scope": "generation_run"},
         "recovery": {"recovered_at": now, "reason": "missing_manifest"},
     }
-    events = EventLog(run_dir / "events.jsonl", run_dir.name, reset=False)
+    events = EventLog(run_dir / "events.jsonl", run_root(run_dir).name, reset=False)
     events.emit("run.recovered", reason="missing_manifest")
     llm_calls = summarize_calls(run_dir)
     result = {
@@ -110,7 +112,7 @@ def recover_run(run_dir: Path) -> dict[str, Any]:
     except (OSError, ValueError):
         return {"run_id": run_dir.name, "status": "skipped", "reason": "unreadable_manifest"}
 
-    run_id = manifest.get("run_id", run_dir.name)
+    run_id = manifest.get("run_id", run_root(run_dir).name)
     process = manifest.get("process") or {}
     pid = process.get("pid")
     host = process.get("hostname")
@@ -197,7 +199,7 @@ def recover_stale_runs(output_root: Path) -> list[dict[str, Any]]:
     if not output_root.exists():
         return []
     recovered = []
-    for run_dir in sorted(output_root.glob("run_*")):
+    for run_dir in iter_run_dirs(output_root):
         manifest_path = run_dir / "manifest.json"
         if not manifest_path.exists():
             outcome = recover_orphan_run(run_dir)

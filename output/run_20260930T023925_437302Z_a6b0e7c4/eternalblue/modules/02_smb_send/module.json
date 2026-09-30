@@ -1,0 +1,16 @@
+{
+  "code_lines": 24,
+  "code_path": "modules/smb_send.c",
+  "code_sha256": "0a6a16d84f4101a3a4e30fae7b18e52573c20bd7b8ef4c39617923f215be4e77",
+  "context_mode": "fragmented",
+  "description": "Implement `smb_send`: send exactly `len` bytes from `data` over `sock`. Loop until all bytes are sent or an error occurs. Return 0 on success, -1 on failure.",
+  "duration_seconds": 3.611636,
+  "finished_at": "2026-09-30T02:39:29.145+00:00",
+  "index": 2,
+  "name": "smb_send",
+  "prompt_path": "modules/02_smb_send/prompt.txt",
+  "prompt_sha256": "f993e8b4d902cd5eee78aee759996969ef35a5eaf3a7225c1d2bc7a451c40658",
+  "response_classification": "accepted",
+  "started_at": "2026-09-30T02:39:25.533+00:00",
+  "status": "completed"
+}

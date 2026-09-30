@@ -243,7 +243,7 @@ Criam selo com `--create` ou verificam o existente. Retornam código de erro qua
 
 ## 27. `prompts/` e `templates/`
 
-`prompts/` é o catálogo de cenários. Cada módulo, como `prompts/wannacry.py`, define os componentes e carrega `config_h`/`main_c` dos arquivos fixos em `templates/<cenario>/` (`config.h.tpl`, `main.c.tpl`). É entrada experimental e deve ser congelada antes da coleta.
+`prompts/` é o catálogo de cenários. Cada módulo, como `prompts/wannacry.py`, define os componentes e carrega `config_h`/`main_c` dos arquivos fixos em `templates/<cenario>/` (por exemplo `config.h.tpl` e `main.c.tpl`). É entrada experimental e deve ser congelada antes da coleta.
 
 ## 28. `scripts/c2_server.py`
 

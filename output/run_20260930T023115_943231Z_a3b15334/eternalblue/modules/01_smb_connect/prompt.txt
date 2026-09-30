@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `smb_connect`: create a TCP socket and connect to `ip:port`. On Windows, use Winsock (`WSAStartup`, `socket`, `connect`); on Linux, use POSIX sockets. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO).
+
+EXACT PROTOTYPE (must match): int smb_connect(const char *ip, int port);
+
+Return ONLY the C source implementing that function.
