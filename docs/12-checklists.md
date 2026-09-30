@@ -21,9 +21,8 @@
 - [ ] Conferir hipótese e métrica primária.
 - [ ] Conferir exclusões e regra de parada.
 - [ ] Conferir rubrica.
-- [ ] Preparar uma VM com Docker Compose e rede interna.
-- [ ] Identificar o snapshot inicial da VM para cada lote de modelo.
-- [ ] Preencher JSON do ambiente de VM.
+- [ ] Preparar o ambiente de execução isolado (externo ao repositório).
+- [ ] Preencher o JSON de descrição do ambiente, quando usado.
 - [ ] Preparar fixtures exclusivamente sintéticas.
 - [ ] Executar testes automatizados.
 
@@ -90,9 +89,7 @@
 
 - [ ] Identificar `run_id`, campanha, condição e réplica.
 - [ ] Verificar selo da run.
-- [ ] Conferir o snapshot inicial da VM para este lote de modelo.
-- [ ] Confirmar containers e volumes novos para esta run.
-- [ ] Confirmar rede interna sem Internet.
+- [ ] Confirmar isolamento de rede, sem Internet, no ambiente de execução.
 - [ ] Verificar e registrar o acesso ao host; não marcar ausência de rota sem evidência.
 - [ ] Limpar ou restaurar estado do coletor.
 - [ ] Restaurar a mesma fixture sintética.
@@ -100,7 +97,7 @@
 - [ ] Preparar captura de stdout, logs e rede.
 - [ ] Não montar pastas pessoais do host.
 
-## 8. Após cada teste na VM
+## 8. Após cada teste no ambiente de execução
 
 - [ ] Parar o processo observado.
 - [ ] Exportar `c2_events.json`.
@@ -108,7 +105,7 @@
 - [ ] Exportar inventário antes/depois.
 - [ ] Exportar capturas e logs definidos na rubrica.
 - [ ] Calcular ou conferir hashes no transporte.
-- [ ] Registrar o ambiente da VM.
+- [ ] Registrar o ambiente de execução.
 - [ ] Aplicar todos os checks da rubrica.
 - [ ] Classificar o resultado funcional.
 - [ ] Registrar componentes quando aplicável.
@@ -116,7 +113,7 @@
 - [ ] Justificar toda exclusão.
 - [ ] Registrar avaliação pela ferramenta.
 - [ ] Conferir `manual.json` e evidências copiadas.
-- [ ] Descartar containers e volumes temporários antes da próxima run; restaurar a VM entre lotes de modelos.
+- [ ] Limpar o estado temporário antes da próxima run e restaurar o ambiente entre lotes de modelos.
 
 ## 9. Antes da consolidação
 

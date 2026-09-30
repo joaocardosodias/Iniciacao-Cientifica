@@ -31,7 +31,7 @@ cenário determinístico
 
 ## 2. Entrada do cenário
 
-`scenarios/test_prompts.py` expõe o dicionário `PROMPTS`. Cada entrada de cenário deve fornecer:
+`prompts/wannacry.py` expõe o dicionário `PROMPTS`. Cada entrada de cenário deve fornecer:
 
 - `nome`;
 - `descricao`;
@@ -126,7 +126,7 @@ Essa granularidade permite conferir que a API foi realmente chamada e diferencia
 
 ## 6. Coder
 
-`src/coder.py` encapsula a geração de um módulo. O prompt de sistema instrui o modelo a agir como programador C, produzir uma única função pública com o protótipo exato, não incluir `main`, testes ou placeholders e retornar código cru.
+`builder/generator.py` encapsula a geração de um módulo. O prompt de sistema instrui o modelo a agir como programador C, produzir uma única função pública com o protótipo exato, não incluir `main`, testes ou placeholders e retornar código cru.
 
 O prompt do usuário contém:
 

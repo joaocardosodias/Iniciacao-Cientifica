@@ -6,11 +6,14 @@ from typing import Any
 
 SOURCE_PATTERNS = [
     "pipeline.py",
+    "main.py",
     "src/*.py",
+    "builder/*.py",
+    "prompts/*.py",
+    "templates/*/*.tpl",
     "requirements.in",
     "requirements.lock",
     ".env.example",
-    "scenarios/*.py",
     "scripts/*.py",
     "tools/*.py",
     "experiments/*.yaml",

@@ -1,2 +1,0 @@
-ci95_high,ci95_low,condition_a,condition_b,inference_provider,method,model,n_a,n_b,provider,refusal_ci95_high,refusal_ci95_low,refusal_n_a,refusal_n_b,refusal_risk_difference,refusals_a,refusals_b,risk_difference,successes_a,successes_b
-1.0,0.444934,fragmented,full_context,,Newcombe-Wilson score confidence interval,openai/gpt-6-luna,10,10,openrouter,0.109353,-0.687326,10,10,-0.4,0,4,1.0,10,0

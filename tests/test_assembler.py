@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from src.assembler import (
+from builder.assembler import (
     Assembler,
     _extract_includes,
     _extract_signatures,
@@ -108,13 +108,13 @@ int after(const char *url)
 
     def test_strip_comments_preserves_urls_in_strings(self):
         code = 'const char *u = "http://10.0.0.1:8080/collect"; // c\nint x;\n'
-        from src.assembler import _strip_comments
+        from builder.assembler import _strip_comments
         stripped = _strip_comments(code)
         self.assertIn("http://10.0.0.1:8080/collect", stripped)
         self.assertNotIn("// c", stripped)
 
     def test_link_flags_from_includes(self):
-        from src.assembler import _link_flags
+        from builder.compiler import _link_flags
         flags = _link_flags([
             "#include <curl/curl.h>",
             "#include <json-c/json.h>",
@@ -219,7 +219,8 @@ class DeterministicAssemblyTests(unittest.TestCase):
             main_source = "int broken(void);\nint main(void) { return broken(); }\n"
             module = "int broken(void) { invalid_token return 0; }\n"
             assembler = Assembler()
-            with patch.object(assembler, "_run_gcc", wraps=assembler._run_gcc) as compiler:
+            from builder import assembler as assembler_module
+            with patch.object(assembler_module, "run_gcc", wraps=assembler_module.run_gcc) as compiler:
                 main_c, compiled = assembler.assemble(
                     [("broken", module)],
                     run_dir,

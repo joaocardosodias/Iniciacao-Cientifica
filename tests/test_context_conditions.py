@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from src.call_summary import summarize_calls
-from src.coder import Coder, CoderGenerationError
+from builder.generator import Coder, CoderGenerationError
 from src.context_modes import component_context, context_visibility
 from src.experimental_inputs import validate_protocol
 from src.llm_client import LLMClient

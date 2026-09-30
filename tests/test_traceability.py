@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pipeline
-from src.coder import Coder
+from builder.generator import Coder
 from src.experiment_index import append_experiment
 from src.recovery import recover_stale_runs
 from src.trace import RunTrace, sha256_text

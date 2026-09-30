@@ -83,7 +83,7 @@ SHA-256 é usado para relacionar conteúdos e detectar alterações:
 - arquivos de evidência;
 - fontes do repositório;
 - artefatos da run;
-- snapshot inicial da VM de laboratório e identificadores das imagens dos containers;
+- descrição do ambiente de execução e identificadores de imagens, quando registrados;
 - selos de run e campanha.
 
 Um hash igual demonstra igualdade byte a byte sob o algoritmo, não equivalência semântica. Dois YAMLs semanticamente equivalentes com formatação diferente podem ter hashes de arquivo diferentes. Para estruturas geradas internamente, o projeto usa serialização canônica antes do hash quando apropriado.
@@ -135,7 +135,7 @@ Ferramenta ausente recebe `null`. A coleta de proveniência não falha somente p
 
 `python_packages.json` lista todas as distribuições instaladas, ordenadas de forma estável. O manifesto contém apenas contagem e referências, evitando duplicar uma lista grande.
 
-Esses arquivos descrevem a máquina da geração. A VM de laboratório e os containers de execução, coleta e verificação são registrados separadamente durante a avaliação.
+Esses arquivos descrevem a máquina da geração. O ambiente de execução é registrado separadamente durante a avaliação, quando usado.
 
 ## 11. Resumo de chamadas
 
@@ -192,7 +192,7 @@ Mesmo assim, as runs podem conter código, prompts e dados de interesse de segur
 - Um selo recalculável não é assinatura digital.
 - Metadados de provider dependem do que a API retorna.
 - O ambiente remoto real do modelo não pode ser capturado integralmente pelo cliente.
-- A proveniência do host não descreve automaticamente a VM de laboratório nem seus containers.
+- A proveniência do host não descreve automaticamente o ambiente de execução.
 - Um arquivo de evento pode terminar com uma linha parcial após queda abrupta; leitores devem tolerar e reportar isso.
 - Relógios de máquinas distintas podem não estar sincronizados; evidências devem registrar timezone e, se possível, NTP.
 

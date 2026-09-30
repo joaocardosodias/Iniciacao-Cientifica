@@ -1,6 +1,6 @@
 import unittest
 
-from src.coder import Coder, _SUSPICIOUS_GUARDS
+from builder.generator import Coder, _SUSPICIOUS_GUARDS
 
 
 class FakeLLM:

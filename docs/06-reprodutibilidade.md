@@ -21,9 +21,8 @@ O projeto combina:
 5. cenário e intervenção congelados;
 6. parâmetros de inferência persistidos;
 7. provider fixado quando solicitado;
-8. VM de laboratório e snapshot inicial documentados;
-9. evidências funcionais hashadas;
-10. resultados regenerados por scripts.
+8. evidências funcionais hashadas;
+9. resultados regenerados por scripts.
 
 Nenhuma camada isolada garante reprodução. A força está na composição.
 
@@ -59,7 +58,7 @@ O pipeline depende, conforme o cenário e o caminho de compilação, de:
 - headers e biblioteca libcurl;
 - Git para snapshot completo de proveniência.
 
-As ferramentas Rust de laboratório dependem de Cargo para compilação. O servidor de coleta depende de Flask.
+As ferramentas Rust (gerador de fixtures) dependem de Cargo para compilação. O servidor de coleta depende de Flask.
 
 Versões são capturadas quando detectáveis. A ausência de uma ferramenta crítica deve ser detectada pelo preflight oficial antes das chamadas remotas.
 
@@ -139,9 +138,7 @@ Idealmente, a coleta oficial começa em worktree limpa, commit identificado e am
 
 ## 12. Ambiente de avaliação
 
-O ambiente funcional é outro domínio: uma VM de laboratório com três containers (executor, coletor e verificador), rede Docker interna e fixtures sintéticas. Os containers são recriados por run, e a VM parte de um snapshot identificado antes de cada lote de modelo. A VM não é restaurada entre runs do mesmo lote.
-
-`experiments/vm-environment.ubuntu-26.04-qemu.json` descreve o laboratório atual: QEMU/KVM, identificador SHA-256 da base, Ubuntu 26.04, CPU, memória, ciclo de vida dos containers e propriedades verificadas da rede. O arquivo usado é copiado para cada avaliação e hashado.
+A avaliação é registrada manualmente. Opcionalmente, `--environment-file` anexa uma descrição do ambiente de execução (JSON schema 2.0), copiada e hashada em `evaluation/environment.json`.
 
 ## 13. Fixtures sintéticas
 
@@ -159,7 +156,7 @@ O gerador usa aleatoriedade do sistema, portanto conjuntos novos não são neces
 
 ## 14. Restauração entre runs
 
-Para cada run, o orquestrador usa novos containers, volumes e diretórios de evidências; o coletor começa sem eventos anteriores. Preserve e sele as evidências na VM antes da limpeza. Ao fim do lote de um modelo, exporte-as e restaure o snapshot da VM antes do próximo lote. O kernel e o daemon Docker persistem entre runs; registre incidentes de ambiente. `reset_vm` é destrutivo e não substitui a restauração do snapshot entre lotes.
+Cada run usa um diretório de evidências próprio. Preserve e sele as evidências antes de qualquer limpeza; o ambiente de execução é externo ao repositório.
 
 ## 15. Execução em lote e retomada
 
@@ -183,7 +180,7 @@ Um pacote de reprodução deve incluir, conforme as restrições de segurança:
 - cenário canônico e intervenção;
 - manifestos de campanha e runs;
 - metadados de chamadas permitidos;
-- descrição da VM, containers e rede;
+- descrição do ambiente de execução, quando registrada;
 - avaliações e evidências publicáveis;
 - scripts de consolidação;
 - selos e hashes;

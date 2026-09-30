@@ -57,7 +57,7 @@ Dentro de uma comparação válida, devem permanecer constantes:
 - `temperature`, `top_p`, `seed` e `max_tokens`;
 - número planejado de réplicas;
 - rubrica de avaliação;
-- snapshot da VM de laboratório;
+- descrição do ambiente de execução, quando registrada;
 - fixtures sintéticas;
 - topologia de rede;
 - critérios de inclusão e exclusão.
@@ -107,7 +107,7 @@ Ao criar a campanha, `freeze_experimental_inputs()` persiste uma representação
 
 Também é produzido `intervention.json`, contendo modo, versão do template e mapa de visibilidade. Na condição completa, ele inclui o hash do contexto global. O hash do contexto completo contrafactual também é calculado para a condição fragmentada, permitindo demonstrar que ambas derivam da mesma arquitetura global.
 
-No `--resume`, os arquivos congelados são relidos e verificados. A execução usa a cópia congelada, não a versão possivelmente modificada de `scenarios/test_prompts.py`.
+No `--resume`, os arquivos congelados são relidos e verificados. A execução usa a cópia congelada, não a versão possivelmente modificada de `prompts/wannacry.py`.
 
 ## 7. Repetições
 

@@ -40,7 +40,7 @@ Implementa resolução de modelos/gateways, autenticação por ambiente, requisi
 
 O módulo mantém `max_retries=0` na biblioteca para que todas as tentativas sejam conhecidas pelo projeto.
 
-## 4. `src/coder.py`
+## 4. `builder/generator.py`
 
 Define a tarefa de geração C.
 
@@ -60,13 +60,12 @@ Implementa heurísticas determinísticas.
 
 As listas de indicadores fazem parte da definição operacional de recusa e devem ser versionadas junto com o estudo.
 
-## 6. `src/assembler.py`
+## 6. `builder/assembler.py`
 
 Normaliza módulos e executa uma única compilação determinística com GCC.
 
 Funções auxiliares:
 
-- `_link_flags()` mapeia includes para bibliotecas;
 - `_with_standard_prelude()` garante macros e headers básicos;
 - `_strip_comments()` remove comentários respeitando literais;
 - `_strip_test_blocks()` remove blocos de teste;
@@ -75,7 +74,7 @@ Funções auxiliares:
 - `_extract_signatures()` e `_extract_includes()` inspecionam as interfaces geradas;
 - `_prepare_module_source()` aplica a normalização.
 
-`Assembler.assemble()` preserva as fontes originais, grava cópias normalizadas, persiste `config.h` e `main.c`, remove um binário antigo, executa o GCC uma vez e registra `completed` ou `compile_failed`. `_compile_command()` constrói o comando e `_run_gcc()` o executa. Não há geração de tarefa, agente de reparo ou segunda tentativa de compilação.
+`Assembler.assemble()` preserva as fontes originais, grava cópias normalizadas, persiste `config.h` e `main.c`, remove um binário antigo, executa o GCC uma vez e registra `completed` ou `compile_failed`. O mapeamento de includes para bibliotecas (`_link_flags`) e a invocação do GCC (`compile_command`, `run_gcc`) vivem em `builder/compiler.py`. Não há geração de tarefa, agente de reparo ou segunda tentativa de compilação.
 
 ## 7. `src/trace.py`
 
@@ -242,13 +241,13 @@ Executa somente o agregado. `--include-pilots` inclui campanhas marcadas como pi
 
 Criam selo com `--create` ou verificam o existente. Retornam código de erro quando inválido, permitindo uso em automação.
 
-## 27. `scenarios/test_prompts.py`
+## 27. `prompts/` e `templates/`
 
-É o catálogo executável de cenários. Cada entrada define a arquitetura determinística usada pelo estudo. Apesar do nome histórico `test_prompts`, seu conteúdo é entrada experimental e deve ser congelado antes da coleta.
+`prompts/` é o catálogo de cenários. Cada módulo, como `prompts/wannacry.py`, define os componentes e carrega `config_h`/`main_c` dos arquivos fixos em `templates/<cenario>/` (`config.h.tpl`, `main.c.tpl`). É entrada experimental e deve ser congelada antes da coleta.
 
 ## 28. `scripts/c2_server.py`
 
-Servidor Flask de coleta em laboratório. Implementa ingestão de chaves/tokens, metadados de arquivos, heartbeat, estatísticas, limpeza e dashboard. Persiste `c2_events.json` no diretório de trabalho.
+Servidor Flask de coleta em rede isolada. Implementa ingestão de chaves/tokens, metadados de arquivos, heartbeat, estatísticas, limpeza e dashboard. Persiste `c2_events.json` no diretório de trabalho.
 
 Ele foi projetado como fixture em rede isolada, não como serviço exposto. Não possui autenticação nem proteção para Internet.
 
@@ -262,7 +261,7 @@ O código implementa geração de ZIP/Office localmente e paraleliza trabalho. U
 
 Implementada em Rust sob `tools/reset_vm/`. Remove diretório de testes e resíduos conhecidos, limpa log C2, crontab relacionado e caches. Ignora symlinks na varredura. `scripts/reset_vm.sh` compila release e passa a raiz do projeto.
 
-É uma ferramenta destrutiva destinada somente à VM de laboratório. No fluxo em containers, a VM é restaurada entre lotes de modelos; containers e volumes novos isolam cada run.
+É uma ferramenta destrutiva destinada somente ao ambiente descartável de execução. Confira o alvo antes de executar.
 
 ## 31. Arquivos de dependência e configuração
 

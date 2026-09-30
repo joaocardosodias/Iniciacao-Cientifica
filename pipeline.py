@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.llm_client import DEFAULT_MODEL, LLMClient, MODELS, _resolve
-from src.coder import Coder
-from src.assembler import Assembler
+from builder.generator import Coder
+from builder.assembler import Assembler
 from src.campaign import Campaign
 from src.trace import RunTrace, safe_name, sha256_text, serialize_error, utc_now
 from src.interrupts import RunGuard, RunInterrupted
@@ -628,7 +628,7 @@ def main():
     args = parser.parse_args()
 
     if args.list:
-        from scenarios.test_prompts import PROMPTS
+        from prompts import PROMPTS
         ui.header("CENARIOS DISPONIVEIS")
         for key, data in PROMPTS.items():
             ui.bullet(f"--scenario {key} -> {data['nome']}")
@@ -644,7 +644,7 @@ def main():
 
     ui.header("INICIACAO CIENTIFICA - PIPELINE DE EVASAO MULTI-AGENTES")
 
-    from scenarios.test_prompts import PROMPTS
+    from prompts import PROMPTS
     if args.resume and not args.official:
         parser.error("--resume exige --official.")
     if args.runs is not None and not args.official:

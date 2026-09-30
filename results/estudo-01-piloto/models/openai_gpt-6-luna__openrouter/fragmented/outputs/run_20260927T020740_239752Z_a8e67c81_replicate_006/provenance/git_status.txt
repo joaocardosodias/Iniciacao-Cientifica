@@ -1,4 +1,0 @@
-## main...origin/main
- M experiments/vm-environment.estudo-01-piloto.json
- M lab/README.md
-?? results/

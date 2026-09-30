@@ -18,6 +18,7 @@ contexto global, e `full_context`, com o programa completo visível.
 ```
 .
 ├── pipeline.py          # Orquestrador principal — entry point
+├── main.py              # CLI (chama pipeline.main)
 ├── requirements.in      # Dependências Python diretas
 ├── requirements.lock    # Ambiente Python integral com hashes
 │
@@ -25,19 +26,25 @@ contexto global, e `full_context`, com o programa completo visível.
 ├── experiments/         # Protocolos, rubricas e ambientes de exemplo
 ├── artigo/              # Fontes do artigo científico
 │
-├── src/                 # Camadas do pipeline
-│   ├── coder.py         # Gera o código C de cada componente genérico
-│   ├── assembler.py     # Integra e compila main.c + módulos
+├── src/                 # Camadas científicas do pipeline
 │   ├── campaign.py      # Campanhas oficiais, repetições e retomada
 │   ├── evaluation.py    # Avaliações manuais revisionadas
 │   ├── results_builder.py # Consolidação em CSV e JSON
 │   ├── trace.py         # Rastreabilidade, hashes e metadados das execuções
 │   └── llm_client.py    # Cliente OpenRouter, Groq e NVIDIA NIM
 │
-├── scenarios/           # Cenários de teste
-│   └── test_prompts.py  # Catálogo de cenários (WannaCry, Petya, Locky…)
+├── builder/             # Geração, montagem e compilação dos módulos
+│   ├── generator.py     # Gera o código C de cada componente (Coder)
+│   ├── assembler.py     # Integra main.c + módulos (Assembler)
+│   └── compiler.py      # Link flags e compilação via gcc
 │
-├── scripts/             # Utilitários de laboratório
+├── prompts/             # Definição dos cenários
+│   └── wannacry.py      # Cenário WannaCry-like (componentes + templates)
+│
+├── templates/           # Arquivos fixos por cenário
+│   └── wannacry/        # config.h.tpl, main.c.tpl
+│
+├── scripts/             # Utilitários de apoio
 │   ├── c2_server.py         # Servidor C2 fake para capturar eventos
 │   ├── generate_test_files.sh   # Wrapper para o gerador Rust de arquivos falsos
 │   └── reset_vm.sh          # Wrapper para o limpador Rust do ambiente
@@ -57,10 +64,9 @@ contexto global, e `full_context`, com o programa completo visível.
     └── <modelo>/<experimento>/<condição>/
 ```
 
-`output/` contém runs de desenvolvimento que podem ser versionadas para
-transferência e teste na VM de laboratório. `results/` contém as campanhas oficiais e também
-pode ser versionado para transportar as runs, avaliações e consolidações entre
-o host de geração e a VM. Os formatos, o desenho experimental e o fluxo completo estão no
+`output/` contém runs de desenvolvimento. `results/` contém as campanhas oficiais e também
+pode ser versionado para transportar as runs, avaliações e consolidações. Os formatos,
+o desenho experimental e o fluxo completo estão no
 [`índice da documentação técnica`](docs/README.md).
 
 ---
@@ -297,7 +303,7 @@ Depois do teste controlado de uma run oficial:
 python tools/record_evaluation.py --run-id run_<id>
 ```
 
-Para registrar a VM QEMU e os containers de forma reproduzível, use
+Para registrar a descrição do ambiente de execução de forma reproduzível, use
 `experiments/vm-environment.ubuntu-26.04-qemu.json`:
 
 ```bash
@@ -469,7 +475,7 @@ python -m unittest discover -v
 
 ## Ambiente de teste
 
-Para preparar e limpar o ambiente de VM antes/depois de cada experimento:
+Para gerar as fixtures sintéticas e limpar o ambiente antes/depois de um experimento:
 
 ```bash
 scripts/generate_test_files.sh --count 500
@@ -499,7 +505,7 @@ As ferramentas Rust formam um workspace na raiz. Do repositório, funcionam
 |------------------|-------------------|-------------------------------------------------------|
 | `wannacry`       | WannaCry-like (C) | AES-256-GCM, .wncry, exfiltração via libcurl, crontab |
 
-*(Novos cenários são adicionados em `scenarios/test_prompts.py`.)*
+*(Novos cenários são adicionados em `prompts/wannacry.py`.)*
 
 ---
 

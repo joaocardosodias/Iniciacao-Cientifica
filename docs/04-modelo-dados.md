@@ -6,7 +6,7 @@
 Iniciacao-Cientifica/
 ├── pipeline.py
 ├── src/
-├── scenarios/
+├── prompts/
 ├── experiments/
 ├── tools/
 ├── scripts/
@@ -18,7 +18,7 @@ Iniciacao-Cientifica/
 └── requirements.lock
 ```
 
-`src/` contém a implementação; `scenarios/` contém os estímulos em código; `experiments/` contém modelos de protocolo, rubrica e ambiente; `tools/` contém utilitários de avaliação, consolidação e integridade; `scripts/` contém utilidades do laboratório; `tests/` contém testes automatizados; `output/` armazena desenvolvimento; `results/` armazena campanhas.
+`src/` contém a implementação; `prompts/` contém os estímulos em código; `experiments/` contém modelos de protocolo, rubrica e ambiente; `tools/` contém utilitários de avaliação, consolidação e integridade; `scripts/` contém utilidades do laboratório; `tests/` contém testes automatizados; `output/` armazena desenvolvimento; `results/` armazena campanhas.
 
 ## 2. Runs de desenvolvimento
 
@@ -250,7 +250,7 @@ outputs/run_<id>/evaluation/
 └── environment.json
 ```
 
-`manual.json` é a revisão vigente. `revisions/` preserva todas as versões. Evidências são copiadas e hashadas. A descrição da VM de laboratório e dos containers também é copiada e hashada quando `--environment-file` é usado.
+`manual.json` é a revisão vigente. `revisions/` preserva todas as versões. Evidências são copiadas e hashadas. A descrição do ambiente de execução também é copiada e hashada quando `--environment-file` é usado.
 
 No nível da campanha, `evaluations.jsonl` recebe uma linha revisionada por alteração. A maior revisão de um `run_id` é vigente; linhas antigas nunca são apagadas.
 

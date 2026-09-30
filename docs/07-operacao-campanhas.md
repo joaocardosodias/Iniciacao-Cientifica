@@ -238,20 +238,20 @@ python tools/record_evaluation.py \
 
 O comando lista condição, réplica, `run_id` e status de geração para registros que possuem diretório de run. Uma falha de inicialização sem `run_id` nem caminho permanece no manifesto e no CSV, mas não aparece como run avaliável nessa listagem. A ordem em que as avaliações são registradas não altera o resultado consolidado.
 
-## 14. Fluxo com Git e a VM de laboratório
+## 14. Fluxo com Git
 
-Como `output/` e `results/` podem ser rastreados para transporte no ambiente atual, um fluxo possível é:
+Como `output/` e `results/` podem ser rastreados para transporte, um fluxo possível é:
 
 1. execute as campanhas de um modelo;
 2. confira quantidade e integridade local;
 3. faça commit dos artefatos que sua política permite transportar;
-4. clone ou atualize o repositório na VM de laboratório;
-5. teste as runs de um modelo sequencialmente, com containers novos por run;
-6. preserve as evidências na VM e exporte-as para o host após o lote;
+4. clone ou atualize o repositório em outro host, quando aplicável;
+5. teste as runs de um modelo sequencialmente no ambiente isolado;
+6. preserve as evidências e exporte-as para o host após o lote;
 7. registre avaliações com a ferramenta;
 8. faça novo commit dos registros e evidências;
 9. consolide o modelo;
-10. restaure a VM e repita com o modelo seguinte.
+10. repita com o modelo seguinte.
 
 Antes de versionar, verifique se chamadas e artefatos podem ser armazenados naquele remoto. Nunca inclua `.env`, credenciais ou dados reais.
 
@@ -295,6 +295,6 @@ Uma alteração posterior de avaliação exige nova consolidação e novo selo d
 - Uso simultâneo de `--condition` e `--all-conditions`.
 - Uso de `--resume` com `--runs`.
 - Tentativa de usar `--openrouter-provider` em outro gateway.
-- Lote iniciado sem o snapshot de referência da VM ou com containers reutilizados entre runs.
+- Lote iniciado sem a descrição de referência do ambiente ou com estado reutilizado entre runs.
 - Confundir 50 por condição com 50 no total.
 - Editar CSV em vez de corrigir a avaliação de origem e regenerar.

@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from urllib.parse import urlparse
 
-from scenarios.test_prompts import PROMPTS
+from prompts import PROMPTS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVER_PATH = REPO_ROOT / "scripts" / "c2_server.py"

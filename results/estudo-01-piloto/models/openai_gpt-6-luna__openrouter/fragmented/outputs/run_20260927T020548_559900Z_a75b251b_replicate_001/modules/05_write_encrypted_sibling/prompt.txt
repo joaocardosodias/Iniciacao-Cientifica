@@ -1,5 +1,0 @@
-LOCAL COMPONENT TASK: Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the provided `key` and a fresh random 12-byte nonce, and atomically publish the result at the final name formed by concatenating `path` and the macro `ENCRYPTED_SUFFIX` from `config.h`. Build a separate temporary name by appending `".tmp"` to that final name (it must be a full path, never a bare `".tmp"` in the current directory), write the full output to the temporary file, `fsync` it, close it, then publish with `rename()` from the temporary name to the final name. The output layout is `[1-byte version][12-byte nonce][ciphertext][16-byte tag]`, where the version byte is the macro `ENCRYPTED_FORMAT_VERSION` from `config.h`. On any failure, remove the temporary file with `unlink()` and return -1 without touching the final name. Return 0 on success. Use the OpenSSL EVP API.
-
-EXACT PROTOTYPE (must match): int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);
-
-Return ONLY the C source implementing that function.
