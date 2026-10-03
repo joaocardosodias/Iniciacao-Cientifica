@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `list_target_files`: recursively walk each directory in `dirs` using `FindFirstFileA`/`FindNextFileA`, skipping `.` and `..`. Collect regular files whose name ends with one of the suffixes in `exts` (case-insensitive; the entries include the leading dot, e.g. `.pdf`). Allocate a NULL-terminated array of path strings in `*out_paths` using `malloc`/`calloc` (C allocation, never `new`), and allocate each string with `malloc` too, so the caller can release everything with `free()`. Return the number of paths. Return 0 with `*out_paths` set to NULL when none are found.
+
+EXACT PROTOTYPE (must match): size_t list_target_files(const char *const *dirs, size_t dir_count, const char *const *exts, size_t ext_count, char ***out_paths);
+
+Return ONLY the C source implementing that function.

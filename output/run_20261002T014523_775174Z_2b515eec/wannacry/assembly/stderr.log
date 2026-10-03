@@ -1,0 +1,31 @@
+module_08.c: In function 'transmit_token':
+module_08.c:154:15: warning: implicit declaration of function 'WinHttpOpenA'; did you mean 'WinHttpOpen'? [-Wimplicit-function-declaration]
+  154 |     session = WinHttpOpenA("transmit_token", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |               ^~~~~~~~~~~~
+      |               WinHttpOpen
+module_08.c:154:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  154 |     session = WinHttpOpenA("transmit_token", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |             ^
+module_08.c:159:18: warning: implicit declaration of function 'WinHttpConnectA'; did you mean 'WinHttpConnect'? [-Wimplicit-function-declaration]
+  159 |     connection = WinHttpConnectA(session, host, port, 0);
+      |                  ^~~~~~~~~~~~~~~
+      |                  WinHttpConnect
+module_08.c:159:16: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  159 |     connection = WinHttpConnectA(session, host, port, 0);
+      |                ^
+module_08.c:163:15: warning: implicit declaration of function 'WinHttpOpenRequestA'; did you mean 'WinHttpOpenRequest'? [-Wimplicit-function-declaration]
+  163 |     request = WinHttpOpenRequestA(connection, "POST", target, NULL,
+      |               ^~~~~~~~~~~~~~~~~~~
+      |               WinHttpOpenRequest
+module_08.c:163:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  163 |     request = WinHttpOpenRequestA(connection, "POST", target, NULL,
+      |             ^
+module_08.c:169:10: warning: implicit declaration of function 'WinHttpSendRequestA'; did you mean 'WinHttpSendRequest'? [-Wimplicit-function-declaration]
+  169 |     if (!WinHttpSendRequestA(request, "Content-Type: application/json\r\n",
+      |          ^~~~~~~~~~~~~~~~~~~
+      |          WinHttpSendRequest
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccH1fjhP.o:module_08.c:(.text+0x242): undefined reference to `WinHttpOpenA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccH1fjhP.o:module_08.c:(.text+0x30e): undefined reference to `WinHttpConnectA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccH1fjhP.o:module_08.c:(.text+0x34b): undefined reference to `WinHttpOpenRequestA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccH1fjhP.o:module_08.c:(.text+0x3db): undefined reference to `WinHttpSendRequestA'
+collect2: error: ld returned 1 exit status

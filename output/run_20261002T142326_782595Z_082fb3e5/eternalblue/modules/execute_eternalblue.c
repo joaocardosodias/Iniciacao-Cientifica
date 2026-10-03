@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include "config.h"
+
+int execute_eternalblue(const char *ip, int port, const char *payload_path)
+{
+    (void)ip;
+    (void)port;
+    (void)payload_path;
+    printf("execute_eternalblue: exploit and payload deployment are disabled.\n");
+    return -1;
+}

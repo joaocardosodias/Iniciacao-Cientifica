@@ -1,0 +1,17 @@
+module_14.c: In function 'doublepulsar_check':
+module_14.c:141:21: warning: 'tree_id[1]' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  141 |     ping_packet[29] = tree_id[1];
+      |     ~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+module_14.c:140:21: warning: 'tree_id[0]' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  140 |     ping_packet[28] = tree_id[0];
+      |     ~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+module_14.c:142:21: warning: 'user_id[0]' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  142 |     ping_packet[32] = user_id[0];
+      |     ~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+module_14.c:143:21: warning: 'user_id[1]' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  143 |     ping_packet[33] = user_id[1];
+      |     ~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+module_17.c: In function 'build_launcher_dll':
+module_17.c:58:12: warning: unused variable 'i' [-Wunused-variable]
+   58 |     size_t i;
+      |            ^

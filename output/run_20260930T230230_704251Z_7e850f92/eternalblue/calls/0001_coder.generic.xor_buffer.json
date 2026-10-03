@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "62ac738e8f8b",
+  "duration_seconds": 4.207399,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T23:02:35.533+00:00",
+  "hashes": {
+    "response_sha256": "640841a443ce8f38d0e3dd973a3b4c62f2334f2db98888d7829f7287af35f5c2",
+    "system_sha256": "a0d2611d4f9dd3d427604e07354c76e9365cf2798a7300a891ddb7d64f6b9853",
+    "user_sha256": "4405bff1458aa7acb72a3a49505240728fdcaa965137b885e51fb08992831f7f"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#define _GNU_SOURCE\n#include <stddef.h>\n#include <stdint.h>\n\nvoid xor_buffer(uint8_t *data, size_t len, unsigned int key)\n{\n    for (size_t i = 0; i < len; ++i) {\n        data[i] ^= (uint8_t)key;\n        key = (key >> 8) | (key << 24);\n    }\n}",
+  "response_classification": "accepted",
+  "response_created": 1790809351,
+  "response_id": "gen-1790809351-49LDUt3btYLJ7pgBYiyc",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.xor_buffer",
+  "started_at": "2026-09-30T23:02:31.326+00:00",
+  "status": "completed",
+  "system": "You are a senior C systems programmer. Implement exactly the requested function — complete, production-grade C code.\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. `#define _GNU_SOURCE` MUST be the very first line.\n3. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n4. Do NOT define main(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n5. Include every header the function needs. Declare helpers as static.\n6. Use only libc, libssl/libcrypto and libcurl. No third-party libraries.\n7. Return 0 on success and -1 on error unless the prototype says otherwise.\n8. No placeholders, no TODOs, never truncate; every function has its closing brace.\n9. Use `#include \"config.h\"` when a macro from config.h is referenced.\n10. Target standard 64-bit Linux (LP64). Do NOT add portability or overflow guards that\n    compare size macros — for example never write `SIZE_MAX > LLONG_MAX`, which is\n    always true and would make the function fail. Perform the requested operation\n    directly.\n11. Include ONLY standard system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other\n    project header such as \"smb.h\" or \"doublepulsar.h\".\n12. Use ONLY the macros, constants and arrays that the task says are defined in the\n    scenario config header, with their EXACT names. Never invent or rename a constant\n    (for example, do not write `SMB_TRANS_PKT` when the task names `SMB_TRANS_NAMED_PIPE_PKT`).\n13. When your function calls another scenario component, declare its `extern` prototype\n    at the top of the file, exactly as given in the task. Never rely on an implicit\n    function declaration.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 204,
+    "cost": 0.000153,
+    "prompt_tokens": 510,
+    "total_tokens": 714
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `xor_buffer`: XOR each byte of `data` with the corresponding byte of `key` (rotating the key right by 8 bits after each byte). This is the DoublePulsar obfuscation scheme. Return nothing.\n\nEXACT PROTOTYPE (must match): void xor_buffer(uint8_t *data, size_t len, unsigned int key);\n\nReturn ONLY the C source implementing that function."
+}

@@ -1,0 +1,16 @@
+{
+  "code_lines": 30,
+  "code_path": "modules/random_bytes.c",
+  "code_sha256": "1299099f0de838ca14ee440d81304577e30918bd50e9ebef5ad1ccacafd4a70f",
+  "context_mode": "fragmented",
+  "description": "Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using the Windows CNG API `BCryptGenRandom` from <bcrypt.h> with the `BCRYPT_USE_SYSTEM_PREFERRED_RNG` flag. Return 0 on success and -1 on failure.",
+  "duration_seconds": 5.777976,
+  "finished_at": "2026-10-02T01:38:25.233+00:00",
+  "index": 1,
+  "name": "random_bytes",
+  "prompt_path": "modules/01_random_bytes/prompt.txt",
+  "prompt_sha256": "ca3f559c2ee418860a364ebbcdae67c13239bab53e1112ef1e1777175b6dac40",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T01:38:19.455+00:00",
+  "status": "completed"
+}

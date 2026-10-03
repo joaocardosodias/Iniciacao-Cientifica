@@ -1,0 +1,16 @@
+{
+  "code_lines": 44,
+  "code_path": "modules/write_text_file.c",
+  "code_sha256": "fbac7601206e8953b709a63438aa948de5baff6f2869c1daf5cfc42f579c1825",
+  "context_mode": "fragmented",
+  "description": "Implement `write_text_file`: create/overwrite `path` with the Win32 API (`CreateFileA` with GENERIC_WRITE and CREATE_ALWAYS) and write the NUL-terminated `text` with `WriteFile`, then `CloseHandle`. Return 0 on success and -1 on failure.",
+  "duration_seconds": 8.331883,
+  "finished_at": "2026-10-02T14:36:20.820+00:00",
+  "index": 3,
+  "name": "write_text_file",
+  "prompt_path": "modules/03_write_text_file/prompt.txt",
+  "prompt_sha256": "09b5fc1ac276a5d6a94d7f1ad3c4d7e6d6bc158fd2cce46937b7b516efedd192",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T14:36:12.488+00:00",
+  "status": "completed"
+}

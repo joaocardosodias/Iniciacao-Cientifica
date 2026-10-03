@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `transmit_token`: send the NUL-terminated JSON text in `token_json` as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using the Windows WinInet API (`InternetOpenA`, `InternetConnectA`, `HttpOpenRequestA`, `HttpSendRequestA`, `InternetReadFile`, `HttpQueryInfoA`). Return 0 only when the HTTP status code is 200, otherwise -1. Use the ANSI (`...A`) WinInet functions only (never the `...W`/Unicode variants, never the WinHTTP `WinHttp*` API) and include `<wininet.h>`.
+
+EXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_json);
+
+Return ONLY the C source implementing that function.

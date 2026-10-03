@@ -1,0 +1,16 @@
+{
+  "code_lines": 69,
+  "code_path": "modules/write_notice.c",
+  "code_sha256": "3052e47e7d8255983edbc3ded1f746d32cbb2b6457bf6a702dfae5c010a7233e",
+  "context_mode": "fragmented",
+  "description": "Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write exactly `strlen(NOTICE_TEXT)` bytes of the macro `NOTICE_TEXT` (both from `config.h`) using the Win32 API (`CreateFileA`/`WriteFile`), without the NUL terminator. Join the directory and filename with a backslash. Return 0 on success and -1 on failure.",
+  "duration_seconds": 15.320511,
+  "finished_at": "2026-10-02T14:36:27.810+00:00",
+  "index": 7,
+  "name": "write_notice",
+  "prompt_path": "modules/07_write_notice/prompt.txt",
+  "prompt_sha256": "cf2a2a299b3172dc5337054255c9ff955707a63f4429776b4f05c56a90d3cba9",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T14:36:12.490+00:00",
+  "status": "completed"
+}

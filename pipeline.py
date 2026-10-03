@@ -37,6 +37,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("pipeline")
 
+REFERENCE_DIR = Path(__file__).resolve().parent / "builder" / "reference"
+
+
+def _load_reference(relative: str) -> str:
+    path = REFERENCE_DIR / relative
+    return path.read_text(encoding="utf-8")
+
 
 def run(
     prompt: str,
@@ -51,6 +58,7 @@ def run(
     scenario_config_h: str | None = None,
     scenario_components: list[dict] | None = None,
     scenario_main_c: str | None = None,
+    scenario_meta: dict | None = None,
     openrouter_provider: str | None = None,
     experiment_id: str | None = None,
     condition: str | None = None,
@@ -134,6 +142,18 @@ def run(
     )
     if scenario:
         trace.record_stage("input", {"scenario": scenario})
+    scenario_info = {
+        "scenario": scenario,
+        "nome": (scenario_meta or {}).get("nome"),
+        "descricao": (scenario_meta or {}).get("descricao"),
+        "base_scenarios": (scenario_meta or {}).get("base_scenarios", []),
+        "components": [
+            {"nome": component["nome"], "from": component.get("from", scenario)}
+            for component in (scenario_components or [])
+        ],
+    }
+    trace.record_stage("scenario", scenario_info)
+    trace.write_json("scenario.json", scenario_info)
 
     guard = RunGuard(trace)
     guard.install()
@@ -159,6 +179,7 @@ def run(
                 "descricao": component.get("task", component["nome"]),
                 "prototype": component["prototype"],
                 "task": component["task"],
+                "reference": component.get("reference"),
             }
             for component in scenario_components
         ]
@@ -205,11 +226,16 @@ def run(
                 )
                 trace.write_text(module_relative / "prompt.txt", contextualized_prompt)
                 ui.note(f"[componente] {name} :: {module['prototype']}")
-                code = coder.generate_generic(
-                    module["task"],
-                    module["prototype"],
-                    global_context,
-                )
+                reference = module.get("reference")
+                if reference:
+                    code = _load_reference(reference)
+                    ui.note(f"[referencia] {name} <- {reference}")
+                else:
+                    code = coder.generate_generic(
+                        module["task"],
+                        module["prototype"],
+                        global_context,
+                    )
                 trace.write_text(module_relative / "response.c", code)
                 if code:
                     trace.write_text(f"modules/{safe_name(name)}.c", code)
@@ -224,7 +250,7 @@ def run(
                     "duration_seconds": round(time.perf_counter() - module_started, 6),
                     "prompt_path": (module_relative / "prompt.txt").as_posix(),
                     "prompt_sha256": sha256_text(contextualized_prompt),
-                    "response_classification": "accepted",
+                    "response_classification": "reference" if reference else "accepted",
                     "code_path": f"modules/{safe_name(name)}.c",
                     "code_sha256": sha256_text(code),
                     "code_lines": len(code.splitlines()),
@@ -300,7 +326,7 @@ def run(
         trace.record_stage("assembler", {
             "status": assembly_status,
             "main_c": "main.c" if main_c else None,
-            "binary": "output" if compiled_ok else None,
+            "binary": "output.exe" if compiled_ok else None,
             "mode": assembler.last_mode,
             "duration_seconds": assembly_duration,
         })
@@ -323,7 +349,7 @@ def run(
             compiled=compiled_ok,
             extra={
                 "main_c": "main.c",
-                "binary": "output" if compiled_ok else None,
+                "binary": "output.exe" if compiled_ok else None,
                 "module_count": len(generated),
                 "context_mode": context_mode,
                 "assembly": {
@@ -368,6 +394,7 @@ def run_official_campaign(
     rubric_path: Path | None = None,
     campaign_kind: str = "official",
     context_mode: str | None = None,
+    scenario_meta: dict | None = None,
 ) -> Campaign:
     experiment_id = experiment_id.strip()
     condition = condition.strip()
@@ -540,6 +567,7 @@ def run_official_campaign(
                     scenario_config_h=scenario_config_h,
                     scenario_components=scenario_components,
                     scenario_main_c=scenario_main_c,
+                    scenario_meta=scenario_meta,
                     openrouter_provider=openrouter_provider,
                     experiment_id=experiment_id,
                     condition=condition,
@@ -765,6 +793,7 @@ def main():
                     scenario_config_h=scenario_config_h,
                     scenario_components=scenario_components,
                     scenario_main_c=scenario_main_c,
+                    scenario_meta=data,
                     model=args.model,
                     openrouter_provider=args.openrouter_provider,
                     experiment_id=args.experiment_id.strip(),
@@ -812,6 +841,7 @@ def main():
             scenario_config_h=scenario_config_h,
             scenario_components=scenario_components,
             scenario_main_c=scenario_main_c,
+            scenario_meta=data,
             experiment_id=args.experiment_id,
             condition=args.condition,
             replicate=args.replicate,
@@ -821,7 +851,7 @@ def main():
         log.error(f"Falha no pipeline: {error}")
         raise
 
-    binary = output_path.parent / "output"
+    binary = output_path.parent / "output.exe"
     lines = [f"codigo    : {output_path}"]
     if binary.exists():
         lines.append(f"binario   : {binary}")

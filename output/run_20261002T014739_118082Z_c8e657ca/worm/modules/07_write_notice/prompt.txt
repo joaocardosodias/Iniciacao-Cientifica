@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write exactly `strlen(NOTICE_TEXT)` bytes of the macro `NOTICE_TEXT` (both from `config.h`) using the Win32 API (`CreateFileA`/`WriteFile`), without the NUL terminator. Join the directory and filename with a backslash. Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE (must match): int write_notice(const char *directory);
+
+Return ONLY the C source implementing that function.

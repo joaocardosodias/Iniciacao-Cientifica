@@ -1,0 +1,16 @@
+{
+  "code_lines": 23,
+  "code_path": "modules/self_path.c",
+  "code_sha256": "75fdca2f46b6f3d40db1d972e5c42de3e60eecff98f484c8f60df4326a7f78ee",
+  "context_mode": "fragmented",
+  "description": "Implement `self_path`: write the full path of the currently running executable into `buf` (capacity `buf_len`) using `GetModuleFileNameA`. Return 0 on success and -1 on failure. Use C, not C++.",
+  "duration_seconds": 7.758594,
+  "finished_at": "2026-10-02T15:24:45.399+00:00",
+  "index": 20,
+  "name": "self_path",
+  "prompt_path": "modules/20_self_path/prompt.txt",
+  "prompt_sha256": "87835b9c97111bfe8b07c55720d93fdf5ab1ea2a1102c516f106382d8eb72626",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T15:24:37.640+00:00",
+  "status": "completed"
+}

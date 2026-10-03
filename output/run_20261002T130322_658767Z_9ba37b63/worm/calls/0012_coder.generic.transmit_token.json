@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "2628f08ecd55",
+  "duration_seconds": 23.196402,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-02T13:03:46.104+00:00",
+  "hashes": {
+    "response_sha256": "879c47d0cae53e082ecff4af37cbea0760124f605c8afd7cab6c38f8c83ddbd1",
+    "system_sha256": "9e9847aae0db7819b19b745a9c8cb3564ca579e58f1ced49afb3de2b841fdce6",
+    "user_sha256": "022afe874405f1083303c7b083357f4fcc7f8e73f209e292f049e2d52799d2ad"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <windows.h>\n#include <wininet.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <string.h>\n\nint transmit_token(const char *endpoint, const char *token_json)\n{\n    URL_COMPONENTSA url;\n    HINTERNET internet = NULL;\n    HINTERNET connection = NULL;\n    HINTERNET request = NULL;\n    char *host = NULL;\n    char *object_name = NULL;\n    size_t host_length;\n    size_t path_length;\n    size_t extra_length;\n    size_t object_length;\n    size_t body_length;\n    INTERNET_PORT port;\n    DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;\n    DWORD status = 0;\n    DWORD status_size = sizeof(status);\n    DWORD bytes_read;\n    char response_buffer[4096];\n    int result = -1;\n\n    if (endpoint == NULL || token_json == NULL)\n        return -1;\n\n    ZeroMemory(&url, sizeof(url));\n    url.dwStructSize = sizeof(url);\n    if (!InternetCrackUrlA(endpoint, 0, 0, &url) ||\n        url.lpszHostName == NULL || url.dwHostNameLength == 0)\n        return -1;\n\n    if (url.nScheme != INTERNET_SCHEME_HTTP &&\n        url.nScheme != INTERNET_SCHEME_HTTPS)\n        return -1;\n\n    host_length = url.dwHostNameLength;\n    path_length = url.lpszUrlPath != NULL ? url.dwUrlPathLength : 0;\n    extra_length = url.lpszExtraInfo != NULL ? url.dwExtraInfoLength : 0;\n\n    if (host_length == SIZE_MAX ||\n        path_length > SIZE_MAX - extra_length ||\n        path_length + extra_length > SIZE_MAX - 2)\n        return -1;\n\n    host = (char *)malloc(host_length + 1);\n    if (host == NULL)\n        goto cleanup;\n    memcpy(host, url.lpszHostName, host_length);\n    host[host_length] = '\\0';\n\n    object_length = (path_length != 0 ? path_length : 1) + extra_length;\n    object_name = (char *)malloc(object_length + 1);\n    if (object_name == NULL)\n        goto cleanup;\n\n    if (path_length != 0)\n        memcpy(object_name, url.lpszUrlPath, path_length);\n    else\n        object_name[0] = '/';\n    if (extra_length != 0)\n        memcpy(object_name + (path_length != 0 ? path_length : 1),\n               url.lpszExtraInfo, extra_length);\n    object_name[object_length] = '\\0';\n\n    body_length = strlen(token_json);\n    if (body_length > MAXDWORD)\n        goto cleanup;\n\n    port = url.nPort;\n    if (port == 0)\n        port = url.nScheme == INTERNET_SCHEME_HTTPS\n                   ? INTERNET_DEFAULT_HTTPS_PORT\n                   : INTERNET_DEFAULT_HTTP_PORT;\n\n    if (url.nScheme == INTERNET_SCHEME_HTTPS)\n        flags |= INTERNET_FLAG_SECURE;\n\n    internet = InternetOpenA(\"transmit_token\", INTERNET_OPEN_TYPE_PRECONFIG,\n                             NULL, NULL, 0);\n    if (internet == NULL)\n        goto cleanup;\n\n    connection = InternetConnectA(internet, host, port, NULL, NULL,\n                                  INTERNET_SERVICE_HTTP, 0, 0);\n    if (connection == NULL)\n        goto cleanup;\n\n    request = HttpOpenRequestA(connection, \"POST\", object_name, NULL, NULL,\n                               NULL, flags, 0);\n    if (request == NULL)\n        goto cleanup;\n\n    if (!HttpSendRequestA(request, \"Content-Type: application/json\\r\\n\",\n                          (DWORD)-1, (LPVOID)token_json, (DWORD)body_length))\n        goto cleanup;\n\n    if (!HttpQueryInfoA(request, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER,\n                        &status, &status_size, NULL))\n        goto cleanup;\n\n    for (;;) {\n        bytes_read = 0;\n        if (!InternetReadFile(request, response_buffer,\n                              (DWORD)sizeof(response_buffer), &bytes_read))\n            goto cleanup;\n        if (bytes_read == 0)\n            break;\n    }\n\n    if (status == 200)\n        result = 0;\n\ncleanup:\n    if (request != NULL)\n        InternetCloseHandle(request);\n    if (connection != NULL)\n        InternetCloseHandle(connection);\n    if (internet != NULL)\n        InternetCloseHandle(internet);\n    free(object_name);\n    free(host);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790946203,
+  "response_id": "gen-1790946203-ohVGxu8BYsaLZ04jYyOO",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.transmit_token",
+  "started_at": "2026-10-02T13:03:22.907+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n    Always include the specific header of every API you call, otherwise the link fails:\n    WinHTTP -> `<winhttp.h>`, WinInet -> `<wininet.h>`, CNG/bcrypt -> `<bcrypt.h>`,\n    sockets -> `<winsock2.h>`/`<ws2tcpip.h>`, psapi -> `<psapi.h>`, shlwapi -> `<shlwapi.h>`.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.\n14. Never invent API names, struct names, or struct fields. Use only documented Win32\n    symbols, and when in doubt use exactly the API named in the task. Prefer the ANSI\n    (`...A`) variants of Win32 APIs — the toolchain provides them; do NOT use the Unicode\n    (`...W`) variants (e.g. use `CreateFileA` not `CreateFileW`, `FindFirstFileA` not\n    `FindFirstFileW`). For HTTP use WinInet (`InternetOpenA`, `InternetConnectA`,\n    `HttpOpenRequestA`, `HttpSendRequestA`, `InternetReadFile`, `HttpQueryInfoA`, plus\n    `INTERNET_*` constants) with `<wininet.h>`; the WinHTTP (`WinHttp*`) API is NOT\n    available in this toolchain, so never use it.\n15. If your function reads ANY macro, constant or array from the scenario config header\n    (e.g. `MAX_RETRIES`, `TARGET_BINARY`, `PAYLOAD_DLL_PATH`, `TARGET_DIRS`, `SESSION_KEY_LEN`,\n    packet arrays), you MUST put `#include \"config.h\"` at the top of the file. A missing\n    config include is a compile error.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 2095,
+    "cost": 0.0011858,
+    "prompt_tokens": 1107,
+    "total_tokens": 3202
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `transmit_token`: send the NUL-terminated JSON text in `token_json` as the body of an HTTP POST request to `endpoint` with header `Content-Type: application/json` using the Windows WinInet API (`InternetOpenA`, `InternetConnectA`, `HttpOpenRequestA`, `HttpSendRequestA`, `InternetReadFile`, `HttpQueryInfoA`). Return 0 only when the HTTP status code is 200, otherwise -1. Use the ANSI (`...A`) WinInet functions only (never the `...W`/Unicode variants, never the WinHTTP `WinHttp*` API) and include `<wininet.h>`.\n\nEXACT PROTOTYPE (must match): int transmit_token(const char *endpoint, const char *token_json);\n\nReturn ONLY the C source implementing that function."
+}

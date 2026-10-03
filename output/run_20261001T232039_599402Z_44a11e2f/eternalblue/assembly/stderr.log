@@ -1,0 +1,7 @@
+module_06.c: In function 'doublepulsar_check':
+module_06.c:138:5: warning: 'memcpy' forming offset [138, 140] is out of the bounds [0, 138] of object 'packet' with type 'unsigned char[138]' [-Warray-bounds]
+  138 |     memcpy(packet, SMB_SESSION_SETUP_PKT, sizeof(SMB_SESSION_SETUP_PKT));
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_06.c:117:19: note: 'packet' declared here
+  117 |     unsigned char packet[sizeof(SMB_NEGOTIATE_PKT)];
+      |                   ^~~~~~

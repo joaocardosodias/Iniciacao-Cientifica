@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`. Copy each packet array to a writable buffer and send only `sizeof(PKT) - 1` bytes (the literal includes a trailing NUL). Send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`; copy the returned UserID (bytes 32-33) into the tree connect packet bytes 32-33 and send `SMB_TREE_CONNECT_PKT`; copy the returned TreeID (bytes 28-29) and the UserID into `DP_PING_PKT` (TreeID at 28-29, UserID at 32-33) and send it. Read the response and compare the byte at offset `SMB_RESP_MUX_ID_OFFSET` (34) with `DP_MULTIPLEX_ID_PING`; if equal, return 1 (active); otherwise return 0. Return -1 on error.
+
+EXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);
+
+Return ONLY the C source implementing that function.

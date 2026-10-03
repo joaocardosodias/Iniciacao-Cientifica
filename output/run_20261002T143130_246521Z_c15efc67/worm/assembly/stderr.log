@@ -1,0 +1,6 @@
+module_18.c: In function 'upload_payload':
+module_18.c:192:60: error: 'DWORD_MAX' undeclared (first use in this function); did you mean 'DWORD_PTR'?
+  192 |             DWORD amount = dll_size - read_total > (size_t)DWORD_MAX
+      |                                                            ^~~~~~~~~
+      |                                                            DWORD_PTR
+module_18.c:192:60: note: each undeclared identifier is reported only once for each function it appears in

@@ -540,7 +540,9 @@ fn parse_args() -> Options {
         index += 1;
     }
 
-    let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+    let home = env::var("HOME")
+        .or_else(|_| env::var("USERPROFILE"))
+        .unwrap_or_else(|_| ".".to_string());
     let dest = dest.unwrap_or_else(|| PathBuf::from(home).join("Documentos_Teste"));
     Options { dest, count, workers }
 }

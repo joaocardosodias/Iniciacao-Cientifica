@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "379e28434166",
+  "duration_seconds": 19.952251,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:16:39.079+00:00",
+  "hashes": {
+    "response_sha256": "7ffdba85191f311504471f991233e29aa96cffe61a49855f4e0deb47c013c523",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "5e5421821bc1be6aefe52233eb888170f7d5af417fa17614a76744467887f8ca"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <ws2tcpip.h>\n#include <limits.h>\n\nstatic INIT_ONCE smb_wsa_once = INIT_ONCE_STATIC_INIT;\nstatic int smb_wsa_status = WSASYSNOTREADY;\n\nstatic BOOL CALLBACK smb_wsa_initialize(PINIT_ONCE once, PVOID parameter, PVOID *context)\n{\n    WSADATA data;\n    int status;\n\n    (void)once;\n    (void)parameter;\n    (void)context;\n\n    status = WSAStartup(MAKEWORD(2, 2), &data);\n    if (status == 0) {\n        if (LOBYTE(data.wVersion) == 2 && HIBYTE(data.wVersion) == 2) {\n            smb_wsa_status = 0;\n        } else {\n            WSACleanup();\n            smb_wsa_status = WSAVERNOTSUPPORTED;\n        }\n    } else {\n        smb_wsa_status = status;\n    }\n\n    return TRUE;\n}\n\nint smb_connect(const char *ip, int port)\n{\n    struct sockaddr_storage address;\n    int address_length;\n    int family;\n    SOCKET sock;\n    DWORD timeout_ms = 2000;\n    int status;\n\n    if (ip == NULL || port < 1 || port > 65535) {\n        return -1;\n    }\n\n    if (!InitOnceExecuteOnce(&smb_wsa_once, smb_wsa_initialize, NULL, NULL) ||\n        smb_wsa_status != 0) {\n        return -1;\n    }\n\n    ZeroMemory(&address, sizeof(address));\n\n    if (InetPtonA(AF_INET, ip, &((struct sockaddr_in *)&address)->sin_addr) == 1) {\n        struct sockaddr_in *ipv4 = (struct sockaddr_in *)&address;\n        family = AF_INET;\n        address_length = (int)sizeof(*ipv4);\n        ipv4->sin_family = AF_INET;\n        ipv4->sin_port = htons((u_short)port);\n    } else if (InetPtonA(AF_INET6, ip, &((struct sockaddr_in6 *)&address)->sin6_addr) == 1) {\n        struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)&address;\n        family = AF_INET6;\n        address_length = (int)sizeof(*ipv6);\n        ipv6->sin6_family = AF_INET6;\n        ipv6->sin6_port = htons((u_short)port);\n    } else {\n        return -1;\n    }\n\n    sock = socket(family, SOCK_STREAM, IPPROTO_TCP);\n    if (sock == INVALID_SOCKET) {\n        return -1;\n    }\n\n    status = setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout_ms,\n                        (int)sizeof(timeout_ms));\n    if (status == SOCKET_ERROR) {\n        closesocket(sock);\n        return -1;\n    }\n\n    status = setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char *)&timeout_ms,\n                        (int)sizeof(timeout_ms));\n    if (status == SOCKET_ERROR) {\n        closesocket(sock);\n        return -1;\n    }\n\n    if (connect(sock, (const struct sockaddr *)&address, address_length) == SOCKET_ERROR) {\n        closesocket(sock);\n        return -1;\n    }\n\n    if (sock > (SOCKET)INT_MAX) {\n        closesocket(sock);\n        return -1;\n    }\n\n    return (int)sock;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790896579,
+  "response_id": "gen-1790896579-E8jy0WVOYmBpLXyLGYI5",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_connect",
+  "started_at": "2026-10-01T23:16:19.127+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1862,
+    "cost": 0.0010014,
+    "prompt_tokens": 704,
+    "total_tokens": 2566
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_connect`: create a TCP socket with Winsock (`WSAStartup`, `socket`, `connect`, `closesocket`) and connect to `ip:port`. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO).\n\nEXACT PROTOTYPE (must match): int smb_connect(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

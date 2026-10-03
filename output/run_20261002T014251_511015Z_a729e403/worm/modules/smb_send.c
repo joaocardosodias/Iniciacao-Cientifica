@@ -1,0 +1,26 @@
+#include <winsock2.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <limits.h>
+
+int smb_send(int sock, const uint8_t *data, size_t len)
+{
+    size_t offset = 0;
+    SOCKET socket_handle = (SOCKET)(uintptr_t)(unsigned int)sock;
+
+    if (len != 0 && data == NULL)
+        return -1;
+
+    while (offset < len) {
+        size_t remaining = len - offset;
+        int chunk = remaining > (size_t)INT_MAX ? INT_MAX : (int)remaining;
+        int sent = send(socket_handle, (const char *)data + offset, chunk, 0);
+
+        if (sent == SOCKET_ERROR || sent == 0)
+            return -1;
+
+        offset += (size_t)sent;
+    }
+
+    return 0;
+}

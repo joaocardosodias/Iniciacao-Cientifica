@@ -1,0 +1,16 @@
+{
+  "code_lines": 67,
+  "code_path": "modules/smb_connect.c",
+  "code_sha256": "674df8574e3768ece85fa7636d818e84af84b741923aa1aa6df8e09a69f3290b",
+  "context_mode": "fragmented",
+  "description": "Implement `smb_connect`: create a TCP socket with Winsock (`WSAStartup`, `socket`, `connect`, `closesocket`) and connect to `ip:port`. Return a socket descriptor (>= 0) on success, -1 on failure. Set a 2-second timeout on send/recv via `setsockopt` (SO_RCVTIMEO, SO_SNDTIMEO).",
+  "duration_seconds": 15.027507,
+  "finished_at": "2026-10-02T14:25:16.624+00:00",
+  "index": 1,
+  "name": "smb_connect",
+  "prompt_path": "modules/01_smb_connect/prompt.txt",
+  "prompt_sha256": "5e5421821bc1be6aefe52233eb888170f7d5af417fa17614a76744467887f8ca",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T14:25:01.596+00:00",
+  "status": "completed"
+}

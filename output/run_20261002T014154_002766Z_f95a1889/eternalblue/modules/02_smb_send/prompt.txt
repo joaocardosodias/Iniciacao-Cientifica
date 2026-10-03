@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `smb_send`: send exactly `len` bytes from `data` over `sock`. Loop until all bytes are sent or an error occurs. Return 0 on success, -1 on failure.
+
+EXACT PROTOTYPE (must match): int smb_send(int sock, const uint8_t *data, size_t len);
+
+Return ONLY the C source implementing that function.

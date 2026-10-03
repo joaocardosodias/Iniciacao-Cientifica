@@ -1,0 +1,1 @@
+Worm auto-propagante para Windows x64: ransomware local (AES-256-GCM via CNG), varredura da sub-rede e MS17-010 (EternalBlue/DoublePulsar) para se reenviar para as proximas maquinas.

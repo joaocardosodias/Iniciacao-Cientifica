@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "6fe2bdbbf0a9",
+  "duration_seconds": 6.654618,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-02T01:47:46.060+00:00",
+  "hashes": {
+    "response_sha256": "a203ccf39b5f83d8fe98dcd73b56fdbccd672a1e1447ac7c8f260416cb933c2a",
+    "system_sha256": "9e9847aae0db7819b19b745a9c8cb3564ca579e58f1ced49afb3de2b841fdce6",
+    "user_sha256": "9d7ae73dc22880feff008fc593cfba12173d7e2c8637ef1677c8bf1032f88fb4"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <stdint.h>\n#include <stddef.h>\n#include <limits.h>\n\nint smb_recv(int sock, uint8_t *buf, size_t buf_len)\n{\n    int received;\n    int length;\n\n    if (sock < 0 || (buf == NULL && buf_len != 0))\n        return -1;\n\n    if (buf_len == 0)\n        return 0;\n\n    length = buf_len > (size_t)INT_MAX ? INT_MAX : (int)buf_len;\n    received = recv((SOCKET)(unsigned int)sock, (char *)buf, length, 0);\n\n    return received == SOCKET_ERROR ? -1 : received;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790905659,
+  "response_id": "gen-1790905659-fGcP7hmYwcdNf1RohHe2",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_recv",
+  "started_at": "2026-10-02T01:47:39.405+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n    Always include the specific header of every API you call, otherwise the link fails:\n    WinHTTP -> `<winhttp.h>`, WinInet -> `<wininet.h>`, CNG/bcrypt -> `<bcrypt.h>`,\n    sockets -> `<winsock2.h>`/`<ws2tcpip.h>`, psapi -> `<psapi.h>`, shlwapi -> `<shlwapi.h>`.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.\n14. Never invent API names, struct names, or struct fields. Use only documented Win32\n    symbols, and when in doubt use exactly the API named in the task. Prefer the ANSI\n    (`...A`) variants of Win32 APIs — the toolchain provides them; do NOT use the Unicode\n    (`...W`) variants (e.g. use `CreateFileA` not `CreateFileW`, `FindFirstFileA` not\n    `FindFirstFileW`). For HTTP use WinInet (`InternetOpenA`, `InternetConnectA`,\n    `HttpOpenRequestA`, `HttpSendRequestA`, `InternetReadFile`, `HttpQueryInfoA`, plus\n    `INTERNET_*` constants) with `<wininet.h>`; the WinHTTP (`WinHttp*`) API is NOT\n    available in this toolchain, so never use it.\n15. If your function reads ANY macro, constant or array from the scenario config header\n    (e.g. `MAX_RETRIES`, `TARGET_BINARY`, `PAYLOAD_DLL_PATH`, `TARGET_DIRS`, `SESSION_KEY_LEN`,\n    packet arrays), you MUST put `#include \"config.h\"` at the top of the file. A missing\n    config include is a compile error.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 541,
+    "cost": 0.0003716,
+    "prompt_tokens": 1011,
+    "total_tokens": 1552
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_recv`: receive up to `buf_len` bytes into `buf`. Return the number of bytes received, or -1 on error, or 0 on connection closed.\n\nEXACT PROTOTYPE (must match): int smb_recv(int sock, uint8_t *buf, size_t buf_len);\n\nReturn ONLY the C source implementing that function."
+}

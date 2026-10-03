@@ -1,0 +1,25 @@
+module_08.c: In function 'transmit_token':
+module_08.c:137:39: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+  137 |     if (host_length == 0 || port == 0 && (
+      |                             ~~~~~~~~~~^~~~
+  138 |             (endpoint[authority_start] == '[' &&
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  139 |              authority_end > authority_start + 1 &&
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  140 |              endpoint[authority_end - 1] == ':') ||
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  141 |             (endpoint[authority_start] != '[' &&
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  142 |              memchr(endpoint + authority_start, ':',
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  143 |                     authority_end - authority_start) != NULL)))
+      |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_08.c:199:15: warning: implicit declaration of function 'WinHttpOpenW'; did you mean 'WinHttpOpen'? [-Wimplicit-function-declaration]
+  199 |     session = WinHttpOpenW(NULL, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |               ^~~~~~~~~~~~
+      |               WinHttpOpen
+module_08.c:199:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  199 |     session = WinHttpOpenW(NULL, WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |             ^
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccHHYTt8.o:module_08.c:(.text+0x61f): undefined reference to `WinHttpOpenW'
+collect2: error: ld returned 1 exit status

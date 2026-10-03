@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "412feb7c6122",
+  "duration_seconds": 118.373545,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:21:38.556+00:00",
+  "hashes": {
+    "response_sha256": "2a48d89df3386ffef6bc66bfe4f967a8e8ed9cc94569873133c7f86e56dfddbb",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "b012ecb1b7a34a42f676830d0c191eb72d35adb4eabd6aa382adfa08e8caeb7d"
+  },
+  "inference_provider": "DeepInfra",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "qwen/qwen3-30b-a3b",
+  "requested_model_input": "qwen/qwen3-30b-a3b",
+  "response": "#include \"config.h\"\n#include <windows.h>\n#include <winsock2.h>\n#include <ws2tcpip.h>\n\n#pragma comment(lib, \"ws2_32.lib\")\n\nint doublepulsar_check(const char *ip, int port) {\n    WSADATA wsaData;\n    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {\n        return -1;\n    }\n\n    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);\n    if (sock == INVALID_SOCKET) {\n        WSACleanup();\n        return -1;\n    }\n\n    struct sockaddr_in server;\n    server.sin_family = AF_INET;\n    server.sin_port = htons(port);\n    if (inet_pton(AF_INET, ip, &server.sin_addr) <= 0) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    if (connect(sock, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t negotiate_buf[sizeof(SMB_NEGOTIATE_PKT)];\n    memcpy(negotiate_buf, SMB_NEGOTIATE_PKT, sizeof(SMB_NEGOTIATE_PKT));\n    if (send(sock, (char*)negotiate_buf, sizeof(SMB_NEGOTIATE_PKT) - 1, 0) == SOCKET_ERROR) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t resp_negotiate[4096];\n    int bytes_received = recv(sock, (char*)resp_negotiate, sizeof(resp_negotiate), 0);\n    if (bytes_received <= 0) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t session_setup_buf[sizeof(SMB_SESSION_SETUP_PKT)];\n    memcpy(session_setup_buf, SMB_SESSION_SETUP_PKT, sizeof(SMB_SESSION_SETUP_PKT));\n    if (send(sock, (char*)session_setup_buf, sizeof(SMB_SESSION_SETUP_PKT) - 1, 0) == SOCKET_ERROR) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t resp_session[4096];\n    bytes_received = recv(sock, (char*)resp_session, sizeof(resp_session), 0);\n    if (bytes_received <= 0) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint16_t user_id = *(uint16_t*)(resp_session + 32);\n\n    uint8_t tree_connect_buf[sizeof(SMB_TREE_CONNECT_PKT)];\n    memcpy(tree_connect_buf, SMB_TREE_CONNECT_PKT, sizeof(SMB_TREE_CONNECT_PKT));\n    *(uint16_t*)(tree_connect_buf + 32) = user_id;\n    if (send(sock, (char*)tree_connect_buf, sizeof(SMB_TREE_CONNECT_PKT) - 1, 0) == SOCKET_ERROR) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t resp_tree[4096];\n    bytes_received = recv(sock, (char*)resp_tree, sizeof(resp_tree), 0);\n    if (bytes_received <= 0) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint16_t tree_id = *(uint16_t*)(resp_tree + 28);\n\n    uint8_t ping_buf[sizeof(DP_PING_PKT)];\n    memcpy(ping_buf, DP_PING_PKT, sizeof(DP_PING_PKT));\n    *(uint16_t*)(ping_buf + 28) = tree_id;\n    *(uint16_t*)(ping_buf + 32) = user_id;\n    if (send(sock, (char*)ping_buf, sizeof(DP_PING_PKT) - 1, 0) == SOCKET_ERROR) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    uint8_t resp_ping[4096];\n    bytes_received = recv(sock, (char*)resp_ping, sizeof(resp_ping), 0);\n    if (bytes_received <= 0) {\n        closesocket(sock);\n        WSACleanup();\n        return -1;\n    }\n\n    if (bytes_received > SMB_RESP_MUX_ID_OFFSET && resp_ping[SMB_RESP_MUX_ID_OFFSET] == DP_MULTIPLEX_ID_PING) {\n        closesocket(sock);\n        WSACleanup();\n        return 1;\n    } else {\n        closesocket(sock);\n        WSACleanup();\n        return 0;\n    }\n}",
+  "response_classification": "accepted",
+  "response_created": 1790896780,
+  "response_id": "gen-1790896780-V0luTEqkEWqDWBaTtpwe",
+  "response_model": "qwen/qwen3-30b-a3b",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.doublepulsar_check",
+  "started_at": "2026-10-01T23:19:40.183+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 7347,
+    "cost": 0.00377322,
+    "prompt_tokens": 831,
+    "total_tokens": 8178
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`. Copy each packet array to a writable buffer and send only `sizeof(PKT) - 1` bytes (the literal includes a trailing NUL). Send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`; copy the returned UserID (bytes 32-33) into the tree connect packet bytes 32-33 and send `SMB_TREE_CONNECT_PKT`; copy the returned TreeID (bytes 28-29) and the UserID into `DP_PING_PKT` (TreeID at 28-29, UserID at 32-33) and send it. Read the response and compare the byte at offset `SMB_RESP_MUX_ID_OFFSET` (34) with `DP_MULTIPLEX_ID_PING`; if equal, return 1 (active); otherwise return 0. Return -1 on error.\n\nEXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

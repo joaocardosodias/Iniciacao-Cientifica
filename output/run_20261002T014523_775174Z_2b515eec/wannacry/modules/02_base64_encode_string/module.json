@@ -1,0 +1,16 @@
+{
+  "code_lines": 56,
+  "code_path": "modules/base64_encode_string.c",
+  "code_sha256": "5ff197f409ca2243232523eef7893541d20a7b5f2bec62968b4af321a0c43224",
+  "context_mode": "fragmented",
+  "description": "Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size`, implementing the standard Base64 alphabet and padding manually (no external library). Return 0 on success and -1 if the buffer is too small.",
+  "duration_seconds": 8.034688,
+  "finished_at": "2026-10-02T01:45:31.993+00:00",
+  "index": 2,
+  "name": "base64_encode_string",
+  "prompt_path": "modules/02_base64_encode_string/prompt.txt",
+  "prompt_sha256": "a4bb43d2be6e1fee411d0950f5647ac3327e389233f28cb8f0dbbb9d95296536",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T01:45:23.958+00:00",
+  "status": "completed"
+}

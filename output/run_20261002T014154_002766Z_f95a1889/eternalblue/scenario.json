@@ -1,0 +1,52 @@
+{
+  "base_scenarios": [],
+  "components": [
+    {
+      "from": "eternalblue",
+      "nome": "smb_connect"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "smb_send"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "smb_recv"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "ms17_vuln_status"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "EternalBlue"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "doublepulsar_check"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "DoublePulsarXORKeyCalculator"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "xor_buffer"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "build_launcher_dll"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "upload_payload"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "execute_eternalblue"
+    }
+  ],
+  "descricao": "Exploit MS17-010 em C11: detecção de vulnerabilidade via SMB, instalação do DoublePulsar, e execução de um binário específico no alvo via DLL lançadora injetada no processo lsass.exe.",
+  "nome": "EternalBlue + DoublePulsar (C)",
+  "scenario": "eternalblue"
+}

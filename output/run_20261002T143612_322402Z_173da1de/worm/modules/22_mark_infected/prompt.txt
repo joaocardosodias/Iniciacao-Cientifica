@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `mark_infected`: read the marker file `SELF_MARKER` (from `config.h`). If it already contains a line equal to `ip`, return 1 (already infected). Otherwise append `ip` with a newline (create the file if needed) and return 0. Use C, not C++.
+
+EXACT PROTOTYPE (must match): int mark_infected(const char *ip);
+
+Return ONLY the C source implementing that function.

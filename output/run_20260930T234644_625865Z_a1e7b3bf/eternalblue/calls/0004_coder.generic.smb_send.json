@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "fa11fd1a389e",
+  "duration_seconds": 7.043949,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T23:46:52.235+00:00",
+  "hashes": {
+    "response_sha256": "f4be704e805085df67468d4ea9fe5fdc6fbb542b8214844b51720800acdffc86",
+    "system_sha256": "8ac91c0f13d68803bff9b895731e3f3ef66c4ea97efe05773b1a120d416b33c3",
+    "user_sha256": "f993e8b4d902cd5eee78aee759996969ef35a5eaf3a7225c1d2bc7a451c40658"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <stdint.h>\n#include <stddef.h>\n#include <limits.h>\n\nint smb_send(int sock, const uint8_t *data, size_t len)\n{\n    SOCKET socket_handle = (SOCKET)(uintptr_t)(unsigned int)sock;\n    size_t sent_total = 0;\n\n    if (len != 0 && data == NULL)\n        return -1;\n\n    while (sent_total < len) {\n        size_t remaining = len - sent_total;\n        int chunk = remaining > (size_t)INT_MAX ? INT_MAX : (int)remaining;\n        int sent = send(socket_handle, (const char *)(data + sent_total), chunk, 0);\n\n        if (sent == SOCKET_ERROR) {\n            if (WSAGetLastError() == WSAEINTR)\n                continue;\n            return -1;\n        }\n\n        if (sent == 0)\n            return -1;\n\n        sent_total += (size_t)sent;\n    }\n\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790812005,
+  "response_id": "gen-1790812005-iorqZtgZAeqj4UTO8dr7",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_send",
+  "started_at": "2026-09-30T23:46:45.191+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 603,
+    "cost": 0.00036,
+    "prompt_tokens": 585,
+    "total_tokens": 1188
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_send`: send exactly `len` bytes from `data` over `sock`. Loop until all bytes are sent or an error occurs. Return 0 on success, -1 on failure.\n\nEXACT PROTOTYPE (must match): int smb_send(int sock, const uint8_t *data, size_t len);\n\nReturn ONLY the C source implementing that function."
+}

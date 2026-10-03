@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`, send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, and `DP_PING_PKT`. Read the response and extract the 16-bit Multiplex ID at offset `SMB_RESP_MUX_ID_OFFSET`. If it equals `DP_MULTIPLEX_ID_PING`, return 1 (active); otherwise return 0. Return -1 on error.
+
+EXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);
+
+Return ONLY the C source implementing that function.

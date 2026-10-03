@@ -1,0 +1,7 @@
+module_17.c: In function 'build_launcher_dll':
+module_17.c:80:14: warning: unused variable 'zero64' [-Wunused-variable]
+   80 |     uint64_t zero64;
+      |              ^~~~~~
+module_17.c:79:14: warning: unused variable 'zero32' [-Wunused-variable]
+   79 |     uint32_t zero32;
+      |              ^~~~~~

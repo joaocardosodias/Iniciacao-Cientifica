@@ -1,0 +1,99 @@
+{
+  "base_scenarios": [
+    "wannacry",
+    "eternalblue"
+  ],
+  "components": [
+    {
+      "from": "wannacry",
+      "nome": "random_bytes"
+    },
+    {
+      "from": "wannacry",
+      "nome": "base64_encode_string"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_text_file"
+    },
+    {
+      "from": "wannacry",
+      "nome": "list_target_files"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_encrypted_sibling"
+    },
+    {
+      "from": "wannacry",
+      "nome": "secure_erase"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_notice"
+    },
+    {
+      "from": "wannacry",
+      "nome": "transmit_token"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "smb_connect"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "smb_send"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "smb_recv"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "ms17_vuln_status"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "EternalBlue"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "doublepulsar_check"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "DoublePulsarXORKeyCalculator"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "xor_buffer"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "build_launcher_dll"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "upload_payload"
+    },
+    {
+      "from": "eternalblue",
+      "nome": "execute_eternalblue"
+    },
+    {
+      "from": "worm",
+      "nome": "self_path"
+    },
+    {
+      "from": "worm",
+      "nome": "scan_targets"
+    },
+    {
+      "from": "worm",
+      "nome": "mark_infected"
+    }
+  ],
+  "descricao": "Worm auto-propagante para Windows x64: ransomware local (AES-256-GCM via CNG), varredura da sub-rede e MS17-010 (EternalBlue/DoublePulsar) para se reenviar para as proximas maquinas.",
+  "nome": "WannaCry-like worm (Windows C)",
+  "scenario": "worm"
+}

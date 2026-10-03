@@ -1,0 +1,46 @@
+#define _WIN32_WINNT 0x0601
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
+#include <time.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <limits.h>
+#include <math.h>
+#include <io.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <winsock2.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <limits.h>
+
+int smb_recv(int sock, uint8_t *buf, size_t buf_len)
+{
+    SOCKET socket_handle;
+    int receive_len;
+    int result;
+
+    if (buf_len == 0)
+        return 0;
+    if (buf == NULL || sock < 0)
+        return -1;
+
+    socket_handle = (SOCKET)(uintptr_t)(unsigned int)sock;
+    receive_len = buf_len > (size_t)INT_MAX ? INT_MAX : (int)buf_len;
+
+    do {
+        result = recv(socket_handle, (char *)buf, receive_len, 0);
+    } while (result == SOCKET_ERROR && WSAGetLastError() == WSAEINTR);
+
+    return result == SOCKET_ERROR ? -1 : result;
+}

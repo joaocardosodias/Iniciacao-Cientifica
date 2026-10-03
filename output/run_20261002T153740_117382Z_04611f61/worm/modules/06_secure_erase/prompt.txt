@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `secure_erase`: open the file at `path` with `CreateFileA` (GENERIC_WRITE, OPEN_EXISTING), obtain its size with `GetFileSizeEx`, overwrite it with zero bytes, close it, then remove it with `DeleteFileA`. Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE (must match): int secure_erase(const char *path);
+
+Return ONLY the C source implementing that function.

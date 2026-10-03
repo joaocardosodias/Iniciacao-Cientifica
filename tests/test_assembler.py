@@ -116,11 +116,11 @@ int after(const char *url)
     def test_link_flags_from_includes(self):
         from builder.compiler import _link_flags
         flags = _link_flags([
-            "#include <curl/curl.h>",
-            "#include <json-c/json.h>",
-            "#include <pthread.h>",
+            "#include <winsock2.h>",
+            "#include <bcrypt.h>",
+            "#include <winhttp.h>",
         ])
-        for expected in ("-lcurl", "-ljson-c", "-lpthread", "-lssl", "-lcrypto"):
+        for expected in ("-lws2_32", "-lbcrypt", "-lwinhttp"):
             self.assertIn(expected, flags)
 
     def test_standard_prelude_after_gnu_source(self):
@@ -130,9 +130,9 @@ int after(const char *url)
         self.assertLess(result.index("#include <errno.h>"), result.index('#include "config.h"'))
         self.assertLess(result.index("#include <fcntl.h>"), result.index('#include "config.h"'))
 
-    def test_standard_prelude_adds_gnu_source_when_absent(self):
+    def test_standard_prelude_adds_windows_macros_when_absent(self):
         result = _with_standard_prelude("int f(void) { return 0; }\n")
-        self.assertTrue(result.startswith("#define _GNU_SOURCE\n#include <errno.h>"))
+        self.assertTrue(result.startswith("#define _WIN32_WINNT 0x0601\n#include <winsock2.h>"))
 
 
 class NoLinkableFunctionsTests(unittest.TestCase):
@@ -151,7 +151,7 @@ class NoLinkableFunctionsTests(unittest.TestCase):
             self.assertEqual(assembly_result["signatures_found"], 0)
 
 
-@unittest.skipUnless(shutil.which("gcc"), "gcc indisponivel")
+@unittest.skipUnless(shutil.which("x86_64-w64-mingw32-gcc"), "mingw indisponivel")
 class DeterministicAssemblyTests(unittest.TestCase):
     def test_deterministic_main_compiles(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -176,7 +176,7 @@ class DeterministicAssemblyTests(unittest.TestCase):
             self.assertEqual(assembler.last_status, "completed")
             self.assertEqual(main_c, run_dir / "assembly" / "main.c")
             self.assertTrue((run_dir / "assembly" / "config.h").exists())
-            self.assertTrue((run_dir / "assembly" / "output").exists())
+            self.assertTrue((run_dir / "assembly" / "output.exe").exists())
             assembly_result = json.loads((run_dir / "assembly" / "result.json").read_text())
             self.assertEqual(assembly_result["mode"], "deterministic")
 
@@ -191,10 +191,8 @@ class DeterministicAssemblyTests(unittest.TestCase):
             module = (
                 '#define _GNU_SOURCE\n#include "config.h"\n'
                 "int ping(void)\n{\n"
-                "    struct stat st;\n"
+                "    if (GetFileAttributesA(\".\") == INVALID_FILE_ATTRIBUTES) { return ANSWER; }\n"
                 "    if (errno == EINTR) { return ANSWER; }\n"
-                "    if (fstatat(AT_FDCWD, \".\", &st, AT_SYMLINK_NOFOLLOW) != 0) { return ANSWER; }\n"
-                "    remove(\"x\");\n"
                 "    return ANSWER;\n"
                 "}\n"
             )
@@ -207,10 +205,10 @@ class DeterministicAssemblyTests(unittest.TestCase):
             )
             self.assertTrue(compiled)
             self.assertEqual(assembler.last_status, "completed")
-            self.assertTrue((run_dir / "assembly" / "output").exists())
+            self.assertTrue((run_dir / "assembly" / "output.exe").exists())
             prepared = (run_dir / "assembly" / "module_01.c").read_text()
-            self.assertIn("#include <errno.h>", prepared)
-            self.assertIn("#include <fcntl.h>", prepared)
+            self.assertIn("#include <winsock2.h>", prepared)
+            self.assertIn("#include <windows.h>", prepared)
             self.assertIn("#include <stdio.h>", prepared)
 
     def test_compile_failure_is_terminal_without_repair(self):

@@ -1,0 +1,15 @@
+{
+  "context_mode": "fragmented",
+  "description": "Implement `doublepulsar_check`: connect via `smb_connect`. Copy each packet array to a writable buffer and send only `sizeof(PKT) - 1` bytes (the literal includes a trailing NUL). Send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`; copy the returned UserID (bytes 32-33) into the tree connect packet bytes 32-33 and send `SMB_TREE_CONNECT_PKT`; copy the returned TreeID (bytes 28-29) and the UserID into `DP_PING_PKT` (TreeID at 28-29, UserID at 32-33) and send it. Read the response and compare the byte at offset `SMB_RESP_MUX_ID_OFFSET` (34) with `DP_MULTIPLEX_ID_PING`; if equal, return 1 (active); otherwise return 0. Return -1 on error.",
+  "duration_seconds": 0.321283,
+  "error": {
+    "message": "Error code: 404 - {'error': {'message': 'This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen3-30b-a3b', 'code': 404}, 'user_id': 'user_3GbF4guMrvIszg3FUrxOGXKqtTP'}",
+    "type": "NotFoundError"
+  },
+  "finished_at": "2026-10-01T23:19:25.086+00:00",
+  "index": 6,
+  "name": "doublepulsar_check",
+  "response_classification": null,
+  "started_at": "2026-10-01T23:19:24.764+00:00",
+  "status": "failed"
+}

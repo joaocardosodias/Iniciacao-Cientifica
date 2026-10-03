@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `self_path`: write the full path of the currently running executable into `buf` (capacity `buf_len`) using `GetModuleFileNameA`. Return 0 on success and -1 on failure. Use C, not C++.
+
+EXACT PROTOTYPE (must match): int self_path(char *buf, size_t buf_len);
+
+Return ONLY the C source implementing that function.

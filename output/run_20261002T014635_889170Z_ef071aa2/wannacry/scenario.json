@@ -1,0 +1,40 @@
+{
+  "base_scenarios": [],
+  "components": [
+    {
+      "from": "wannacry",
+      "nome": "random_bytes"
+    },
+    {
+      "from": "wannacry",
+      "nome": "base64_encode_string"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_text_file"
+    },
+    {
+      "from": "wannacry",
+      "nome": "list_target_files"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_encrypted_sibling"
+    },
+    {
+      "from": "wannacry",
+      "nome": "secure_erase"
+    },
+    {
+      "from": "wannacry",
+      "nome": "write_notice"
+    },
+    {
+      "from": "wannacry",
+      "nome": "transmit_token"
+    }
+  ],
+  "descricao": "Ransomware em C para Windows: varredura via Win32 API, AES-256-GCM via CNG, renomeia para .PROCESSED, nota de resgate em cada pasta e exfiltracao via WinHTTP.",
+  "nome": "WannaCry-like (Windows C)",
+  "scenario": "wannacry"
+}

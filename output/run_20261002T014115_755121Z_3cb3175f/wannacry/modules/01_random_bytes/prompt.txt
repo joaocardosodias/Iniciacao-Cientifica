@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `random_bytes`: fill the buffer `out` with `len` cryptographically secure random bytes using the Windows CNG API `BCryptGenRandom` from <bcrypt.h> with the `BCRYPT_USE_SYSTEM_PREFERRED_RNG` flag. Return 0 on success and -1 on failure.
+
+EXACT PROTOTYPE (must match): int random_bytes(unsigned char *out, size_t len);
+
+Return ONLY the C source implementing that function.

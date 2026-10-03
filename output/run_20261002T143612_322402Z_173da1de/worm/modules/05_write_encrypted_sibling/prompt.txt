@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the Windows CNG API (`BCryptOpenAlgorithmProvider` with `BCRYPT_AES_ALGORITHM` and `BCRYPT_CHAIN_MODE_GCM`, `BCryptEncrypt` with a `BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO`) with the provided `key` and a fresh random 12-byte nonce. Atomically publish the result at the final name formed by concatenating `path` and the macro `ENCRYPTED_SUFFIX` from `config.h`. Build a separate temporary name by appending `".tmp"` to that final name, write the full output there, then publish with `MoveFileExA` (MOVEFILE_REPLACE_EXISTING). The output layout is `[1-byte version][12-byte nonce][ciphertext][16-byte tag]`, where the version byte is the macro `ENCRYPTED_FORMAT_VERSION` from `config.h`. On any failure, delete the temporary file with `DeleteFileA` and return -1 without touching the final name. Return 0 on success.
+
+EXACT PROTOTYPE (must match): int write_encrypted_sibling(const char *path, const unsigned char *key, size_t key_len);
+
+Return ONLY the C source implementing that function.

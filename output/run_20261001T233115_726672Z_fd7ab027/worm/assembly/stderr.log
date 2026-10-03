@@ -1,0 +1,26 @@
+module_08.c: In function 'transmit_token':
+module_08.c:67:15: error: 'URL_COMPONENTS' has no member named 'dwStructLength'
+   67 |     components.dwStructLength = sizeof(components);
+      |               ^
+module_08.c:82:15: error: 'URL_COMPONENTS' has no member named 'dwStructLength'
+   82 |     components.dwStructLength = sizeof(components);
+      |               ^
+module_08.c:100:14: error: 'URL_COMPONENTS' has no member named 'dwStructLength'
+  100 |         sizes.dwStructLength = sizeof(sizes);
+      |              ^
+module_15.c: In function 'DoublePulsarXORKeyCalculator':
+module_15.c:144:13: warning: '*(short unsigned int *)(&user_id[0])' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  144 |             memcpy(packets[3] + 32, user_id, sizeof(user_id));
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+module_19.c: In function 'execute_eternalblue':
+module_19.c:43:33: error: 'MAX_RETRIES' undeclared (first use in this function)
+   43 |     for (attempt = 0; attempt < MAX_RETRIES; ++attempt) {
+      |                                 ^~~~~~~~~~~
+module_19.c:43:33: note: each undeclared identifier is reported only once for each function it appears in
+module_19.c:61:28: error: 'TARGET_BINARY' undeclared (first use in this function); did you mean 'REG_BINARY'?
+   61 |     if (build_launcher_dll(TARGET_BINARY, PAYLOAD_DLL_PATH) != 0) {
+      |                            ^~~~~~~~~~~~~
+      |                            REG_BINARY
+module_19.c:61:43: error: 'PAYLOAD_DLL_PATH' undeclared (first use in this function)
+   61 |     if (build_launcher_dll(TARGET_BINARY, PAYLOAD_DLL_PATH) != 0) {
+      |                                           ^~~~~~~~~~~~~~~~

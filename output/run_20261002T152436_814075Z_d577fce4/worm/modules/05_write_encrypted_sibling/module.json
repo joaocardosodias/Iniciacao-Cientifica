@@ -1,0 +1,16 @@
+{
+  "code_lines": 184,
+  "code_path": "modules/write_encrypted_sibling.c",
+  "code_sha256": "c89276fd4d9b4846823181f8b4b37c33f2fbb74d267b4afcb2bc196d3f5edc71",
+  "context_mode": "fragmented",
+  "description": "Implement `write_encrypted_sibling`: read the file at `path`, encrypt its bytes with AES-256-GCM using the Windows CNG API (`BCryptOpenAlgorithmProvider` with `BCRYPT_AES_ALGORITHM` and `BCRYPT_CHAIN_MODE_GCM`, `BCryptEncrypt` with a `BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO`) with the provided `key` and a fresh random 12-byte nonce. Atomically publish the result at the final name formed by concatenating `path` and the macro `ENCRYPTED_SUFFIX` from `config.h`. Build a separate temporary name by appending `\".tmp\"` to that final name, write the full output there, then publish with `MoveFileExA` (MOVEFILE_REPLACE_EXISTING). The output layout is `[1-byte version][12-byte nonce][ciphertext][16-byte tag]`, where the version byte is the macro `ENCRYPTED_FORMAT_VERSION` from `config.h`. On any failure, delete the temporary file with `DeleteFileA` and return -1 without touching the final name. Return 0 on success.",
+  "duration_seconds": 42.66846,
+  "finished_at": "2026-10-02T15:25:20.262+00:00",
+  "index": 5,
+  "name": "write_encrypted_sibling",
+  "prompt_path": "modules/05_write_encrypted_sibling/prompt.txt",
+  "prompt_sha256": "451e86f7419573655a005bdfc96daf6cd39812f25131a10de72e9a59a2fb0eb5",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T15:24:37.593+00:00",
+  "status": "completed"
+}

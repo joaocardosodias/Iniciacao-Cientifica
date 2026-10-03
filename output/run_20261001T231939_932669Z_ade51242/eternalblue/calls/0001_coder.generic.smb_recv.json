@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "b9b86be0400b",
+  "duration_seconds": 26.273301,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:20:06.453+00:00",
+  "hashes": {
+    "response_sha256": "102775a89f143c1a4b2ca9ba209ecf3e6f5bcc8361ed7db95f6c18bafa5f3a74",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "9d7ae73dc22880feff008fc593cfba12173d7e2c8637ef1677c8bf1032f88fb4"
+  },
+  "inference_provider": "DeepInfra",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "qwen/qwen3-30b-a3b",
+  "requested_model_input": "qwen/qwen3-30b-a3b",
+  "response": "#include <windows.h>\n#include <winsock2.h>\n#include <ws2tcpip.h>\n\nint smb_recv(int sock, uint8_t *buf, size_t buf_len) {\n    int bytes_received = recv((SOCKET)sock, (char*)buf, (int)buf_len, 0);\n    if (bytes_received == 0) {\n        return 0;\n    } else if (bytes_received == -1) {\n        return -1;\n    } else {\n        return bytes_received;\n    }\n}",
+  "response_classification": "accepted",
+  "response_created": 1790896780,
+  "response_id": "gen-1790896780-ak6e4UtgdVrspJ3Tnn1P",
+  "response_model": "qwen/qwen3-30b-a3b",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.smb_recv",
+  "started_at": "2026-10-01T23:19:40.179+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1802,
+    "cost": 0.00098224,
+    "prompt_tokens": 677,
+    "total_tokens": 2479
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `smb_recv`: receive up to `buf_len` bytes into `buf`. Return the number of bytes received, or -1 on error, or 0 on connection closed.\n\nEXACT PROTOTYPE (must match): int smb_recv(int sock, uint8_t *buf, size_t buf_len);\n\nReturn ONLY the C source implementing that function."
+}

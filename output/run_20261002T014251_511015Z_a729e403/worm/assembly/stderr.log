@@ -1,0 +1,31 @@
+module_08.c: In function 'transmit_token':
+module_08.c:229:15: warning: implicit declaration of function 'WinHttpOpenW'; did you mean 'WinHttpOpen'? [-Wimplicit-function-declaration]
+  229 |     session = WinHttpOpenW(L"transmit_token/1.0",
+      |               ^~~~~~~~~~~~
+      |               WinHttpOpen
+module_08.c:229:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  229 |     session = WinHttpOpenW(L"transmit_token/1.0",
+      |             ^
+module_08.c:237:18: warning: implicit declaration of function 'WinHttpConnectW'; did you mean 'WinHttpConnect'? [-Wimplicit-function-declaration]
+  237 |     connection = WinHttpConnectW(session, host, port, 0);
+      |                  ^~~~~~~~~~~~~~~
+      |                  WinHttpConnect
+module_08.c:237:16: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  237 |     connection = WinHttpConnectW(session, host, port, 0);
+      |                ^
+module_08.c:241:15: warning: implicit declaration of function 'WinHttpOpenRequestW'; did you mean 'WinHttpOpenRequest'? [-Wimplicit-function-declaration]
+  241 |     request = WinHttpOpenRequestW(connection, L"POST", request_path,
+      |               ^~~~~~~~~~~~~~~~~~~
+      |               WinHttpOpenRequest
+module_08.c:241:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  241 |     request = WinHttpOpenRequestW(connection, L"POST", request_path,
+      |             ^
+module_08.c:256:10: warning: implicit declaration of function 'WinHttpQueryHeadersW'; did you mean 'WinHttpQueryHeaders'? [-Wimplicit-function-declaration]
+  256 |     if (!WinHttpQueryHeadersW(request,
+      |          ^~~~~~~~~~~~~~~~~~~~
+      |          WinHttpQueryHeaders
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/cciei9Y9.o:module_08.c:(.text+0x549): undefined reference to `WinHttpOpenW'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/cciei9Y9.o:module_08.c:(.text+0x56a): undefined reference to `WinHttpConnectW'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/cciei9Y9.o:module_08.c:(.text+0x5a4): undefined reference to `WinHttpOpenRequestW'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/cciei9Y9.o:module_08.c:(.text+0x635): undefined reference to `WinHttpQueryHeadersW'
+collect2: error: ld returned 1 exit status

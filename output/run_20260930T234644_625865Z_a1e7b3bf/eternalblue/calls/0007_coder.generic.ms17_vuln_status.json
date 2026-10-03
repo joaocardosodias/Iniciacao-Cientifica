@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "80f65439c23a",
+  "duration_seconds": 21.02512,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-09-30T23:47:06.203+00:00",
+  "hashes": {
+    "response_sha256": "698bd00041e561835d6f56776708094ab0800faf9f75ee373f1b367679474428",
+    "system_sha256": "8ac91c0f13d68803bff9b895731e3f3ef66c4ea97efe05773b1a120d416b33c3",
+    "user_sha256": "7865f9b2edf083698018a0a1c39dd8c2fad79760bd8ace6afe0ff517e9e8978c"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <ws2tcpip.h>\n#include <windows.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <limits.h>\n#include \"config.h\"\n\nextern SOCKET smb_connect(const char *ip, int port);\n\nint ms17_vuln_status(const char *ip, int port)\n{\n    SOCKET sock;\n    const unsigned char *packets[4];\n    size_t packet_sizes[4];\n    unsigned char *response = NULL;\n    int result = -1;\n\n    if (ip == NULL || port < 1 || port > 65535) {\n        return -1;\n    }\n\n    sock = smb_connect(ip, port);\n    if (sock == INVALID_SOCKET) {\n        return -1;\n    }\n\n    packets[0] = (const unsigned char *)SMB_NEGOTIATE_PKT;\n    packet_sizes[0] = sizeof(SMB_NEGOTIATE_PKT);\n    packets[1] = (const unsigned char *)SMB_SESSION_SETUP_PKT;\n    packet_sizes[1] = sizeof(SMB_SESSION_SETUP_PKT);\n    packets[2] = (const unsigned char *)SMB_TREE_CONNECT_PKT;\n    packet_sizes[2] = sizeof(SMB_TREE_CONNECT_PKT);\n    packets[3] = (const unsigned char *)SMB_TRANS_NAMED_PIPE_PKT;\n    packet_sizes[3] = sizeof(SMB_TRANS_NAMED_PIPE_PKT);\n\n    for (size_t i = 0; i < 4; ++i) {\n        size_t sent = 0;\n\n        while (sent < packet_sizes[i]) {\n            size_t remaining = packet_sizes[i] - sent;\n            int chunk = remaining > INT_MAX ? INT_MAX : (int)remaining;\n            int n = send(sock, (const char *)packets[i] + sent, chunk, 0);\n\n            if (n == SOCKET_ERROR || n == 0) {\n                goto cleanup;\n            }\n            sent += (size_t)n;\n        }\n\n        unsigned char header[4];\n        size_t received = 0;\n\n        while (received < sizeof(header)) {\n            int n = recv(sock, (char *)header + received,\n                         (int)(sizeof(header) - received), 0);\n            if (n == SOCKET_ERROR || n == 0) {\n                goto cleanup;\n            }\n            received += (size_t)n;\n        }\n\n        size_t body_length = ((size_t)header[1] << 16) |\n                             ((size_t)header[2] << 8) |\n                             (size_t)header[3];\n        if (body_length > SIZE_MAX - sizeof(header)) {\n            goto cleanup;\n        }\n\n        size_t response_length = sizeof(header) + body_length;\n        unsigned char *new_response =\n            (unsigned char *)realloc(response, response_length ? response_length : 1);\n        if (new_response == NULL) {\n            goto cleanup;\n        }\n        response = new_response;\n        memcpy(response, header, sizeof(header));\n\n        received = 0;\n        while (received < body_length) {\n            size_t remaining = body_length - received;\n            int chunk = remaining > INT_MAX ? INT_MAX : (int)remaining;\n            int n = recv(sock, (char *)response + sizeof(header) + received,\n                         chunk, 0);\n            if (n == SOCKET_ERROR || n == 0) {\n                goto cleanup;\n            }\n            received += (size_t)n;\n        }\n\n        if (i == 3) {\n            size_t status_offset = (size_t)SMB_RESP_NT_STATUS_OFFSET;\n            if (status_offset > response_length ||\n                response_length - status_offset < sizeof(uint32_t)) {\n                goto cleanup;\n            }\n\n            uint32_t status = (uint32_t)response[status_offset] |\n                              ((uint32_t)response[status_offset + 1] << 8) |\n                              ((uint32_t)response[status_offset + 2] << 16) |\n                              ((uint32_t)response[status_offset + 3] << 24);\n            result = status == (uint32_t)NT_STATUS_INSUFF_SERVER_RESOURCES ? 1 : 0;\n        }\n    }\n\ncleanup:\n    free(response);\n    closesocket(sock);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790812005,
+  "response_id": "gen-1790812005-zAre72d38jpgpT14dC3W",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.ms17_vuln_status",
+  "started_at": "2026-09-30T23:46:45.178+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 2356,
+    "cost": 0.001245,
+    "prompt_tokens": 670,
+    "total_tokens": 3026
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `ms17_vuln_status`: connect to `ip:port` via `smb_connect`. Send the 4 packets `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`, `SMB_TREE_CONNECT_PKT`, `SMB_TRANS_NAMED_PIPE_PKT` (from `config.h`). Read the response and extract the 32-bit NT_STATUS at offset `SMB_RESP_NT_STATUS_OFFSET`. If it equals `NT_STATUS_INSUFF_SERVER_RESOURCES`, return 1 (vulnerable); otherwise return 0 (not vulnerable). Return -1 on connection error. Close the socket before returning.\n\nEXACT PROTOTYPE (must match): int ms17_vuln_status(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

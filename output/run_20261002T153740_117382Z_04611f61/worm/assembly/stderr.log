@@ -1,0 +1,114 @@
+module_10.c: In function 'smb_send':
+module_10.c:48:37: warning: pointer targets in passing argument 2 of 'send' differ in signedness [-Wpointer-sign]
+   48 |         ssize_t n = send(sock, data + sent, len - sent, MSG_NOSIGNAL);
+      |                                ~~~~~^~~~~~
+      |                                     |
+      |                                     const uint8_t * {aka const unsigned char *}
+In file included from module_10.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1033:60: note: expected 'const char *' but argument is of type 'const uint8_t *' {aka 'const unsigned char *'}
+ 1033 |   WINSOCK_API_LINKAGE int WSAAPI send(SOCKET s,const char *buf,int len,int flags);
+      |                                                ~~~~~~~~~~~~^~~
+module_11.c: In function 'smb_recv':
+module_11.c:50:31: warning: pointer targets in passing argument 2 of 'recv' differ in signedness [-Wpointer-sign]
+   50 |         received = recv(sock, buf, buf_len, 0);
+      |                               ^~~
+      |                               |
+      |                               uint8_t * {aka unsigned char *}
+In file included from module_11.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1028:54: note: expected 'char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+ 1028 |   WINSOCK_API_LINKAGE int WSAAPI recv(SOCKET s,char *buf,int len,int flags);
+      |                                                ~~~~~~^~~
+module_12.c: In function 'ms17_send_all':
+module_12.c:49:30: warning: pointer targets in passing argument 2 of 'send' differ in signedness [-Wpointer-sign]
+   49 |         ssize_t n = send(fd, p, length, MSG_NOSIGNAL);
+      |                              ^
+      |                              |
+      |                              const unsigned char *
+In file included from module_12.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1033:60: note: expected 'const char *' but argument is of type 'const unsigned char *'
+ 1033 |   WINSOCK_API_LINKAGE int WSAAPI send(SOCKET s,const char *buf,int len,int flags);
+      |                                                ~~~~~~~~~~~~^~~
+module_12.c: In function 'ms17_read_all':
+module_12.c:66:30: warning: pointer targets in passing argument 2 of 'recv' differ in signedness [-Wpointer-sign]
+   66 |         ssize_t n = recv(fd, p, length, 0);
+      |                              ^
+      |                              |
+      |                              unsigned char *
+In file included from module_12.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1028:54: note: expected 'char *' but argument is of type 'unsigned char *'
+ 1028 |   WINSOCK_API_LINKAGE int WSAAPI recv(SOCKET s,char *buf,int len,int flags);
+      |                                                ~~~~~~^~~
+module_14.c: In function 'doublepulsar_send_all':
+module_14.c:49:34: warning: pointer targets in passing argument 2 of 'send' differ in signedness [-Wpointer-sign]
+   49 |         ssize_t n = send(fd, buf + sent, len - sent, MSG_NOSIGNAL);
+      |                              ~~~~^~~~~~
+      |                                  |
+      |                                  const unsigned char *
+In file included from module_14.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1033:60: note: expected 'const char *' but argument is of type 'const unsigned char *'
+ 1033 |   WINSOCK_API_LINKAGE int WSAAPI send(SOCKET s,const char *buf,int len,int flags);
+      |                                                ~~~~~~~~~~~~^~~
+module_14.c: In function 'doublepulsar_recv_all':
+module_14.c:65:34: warning: pointer targets in passing argument 2 of 'recv' differ in signedness [-Wpointer-sign]
+   65 |         ssize_t n = recv(fd, buf + received, len - received, 0);
+      |                              ~~~~^~~~~~~~~~
+      |                                  |
+      |                                  unsigned char *
+In file included from module_14.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1028:54: note: expected 'char *' but argument is of type 'unsigned char *'
+ 1028 |   WINSOCK_API_LINKAGE int WSAAPI recv(SOCKET s,char *buf,int len,int flags);
+      |                                                ~~~~~~^~~
+module_15.c: In function 'send_all':
+module_15.c:50:36: warning: pointer targets in passing argument 2 of 'send' differ in signedness [-Wpointer-sign]
+   50 |         ssize_t n = send(fd, bytes + sent, length - sent, MSG_NOSIGNAL);
+      |                              ~~~~~~^~~~~~
+      |                                    |
+      |                                    const unsigned char *
+In file included from module_15.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1033:60: note: expected 'const char *' but argument is of type 'const unsigned char *'
+ 1033 |   WINSOCK_API_LINKAGE int WSAAPI send(SOCKET s,const char *buf,int len,int flags);
+      |                                                ~~~~~~~~~~~~^~~
+module_15.c: In function 'recv_all':
+module_15.c:67:36: warning: pointer targets in passing argument 2 of 'recv' differ in signedness [-Wpointer-sign]
+   67 |         ssize_t n = recv(fd, bytes + received, length - received, 0);
+      |                              ~~~~~~^~~~~~~~~~
+      |                                    |
+      |                                    unsigned char *
+In file included from module_15.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1028:54: note: expected 'char *' but argument is of type 'unsigned char *'
+ 1028 |   WINSOCK_API_LINKAGE int WSAAPI recv(SOCKET s,char *buf,int len,int flags);
+      |                                                ~~~~~~^~~
+module_17.c:142:12: warning: 'launcher_emit_u32' defined but not used [-Wunused-function]
+  142 | static int launcher_emit_u32(struct launcher_buf *buf, uint32_t value)
+      |            ^~~~~~~~~~~~~~~~~
+module_17.c:108:12: warning: 'launcher_append_u64' defined but not used [-Wunused-function]
+  108 | static int launcher_append_u64(struct launcher_buf *buf, uint64_t value)
+      |            ^~~~~~~~~~~~~~~~~~~
+module_18.c: In function 'send_all':
+module_18.c:87:36: warning: pointer targets in passing argument 2 of 'send' differ in signedness [-Wpointer-sign]
+   87 |         ssize_t n = send(fd, bytes + sent, length - sent, MSG_NOSIGNAL);
+      |                              ~~~~~~^~~~~~
+      |                                    |
+      |                                    const unsigned char *
+In file included from module_18.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1033:60: note: expected 'const char *' but argument is of type 'const unsigned char *'
+ 1033 |   WINSOCK_API_LINKAGE int WSAAPI send(SOCKET s,const char *buf,int len,int flags);
+      |                                                ~~~~~~~~~~~~^~~
+module_18.c: In function 'recv_all':
+module_18.c:104:36: warning: pointer targets in passing argument 2 of 'recv' differ in signedness [-Wpointer-sign]
+  104 |         ssize_t n = recv(fd, bytes + received, length - received, 0);
+      |                              ~~~~~~^~~~~~~~~~
+      |                                    |
+      |                                    unsigned char *
+In file included from module_18.c:2:
+/usr/src/mxe/usr/x86_64-w64-mingw32.static/include/winsock2.h:1028:54: note: expected 'char *' but argument is of type 'unsigned char *'
+ 1028 |   WINSOCK_API_LINKAGE int WSAAPI recv(SOCKET s,char *buf,int len,int flags);
+      |                                                ~~~~~~^~~
+module_18.c: In function 'upload_payload':
+module_18.c:254:12: warning: unused variable 'payload_len' [-Wunused-variable]
+  254 |     size_t payload_len;
+      |            ^~~~~~~~~~~
+At top level:
+module_18.c:56:17: warning: 'dp_inject_hash' defined but not used [-Wunused-function]
+   56 | static uint32_t dp_inject_hash(const char *name)
+      |                 ^~~~~~~~~~~~~~

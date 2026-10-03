@@ -1,0 +1,1 @@
+Ransomware em C para Windows: varredura via Win32 API, AES-256-GCM via CNG, renomeia para .PROCESSED, nota de resgate em cada pasta e exfiltracao via WinHTTP.

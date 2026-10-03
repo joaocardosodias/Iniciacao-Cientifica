@@ -1,0 +1,16 @@
+{
+  "code_lines": 21,
+  "code_path": "modules/smb_recv.c",
+  "code_sha256": "a203ccf39b5f83d8fe98dcd73b56fdbccd672a1e1447ac7c8f260416cb933c2a",
+  "context_mode": "fragmented",
+  "description": "Implement `smb_recv`: receive up to `buf_len` bytes into `buf`. Return the number of bytes received, or -1 on error, or 0 on connection closed.",
+  "duration_seconds": 6.686134,
+  "finished_at": "2026-10-02T01:47:46.063+00:00",
+  "index": 11,
+  "name": "smb_recv",
+  "prompt_path": "modules/11_smb_recv/prompt.txt",
+  "prompt_sha256": "9d7ae73dc22880feff008fc593cfba12173d7e2c8637ef1677c8bf1032f88fb4",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T01:47:39.377+00:00",
+  "status": "completed"
+}

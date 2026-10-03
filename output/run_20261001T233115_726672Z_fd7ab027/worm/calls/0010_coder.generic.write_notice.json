@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "506667328427",
+  "duration_seconds": 11.093314,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:31:27.092+00:00",
+  "hashes": {
+    "response_sha256": "6b01c1b7a0ca6606fd44b6966122b8b11f38c328b79c2c050eac45c3dcbd8ac2",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "cf2a2a299b3172dc5337054255c9ff955707a63f4429776b4f05c56a90d3cba9"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <windows.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <string.h>\n#include \"config.h\"\n\nint write_notice(const char *directory)\n{\n    size_t directory_length;\n    size_t filename_length;\n    size_t text_length;\n    size_t separator_length;\n    size_t path_length;\n    char *path;\n    HANDLE file;\n    size_t written_total = 0;\n    int result = -1;\n\n    if (directory == NULL)\n        return -1;\n\n    directory_length = strlen(directory);\n    filename_length = strlen(NOTICE_FILENAME);\n    text_length = strlen(NOTICE_TEXT);\n\n    separator_length = (directory_length != 0 &&\n                        (directory[directory_length - 1] == '\\\\' ||\n                         directory[directory_length - 1] == '/')) ? 0 : 1;\n\n    if (directory_length > SIZE_MAX - separator_length)\n        return -1;\n    path_length = directory_length + separator_length;\n    if (filename_length > SIZE_MAX - path_length - 1)\n        return -1;\n    path_length += filename_length + 1;\n\n    path = (char *)malloc(path_length);\n    if (path == NULL)\n        return -1;\n\n    memcpy(path, directory, directory_length);\n    if (separator_length != 0)\n        path[directory_length] = '\\\\';\n    memcpy(path + directory_length + separator_length, NOTICE_FILENAME,\n           filename_length + 1);\n\n    file = CreateFileA(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,\n                       FILE_ATTRIBUTE_NORMAL, NULL);\n    if (file == INVALID_HANDLE_VALUE)\n        goto cleanup;\n\n    while (written_total < text_length) {\n        size_t remaining = text_length - written_total;\n        DWORD chunk = remaining > MAXDWORD ? MAXDWORD : (DWORD)remaining;\n        DWORD bytes_written = 0;\n\n        if (!WriteFile(file, NOTICE_TEXT + written_total, chunk,\n                       &bytes_written, NULL) || bytes_written == 0) {\n            CloseHandle(file);\n            goto cleanup;\n        }\n        written_total += bytes_written;\n    }\n\n    if (!CloseHandle(file))\n        goto cleanup;\n\n    result = 0;\n\ncleanup:\n    free(path);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790897476,
+  "response_id": "gen-1790897476-Wpmr54nXLz4VxX2yeGdW",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.write_notice",
+  "started_at": "2026-10-01T23:31:15.999+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1134,
+    "cost": 0.0006374,
+    "prompt_tokens": 704,
+    "total_tokens": 1838
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `write_notice`: inside `directory`, create a file named `NOTICE_FILENAME` and write exactly `strlen(NOTICE_TEXT)` bytes of the macro `NOTICE_TEXT` (both from `config.h`) using the Win32 API (`CreateFileA`/`WriteFile`), without the NUL terminator. Join the directory and filename with a backslash. Return 0 on success and -1 on failure.\n\nEXACT PROTOTYPE (must match): int write_notice(const char *directory);\n\nReturn ONLY the C source implementing that function."
+}

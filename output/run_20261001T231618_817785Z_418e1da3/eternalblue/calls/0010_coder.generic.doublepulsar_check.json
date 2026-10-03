@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "b1db7bee1d98",
+  "duration_seconds": 35.67487,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:16:54.805+00:00",
+  "hashes": {
+    "response_sha256": "62f42187c71913aeb1b459210e3b574fdab9881276aac5cf5dbcea5020a48558",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "b012ecb1b7a34a42f676830d0c191eb72d35adb4eabd6aa382adfa08e8caeb7d"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "gpt-6-luna",
+  "requested_model_input": "gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <windows.h>\n#include <ws2tcpip.h>\n#include <stdint.h>\n#include <stdlib.h>\n#include <string.h>\n#include <limits.h>\n#include \"config.h\"\n\nextern SOCKET smb_connect(const char *ip, int port);\n\nint doublepulsar_check(const char *ip, int port)\n{\n    const uint8_t *sources[4] = {\n        SMB_NEGOTIATE_PKT,\n        SMB_SESSION_SETUP_PKT,\n        SMB_TREE_CONNECT_PKT,\n        DP_PING_PKT\n    };\n    size_t sizes[4] = {\n        sizeof(SMB_NEGOTIATE_PKT),\n        sizeof(SMB_SESSION_SETUP_PKT),\n        sizeof(SMB_TREE_CONNECT_PKT),\n        sizeof(DP_PING_PKT)\n    };\n    uint8_t *packets[4] = { NULL, NULL, NULL, NULL };\n    SOCKET sock = INVALID_SOCKET;\n    int result = -1;\n    size_t i;\n\n    if (ip == NULL)\n        return -1;\n\n    for (i = 0; i < 4; ++i) {\n        if (sizes[i] < 2)\n            goto cleanup;\n        packets[i] = (uint8_t *)malloc(sizes[i]);\n        if (packets[i] == NULL)\n            goto cleanup;\n        memcpy(packets[i], sources[i], sizes[i]);\n    }\n\n    sock = smb_connect(ip, port);\n    if (sock == INVALID_SOCKET)\n        goto cleanup;\n\n    for (i = 0; i < 4; ++i) {\n        size_t bytes_to_send = sizes[i] - 1;\n        size_t sent = 0;\n        uint8_t header[4];\n        uint8_t *response = NULL;\n        uint32_t body_length;\n        size_t frame_length;\n        size_t received;\n\n        if (bytes_to_send == 0 || bytes_to_send > (size_t)INT_MAX)\n            goto cleanup;\n\n        while (sent < bytes_to_send) {\n            int amount = send(sock, (const char *)packets[i] + sent,\n                              (int)(bytes_to_send - sent), 0);\n            if (amount == SOCKET_ERROR) {\n                if (WSAGetLastError() == WSAEINTR)\n                    continue;\n                goto cleanup;\n            }\n            if (amount == 0)\n                goto cleanup;\n            sent += (size_t)amount;\n        }\n\n        received = 0;\n        while (received < sizeof(header)) {\n            int amount = recv(sock, (char *)header + received,\n                              (int)(sizeof(header) - received), 0);\n            if (amount == SOCKET_ERROR) {\n                if (WSAGetLastError() == WSAEINTR)\n                    continue;\n                goto cleanup;\n            }\n            if (amount == 0)\n                goto cleanup;\n            received += (size_t)amount;\n        }\n\n        if (header[0] != 0)\n            goto cleanup;\n\n        body_length = ((uint32_t)header[1] << 16) |\n                      ((uint32_t)header[2] << 8) |\n                      (uint32_t)header[3];\n        if (body_length > UINT32_C(0x00ffffff))\n            goto cleanup;\n        frame_length = (size_t)body_length + sizeof(header);\n        response = (uint8_t *)malloc(frame_length);\n        if (response == NULL)\n            goto cleanup;\n        memcpy(response, header, sizeof(header));\n\n        received = 0;\n        while (received < (size_t)body_length) {\n            size_t remaining = (size_t)body_length - received;\n            int request = remaining > (size_t)INT_MAX ? INT_MAX : (int)remaining;\n            int amount = recv(sock, (char *)response + sizeof(header) + received,\n                              request, 0);\n            if (amount == SOCKET_ERROR) {\n                if (WSAGetLastError() == WSAEINTR)\n                    continue;\n                free(response);\n                goto cleanup;\n            }\n            if (amount == 0) {\n                free(response);\n                goto cleanup;\n            }\n            received += (size_t)amount;\n        }\n\n        if (i == 1) {\n            if (frame_length < 34) {\n                free(response);\n                goto cleanup;\n            }\n            memcpy(packets[2] + 32, response + 32, 2);\n        } else if (i == 2) {\n            if (frame_length < 30) {\n                free(response);\n                goto cleanup;\n            }\n            memcpy(packets[3] + 28, response + 28, 2);\n            memcpy(packets[3] + 32, packets[2] + 32, 2);\n        } else if (i == 3) {\n            if (frame_length <= (size_t)SMB_RESP_MUX_ID_OFFSET) {\n                free(response);\n                goto cleanup;\n            }\n            result = response[SMB_RESP_MUX_ID_OFFSET] == DP_MULTIPLEX_ID_PING ? 1 : 0;\n            free(response);\n            break;\n        }\n\n        free(response);\n    }\n\ncleanup:\n    if (sock != INVALID_SOCKET)\n        closesocket(sock);\n    for (i = 0; i < 4; ++i)\n        free(packets[i]);\n    return result;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790896579,
+  "response_id": "gen-1790896579-H0S6e3ZJ6MWiMWq2N4nC",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.doublepulsar_check",
+  "started_at": "2026-10-01T23:16:19.131+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 3583,
+    "cost": 0.0018726,
+    "prompt_tokens": 811,
+    "total_tokens": 4394
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `doublepulsar_check`: connect via `smb_connect`. Copy each packet array to a writable buffer and send only `sizeof(PKT) - 1` bytes (the literal includes a trailing NUL). Send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`; copy the returned UserID (bytes 32-33) into the tree connect packet bytes 32-33 and send `SMB_TREE_CONNECT_PKT`; copy the returned TreeID (bytes 28-29) and the UserID into `DP_PING_PKT` (TreeID at 28-29, UserID at 32-33) and send it. Read the response and compare the byte at offset `SMB_RESP_MUX_ID_OFFSET` (34) with `DP_MULTIPLEX_ID_PING`; if equal, return 1 (active); otherwise return 0. Return -1 on error.\n\nEXACT PROTOTYPE (must match): int doublepulsar_check(const char *ip, int port);\n\nReturn ONLY the C source implementing that function."
+}

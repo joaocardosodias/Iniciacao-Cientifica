@@ -1,0 +1,21 @@
+## main...origin/main
+ M builder/assembler.py
+ M builder/compiler.py
+ M builder/generator.py
+ M output/experiments.jsonl
+ M prompts/eternalblue.py
+ M prompts/wannacry.py
+ M templates/eternalblue/config.h.tpl
+ M templates/eternalblue/main.c.tpl
+ M templates/wannacry/config.h.tpl
+ M templates/wannacry/main.c.tpl
+ M tests/test_assembler.py
+ M tools/generate_test_files/src/main.rs
+ M tools/reset_vm/src/main.rs
+?? RUN_VM.md
+?? output/run_20260930T230230_704251Z_7e850f92/
+?? output/run_20260930T234644_625865Z_a1e7b3bf/
+?? output/run_20261001T230141_296901Z_e0ec3b18/
+?? payloads/
+?? samples/
+?? tests/test_eternalblue_config.py

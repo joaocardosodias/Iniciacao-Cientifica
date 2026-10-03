@@ -1,0 +1,39 @@
+module_08.c: In function 'transmit_token':
+module_08.c:170:15: warning: implicit declaration of function 'WinHttpOpenA'; did you mean 'WinHttpOpen'? [-Wimplicit-function-declaration]
+  170 |     session = WinHttpOpenA("transmit_token", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |               ^~~~~~~~~~~~
+      |               WinHttpOpen
+module_08.c:170:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  170 |     session = WinHttpOpenA("transmit_token", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+      |             ^
+module_08.c:175:18: warning: implicit declaration of function 'WinHttpConnectA'; did you mean 'WinHttpConnect'? [-Wimplicit-function-declaration]
+  175 |     connection = WinHttpConnectA(session, host, port, 0);
+      |                  ^~~~~~~~~~~~~~~
+      |                  WinHttpConnect
+module_08.c:175:16: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  175 |     connection = WinHttpConnectA(session, host, port, 0);
+      |                ^
+module_08.c:179:15: warning: implicit declaration of function 'WinHttpOpenRequestA'; did you mean 'WinHttpOpenRequest'? [-Wimplicit-function-declaration]
+  179 |     request = WinHttpOpenRequestA(connection, "POST", path, NULL, NULL,
+      |               ^~~~~~~~~~~~~~~~~~~
+      |               WinHttpOpenRequest
+module_08.c:179:13: warning: assignment to 'HINTERNET' {aka 'void *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  179 |     request = WinHttpOpenRequestA(connection, "POST", path, NULL, NULL,
+      |             ^
+module_08.c:184:10: warning: implicit declaration of function 'WinHttpSendRequestA'; did you mean 'WinHttpSendRequest'? [-Wimplicit-function-declaration]
+  184 |     if (!WinHttpSendRequestA(request, "Content-Type: application/json\r\n",
+      |          ^~~~~~~~~~~~~~~~~~~
+      |          WinHttpSendRequest
+module_08.c:192:10: warning: implicit declaration of function 'WinHttpQueryHeadersA'; did you mean 'WinHttpQueryHeaders'? [-Wimplicit-function-declaration]
+  192 |     if (!WinHttpQueryHeadersA(request,
+      |          ^~~~~~~~~~~~~~~~~~~~
+      |          WinHttpQueryHeaders
+module_08.c:50:10: warning: variable 'secure' set but not used [-Wunused-but-set-variable]
+   50 |     BOOL secure;
+      |          ^~~~~~
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccYNrJb3.o:module_08.c:(.text+0x227): undefined reference to `WinHttpOpenA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccYNrJb3.o:module_08.c:(.text+0x240): undefined reference to `WinHttpConnectA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccYNrJb3.o:module_08.c:(.text+0x393): undefined reference to `WinHttpOpenRequestA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccYNrJb3.o:module_08.c:(.text+0x3cf): undefined reference to `WinHttpSendRequestA'
+/usr/src/mxe/usr/bin/x86_64-w64-mingw32.static-ld: /tmp/ccYNrJb3.o:module_08.c:(.text+0x40e): undefined reference to `WinHttpQueryHeadersA'
+collect2: error: ld returned 1 exit status

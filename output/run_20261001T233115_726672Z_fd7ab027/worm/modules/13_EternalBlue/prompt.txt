@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `EternalBlue`: replay the recorded MS17-010 packet sequence that is embedded in `config.h`. Iterate over `EB_OPS` (`EB_OPS_COUNT` entries); each `eb_op_t` has `kind` (0=connect, 1=send, 2=recv, 3=close), `stream` (1..NUM_SOCKETS), `fix` (0=none, 1=userid, 2=treeid), `offset` and `length`. Keep one socket per stream. Process the ops in order: connect a new socket to `ip:port`; for `send`, take `length` bytes from `EB_PACKETS + offset`, copy them to a writable buffer and replace every occurrence of the literal `__USERID__PLACEHOLDER__` with the current 2-byte UserID and of `__TREEID__PLACEHOLDER__` with the current 2-byte TreeID (the replacement shrinks the buffer), then send the resulting bytes; for `recv`, read the response and, when `fix==1`, update the UserID from response bytes 32-33, and when `fix==2`, update the TreeID from response bytes 28-29; for `close`, close the stream socket. Ignore `SIGPIPE`/use `MSG_NOSIGNAL` on POSIX. Return 0 on success, -1 on failure. Log progress with printf.
+
+EXACT PROTOTYPE (must match): int EternalBlue(const char *ip, int port);
+
+Return ONLY the C source implementing that function.

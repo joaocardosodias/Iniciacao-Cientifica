@@ -37,11 +37,38 @@ fn title(message: &str) {
 }
 
 fn home_dir() -> PathBuf {
+    if let Ok(value) = env::var("USERPROFILE") {
+        if !value.is_empty() {
+            return PathBuf::from(value);
+        }
+    }
     env::var("HOME").map(PathBuf::from).unwrap_or_else(|_| PathBuf::from("."))
 }
 
+fn temp_dir() -> PathBuf {
+    for key in ["TEMP", "TMP"] {
+        if let Ok(value) = env::var(key) {
+            if !value.is_empty() {
+                return PathBuf::from(value);
+            }
+        }
+    }
+    if cfg!(windows) {
+        PathBuf::from("C:\\Windows\\Temp")
+    } else {
+        PathBuf::from("/tmp")
+    }
+}
+
 fn scan_roots() -> Vec<PathBuf> {
-    vec![home_dir(), PathBuf::from("/tmp"), PathBuf::from("/mnt")]
+    #[allow(unused_mut)]
+    let mut roots = vec![home_dir(), temp_dir()];
+    #[cfg(not(windows))]
+    {
+        roots.push(PathBuf::from("/tmp"));
+        roots.push(PathBuf::from("/mnt"));
+    }
+    roots
 }
 
 fn is_encrypted(path: &Path) -> bool {
@@ -127,25 +154,25 @@ fn clean_attack_residues() {
         }
     }
 
-    let master_key = PathBuf::from("/tmp/.master.key");
+    let master_key = temp_dir().join(".master.key");
     if master_key.exists() {
         match fs::remove_file(&master_key) {
             Ok(_) => {
                 removed += 1;
-                ok("Chave mestra do ransomware (/tmp/.master.key) removida.");
+                ok(&format!("Chave mestra do ransomware ({}) removida.", master_key.display()));
             }
-            Err(error) => warn(&format!("Falha ao remover /tmp/.master.key: {}", error)),
+            Err(error) => warn(&format!("Falha ao remover {}: {}", master_key.display(), error)),
         }
     }
 
-    let session_token = PathBuf::from("/tmp/.session.token");
+    let session_token = temp_dir().join(".session.token");
     if session_token.exists() {
         match fs::remove_file(&session_token) {
             Ok(_) => {
                 removed += 1;
-                ok("Token de sessao com a chave (/tmp/.session.token) removido.");
+                ok(&format!("Token de sessao com a chave ({}) removido.", session_token.display()));
             }
-            Err(error) => warn(&format!("Falha ao remover /tmp/.session.token: {}", error)),
+            Err(error) => warn(&format!("Falha ao remover {}: {}", session_token.display(), error)),
         }
     }
 
@@ -161,7 +188,8 @@ fn clean_c2_log(root: &Path) {
     delete_file(&root.join("c2_events.json"), "Log do C2 (c2_events.json)");
 }
 
-fn clean_crontab(root: &Path) {
+#[cfg(not(windows))]
+fn clean_persistence(root: &Path) {
     title("4 — Persistência no crontab");
     let output = match Command::new("crontab").arg("-l").output() {
         Ok(output) => output,
@@ -208,6 +236,60 @@ fn clean_crontab(root: &Path) {
         }
     }
     ok(&format!("{} entrada(s) de persistência removidas do crontab.", removed));
+}
+
+#[cfg(windows)]
+fn clean_persistence(root: &Path) {
+    title("4 — Persistência no registro (Run)");
+    let keys = [
+        "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+        "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
+        "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+    ];
+    let root_marker = root.to_string_lossy().to_lowercase();
+    let mut removed = 0usize;
+
+    for key in keys {
+        let output = match Command::new("reg").args(["query", key]).output() {
+            Ok(output) => output,
+            Err(_) => continue,
+        };
+        if !output.status.success() {
+            continue;
+        }
+        let text = String::from_utf8_lossy(&output.stdout);
+        for line in text.lines() {
+            let trimmed = line.trim();
+            if trimmed.is_empty() || trimmed.starts_with("HKEY") {
+                continue;
+            }
+            let name = match trimmed.split_whitespace().next() {
+                Some(name) => name,
+                None => continue,
+            };
+            let lowered = trimmed.to_lowercase();
+            if lowered.contains(&root_marker)
+                || lowered.contains("output/result_")
+                || lowered.contains("output\\result_")
+                || lowered.contains("mssecsvc")
+            {
+                if Command::new("reg")
+                    .args(["delete", key, "/v", name, "/f"])
+                    .status()
+                    .map(|status| status.success())
+                    .unwrap_or(false)
+                {
+                    removed += 1;
+                }
+            }
+        }
+    }
+
+    if removed > 0 {
+        ok(&format!("{} entrada(s) de persistência removidas do registro.", removed));
+    } else {
+        skip("Nenhuma entrada de persistência encontrada no registro.");
+    }
 }
 
 fn clean_pycache(root: &Path) {
@@ -311,7 +393,7 @@ fn confirm(test_dir: &Path) -> bool {
     println!("    • Pasta de teste   : {}", test_dir.display());
     println!("    • Arquivos .wncry, .locky, notas de resgate");
     println!("    • Log C2           : c2_events.json");
-    println!("    • Crontab          : entradas do pipeline");
+    println!("    • Persistência     : crontab (Linux) / registro Run (Windows)");
     print!("\n  Confirma? [s/N]: ");
     let _ = io::stdout().flush();
 
@@ -338,7 +420,7 @@ fn main() {
     clean_test_dir(&options.test_dir);
     clean_attack_residues();
     clean_c2_log(&options.root);
-    clean_crontab(&options.root);
+    clean_persistence(&options.root);
     clean_pycache(&options.root);
 
     println!("\n{}", "-".repeat(64));

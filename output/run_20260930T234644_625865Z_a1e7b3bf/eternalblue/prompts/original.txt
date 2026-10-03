@@ -1,0 +1,1 @@
+Exploit MS17-010 em C11: detecção de vulnerabilidade via SMB, instalação do DoublePulsar, e execução de um binário específico no alvo via DLL lançadora injetada no processo lsass.exe.

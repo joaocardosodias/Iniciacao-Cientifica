@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `scan_targets`: given an IPv4 `subnet` in prefix form (e.g. `10.0.2.0/24`), probe every host address on `port` with a short-timeout TCP connect and store the reachable host addresses (dotted-quad, NUL-terminated) into `targets`, up to `max_hosts`. Return the number of reachable hosts found. Use C, not C++.
+
+EXACT PROTOTYPE (must match): size_t scan_targets(const char *subnet, int port, char targets[][16], size_t max_hosts);
+
+Return ONLY the C source implementing that function.

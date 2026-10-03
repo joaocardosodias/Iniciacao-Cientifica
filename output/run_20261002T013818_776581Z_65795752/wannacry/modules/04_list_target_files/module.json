@@ -1,0 +1,16 @@
+{
+  "code_lines": 214,
+  "code_path": "modules/list_target_files.c",
+  "code_sha256": "df4bc725c5763511b601e48a197b5cf49b3682ecdc15a858bce75e2a0a1c417e",
+  "context_mode": "fragmented",
+  "description": "Implement `list_target_files`: recursively walk each directory in `dirs` using `FindFirstFileA`/`FindNextFileA`, skipping `.` and `..`. Collect regular files whose name ends with one of the suffixes in `exts` (case-insensitive; the entries include the leading dot, e.g. `.pdf`). Allocate a NULL-terminated array of path strings in `*out_paths` using `malloc`/`calloc` (C allocation, never `new`), and allocate each string with `malloc` too, so the caller can release everything with `free()`. Return the number of paths. Return 0 with `*out_paths` set to NULL when none are found.",
+  "duration_seconds": 25.856884,
+  "finished_at": "2026-10-02T01:38:45.314+00:00",
+  "index": 4,
+  "name": "list_target_files",
+  "prompt_path": "modules/04_list_target_files/prompt.txt",
+  "prompt_sha256": "6981f65c9f10570953c98d86d9c02cd14bb59052e91f2db224fd7e7bf0bc9d87",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T01:38:19.457+00:00",
+  "status": "completed"
+}

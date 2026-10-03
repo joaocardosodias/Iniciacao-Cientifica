@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "afc91ca6aa4a",
+  "duration_seconds": 12.29591,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-02T01:46:48.375+00:00",
+  "hashes": {
+    "response_sha256": "ae71d18142dda516b4595057fe2e233b5f4ce4ff51f41b990f98b190eadb6933",
+    "system_sha256": "9e9847aae0db7819b19b745a9c8cb3564ca579e58f1ced49afb3de2b841fdce6",
+    "user_sha256": "a4bb43d2be6e1fee411d0950f5647ac3327e389233f28cb8f0dbbb9d95296536"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <stddef.h>\n#include <stdint.h>\n\nint base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size)\n{\n    static const char alphabet[] =\n        \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\";\n\n    size_t groups = data_len / 3;\n    size_t remainder = data_len % 3;\n    size_t encoded_len;\n    size_t i;\n    size_t j = 0;\n\n    if (out == NULL || (data_len != 0 && data == NULL))\n        return -1;\n\n    if (remainder != 0) {\n        if (groups == SIZE_MAX)\n            return -1;\n        ++groups;\n    }\n\n    if (groups > (SIZE_MAX - 1) / 4)\n        return -1;\n\n    encoded_len = groups * 4;\n    if (out_size < encoded_len + 1)\n        return -1;\n\n    for (i = 0; i + 3 <= data_len; i += 3) {\n        unsigned int value = ((unsigned int)data[i] << 16) |\n                             ((unsigned int)data[i + 1] << 8) |\n                             (unsigned int)data[i + 2];\n\n        out[j++] = alphabet[(value >> 18) & 0x3f];\n        out[j++] = alphabet[(value >> 12) & 0x3f];\n        out[j++] = alphabet[(value >> 6) & 0x3f];\n        out[j++] = alphabet[value & 0x3f];\n    }\n\n    if (remainder == 1) {\n        unsigned int value = (unsigned int)data[i] << 16;\n\n        out[j++] = alphabet[(value >> 18) & 0x3f];\n        out[j++] = alphabet[(value >> 12) & 0x3f];\n        out[j++] = '=';\n        out[j++] = '=';\n    } else if (remainder == 2) {\n        unsigned int value = ((unsigned int)data[i] << 16) |\n                             ((unsigned int)data[i + 1] << 8);\n\n        out[j++] = alphabet[(value >> 18) & 0x3f];\n        out[j++] = alphabet[(value >> 12) & 0x3f];\n        out[j++] = alphabet[(value >> 6) & 0x3f];\n        out[j++] = '=';\n    }\n\n    out[j] = '\\0';\n    return 0;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790905596,
+  "response_id": "gen-1790905596-B7qWFkrbKgkAR5hC2fLa",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.base64_encode_string",
+  "started_at": "2026-10-02T01:46:36.079+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n    Always include the specific header of every API you call, otherwise the link fails:\n    WinHTTP -> `<winhttp.h>`, WinInet -> `<wininet.h>`, CNG/bcrypt -> `<bcrypt.h>`,\n    sockets -> `<winsock2.h>`/`<ws2tcpip.h>`, psapi -> `<psapi.h>`, shlwapi -> `<shlwapi.h>`.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.\n14. Never invent API names, struct names, or struct fields. Use only documented Win32\n    symbols, and when in doubt use exactly the API named in the task. Prefer the ANSI\n    (`...A`) variants of Win32 APIs — the toolchain provides them; do NOT use the Unicode\n    (`...W`) variants (e.g. use `CreateFileA` not `CreateFileW`, `FindFirstFileA` not\n    `FindFirstFileW`). For HTTP use WinInet (`InternetOpenA`, `InternetConnectA`,\n    `HttpOpenRequestA`, `HttpSendRequestA`, `InternetReadFile`, `HttpQueryInfoA`, plus\n    `INTERNET_*` constants) with `<wininet.h>`; the WinHTTP (`WinHttp*`) API is NOT\n    available in this toolchain, so never use it.\n15. If your function reads ANY macro, constant or array from the scenario config header\n    (e.g. `MAX_RETRIES`, `TARGET_BINARY`, `PAYLOAD_DLL_PATH`, `TARGET_DIRS`, `SESSION_KEY_LEN`,\n    packet arrays), you MUST put `#include \"config.h\"` at the top of the file. A missing\n    config include is a compile error.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 1050,
+    "cost": 0.00065505,
+    "prompt_tokens": 1041,
+    "total_tokens": 2091
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `base64_encode_string`: standard Base64-encode `data` into the NUL-terminated buffer `out` of size `out_size`, implementing the standard Base64 alphabet and padding manually (no external library). Return 0 on success and -1 if the buffer is too small.\n\nEXACT PROTOTYPE (must match): int base64_encode_string(const unsigned char *data, size_t data_len, char *out, size_t out_size);\n\nReturn ONLY the C source implementing that function."
+}

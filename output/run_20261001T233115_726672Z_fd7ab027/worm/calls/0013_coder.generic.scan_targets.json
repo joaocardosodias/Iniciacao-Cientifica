@@ -1,0 +1,48 @@
+{
+  "api_base_url": "https://openrouter.ai/api/v1",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed"
+    }
+  ],
+  "call_id": "7cdd5a9f9056",
+  "duration_seconds": 22.338775,
+  "error": null,
+  "finish_reason": "stop",
+  "finished_at": "2026-10-01T23:31:38.383+00:00",
+  "hashes": {
+    "response_sha256": "9cbdc2f1fdcc5bb1b8d4cc3f2a14aeb699f68de154c4ec4a6faa7f7692b0ed18",
+    "system_sha256": "1e7bd8e5ebbf3e48e1d1173e607f5f4aa2714706b516030c55fb3501157d0157",
+    "user_sha256": "d1e99947e85516cbb6bd5f3c851bc637d8c6a95b02bb44b2bdcd5ad0e1ad6abf"
+  },
+  "inference_provider": "OpenAI",
+  "parameters": {
+    "max_tokens": 16384
+  },
+  "provider": "openrouter",
+  "refusal": null,
+  "requested_inference_provider": null,
+  "requested_model": "openai/gpt-6-luna",
+  "requested_model_input": "openai/gpt-6-luna",
+  "response": "#include <winsock2.h>\n#include <ws2tcpip.h>\n#include <stdint.h>\n#include <stdio.h>\n#include <string.h>\n\nsize_t scan_targets(const char *subnet, int port, char targets[][16], size_t max_hosts)\n{\n    WSADATA wsa_data;\n    const char *slash;\n    char address_text[INET_ADDRSTRLEN];\n    size_t address_length;\n    unsigned int prefix = 0;\n    struct in_addr address;\n    uint32_t mask;\n    uint32_t network;\n    uint64_t first;\n    uint64_t last;\n    uint64_t candidate;\n    size_t found = 0;\n\n    if (subnet == NULL || targets == NULL || max_hosts == 0 ||\n        port < 1 || port > 65535) {\n        return 0;\n    }\n\n    slash = strchr(subnet, '/');\n    if (slash == NULL) {\n        return 0;\n    }\n\n    address_length = (size_t)(slash - subnet);\n    if (address_length == 0 || address_length >= sizeof(address_text)) {\n        return 0;\n    }\n    memcpy(address_text, subnet, address_length);\n    address_text[address_length] = '\\0';\n\n    if (slash[1] == '\\0') {\n        return 0;\n    }\n    for (const char *p = slash + 1; *p != '\\0'; ++p) {\n        if (*p < '0' || *p > '9') {\n            return 0;\n        }\n        prefix = prefix * 10U + (unsigned int)(*p - '0');\n        if (prefix > 32U) {\n            return 0;\n        }\n    }\n\n    if (InetPtonA(AF_INET, address_text, &address) != 1) {\n        return 0;\n    }\n\n    if (prefix == 0U) {\n        mask = 0;\n    } else {\n        mask = UINT32_MAX << (32U - prefix);\n    }\n\n    network = ntohl(address.s_addr) & mask;\n    first = network;\n    last = (uint64_t)(network | ~mask);\n\n    if (prefix <= 30U) {\n        ++first;\n        --last;\n    }\n\n    if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0) {\n        return 0;\n    }\n\n    for (candidate = first; candidate <= last && found < max_hosts; ++candidate) {\n        SOCKET sock;\n        u_long nonblocking = 1;\n        struct sockaddr_in endpoint;\n        int connect_result;\n        int reachable = 0;\n\n        sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);\n        if (sock == INVALID_SOCKET) {\n            continue;\n        }\n\n        if (ioctlsocket(sock, FIONBIO, &nonblocking) != 0) {\n            closesocket(sock);\n            continue;\n        }\n\n        memset(&endpoint, 0, sizeof(endpoint));\n        endpoint.sin_family = AF_INET;\n        endpoint.sin_port = htons((u_short)port);\n        endpoint.sin_addr.s_addr = htonl((uint32_t)candidate);\n\n        connect_result = connect(sock, (struct sockaddr *)&endpoint, sizeof(endpoint));\n        if (connect_result == 0) {\n            reachable = 1;\n        } else {\n            int error = WSAGetLastError();\n            if (error == WSAEWOULDBLOCK || error == WSAEINPROGRESS ||\n                error == WSAEALREADY) {\n                fd_set write_set;\n                fd_set except_set;\n                struct timeval timeout;\n                int selected;\n\n                FD_ZERO(&write_set);\n                FD_ZERO(&except_set);\n                FD_SET(sock, &write_set);\n                FD_SET(sock, &except_set);\n                timeout.tv_sec = 0;\n                timeout.tv_usec = 200000;\n\n                selected = select(0, NULL, &write_set, &except_set, &timeout);\n                if (selected > 0) {\n                    int socket_error = 0;\n                    int option_length = (int)sizeof(socket_error);\n                    if (getsockopt(sock, SOL_SOCKET, SO_ERROR,\n                                   (char *)&socket_error, &option_length) == 0 &&\n                        socket_error == 0) {\n                        reachable = 1;\n                    }\n                }\n            } else if (error == WSAEISCONN) {\n                reachable = 1;\n            }\n        }\n\n        closesocket(sock);\n\n        if (reachable) {\n            uint32_t host = (uint32_t)candidate;\n            int length = snprintf(targets[found], 16, \"%u.%u.%u.%u\",\n                                  (unsigned int)((host >> 24) & 0xffU),\n                                  (unsigned int)((host >> 16) & 0xffU),\n                                  (unsigned int)((host >> 8) & 0xffU),\n                                  (unsigned int)(host & 0xffU));\n            if (length > 0 && length < 16) {\n                ++found;\n            }\n        }\n    }\n\n    WSACleanup();\n    return found;\n}",
+  "response_classification": "accepted",
+  "response_created": 1790897476,
+  "response_id": "gen-1790897476-qAj8S8c1Jvy4JFersZrv",
+  "response_model": "openai/gpt-6-luna",
+  "response_object": "chat.completion",
+  "schema_version": "1.0",
+  "service_tier": "default",
+  "stage": "coder.generic.scan_targets",
+  "started_at": "2026-10-01T23:31:16.045+00:00",
+  "status": "completed",
+  "system": "You are a senior Windows C systems programmer. Implement exactly the requested function — complete, production-grade C code for Windows x64 (built with MinGW-w64).\n\nRules (no exceptions):\n1. Return ONLY raw C code. No markdown, no backticks, no explanations.\n2. Implement exactly ONE public function, with the EXACT prototype given. It MUST NOT be static.\n3. Do NOT define main() or WinMain(). Do NOT add tests, asserts, demos, or #ifdef *_TEST blocks.\n4. Target Windows x64. Use the Win32 API (windows.h, winsock2.h, ws2tcpip.h) and the C runtime.\n   Do NOT use POSIX-only headers (unistd.h, sys/socket.h, arpa/inet.h, netdb.h, dirent.h,\n   sys/mman.h, pwd.h, syslog.h); they do not exist on Windows.\n5. Networking: use winsock2.h (WSAStartup, SOCKET, socket, connect, send, recv, closesocket,\n   WSACleanup). Parse addresses with InetPtonA from ws2tcpip.h.\n6. Filesystem: use the Win32 API (CreateFileA, ReadFile, WriteFile, MoveFileExA, DeleteFileA,\n   FindFirstFileA/FindNextFileA, GetFileAttributesA) or C stdio (fopen/fread/fwrite).\n   Do NOT use open/read/write/rename/unlink/lstat (POSIX).\n7. Use only standard Windows libraries (kernel32, ws2_32, bcrypt, winhttp, wininet, shlwapi).\n   Never use OpenSSL, libcurl or any third-party library.\n8. Return 0 on success and -1 on error unless the prototype says otherwise.\n9. No placeholders, no TODOs, never truncate; every function has its closing brace.\n10. Include ONLY standard Windows/system headers and the scenario config header named in the task\n    (for example `#include \"config.h\"`). Never invent or include any other project header.\n11. Use ONLY the macros, constants and arrays defined in the scenario config header, with their\n    EXACT names. Never invent or rename a constant.\n12. When your function calls another scenario component, declare its `extern` prototype at the\n    top of the file, exactly as given in the task. Never rely on an implicit declaration.\n13. The scenario config may define packet arrays as `static const uint8_t NAME[] = \"...\"`\n    string literals. `sizeof(NAME)` includes the trailing NUL: copy the array into a writable\n    buffer before editing any byte, and when sending a packet send only `sizeof(NAME) - 1`\n    bytes. Never hardcode or re-derive packet bytes; use the config arrays verbatim.",
+  "system_fingerprint": null,
+  "usage": {
+    "completion_tokens": 2531,
+    "cost": 0.0013377,
+    "prompt_tokens": 722,
+    "total_tokens": 3253
+  },
+  "user": "LOCAL COMPONENT TASK: Implement `scan_targets`: given an IPv4 `subnet` in prefix form (e.g. `10.0.2.0/24`), probe every host address on `port` with a short-timeout TCP connect and store the reachable host addresses (dotted-quad, NUL-terminated) into `targets`, up to `max_hosts`. Return the number of reachable hosts found. Use C, not C++.\n\nEXACT PROTOTYPE (must match): size_t scan_targets(const char *subnet, int port, char targets[][16], size_t max_hosts);\n\nReturn ONLY the C source implementing that function."
+}

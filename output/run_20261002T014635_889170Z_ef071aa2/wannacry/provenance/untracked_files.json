@@ -1,0 +1,137 @@
+{
+  "files": [
+    {
+      "bytes": 4161,
+      "path": "RUN_VM.md",
+      "sha256": "d468794d11d3e1c297109f74ac3e6e1dafd34dca5ede6630c5135ddeeca74843",
+      "stored": "untracked/RUN_VM.md"
+    },
+    {
+      "bytes": 147456,
+      "path": "payloads/launcher.dll",
+      "sha256": "6a3e3471420667b505f1f1b93d288d4dc9714d4173ae90b1a986044639840d8f",
+      "stored": "untracked/payloads/launcher.dll"
+    },
+    {
+      "bytes": 7114,
+      "path": "payloads/meu_binario.exe",
+      "sha256": "09fa67fea6e78b28bab9f9331eee43ec92ad772c9dd0d49be92c5e391a048acf",
+      "stored": "untracked/payloads/meu_binario.exe"
+    },
+    {
+      "bytes": 2430,
+      "path": "prompts/worm.py",
+      "sha256": "9801dd6b92ceefc7c019db235aed6ae5d6726e6d6bd78f69d7faf178a0af2623",
+      "stored": "untracked/prompts/worm.py"
+    },
+    {
+      "bytes": 262,
+      "path": "samples/eternalblue/Makefile",
+      "sha256": "0a3465405a91b5786c01f5bbbc6e5d8c07ab3e74e98fba8db15c29939245aa17",
+      "stored": "untracked/samples/eternalblue/Makefile"
+    },
+    {
+      "bytes": 1092582,
+      "path": "samples/eternalblue/config.h",
+      "sha256": null,
+      "skipped": "too_large"
+    },
+    {
+      "bytes": 241184,
+      "path": "samples/eternalblue/eternalblue",
+      "sha256": "b4338811f4da835b8a22806c34eaae68020e968ceb2d7868686318f664efddd7",
+      "stored": "untracked/samples/eternalblue/eternalblue"
+    },
+    {
+      "bytes": 1126,
+      "path": "samples/eternalblue/main.c",
+      "sha256": "94aa78836edc67593624bb2642e156ae06a8a8cd34d8e6bc74617515c9060f5b",
+      "stored": "untracked/samples/eternalblue/main.c"
+    },
+    {
+      "bytes": 3161,
+      "path": "samples/eternalblue/module_01.c",
+      "sha256": "3a32eb302a41e2a85a6690d3fc427dec467f967fd56524c755660a3a1418087e",
+      "stored": "untracked/samples/eternalblue/module_01.c"
+    },
+    {
+      "bytes": 1186,
+      "path": "samples/eternalblue/module_02.c",
+      "sha256": "5179344a2ce3b62f3de4afd33da950d336803eaf71810c6f28d50ae9057a9b71",
+      "stored": "untracked/samples/eternalblue/module_02.c"
+    },
+    {
+      "bytes": 1182,
+      "path": "samples/eternalblue/module_03.c",
+      "sha256": "0fef2cfedc2b34eb37414b2705ecceb90a166408fe625c17bfaa75b3912b7247",
+      "stored": "untracked/samples/eternalblue/module_03.c"
+    },
+    {
+      "bytes": 5201,
+      "path": "samples/eternalblue/module_04.c",
+      "sha256": "6ea9bfca9f7f2d1ea5ba3f77ffa85116a688ce147fb39b0abb876cccebdb5d82",
+      "stored": "untracked/samples/eternalblue/module_04.c"
+    },
+    {
+      "bytes": 4442,
+      "path": "samples/eternalblue/module_05.c",
+      "sha256": "62a89ba0d1e6aa106469dc1082f421239fd57e18cf8943fe5759f441e7751cd9",
+      "stored": "untracked/samples/eternalblue/module_05.c"
+    },
+    {
+      "bytes": 4624,
+      "path": "samples/eternalblue/module_06.c",
+      "sha256": "9356075879b47cb9b3ee4ceda6cbf43845e624cfa63d9fb64d863db1bcc0d709",
+      "stored": "untracked/samples/eternalblue/module_06.c"
+    },
+    {
+      "bytes": 4022,
+      "path": "samples/eternalblue/module_07.c",
+      "sha256": "1b15085f94789eadb31939172e051de878dad115310aaed44351d03c88ed5269",
+      "stored": "untracked/samples/eternalblue/module_07.c"
+    },
+    {
+      "bytes": 957,
+      "path": "samples/eternalblue/module_08.c",
+      "sha256": "fc05a71ac65299521047f6cab5837ab873dc653bef98b4c369d3426222e178c1",
+      "stored": "untracked/samples/eternalblue/module_08.c"
+    },
+    {
+      "bytes": 22580,
+      "path": "samples/eternalblue/module_09.c",
+      "sha256": "b10cfdac5a2a666d5754d69ce9001baff8e5eba247ad88bb900b8b2d23aac1f5",
+      "stored": "untracked/samples/eternalblue/module_09.c"
+    },
+    {
+      "bytes": 11066,
+      "path": "samples/eternalblue/module_10.c",
+      "sha256": "294949e9f37f39fd7fff1158cbaf59f7b0d58bccdef348c3a70d07701bd44501",
+      "stored": "untracked/samples/eternalblue/module_10.c"
+    },
+    {
+      "bytes": 2737,
+      "path": "samples/eternalblue/module_11.c",
+      "sha256": "662a5ffb3ed3ec0f4f2c7ff8f86aba61d8bac69a30124ad298cab6d5e46951b4",
+      "stored": "untracked/samples/eternalblue/module_11.c"
+    },
+    {
+      "bytes": 1094331,
+      "path": "templates/worm/config.h.tpl",
+      "sha256": null,
+      "skipped": "too_large"
+    },
+    {
+      "bytes": 5099,
+      "path": "templates/worm/main.c.tpl",
+      "sha256": "d793934fbad73bbbe73e16b64a219e707d91df215ca60edc926bc38799c76d17",
+      "stored": "untracked/templates/worm/main.c.tpl"
+    },
+    {
+      "bytes": 2237,
+      "path": "tests/test_eternalblue_config.py",
+      "sha256": "5ca1e3d28662a222f4cca211bdc5c36171b52b1f38c3216a4ca495864166a3d7",
+      "stored": "untracked/tests/test_eternalblue_config.py"
+    }
+  ],
+  "stored_count": 20
+}

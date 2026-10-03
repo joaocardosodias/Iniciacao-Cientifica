@@ -1,0 +1,5 @@
+LOCAL COMPONENT TASK: Implement `smb_recv`: receive up to `buf_len` bytes into `buf`. Return the number of bytes received, or -1 on error, or 0 on connection closed.
+
+EXACT PROTOTYPE (must match): int smb_recv(int sock, uint8_t *buf, size_t buf_len);
+
+Return ONLY the C source implementing that function.

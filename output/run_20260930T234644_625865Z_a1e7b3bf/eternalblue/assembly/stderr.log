@@ -1,0 +1,8 @@
+module_10.c: In function ‘upload_payload’:
+module_10.c:53:39: error: ‘TARGET_PROCESS_HASH’ undeclared (first use in this function)
+   53 |     uint32_t process_hash = (uint32_t)TARGET_PROCESS_HASH;
+      |                                       ^~~~~~~~~~~~~~~~~~~
+module_10.c:53:39: note: each undeclared identifier is reported only once for each function it appears in
+module_10.c:60:12: warning: unused variable ‘i’ [-Wunused-variable]
+   60 |     size_t i;
+      |            ^

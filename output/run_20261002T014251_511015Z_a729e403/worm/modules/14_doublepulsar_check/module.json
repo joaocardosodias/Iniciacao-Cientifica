@@ -1,0 +1,16 @@
+{
+  "code_lines": 163,
+  "code_path": "modules/doublepulsar_check.c",
+  "code_sha256": "188c7574b456dc4cb8c026014f02e1dfec994d0a70ac226cca995c9e7f5b6ef8",
+  "context_mode": "fragmented",
+  "description": "Implement `doublepulsar_check`: connect via `smb_connect`. Copy each packet array to a writable buffer and send only `sizeof(PKT) - 1` bytes (the literal includes a trailing NUL). Send `SMB_NEGOTIATE_PKT`, `SMB_SESSION_SETUP_PKT`; copy the returned UserID (bytes 32-33) into the tree connect packet bytes 32-33 and send `SMB_TREE_CONNECT_PKT`; copy the returned TreeID (bytes 28-29) and the UserID into `DP_PING_PKT` (TreeID at 28-29, UserID at 32-33) and send it. Read the response and compare the byte at offset `SMB_RESP_MUX_ID_OFFSET` (34) with `DP_MULTIPLEX_ID_PING`; if equal, return 1 (active); otherwise return 0. Return -1 on error.",
+  "duration_seconds": 36.748125,
+  "finished_at": "2026-10-02T01:43:28.459+00:00",
+  "index": 14,
+  "name": "doublepulsar_check",
+  "prompt_path": "modules/14_doublepulsar_check/prompt.txt",
+  "prompt_sha256": "b012ecb1b7a34a42f676830d0c191eb72d35adb4eabd6aa382adfa08e8caeb7d",
+  "response_classification": "accepted",
+  "started_at": "2026-10-02T01:42:51.711+00:00",
+  "status": "completed"
+}
